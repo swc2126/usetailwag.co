@@ -583,10 +583,91 @@
             border-radius: 32px;
             overflow: hidden;
             display: flex;
+            flex-direction: column;
+        }
+
+        .fp-status-bar {
+            background: #fff;
+            padding: 10px 16px 4px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            color: var(--slate);
-            font-size: 14px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #000;
+            font-family: -apple-system, sans-serif;
+        }
+
+        .fp-contact-bar {
+            background: #fff;
+            padding: 8px 16px 10px;
+            text-align: center;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .fp-contact-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #000;
+            font-family: -apple-system, sans-serif;
+        }
+
+        .fp-contact-sub {
+            font-size: 10px;
+            color: #8e8e93;
+            font-family: -apple-system, sans-serif;
+        }
+
+        .fp-messages {
+            flex: 1;
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow: hidden;
+        }
+
+        .fp-bubble {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 18px;
+            font-size: 11.5px;
+            line-height: 1.45;
+            font-family: -apple-system, sans-serif;
+        }
+
+        .fp-bubble.received {
+            background: #e9e9eb;
+            color: #000;
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+        }
+
+        .fp-bubble.sent {
+            background: #007aff;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            align-self: flex-end;
+        }
+
+        .fp-bubble.green {
+            background: #34c759;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            align-self: flex-end;
+        }
+
+        .fp-time {
+            font-size: 9.5px;
+            color: #8e8e93;
+            font-family: -apple-system, sans-serif;
+            text-align: center;
+            margin: 2px 0;
+        }
+
+        .fp-link {
+            color: #007aff;
+            text-decoration: underline;
         }
 
         /* ROI SECTION */
@@ -1369,13 +1450,35 @@
             </ul>
         </div>
         <div class="feature-phone">
-            <div class="feature-phone-screen">Report Cards</div>
+            <div class="feature-phone-screen">
+                <div class="fp-status-bar"><span>9:41</span><span>●●●</span></div>
+                <div class="fp-contact-bar">
+                    <div class="fp-contact-name">Barney's Ranch</div>
+                    <div class="fp-contact-sub">text message</div>
+                </div>
+                <div class="fp-messages">
+                    <div class="fp-time">Today 4:18 PM</div>
+                    <div class="fp-bubble received">Hi Sarah! 🐾 Buddy had a fantastic day. He was playful and social all morning, made a new friend named Archie, and finished every bite of lunch. He's one tired pup — the best kind. See you tomorrow! — The Barney's Ranch Team</div>
+                </div>
+            </div>
         </div>
     </section>
 
     <section class="feature-section dark right-text fade-in-up">
         <div class="feature-phone">
-            <div class="feature-phone-screen">Smart Reminders</div>
+            <div class="feature-phone-screen">
+                <div class="fp-status-bar"><span>9:41</span><span>●●●</span></div>
+                <div class="fp-contact-bar">
+                    <div class="fp-contact-name">Barney's Ranch</div>
+                    <div class="fp-contact-sub">text message</div>
+                </div>
+                <div class="fp-messages">
+                    <div class="fp-time">Today 7:52 PM</div>
+                    <div class="fp-bubble received">Hi Sarah! Reminder: Buddy is scheduled at Barney's Ranch tomorrow, Tuesday March 25 at 8:00 AM. Reply YES to confirm or NO to cancel.</div>
+                    <div class="fp-bubble sent">YES</div>
+                    <div class="fp-bubble received">You're confirmed! See you then 🐾</div>
+                </div>
+            </div>
         </div>
         <div class="feature-text">
             <h2>Fewer no-shows. More revenue. Zero effort.</h2>
@@ -1397,7 +1500,19 @@
             </ul>
         </div>
         <div class="feature-phone">
-            <div class="feature-phone-screen">Review Generation</div>
+            <div class="feature-phone-screen">
+                <div class="fp-status-bar"><span>9:41</span><span>●●●</span></div>
+                <div class="fp-contact-bar">
+                    <div class="fp-contact-name">Barney's Ranch</div>
+                    <div class="fp-contact-sub">text message</div>
+                </div>
+                <div class="fp-messages">
+                    <div class="fp-time">Today 5:03 PM</div>
+                    <div class="fp-bubble received">We loved having Buddy today! 🐾 If you have a moment, a Google review means the world to us: <span class="fp-link">g.page/r/barneysranch/review</span></div>
+                    <div class="fp-time" style="margin-top:4px;">Today 5:11 PM</div>
+                    <div class="fp-bubble sent">Just left one — you guys are the best 🐶⭐</div>
+                </div>
+            </div>
         </div>
     </section>
 
