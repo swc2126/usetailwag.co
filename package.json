@@ -1,0 +1,19 @@
+{
+  "name": "usetailwag",
+  "version": "1.0.0",
+  "description": "TailWag — AI-Powered SMS for Independent Daycares",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "dotenv": "^16.4.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "stripe": "^17.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

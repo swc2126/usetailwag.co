@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --black: #0F1410;
+      --green: #1E6B4A;
+      --linen: #F5F0E8;
+      --gold: #C4933F;
+      --sage: #A8C5B0;
+      --slate: #2D3748;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--linen);
+      color: var(--slate);
+      min-height: 100vh;
+    }
+
+    .dashboard-nav {
+      background: var(--black);
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dashboard-nav .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .dashboard-nav .logo-text {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--linen);
+    }
+
+    .dashboard-nav .logout-btn {
+      background: transparent;
+      border: 1px solid rgba(245, 240, 232, 0.3);
+      color: var(--linen);
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .dashboard-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    .welcome-header {
+      margin-bottom: 32px;
+    }
+
+    .welcome-header h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 36px;
+      color: var(--black);
+      margin-bottom: 8px;
+    }
+
+    .welcome-header p {
+      font-size: 16px;
+      color: var(--slate);
+    }
+
+    .placeholder-card {
+      background: #fff;
+      border-radius: 12px;
+      border-left: 4px solid var(--green);
+      padding: 32px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .placeholder-card h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      color: var(--black);
+      margin-bottom: 12px;
+    }
+
+    .placeholder-card p {
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <nav class="dashboard-nav">
+    <a href="/" class="logo">
+      <svg width="28" height="28" viewBox="0 0 56 56" fill="none">
+        <rect width="56" height="56" fill="#1E6B4A" rx="9"></rect>
+        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"></path>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"></circle>
+      </svg>
+      <span class="logo-text">TailWag</span>
+    </a>
+    <button class="logout-btn" onclick="handleLogout()">Log out</button>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="welcome-header">
+      <h1>Welcome to TailWag</h1>
+      <p>Your dashboard is being built — check back soon.</p>
+    </div>
+
+    <div class="placeholder-card">
+      <h2>Coming up next</h2>
+      <p>Your daycare profile, subscription status, and SMS settings will appear here once authentication and payments are wired up on Day 2.</p>
+    </div>
+  </div>
+
+  <script>
+    function handleLogout() {
+      // TODO: Wire up Supabase logout (Day 2)
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>
