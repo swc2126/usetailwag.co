@@ -2,6 +2,7 @@
 config/demo_settings.txt
 *.env
 .env
+TailWag_Session_Context.txt
 
 # Database files
 *.db
