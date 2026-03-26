@@ -14,10 +14,12 @@
     :root {
       --black: #0F1410;
       --green: #1E6B4A;
+      --green-dark: #164D35;
       --linen: #F5F0E8;
       --gold: #C4933F;
       --sage: #A8C5B0;
       --slate: #2D3748;
+      --border-subtle: rgba(255, 255, 255, 0.08);
     }
 
     body {
@@ -27,6 +29,7 @@
       min-height: 100vh;
     }
 
+    /* ── NAV ── */
     .dashboard-nav {
       background: var(--black);
       padding: 16px 32px;
@@ -49,7 +52,18 @@
       color: var(--linen);
     }
 
-    .dashboard-nav .logout-btn {
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-name {
+      font-size: 14px;
+      color: var(--sage);
+    }
+
+    .logout-btn {
       background: transparent;
       border: 1px solid rgba(245, 240, 232, 0.3);
       color: var(--linen);
@@ -59,8 +73,12 @@
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
+      transition: border-color 0.2s;
     }
 
+    .logout-btn:hover { border-color: var(--linen); }
+
+    /* ── CONTAINER ── */
     .dashboard-container {
       max-width: 1100px;
       margin: 0 auto;
@@ -77,31 +95,108 @@
       font-size: 36px;
       color: var(--black);
       margin-bottom: 8px;
+      letter-spacing: -0.5px;
     }
 
     .welcome-header p {
       font-size: 16px;
       color: var(--slate);
+      line-height: 1.6;
     }
 
-    .placeholder-card {
+    /* ── CARDS GRID ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .card {
       background: #fff;
       border-radius: 12px;
       border-left: 4px solid var(--green);
-      padding: 32px;
+      padding: 28px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     }
 
-    .placeholder-card h2 {
+    .card h2 {
       font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 700;
-      font-size: 22px;
+      font-size: 18px;
       color: var(--black);
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
-    .placeholder-card p {
-      line-height: 1.6;
+    .card-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--green);
+      margin-bottom: 4px;
+    }
+
+    .card-value {
+      font-size: 16px;
+      color: var(--slate);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .card-value.large {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      color: var(--gold);
+    }
+
+    /* ── STATUS BADGES ── */
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-active {
+      background: rgba(30, 107, 74, 0.12);
+      color: var(--green);
+    }
+
+    .status-inactive {
+      background: rgba(196, 147, 63, 0.12);
+      color: var(--gold);
+    }
+
+    /* ── LOADING ── */
+    .loading {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--slate);
+    }
+
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(30, 107, 74, 0.2);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      .dashboard-nav { padding: 16px 20px; }
+      .dashboard-container { padding: 32px 16px; }
+      .welcome-header h1 { font-size: 28px; }
+      .cards-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -115,24 +210,117 @@
       </svg>
       <span class="logo-text">TailWag</span>
     </a>
-    <button class="logout-btn" onclick="handleLogout()">Log out</button>
+    <div class="nav-right">
+      <span class="user-name" id="userName"></span>
+      <button class="logout-btn" onclick="handleLogout()">Log out</button>
+    </div>
   </nav>
 
   <div class="dashboard-container">
-    <div class="welcome-header">
-      <h1>Welcome to TailWag</h1>
-      <p>Your dashboard is being built — check back soon.</p>
+    <!-- Loading state -->
+    <div class="loading" id="loadingState">
+      <div class="loading-spinner"></div>
+      <p>Loading your dashboard...</p>
     </div>
 
-    <div class="placeholder-card">
-      <h2>Coming up next</h2>
-      <p>Your daycare profile, subscription status, and SMS settings will appear here once authentication and payments are wired up on Day 2.</p>
+    <!-- Dashboard content (hidden until loaded) -->
+    <div id="dashboardContent" style="display: none;">
+      <div class="welcome-header">
+        <h1 id="welcomeText">Welcome to TailWag</h1>
+        <p id="welcomeSubtext">Here's an overview of your account.</p>
+      </div>
+
+      <div class="cards-grid">
+        <!-- Daycare Info -->
+        <div class="card">
+          <h2>Your Daycare</h2>
+          <div class="card-label">Name</div>
+          <div class="card-value" id="daycareName">—</div>
+          <div class="card-label">Location</div>
+          <div class="card-value" id="daycareAddress">—</div>
+          <div class="card-label">Email</div>
+          <div class="card-value" id="userEmail">—</div>
+        </div>
+
+        <!-- Subscription Info -->
+        <div class="card">
+          <h2>Subscription</h2>
+          <div class="card-label">Plan</div>
+          <div class="card-value" id="planName">—</div>
+          <div class="card-label">Status</div>
+          <div class="card-value" id="planStatus">—</div>
+          <div class="card-label">Billing</div>
+          <div class="card-value" id="planBilling">—</div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
+    // Check if user is authenticated
+    const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+
+    if (!session || !session.access_token) {
+      window.location.href = '/login.html';
+    } else {
+      loadDashboard();
+    }
+
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/auth/me', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: session.access_token })
+        });
+
+        if (!res.ok) {
+          // Session expired
+          localStorage.removeItem('tailwag_session');
+          localStorage.removeItem('tailwag_user');
+          window.location.href = '/login.html';
+          return;
+        }
+
+        const data = await res.json();
+
+        // Populate nav
+        document.getElementById('userName').textContent = data.user.name || data.user.email;
+
+        // Populate welcome
+        const firstName = data.user.name || 'there';
+        document.getElementById('welcomeText').textContent = `Welcome back, ${firstName}`;
+
+        // Populate daycare card
+        document.getElementById('daycareName').textContent = data.daycare?.name || '—';
+        document.getElementById('daycareAddress').textContent = data.daycare?.address || '—';
+        document.getElementById('userEmail').textContent = data.user.email;
+
+        // Populate subscription card
+        const sub = data.subscription;
+        if (sub && sub.status === 'active') {
+          document.getElementById('planName').textContent = (sub.plan || '').charAt(0).toUpperCase() + (sub.plan || '').slice(1);
+          document.getElementById('planStatus').innerHTML = '<span class="status-badge status-active">Active</span>';
+          document.getElementById('planBilling').textContent = sub.billing_cycle === 'annual' ? 'Annual' : 'Quarterly';
+        } else {
+          document.getElementById('planName').textContent = 'No active plan';
+          document.getElementById('planStatus').innerHTML = '<span class="status-badge status-inactive">Inactive</span>';
+          document.getElementById('planBilling').textContent = '—';
+        }
+
+        // Show dashboard, hide loading
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('dashboardContent').style.display = 'block';
+
+      } catch (err) {
+        console.error('Dashboard load error:', err);
+        document.getElementById('loadingState').innerHTML = '<p>Something went wrong loading your dashboard. <a href="/login.html">Try logging in again.</a></p>';
+      }
+    }
+
     function handleLogout() {
-      // TODO: Wire up Supabase logout (Day 2)
+      localStorage.removeItem('tailwag_session');
+      localStorage.removeItem('tailwag_user');
       window.location.href = '/';
     }
   </script>

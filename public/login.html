@@ -316,32 +316,42 @@
   </footer>
 
   <script>
-    function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const errorMsg = document.getElementById('errorMsg');
-
-      // Hide any existing error
-      errorMsg.classList.remove('visible');
-
-      // In production, this would POST to your auth API
-      // For now, show a loading state and simulate
       const btn = e.target.querySelector('.btn-login');
-      const originalText = btn.textContent;
+
+      errorMsg.classList.remove('visible');
       btn.textContent = 'Signing in…';
       btn.disabled = true;
 
-      setTimeout(() => {
-        // Placeholder: redirect to the portal on successful auth
-        // Replace this URL with the actual app URL once backend is wired
-        // window.location.href = 'https://app.usetailwag.co/portal';
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
 
-        // For now, show error to demonstrate the flow
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Invalid email or password.');
+        }
+
+        // Store session in localStorage
+        localStorage.setItem('tailwag_session', JSON.stringify(data.session));
+        localStorage.setItem('tailwag_user', JSON.stringify(data.user));
+
+        // Redirect to dashboard
+        window.location.href = '/dashboard.html';
+      } catch (err) {
+        errorMsg.textContent = err.message;
         errorMsg.classList.add('visible');
-        btn.textContent = originalText;
+        btn.textContent = 'Sign in';
         btn.disabled = false;
-      }, 1200);
+      }
     }
   </script>
 </body>

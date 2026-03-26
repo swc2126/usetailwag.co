@@ -5,7 +5,10 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Parse JSON bodies (for API routes)
+// Stripe webhook needs raw body — must be registered before express.json()
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+
+// Parse JSON bodies (for all other API routes)
 app.use(express.json());
 
 // Serve static files from /public
