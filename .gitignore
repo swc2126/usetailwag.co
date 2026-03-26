@@ -1,0 +1,25 @@
+# Credentials & secrets — NEVER push these
+config/demo_settings.txt
+*.env
+.env
+
+# Database files
+*.db
+*.db-wal
+*.db-shm
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+*~$*
+
+# Logs
+logs/
+
+# IDE
+.vscode/
+.idea/

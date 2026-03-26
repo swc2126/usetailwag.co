@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TailWag Email Signature</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Inter, -apple-system, sans-serif;
+    background: #f0ede8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    gap: 32px;
+  }
+  .instructions {
+    background: #0F1410;
+    color: #F5F0E8;
+    border-radius: 12px;
+    padding: 28px 32px;
+    max-width: 640px;
+    width: 100%;
+  }
+  .instructions h2 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #A8C5B0;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .step {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #d4cfc8;
+  }
+  .step-num {
+    background: #1E6B4A;
+    color: #F5F0E8;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  kbd {
+    background: #1a231c;
+    border: 1px solid #2d3d31;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    font-family: monospace;
+    color: #A8C5B0;
+  }
+  .copy-btn {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background: #1E6B4A;
+    color: #F5F0E8;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.15s;
+  }
+  .copy-btn:hover { background: #286050; }
+  .copy-btn.copied { background: #C4933F; }
+
+  .preview-wrapper {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 640px;
+    width: 100%;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  }
+  .preview-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #888;
+    margin-bottom: 20px;
+  }
+
+  /* The actual signature — this is what gets copied */
+  #signature-block {
+    font-family: Inter, Arial, sans-serif;
+  }
+</style>
+</head>
+<body>
+
+<div class="instructions">
+  <h2>How to set this as your Gmail signature</h2>
+  <div class="step"><div class="step-num">1</div><div>Click the <strong style="color:#F5F0E8;">Copy Signature</strong> button below</div></div>
+  <div class="step"><div class="step-num">2</div><div>Go to <strong style="color:#F5F0E8;">Gmail → Settings (gear icon) → See all settings → General</strong></div></div>
+  <div class="step"><div class="step-num">3</div><div>Scroll to <strong style="color:#F5F0E8;">Signature</strong>, click <strong style="color:#F5F0E8;">Create new</strong>, name it <em style="color:#A8C5B0;">TailWag</em>, click Create</div></div>
+  <div class="step"><div class="step-num">4</div><div>Click inside the signature editor box and press <kbd>Ctrl+A</kbd> then <kbd>Ctrl+V</kbd> (or <kbd>⌘A</kbd> / <kbd>⌘V</kbd> on Mac) to paste</div></div>
+  <div class="step"><div class="step-num">5</div><div>Scroll down and click <strong style="color:#F5F0E8;">Save Changes</strong></div></div>
+  <button class="copy-btn" onclick="copySignature()" id="copyBtn">Copy Signature</button>
+</div>
+
+<div class="preview-wrapper">
+  <div class="preview-label">Signature Preview</div>
+
+  <!-- SIGNATURE BLOCK — this is exactly what will appear in emails -->
+  <div id="signature-block">
+    <table cellpadding="0" cellspacing="0" border="0" style="font-family:Inter,Arial,sans-serif;font-size:13px;color:#0F1410;line-height:1.5;">
+      <tr>
+        <td style="padding-right:18px;border-right:3px solid #1E6B4A;vertical-align:middle;padding-top:4px;padding-bottom:4px;">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56' width='44' height='44'%3E%3Crect width='56' height='56' fill='%231E6B4A' rx='12'/%3E%3Cpath d='M 11 50 C 5 30%2C 23 4%2C 41 4 C 49 4%2C 51 18%2C 45 26' stroke='%23F5F0E8' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='45' cy='26' r='3.5' fill='%23F5F0E8'/%3E%3C/svg%3E"
+               alt="TailWag" width="44" height="44" style="display:block;">
+        </td>
+        <td style="padding-left:18px;vertical-align:middle;">
+          <div style="font-weight:700;font-size:14px;color:#0F1410;letter-spacing:-0.2px;margin-bottom:2px;">Summer Wright Collins</div>
+          <div style="color:#1E6B4A;font-size:12px;font-weight:600;margin-bottom:7px;">Founder, TailWag</div>
+          <div style="font-size:12px;margin-bottom:4px;">
+            <a href="https://usetailwag.co" style="color:#1E6B4A;text-decoration:none;font-weight:500;">usetailwag.co</a>
+            <span style="color:#C4933F;margin:0 7px;">·</span>
+            <a href="mailto:summer@usetailwag.co" style="color:#555;text-decoration:none;">summer@usetailwag.co</a>
+          </div>
+          <div style="font-size:11.5px;color:#999;font-style:italic;">Making every tail wag long after pickup</div>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <!-- END SIGNATURE BLOCK -->
+</div>
+
+<script>
+async function copySignature() {
+  const btn = document.getElementById('copyBtn');
+  const sigEl = document.getElementById('signature-block');
+  const htmlContent = sigEl.innerHTML;
+  const plainText = 'Summer Wright\nFounder, TailWag\nusetailwag.co · AI-powered SMS for doggie daycares';
+
+  try {
+    const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+    const textBlob = new Blob([plainText], { type: 'text/plain' });
+    await navigator.clipboard.write([
+      new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob })
+    ]);
+    btn.textContent = '✓ Copied! Now paste into Gmail';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy Signature';
+      btn.classList.remove('copied');
+    }, 4000);
+  } catch(e) {
+    // Fallback: select the signature element for manual copy
+    const range = document.createRange();
+    range.selectNodeContents(sigEl);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    btn.textContent = 'Selected — now press Ctrl+C / ⌘C to copy';
+    btn.classList.add('copied');
+  }
+}
+</script>
+</body>
+</html>

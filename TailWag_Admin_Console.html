@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TailWag Admin Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --black: #0F1410;
+      --green: #1E6B4A;
+      --green-dark: #164D35;
+      --linen: #F5F0E8;
+      --gold: #C4933F;
+      --sage: #A8C5B0;
+      --slate: #2D3748;
+      --card-bg: #1A231C;
+      --content-bg: #111812;
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --red-alert: #C44A3F;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--black);
+      color: var(--linen);
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 240px;
+      background: var(--black);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .wag-mark {
+      flex-shrink: 0;
+    }
+
+    .sidebar-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--linen);
+      line-height: 1.2;
+    }
+
+    .sidebar-label {
+      font-size: 11px;
+      color: var(--sage);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-items {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-item {
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--sage);
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--linen);
+    }
+
+    .nav-item.active {
+      background: rgba(30, 107, 74, 0.15);
+      color: var(--green);
+      border-left-color: var(--green);
+    }
+
+    .nav-icon {
+      font-size: 16px;
+      width: 18px;
+      text-align: center;
+    }
+
+    .sidebar-profile {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 16px;
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .profile-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--green));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--black);
+      flex-shrink: 0;
+    }
+
+    .profile-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .profile-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--linen);
+    }
+
+    .profile-role {
+      font-size: 11px;
+      color: var(--sage);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--content-bg);
+      overflow: hidden;
+    }
+
+    .header-bar {
+      height: 60px;
+      background: var(--black);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .header-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--linen);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-left: auto;
+    }
+
+    .search-bar {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--linen);
+      width: 200px;
+      transition: all 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .search-bar::placeholder {
+      color: var(--sage);
+    }
+
+    .search-bar:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--green);
+    }
+
+    .date-selector, .btn-export, .btn-notification {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--linen);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .date-selector:hover, .btn-export:hover, .btn-notification:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--green);
+    }
+
+    .btn-notification {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    /* TABS CONTENT */
+    .tabs-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .tab-content {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 28px 28px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* KPI GRID */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      background: rgba(30, 107, 74, 0.08);
+      border-color: rgba(30, 107, 74, 0.3);
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      color: var(--sage);
+      text-transform: uppercase;
+      font-weight: 500;
+      letter-spacing: 0.4px;
+    }
+
+    .kpi-value {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .kpi-value.gold {
+      color: var(--gold);
+    }
+
+    .kpi-value.green {
+      color: var(--green);
+    }
+
+    .kpi-value.sage {
+      color: var(--sage);
+    }
+
+    .kpi-value.white {
+      color: var(--linen);
+    }
+
+    .kpi-value.red {
+      color: var(--red-alert);
+    }
+
+    /* OVERVIEW TAB LAYOUT */
+    .overview-top {
+      display: flex;
+      gap: 28px;
+      margin-bottom: 28px;
+    }
+
+    .overview-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .overview-sidebar {
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* TABLES */
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .table-header {
+      padding: 16px 20px;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--border-subtle);
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--sage);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      display: grid;
+      align-items: center;
+    }
+
+    .table-row {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: grid;
+      align-items: center;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .table-row:last-child {
+      border-bottom: none;
+    }
+
+    .table-row:hover {
+      background: rgba(30, 107, 74, 0.1);
+    }
+
+    .table-accounts {
+      grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .col-name {
+      color: var(--linen);
+      font-weight: 500;
+    }
+
+    .col-plan {
+      color: var(--linen);
+    }
+
+    .col-status {
+      color: var(--linen);
+    }
+
+    .col-health {
+      color: var(--linen);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .col-messages {
+      text-align: center;
+      color: var(--linen);
+    }
+
+    .col-reviews {
+      text-align: center;
+      color: var(--linen);
+    }
+
+    .col-days {
+      text-align: center;
+      color: var(--linen);
+    }
+
+    .col-mrr {
+      text-align: right;
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .badge-starter {
+      background: rgba(168, 197, 176, 0.2);
+      color: var(--sage);
+    }
+
+    .badge-growth {
+      background: rgba(30, 107, 74, 0.2);
+      color: var(--green);
+    }
+
+    .badge-active {
+      background: rgba(30, 107, 74, 0.2);
+      color: var(--green);
+    }
+
+    .badge-trial {
+      background: rgba(196, 147, 63, 0.2);
+      color: var(--gold);
+    }
+
+    .badge-at-risk {
+      background: rgba(196, 74, 63, 0.2);
+      color: var(--red-alert);
+    }
+
+    /* HEALTH BARS */
+    .health-bar {
+      width: 80px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .health-bar-fill {
+      height: 100%;
+      background: var(--green);
+      transition: width 0.3s ease;
+    }
+
+    .health-bar-fill.medium {
+      background: var(--gold);
+    }
+
+    .health-bar-fill.low {
+      background: var(--red-alert);
+    }
+
+    .health-score {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--linen);
+      width: 35px;
+      text-align: right;
+    }
+
+    /* ACTIVITY FEED */
+    .activity-feed {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 20px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .activity-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--linen);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .activity-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--sage);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-time {
+      font-size: 11px;
+      color: rgba(168, 197, 176, 0.6);
+      margin-top: 4px;
+    }
+
+    .activity-event {
+      color: var(--linen);
+    }
+
+    /* MINI CHARTS */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .chart-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .chart-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--linen);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 80px;
+    }
+
+    .chart-bar {
+      flex: 1;
+      background: var(--green);
+      border-radius: 4px 4px 0 0;
+      min-height: 4px;
+      transition: all 0.2s ease;
+      opacity: 0.8;
+    }
+
+    .chart-bar:hover {
+      opacity: 1;
+    }
+
+    /* FILTER/ACTION BAR */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      padding: 8px 14px;
+      border: 1px solid var(--border-subtle);
+      background: transparent;
+      color: var(--sage);
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .filter-btn.active {
+      background: var(--green);
+      border-color: var(--green);
+      color: var(--black);
+    }
+
+    .btn-primary {
+      padding: 8px 16px;
+      background: var(--green);
+      color: var(--black);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-primary:hover {
+      background: var(--green-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      padding: 8px 14px;
+      background: transparent;
+      color: var(--linen);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(30, 107, 74, 0.1);
+      border-color: var(--green);
+    }
+
+    /* MESSAGES TAB */
+    .messages-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .message-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .message-item:hover {
+      background: rgba(30, 107, 74, 0.1);
+      border-color: rgba(30, 107, 74, 0.3);
+    }
+
+    .message-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .message-header {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+
+    .message-account {
+      font-weight: 600;
+      color: var(--linen);
+      font-size: 13px;
+    }
+
+    .message-recipient {
+      font-size: 12px;
+      color: var(--sage);
+    }
+
+    .message-text {
+      font-size: 12px;
+      color: var(--sage);
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .message-footer {
+      font-size: 11px;
+      color: rgba(168, 197, 176, 0.6);
+      margin-top: 6px;
+    }
+
+    .message-status {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      color: var(--green);
+      font-size: 12px;
+    }
+
+    .message-status.failed {
+      color: var(--red-alert);
+    }
+
+    /* REVIEWS TAB */
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .review-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .review-account {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--linen);
+    }
+
+    .review-flag {
+      font-size: 18px;
+    }
+
+    .review-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .review-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .review-stat-label {
+      color: var(--sage);
+    }
+
+    .review-stat-value {
+      color: var(--linen);
+      font-weight: 600;
+    }
+
+    .star {
+      color: var(--gold);
+      font-size: 14px;
+    }
+
+    .rating-stars {
+      font-size: 16px;
+      letter-spacing: 2px;
+    }
+
+    .trend-up {
+      color: var(--green);
+      font-size: 12px;
+    }
+
+    .trend-down {
+      color: var(--red-alert);
+      font-size: 12px;
+    }
+
+    /* AT-RISK TAB */
+    .risk-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .risk-card-main {
+      background: var(--card-bg);
+      border: 2px solid var(--red-alert);
+      border-radius: 10px;
+      padding: 28px;
+    }
+
+    .risk-header {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--red-alert);
+      margin-bottom: 20px;
+    }
+
+    .risk-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    .risk-indicators {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .indicator {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(196, 74, 63, 0.1);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .indicator-icon {
+      color: var(--red-alert);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .indicator-text {
+      color: var(--linen);
+      line-height: 1.4;
+    }
+
+    .risk-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+    }
+
+    .timeline-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+
+    .timeline-dot.inactive {
+      background: var(--red-alert);
+    }
+
+    .timeline-text {
+      color: var(--sage);
+      line-height: 1.6;
+    }
+
+    .timeline-date {
+      color: rgba(168, 197, 176, 0.5);
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .risk-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn-action {
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-action.send-email {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--linen);
+    }
+
+    .btn-action.send-email:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--green);
+    }
+
+    .btn-action.schedule {
+      background: var(--gold);
+      color: var(--black);
+      border: none;
+    }
+
+    .btn-action.schedule:hover {
+      background: #B8843A;
+    }
+
+    .btn-action.resolved {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--linen);
+    }
+
+    .btn-action.resolved:hover {
+      background: rgba(30, 107, 74, 0.15);
+      border-color: var(--green);
+    }
+
+    .early-warnings {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .warning-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(196, 74, 63, 0.3);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .warning-title {
+      font-weight: 600;
+      color: var(--linen);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .warning-stat {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--sage);
+      margin-bottom: 6px;
+    }
+
+    .warning-value {
+      color: var(--linen);
+      font-weight: 600;
+    }
+
+    /* RESPONSIVE SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ACCOUNTS TAB SPECIFIC */
+    .accounts-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .btn-action-small {
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--sage);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 11px;
+    }
+
+    .btn-action-small:hover {
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    .table-accounts-grid {
+      grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr 1fr 1fr 0.8fr;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <svg class="wag-mark" width="28" height="28" viewBox="0 0 56 56" fill="none">
+          <rect width="56" height="56" fill="#1E6B4A" rx="8"/>
+          <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+          <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+        </svg>
+        <div>
+          <div class="sidebar-title">TailWag</div>
+          <div class="sidebar-label">Admin Console</div>
+        </div>
+      </div>
+
+      <nav class="nav-items">
+        <div class="nav-item active" onclick="switchTab('overview')">
+          <span class="nav-icon">📊</span>
+          <span>Overview</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('accounts')">
+          <span class="nav-icon">👥</span>
+          <span>Accounts</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('messages')">
+          <span class="nav-icon">💬</span>
+          <span>Messages</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('reviews')">
+          <span class="nav-icon">⭐</span>
+          <span>Reviews</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('at-risk')">
+          <span class="nav-icon">⚠️</span>
+          <span>At-Risk</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-profile">
+        <div class="profile-avatar">SW</div>
+        <div class="profile-info">
+          <div class="profile-name">Summer Wright</div>
+          <div class="profile-role">Admin</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <!-- HEADER -->
+      <div class="header-bar">
+        <div class="header-title" id="pageTitle">Overview</div>
+        <div class="header-controls">
+          <input type="text" class="search-bar" placeholder="Search accounts...">
+          <select class="date-selector">
+            <option>Last 30 days</option>
+            <option>Last 7 days</option>
+            <option>Last 90 days</option>
+          </select>
+          <button class="btn-export">Export</button>
+          <button class="btn-notification">🔔</button>
+        </div>
+      </div>
+
+      <!-- TABS CONTAINER -->
+      <div class="tabs-container">
+        <!-- TAB 1: OVERVIEW -->
+        <div id="overview" class="tab-content active">
+          <!-- KPI GRID -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">MRR</div>
+              <div class="kpi-value gold">$523</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Active Accounts</div>
+              <div class="kpi-value green">4</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Trial Accounts</div>
+              <div class="kpi-value sage">2</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Messages This Month</div>
+              <div class="kpi-value white">635</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Reviews Generated</div>
+              <div class="kpi-value green">27</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">At-Risk Accounts</div>
+              <div class="kpi-value red">1</div>
+            </div>
+          </div>
+
+          <div class="overview-top">
+            <div class="overview-main">
+              <!-- ACCOUNT HEALTH TABLE -->
+              <div class="table-container">
+                <div class="table-header table-accounts">
+                  <div>Account Name</div>
+                  <div>Plan</div>
+                  <div>Status</div>
+                  <div>Health Score</div>
+                  <div>Messages/Mo</div>
+                  <div>Reviews</div>
+                  <div>Days Active</div>
+                  <div>MRR</div>
+                </div>
+                <div id="accountsTableOverview"></div>
+              </div>
+            </div>
+
+            <!-- ACTIVITY FEED -->
+            <div class="overview-sidebar">
+              <div class="activity-feed">
+                <div class="activity-title">Activity Feed</div>
+                <div id="activityFeed"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CHARTS -->
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">Messages Sent (7 Days)</div>
+              <div class="chart-bars" id="messagesChart"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Reviews Per Account</div>
+              <div class="chart-bars" id="reviewsChart"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">MRR Trend</div>
+              <div class="chart-bars" id="mrrChart"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Health Scores</div>
+              <div class="chart-bars" id="healthChart"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: ACCOUNTS -->
+        <div id="accounts" class="tab-content">
+          <div class="accounts-actions">
+            <div class="filter-bar">
+              <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterAccounts('all')">All</button>
+                <button class="filter-btn" onclick="filterAccounts('active')">Active</button>
+                <button class="filter-btn" onclick="filterAccounts('trial')">Trial</button>
+                <button class="filter-btn" onclick="filterAccounts('at-risk')">At-Risk</button>
+              </div>
+            </div>
+            <button class="btn-primary">+ Add Account</button>
+          </div>
+
+          <div class="table-container">
+            <div class="table-header table-accounts-grid">
+              <div>Account Name</div>
+              <div>Plan</div>
+              <div>Status</div>
+              <div>Health Score</div>
+              <div>Messages/Mo</div>
+              <div>Reviews</div>
+              <div>Days Active</div>
+              <div>Actions</div>
+            </div>
+            <div id="accountsTableFull"></div>
+          </div>
+        </div>
+
+        <!-- TAB 3: MESSAGES -->
+        <div id="messages" class="tab-content">
+          <div class="filter-bar">
+            <input type="text" class="search-bar" placeholder="Search messages...">
+            <select class="date-selector">
+              <option>All dates</option>
+              <option>Today</option>
+              <option>This week</option>
+              <option>This month</option>
+            </select>
+          </div>
+
+          <div class="messages-list" id="messagesList"></div>
+        </div>
+
+        <!-- TAB 4: REVIEWS -->
+        <div id="reviews" class="tab-content">
+          <div class="reviews-grid" id="reviewsGrid"></div>
+        </div>
+
+        <!-- TAB 5: AT-RISK -->
+        <div id="at-risk" class="tab-content">
+          <div class="risk-container">
+            <!-- MAIN RISK CARD -->
+            <div class="risk-card-main">
+              <div class="risk-header">⚠️ Wüf Pet Resort — Immediate Attention Required</div>
+
+              <div class="risk-content">
+                <div class="risk-indicators">
+                  <div class="indicator">
+                    <div class="indicator-icon">🔴</div>
+                    <div class="indicator-text"><strong>11 days</strong> since last active</div>
+                  </div>
+                  <div class="indicator">
+                    <div class="indicator-icon">📊</div>
+                    <div class="indicator-text">Health score: <strong>18</strong> (Critical)</div>
+                  </div>
+                  <div class="indicator">
+                    <div class="indicator-icon">⭐</div>
+                    <div class="indicator-text"><strong>0 reviews</strong> this month</div>
+                  </div>
+                  <div class="indicator">
+                    <div class="indicator-icon">💬</div>
+                    <div class="indicator-text">Only <strong>12 messages</strong> sent this month</div>
+                  </div>
+                </div>
+
+                <div class="risk-timeline">
+                  <div class="timeline-item">
+                    <div class="timeline-dot inactive"></div>
+                    <div>
+                      <div class="timeline-text">Last active</div>
+                      <div class="timeline-date">11 days ago</div>
+                    </div>
+                  </div>
+                  <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div>
+                      <div class="timeline-text">Last review request sent</div>
+                      <div class="timeline-date">14 days ago</div>
+                    </div>
+                  </div>
+                  <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div>
+                      <div class="timeline-text">Account created</div>
+                      <div class="timeline-date">84 days ago</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="risk-actions">
+                <button class="btn-action send-email">📧 Send Email</button>
+                <button class="btn-action schedule">📞 Schedule Call</button>
+                <button class="btn-action resolved">✓ Mark Resolved</button>
+              </div>
+            </div>
+
+            <!-- EARLY WARNINGS -->
+            <div style="margin-top: 12px;">
+              <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; color: var(--linen); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.3px;">Early Warning Cards</div>
+              <div class="early-warnings">
+                <div class="warning-card">
+                  <div class="warning-title">Playful Pet Resort</div>
+                  <div class="warning-stat">
+                    <div>Days Active</div>
+                    <div class="warning-value">3</div>
+                  </div>
+                  <div class="warning-stat">
+                    <div>Messages Sent</div>
+                    <div class="warning-value">23</div>
+                  </div>
+                  <div class="warning-stat">
+                    <div>Health Score</div>
+                    <div class="warning-value">65</div>
+                  </div>
+                  <div style="font-size: 11px; color: var(--sage); margin-top: 8px;">New trial - monitor closely</div>
+                </div>
+                <div class="warning-card">
+                  <div class="warning-title">The Yard Dog</div>
+                  <div class="warning-stat">
+                    <div>Days Active</div>
+                    <div class="warning-value">8</div>
+                  </div>
+                  <div class="warning-stat">
+                    <div>Messages Sent</div>
+                    <div class="warning-value">67</div>
+                  </div>
+                  <div class="warning-stat">
+                    <div>Health Score</div>
+                    <div class="warning-value">78</div>
+                  </div>
+                  <div style="font-size: 11px; color: var(--sage); margin-top: 8px;">Trial ending in 14 days</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // MOCK DATA
+    const accounts = [
+      {
+        id: 1,
+        name: 'Social Pack Dogs',
+        plan: 'Starter',
+        status: 'Active',
+        healthScore: 97,
+        messages: 143,
+        reviews: 6,
+        daysActive: 62,
+        mrr: 129,
+        lastActive: 2
+      },
+      {
+        id: 2,
+        name: "Barney's Ranch",
+        plan: 'Growth',
+        status: 'Active',
+        healthScore: 92,
+        messages: 187,
+        reviews: 8,
+        daysActive: 45,
+        mrr: 197,
+        lastActive: 1
+      },
+      {
+        id: 3,
+        name: "Dog's Day Out",
+        plan: 'Growth',
+        status: 'Active',
+        healthScore: 88,
+        messages: 203,
+        reviews: 9,
+        daysActive: 38,
+        mrr: 197,
+        lastActive: 0
+      },
+      {
+        id: 4,
+        name: 'The Yard Dog',
+        plan: 'Growth',
+        status: 'Trial (Day 8)',
+        healthScore: 78,
+        messages: 67,
+        reviews: 3,
+        daysActive: 8,
+        mrr: 0,
+        lastActive: 1
+      },
+      {
+        id: 5,
+        name: 'Playful Pet Resort',
+        plan: 'Starter',
+        status: 'Trial (Day 3)',
+        healthScore: 65,
+        messages: 23,
+        reviews: 1,
+        daysActive: 3,
+        mrr: 0,
+        lastActive: 0
+      },
+      {
+        id: 6,
+        name: 'Wüf Pet Resort',
+        plan: 'Growth',
+        status: 'At-Risk',
+        healthScore: 18,
+        messages: 12,
+        reviews: 0,
+        daysActive: 84,
+        mrr: 197,
+        lastActive: 11
+      }
+    ];
+
+    const activityEvents = [
+      { text: 'Buddy\'s report card sent', account: 'Social Pack Dogs', time: '2 hrs ago' },
+      { text: 'New 5★ review received', account: 'Barney\'s Ranch', time: '4 hrs ago' },
+      { text: 'No-show prevented', account: 'Dog\'s Day Out', time: '6 hrs ago' },
+      { text: 'Message delivery failed', account: 'The Yard Dog', time: '8 hrs ago' },
+      { text: 'Trial extended', account: 'Playful Pet Resort', time: '1 day ago' },
+      { text: 'Payment processed', account: 'Social Pack Dogs', time: '2 days ago' }
+    ];
+
+    const messages = [
+      { account: 'Social Pack Dogs', recipient: 'Jane Smith', text: 'Your pet\'s report card is ready!', time: '2:34 PM', status: 'delivered' },
+      { account: 'Barney\'s Ranch', recipient: 'Mike Johnson', text: 'Great news - we have 5★ review from one of your customers', time: '1:20 PM', status: 'delivered' },
+      { account: 'Dog\'s Day Out', recipient: 'Sarah Lee', text: 'Reminder: Your pickup is in 1 hour', time: '11:45 AM', status: 'sent' },
+      { account: 'The Yard Dog', recipient: 'Tom Brown', text: 'Welcome to The Yard Dog! Here\'s your first welcome message', time: '9:30 AM', status: 'failed' },
+      { account: 'Playful Pet Resort', recipient: 'Emma Davis', text: 'Your trial includes unlimited messaging - try it now', time: '8:15 AM', status: 'delivered' }
+    ];
+
+    function getHealthBarColor(score) {
+      if (score >= 80) return 'green';
+      if (score >= 50) return 'medium';
+      return 'low';
+    }
+
+    function getPlanBadge(plan) {
+      return plan === 'Growth' ? 'badge-growth' : 'badge-starter';
+    }
+
+    function getStatusBadge(status) {
+      if (status === 'Active') return 'badge-active';
+      if (status.includes('Trial')) return 'badge-trial';
+      if (status === 'At-Risk') return 'badge-at-risk';
+    }
+
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
+      // Show selected tab
+      document.getElementById(tabName).classList.add('active');
+      event.target.closest('.nav-item').classList.add('active');
+
+      // Update header title
+      const titles = {
+        overview: 'Overview',
+        accounts: 'Accounts',
+        messages: 'Messages',
+        reviews: 'Reviews',
+        'at-risk': 'At-Risk Accounts'
+      };
+      document.getElementById('pageTitle').textContent = titles[tabName];
+
+      // Populate tab content
+      if (tabName === 'accounts') populateAccountsTable();
+      if (tabName === 'overview') populateOverview();
+      if (tabName === 'messages') populateMessages();
+      if (tabName === 'reviews') populateReviews();
+    }
+
+    function populateOverview() {
+      populateAccountsTableOverview();
+      populateActivityFeed();
+      populateCharts();
+    }
+
+    function populateAccountsTableOverview() {
+      const container = document.getElementById('accountsTableOverview');
+      container.innerHTML = accounts.map(acc => `
+        <div class="table-row table-accounts">
+          <div class="col-name">${acc.name}</div>
+          <div class="col-plan"><span class="badge ${getPlanBadge(acc.plan)}">${acc.plan}</span></div>
+          <div class="col-status"><span class="badge ${getStatusBadge(acc.status)}">${acc.status}</span></div>
+          <div class="col-health">
+            <div class="health-bar">
+              <div class="health-bar-fill ${getHealthBarColor(acc.healthScore)}" style="width: ${Math.min(acc.healthScore, 100)}%"></div>
+            </div>
+            <div class="health-score">${acc.healthScore}</div>
+          </div>
+          <div class="col-messages">${acc.messages}</div>
+          <div class="col-reviews">${acc.reviews}</div>
+          <div class="col-days">${acc.daysActive}</div>
+          <div class="col-mrr">$${acc.mrr}</div>
+        </div>
+      `).join('');
+    }
+
+    function populateAccountsTable() {
+      const container = document.getElementById('accountsTableFull');
+      container.innerHTML = accounts.map(acc => `
+        <div class="table-row table-accounts-grid">
+          <div class="col-name">${acc.name}</div>
+          <div class="col-plan"><span class="badge ${getPlanBadge(acc.plan)}">${acc.plan}</span></div>
+          <div class="col-status"><span class="badge ${getStatusBadge(acc.status)}">${acc.status}</span></div>
+          <div class="col-health">
+            <div class="health-bar">
+              <div class="health-bar-fill ${getHealthBarColor(acc.healthScore)}" style="width: ${Math.min(acc.healthScore, 100)}%"></div>
+            </div>
+            <div class="health-score">${acc.healthScore}</div>
+          </div>
+          <div class="col-messages">${acc.messages}</div>
+          <div class="col-reviews">${acc.reviews}</div>
+          <div class="col-days">${acc.daysActive}</div>
+          <div class="action-buttons">
+            <button class="btn-action-small">Edit</button>
+            <button class="btn-action-small">View</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function populateActivityFeed() {
+      const container = document.getElementById('activityFeed');
+      container.innerHTML = activityEvents.map(event => `
+        <div class="activity-item">
+          <div class="activity-event">${event.text}</div>
+          <div class="activity-time">${event.account} • ${event.time}</div>
+        </div>
+      `).join('');
+    }
+
+    function populateCharts() {
+      // Messages chart (7 days data)
+      const messagesData = [45, 62, 78, 91, 84, 103, 102];
+      const maxMessages = Math.max(...messagesData);
+      document.getElementById('messagesChart').innerHTML = messagesData.map(val =>
+        `<div class="chart-bar" style="height: ${(val / maxMessages) * 100}%"></div>`
+      ).join('');
+
+      // Reviews chart (per account)
+      const reviewsData = [6, 8, 9, 3, 1, 0];
+      const maxReviews = Math.max(...reviewsData);
+      document.getElementById('reviewsChart').innerHTML = reviewsData.map(val =>
+        `<div class="chart-bar" style="height: ${(val / maxReviews) * 100}%"></div>`
+      ).join('');
+
+      // MRR trend
+      const mrrData = [480, 485, 500, 510, 520, 523];
+      const maxMRR = Math.max(...mrrData);
+      document.getElementById('mrrChart').innerHTML = mrrData.map(val =>
+        `<div class="chart-bar" style="height: ${(val / maxMRR) * 100}%"></div>`
+      ).join('');
+
+      // Health scores
+      const healthData = [97, 92, 88, 78, 65, 18];
+      const maxHealth = 100;
+      document.getElementById('healthChart').innerHTML = healthData.map(val =>
+        `<div class="chart-bar" style="height: ${(val / maxHealth) * 100}%"></div>`
+      ).join('');
+    }
+
+    function populateMessages() {
+      const container = document.getElementById('messagesList');
+      container.innerHTML = messages.map(msg => {
+        const statusIcon = msg.status === 'delivered' ? '✓✓' : msg.status === 'sent' ? '✓' : '✗';
+        const statusClass = msg.status === 'failed' ? 'failed' : '';
+        return `
+          <div class="message-item">
+            <div class="message-content">
+              <div class="message-header">
+                <div class="message-account">${msg.account}</div>
+                <div class="message-recipient">to ${msg.recipient}</div>
+              </div>
+              <div class="message-text">${msg.text}</div>
+              <div class="message-footer">${msg.time}</div>
+            </div>
+            <div class="message-status ${statusClass}">${statusIcon}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function populateReviews() {
+      const reviewsData = [
+        { account: 'Social Pack Dogs', rating: 4.9, thisMonth: 6, conversion: 18 },
+        { account: 'Barney\'s Ranch', rating: 4.8, thisMonth: 8, conversion: 22 },
+        { account: 'Dog\'s Day Out', rating: 4.7, thisMonth: 9, conversion: 25 },
+        { account: 'The Yard Dog', rating: 4.5, thisMonth: 3, conversion: 15 },
+        { account: 'Playful Pet Resort', rating: 4.0, thisMonth: 1, conversion: 8 },
+        { account: 'Wüf Pet Resort', rating: 4.2, thisMonth: 0, conversion: 0, flagged: true }
+      ];
+
+      const container = document.getElementById('reviewsGrid');
+      container.innerHTML = reviewsData.map(review => {
+        const stars = '★'.repeat(Math.floor(review.rating)) + (review.rating % 1 >= 0.5 ? '★' : '☆');
+        const trend = review.thisMonth > 3 ? '<span class="trend-up">↑</span>' : review.thisMonth === 0 ? '<span class="trend-down">↓</span>' : '';
+        return `
+          <div class="review-card">
+            <div class="review-header">
+              <div class="review-account">${review.account}</div>
+              ${review.flagged ? '<div class="review-flag">🚩</div>' : ''}
+            </div>
+            <div class="review-stats">
+              <div class="review-stat">
+                <div class="review-stat-label">Rating</div>
+                <div class="rating-stars">${stars}</div>
+              </div>
+              <div class="review-stat">
+                <div class="review-stat-label">This Month</div>
+                <div class="review-stat-value">+${review.thisMonth} ${trend}</div>
+              </div>
+              <div class="review-stat">
+                <div class="review-stat-label">Conversion Rate</div>
+                <div class="review-stat-value">${review.conversion}%</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterAccounts(status) {
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      // Filter logic would go here
+    }
+
+    // ── LIVE DATA FROM RUNNING FLASK INSTANCE ─────────────────────────────────
+    // When the admin console is served from (or connected to) the Flask app at
+    // the same origin, /api/* endpoints return real data. If the server isn't
+    // running, fetchLiveData() silently fails and the mock data is shown.
+
+    let liveStats    = null;
+    let liveMessages = [];
+    let liveDogs     = [];
+    let liveAppts    = [];
+    let liveInbox    = [];
+
+    async function fetchLiveData() {
+      try {
+        const [statsRes, msgsRes, dogsRes, apptsRes, inboxRes] = await Promise.all([
+          fetch('/api/stats'),
+          fetch('/api/messages?limit=20'),
+          fetch('/api/dogs'),
+          fetch('/api/appointments'),
+          fetch('/api/inbox'),
+        ]);
+
+        if (!statsRes.ok) return; // not connected to Flask
+
+        liveStats    = await statsRes.json();
+        liveMessages = await msgsRes.json();
+        liveDogs     = await dogsRes.json();
+        liveAppts    = await apptsRes.json();
+        liveInbox    = await inboxRes.json();
+
+        injectLiveAccountRow();
+        updateLiveKPIs();
+        updateActivityFeedLive();
+      } catch (_) {
+        // Server not reachable — static mock data used instead
+      }
+    }
+
+    function injectLiveAccountRow() {
+      if (!liveStats) return;
+      const healthScore = liveStats.total_messages > 0 ? Math.min(99, 60 + liveStats.total_messages) : 40;
+      const liveRow = {
+        name: '🟢 Demo Instance (Live)',
+        plan: 'Growth',
+        status: 'Active',
+        healthScore: Math.min(healthScore, 99),
+        messages: liveStats.total_messages,
+        reviews: liveStats.review_requests_sent,
+        daysActive: 1,
+        mrr: 197
+      };
+      // Insert live row at top of accounts array for rendering
+      accounts.unshift(liveRow);
+      populateAccountsTableOverview();
+      populateAccountsTable();
+      accounts.shift(); // remove after rendering so it doesn't duplicate
+    }
+
+    function updateLiveKPIs() {
+      if (!liveStats) return;
+      // Find and update KPI cards by scanning for label text
+      document.querySelectorAll('.kpi-card').forEach(card => {
+        const label = card.querySelector('.kpi-label');
+        const value = card.querySelector('.kpi-value');
+        if (!label || !value) return;
+        const text = label.textContent.trim();
+        if (text === 'Messages This Month') value.textContent = liveStats.total_messages;
+        if (text === 'Reviews Generated')   value.textContent = liveStats.review_requests_sent;
+        if (text === 'Active Accounts')     value.textContent = 4 + (liveStats.total_dogs > 0 ? 1 : 0);
+      });
+      // Add live badge to header
+      const header = document.querySelector('.header-right');
+      if (header && !document.getElementById('liveBadge')) {
+        const badge = document.createElement('div');
+        badge.id = 'liveBadge';
+        badge.style.cssText = 'font-size:0.72rem;font-weight:700;background:#2d7d4a;color:#f5f0e8;padding:3px 10px;border-radius:12px;letter-spacing:0.05em';
+        badge.textContent = '● LIVE';
+        header.prepend(badge);
+      }
+    }
+
+    function updateActivityFeedLive() {
+      if (!liveMessages.length) return;
+      const liveEvents = liveMessages.slice(0, 4).map(msg => ({
+        text: msg.message_type === 'report_card'
+          ? `${msg.dog_name || 'Dog'}\u2019s report card sent`
+          : msg.message_type === 'google_request'
+          ? `Google review request sent to ${msg.owner_first_name || 'owner'}`
+          : msg.message_type === 'appointment_reminder'
+          ? `Reminder sent for ${msg.dog_name || 'appointment'}`
+          : `Message sent (${msg.message_type})`,
+        account: 'Demo Instance',
+        time: formatRelativeTime(msg.sent_at)
+      }));
+      const activityEvents_live = [...liveEvents, ...activityEvents].slice(0, 8);
+      const container = document.getElementById('activityFeed');
+      if (container) {
+        container.innerHTML = activityEvents_live.map(ev => `
+          <div class="activity-item">
+            <div class="activity-event">${ev.text}</div>
+            <div class="activity-time">${ev.account} \u2022 ${ev.time}</div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function formatRelativeTime(isoStr) {
+      if (!isoStr) return 'recently';
+      const diff = (Date.now() - new Date(isoStr).getTime()) / 1000;
+      if (diff < 60)   return 'just now';
+      if (diff < 3600) return `${Math.floor(diff/60)} min ago`;
+      if (diff < 86400)return `${Math.floor(diff/3600)} hrs ago`;
+      return `${Math.floor(diff/86400)} days ago`;
+    }
+
+    // Override populateMessages to mix live + mock data
+    const _populateMessagesMock = populateMessages;
+    function populateMessages() {
+      if (liveMessages.length) {
+        const container = document.getElementById('messagesList');
+        const liveMapped = liveMessages.map(msg => ({
+          account: 'Demo Instance',
+          recipient: msg.owner_first_name || 'Owner',
+          text: msg.message_body || '(no body)',
+          time: new Date(msg.sent_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+          status: msg.delivery_status === 'sent' ? 'delivered' : (msg.delivery_status || 'sent')
+        }));
+        const allMessages = [...liveMapped, ...messages];
+        container.innerHTML = allMessages.map(msg => {
+          const statusIcon  = msg.status === 'delivered' ? '\u2713\u2713' : msg.status === 'sent' ? '\u2713' : '\u2717';
+          const statusClass = msg.status === 'failed' ? 'failed' : '';
+          return `
+            <div class="message-item">
+              <div class="message-content">
+                <div class="message-header">
+                  <div class="message-account">${msg.account}</div>
+                  <div class="message-recipient">to ${msg.recipient}</div>
+                </div>
+                <div class="message-text">${msg.text}</div>
+                <div class="message-footer">${msg.time}</div>
+              </div>
+              <div class="message-status ${statusClass}">${statusIcon}</div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        _populateMessagesMock();
+      }
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      populateOverview();
+      fetchLiveData(); // try to connect to live Flask instance
+    });
+  </script>
+</body>
+</html>

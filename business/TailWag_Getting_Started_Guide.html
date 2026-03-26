@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TailWag — Getting Started Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #0F1410;
+      --black-darker: #0A0E0A;
+      --green: #1E6B4A;
+      --linen: #F5F0E8;
+      --gold: #C4933F;
+      --sage: #A8C5B0;
+      --slate: #2D3748;
+      --white: #ffffff;
+      --border-light: rgba(255,255,255,0.08);
+      --border-dark: rgba(30,107,74,0.2);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family:'Inter',sans-serif; color:#333; line-height:1.6; overflow-x:hidden; }
+    h1,h2,h3,h4,h5,h6 { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; }
+    h1 { font-size:60px; line-height:1.1; letter-spacing:-1px; }
+    h2 { font-size:42px; line-height:1.2; letter-spacing:-0.5px; }
+    h3 { font-size:26px; font-weight:700; }
+    p  { font-size:16px; line-height:1.7; }
+    a  { text-decoration:none; }
+
+    .container { max-width:1100px; margin:0 auto; padding:0 40px; }
+
+    /* ── NAVBAR ─────────────────────────────────── */
+    nav {
+      position:sticky; top:0; z-index:1000;
+      background-color:var(--black);
+      border-bottom:1px solid var(--border-light);
+      backdrop-filter:blur(10px);
+    }
+    .navbar {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:16px 40px; max-width:1400px; margin:0 auto;
+    }
+    .navbar-brand {
+      display:flex; align-items:center; gap:10px;
+      color:var(--linen); font-family:'Plus Jakarta Sans',sans-serif;
+      font-size:20px; font-weight:700;
+    }
+    .navbar-brand svg { width:32px; height:32px; }
+    .navbar-tag {
+      background:rgba(30,107,74,0.25); color:var(--sage);
+      font-size:12px; font-weight:600; padding:4px 10px;
+      border-radius:20px; letter-spacing:0.5px; margin-left:8px;
+      border:1px solid rgba(30,107,74,0.4);
+    }
+    .navbar-links { display:flex; gap:32px; }
+    .navbar-links a {
+      color:var(--sage); font-size:14px; font-weight:500;
+      transition:color 0.2s;
+    }
+    .navbar-links a:hover { color:var(--linen); }
+
+    /* ── HERO ─────────────────────────────────── */
+    .hero {
+      background-color:var(--black);
+      padding:100px 40px 80px;
+      position:relative; overflow:hidden;
+    }
+    .hero::before {
+      content:''; position:absolute; top:-30%; right:-10%;
+      width:700px; height:700px;
+      background:radial-gradient(circle, rgba(30,107,74,0.12) 0%, transparent 70%);
+      border-radius:50%; pointer-events:none;
+    }
+    .hero-inner {
+      max-width:1100px; margin:0 auto;
+      display:grid; grid-template-columns:1fr 380px; gap:80px;
+      align-items:center; position:relative; z-index:2;
+    }
+    .guide-eyebrow {
+      display:inline-flex; align-items:center; gap:8px;
+      color:var(--green); font-size:12px; font-weight:700;
+      text-transform:uppercase; letter-spacing:2px; margin-bottom:20px;
+    }
+    .guide-eyebrow span { color:var(--sage); }
+    .hero h1 { color:var(--linen); margin-bottom:20px; }
+    .hero-sub { color:var(--sage); font-size:18px; line-height:1.7; margin-bottom:32px; max-width:560px; }
+    .hero-meta {
+      display:flex; gap:32px; flex-wrap:wrap;
+    }
+    .hero-meta-item { display:flex; flex-direction:column; gap:4px; }
+    .hero-meta-item .meta-label { color:var(--green); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; }
+    .hero-meta-item .meta-val { color:var(--linen); font-size:15px; font-weight:500; }
+
+    /* Guide card */
+    .guide-card {
+      background:rgba(30,107,74,0.1);
+      border:1px solid rgba(30,107,74,0.3);
+      border-radius:16px; padding:32px;
+    }
+    .guide-card-header {
+      display:flex; align-items:center; gap:12px; margin-bottom:24px;
+      padding-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .guide-card-header svg { width:28px; height:28px; }
+    .guide-card-header span { color:var(--linen); font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:16px; }
+    .toc-list { list-style:none; }
+    .toc-list li {
+      padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .toc-list li:last-child { border-bottom:none; padding-bottom:0; }
+    .toc-list a { color:var(--sage); font-size:14px; font-weight:500; transition:color 0.2s; }
+    .toc-list a:hover { color:var(--linen); }
+    .toc-list .toc-time { color:var(--green); font-size:12px; white-space:nowrap; margin-left:16px; }
+
+    /* ── SECTION LABEL (reusable) ─────────────── */
+    .section-label {
+      color:var(--green); font-size:12px; font-weight:700;
+      text-transform:uppercase; letter-spacing:2px;
+      margin-bottom:12px; display:block;
+    }
+    .section-headline-linen { color:var(--linen); margin-bottom:16px; }
+    .section-headline-black { color:var(--black); margin-bottom:16px; }
+    .section-sub-sage  { color:var(--sage);  font-size:18px; margin-bottom:48px; }
+    .section-sub-slate { color:var(--slate); font-size:18px; margin-bottom:48px; }
+
+    /* ── DARK SECTIONS ─────────────────────────── */
+    .section-dark { background-color:var(--black); padding:80px 40px; }
+    .section-linen { background-color:var(--linen); padding:80px 40px; }
+    .section-white { background-color:var(--white); padding:80px 40px; }
+
+    /* ── MODULE CARDS (Section 1) ─────────────── */
+    .module-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+    .module-card {
+      background:rgba(30,107,74,0.08);
+      border:1px solid rgba(30,107,74,0.25);
+      border-radius:14px; padding:32px;
+      transition:all 0.3s;
+    }
+    .module-card:hover {
+      background:rgba(30,107,74,0.15);
+      transform:translateY(-4px);
+      box-shadow:0 16px 40px rgba(0,0,0,0.3);
+    }
+    .module-number {
+      width:44px; height:44px; background:var(--green);
+      border-radius:8px; display:flex; align-items:center; justify-content:center;
+      font-family:'Plus Jakarta Sans',sans-serif; font-weight:800;
+      font-size:20px; color:var(--linen); margin-bottom:20px;
+    }
+    .module-card h3 { color:var(--linen); font-size:20px; margin-bottom:12px; }
+    .module-card p  { color:var(--sage); font-size:15px; line-height:1.7; }
+    .module-tag {
+      display:inline-block; margin-top:16px;
+      background:rgba(30,107,74,0.3); color:var(--sage);
+      font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px;
+    }
+
+    /* ── FEATURE ROWS (Section 1 detail) ─────── */
+    .feature-row {
+      display:grid; grid-template-columns:1fr 1fr; gap:60px;
+      align-items:start; padding:60px 0;
+      border-top:1px solid var(--border-light);
+    }
+    .feature-row.reverse { direction:rtl; }
+    .feature-row.reverse > * { direction:ltr; }
+    .feature-num {
+      color:var(--gold); font-family:'Plus Jakarta Sans',sans-serif;
+      font-size:56px; font-weight:800; line-height:1; margin-bottom:12px;
+    }
+    .feature-title { color:var(--linen); margin-bottom:12px; font-size:28px; }
+    .feature-desc  { color:var(--sage); font-size:16px; margin-bottom:24px; line-height:1.7; }
+    .feature-bullets { list-style:none; margin-bottom:28px; }
+    .feature-bullets li {
+      color:var(--sage); font-size:15px; padding:8px 0;
+      border-bottom:1px solid var(--border-light);
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .feature-bullets li::before { content:'✓'; color:var(--green); font-weight:800; flex-shrink:0; margin-top:1px; }
+
+    /* SMS mock (dark) */
+    .sms-mock {
+      background:#111812; border-radius:16px;
+      padding:24px; border:1px solid rgba(255,255,255,0.06);
+    }
+    .sms-mock-header {
+      display:flex; align-items:center; gap:10px; margin-bottom:16px;
+      padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .sms-avatar {
+      width:36px; height:36px; background:var(--green); border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; flex-shrink:0;
+    }
+    .sms-name { color:var(--linen); font-weight:600; font-size:14px; }
+    .sms-sub  { color:var(--sage);  font-size:12px; }
+    .sms-bubble {
+      background:var(--green); color:var(--linen);
+      border-radius:16px 16px 4px 16px;
+      padding:14px 16px; font-size:14px; line-height:1.6;
+      margin-bottom:8px;
+    }
+    .sms-bubble.reminder { background:#286050; }
+    .sms-delivered { color:var(--sage); font-size:11px; text-align:right; }
+    .sms-note {
+      margin-top:16px; padding:10px 14px;
+      background:rgba(196,147,63,0.1); border-radius:8px;
+      border-left:3px solid var(--gold);
+      color:var(--sage); font-size:13px; font-style:italic;
+    }
+
+    /* ── CHECKLIST SECTION (Section 2) ─────────── */
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:48px; }
+    .checklist-block h3 { color:var(--black); margin-bottom:20px; font-size:22px; }
+    .checklist { list-style:none; }
+    .checklist li {
+      display:flex; gap:12px; padding:12px 0;
+      border-bottom:1px solid rgba(30,107,74,0.12);
+      font-size:15px; color:var(--slate);
+    }
+    .checklist li:last-child { border-bottom:none; }
+    .check-icon {
+      width:22px; height:22px; background:var(--green); border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      color:var(--linen); font-size:12px; font-weight:800; flex-shrink:0; margin-top:1px;
+    }
+    .check-open {
+      width:22px; height:22px; border:2px solid var(--green); border-radius:50%; flex-shrink:0; margin-top:2px;
+    }
+
+    /* Warning box */
+    .warning-box {
+      background:#FFF8EC; border-radius:12px;
+      border-left:4px solid var(--gold); padding:24px;
+      margin-bottom:32px;
+    }
+    .warning-box h4 { color:var(--gold); font-size:16px; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+    .warning-box p  { color:var(--slate); font-size:15px; }
+
+    /* Consent table */
+    .consent-table { width:100%; border-collapse:collapse; margin-top:24px; }
+    .consent-table th {
+      background:var(--green); color:var(--linen);
+      font-family:'Plus Jakarta Sans',sans-serif; font-size:14px;
+      padding:12px 16px; text-align:left;
+    }
+    .consent-table th:first-child { border-radius:8px 0 0 0; width:38%; }
+    .consent-table th:last-child  { border-radius:0 8px 0 0; }
+    .consent-table td { padding:12px 16px; font-size:14px; color:var(--slate); vertical-align:top; }
+    .consent-table tr:nth-child(odd)  td { background:#fff; }
+    .consent-table tr:nth-child(even) td { background:#F9F9F9; }
+    .consent-table tr:last-child td:first-child { border-radius:0 0 0 8px; }
+    .consent-table tr:last-child td:last-child  { border-radius:0 0 8px 0; }
+    .consent-table td:first-child { color:var(--black); font-weight:600; }
+
+    /* Callout box */
+    .callout-box {
+      background:rgba(30,107,74,0.07);
+      border-radius:12px; border-left:4px solid var(--green);
+      padding:24px; margin:24px 0;
+    }
+    .callout-box h4 { color:var(--green); font-size:16px; margin-bottom:8px; }
+    .callout-box p  { color:var(--slate); font-size:15px; }
+
+    /* ── TIMELINE (Section 3) ────────────────── */
+    .timeline { position:relative; padding-left:48px; }
+    .timeline::before {
+      content:''; position:absolute; left:16px; top:0; bottom:0;
+      width:2px; background:rgba(30,107,74,0.3);
+    }
+    .timeline-item { position:relative; margin-bottom:48px; }
+    .timeline-item:last-child { margin-bottom:0; }
+    .timeline-dot {
+      position:absolute; left:-48px; top:0;
+      width:34px; height:34px; background:var(--green); border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Plus Jakarta Sans',sans-serif; font-weight:800;
+      font-size:15px; color:var(--linen); border:3px solid var(--black);
+    }
+    .timeline-item h3 { color:var(--linen); font-size:20px; margin-bottom:4px; }
+    .timeline-item .time-badge {
+      color:var(--gold); font-size:12px; font-weight:600;
+      text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; display:block;
+    }
+    .timeline-item p { color:var(--sage); font-size:15px; margin-bottom:12px; }
+    .timeline-arrows { list-style:none; }
+    .timeline-arrows li {
+      color:var(--sage); font-size:14px; padding:4px 0;
+      display:flex; gap:8px;
+    }
+    .timeline-arrows li::before { content:'→'; color:var(--green); flex-shrink:0; }
+
+    /* Setup table */
+    .setup-table { width:100%; border-collapse:collapse; margin-top:32px; }
+    .setup-table td {
+      padding:14px 16px; font-size:14px; vertical-align:top;
+      border-bottom:1px solid rgba(255,255,255,0.05);
+    }
+    .setup-table tr:last-child td { border-bottom:none; }
+    .setup-table td:first-child {
+      color:var(--sage); font-weight:600; font-size:13px;
+      text-transform:uppercase; letter-spacing:0.5px;
+      width:30%; background:rgba(30,107,74,0.08);
+      border-right:1px solid rgba(255,255,255,0.04);
+    }
+    .setup-table td:last-child { color:var(--sage); }
+
+    /* ── STAFF CHECKLIST (Section 4) ────────── */
+    .staff-checklist-card {
+      background:rgba(30,107,74,0.08);
+      border:1px solid rgba(30,107,74,0.25);
+      border-radius:14px; padding:36px;
+      max-width:700px; margin:0 auto;
+    }
+    .staff-checklist-card h3 {
+      color:var(--linen); text-align:center; font-size:18px;
+      text-transform:uppercase; letter-spacing:1px; margin-bottom:28px;
+      padding-bottom:16px; border-bottom:1px solid var(--border-light);
+    }
+    .staff-group { margin-bottom:24px; }
+    .staff-group h4 { color:var(--green); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+    .staff-item {
+      display:flex; gap:10px; align-items:flex-start;
+      color:var(--sage); font-size:14px; padding:6px 0;
+    }
+    .staff-item::before { content:'→'; color:var(--green); flex-shrink:0; }
+
+    /* Notes table */
+    .notes-table { width:100%; border-collapse:collapse; }
+    .notes-table th { padding:12px 16px; font-size:14px; font-weight:700; text-align:left; }
+    .notes-table th:first-child { background:#FFF0F0; color:#CC3333; border-radius:8px 0 0 0; }
+    .notes-table th:last-child  { background:rgba(30,107,74,0.1); color:var(--green); border-radius:0 8px 0 0; }
+    .notes-table td { padding:10px 16px; font-size:14px; color:var(--slate); border-bottom:1px solid #eee; }
+    .notes-table tr:last-child td { border-bottom:none; }
+    .notes-table tr:nth-child(odd) td { background:#FAFAFA; }
+
+    /* Morning summary mock */
+    .morning-summary {
+      background:var(--black); border-radius:14px;
+      padding:28px; border:1px solid var(--border-light);
+    }
+    .ms-header { color:var(--sage); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:16px; }
+    .ms-from { color:var(--gold); font-size:14px; font-weight:600; margin-bottom:12px; }
+    .ms-body { color:var(--linen); font-size:14px; line-height:1.8; white-space:pre-line; }
+    .ms-confirmed { color:#4ade80; }
+    .ms-pending   { color:var(--gold); }
+    .ms-cancelled { color:#f87171; }
+
+    /* ── METRICS (Section 5) ─────────────────── */
+    .metrics-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; }
+    .metric-card {
+      background:rgba(30,107,74,0.08);
+      border:1px solid rgba(30,107,74,0.2);
+      border-radius:12px; padding:24px;
+      display:flex; gap:16px; align-items:flex-start;
+    }
+    .metric-icon {
+      width:40px; height:40px; background:rgba(30,107,74,0.2);
+      border-radius:8px; display:flex; align-items:center;
+      justify-content:center; font-size:20px; flex-shrink:0;
+    }
+    .metric-label { color:var(--sage); font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+    .metric-desc  { color:var(--linen); font-size:14px; line-height:1.6; }
+
+    /* Benchmarks */
+    .benchmarks-table { width:100%; border-collapse:collapse; }
+    .benchmarks-table thead th { background:var(--green); color:var(--linen); padding:12px 16px; font-size:14px; text-align:left; }
+    .benchmarks-table thead th:first-child { border-radius:8px 0 0 0; }
+    .benchmarks-table thead th:last-child  { border-radius:0 8px 0 0; }
+    .benchmarks-table td { padding:12px 16px; font-size:14px; color:var(--slate); border-bottom:1px solid #eee; vertical-align:top; }
+    .benchmarks-table tr:nth-child(even) td { background:#F7FAF8; }
+    .benchmarks-table tr:last-child td { border-bottom:none; }
+    .benchmarks-table td:first-child { color:var(--black); font-weight:600; }
+    .benchmarks-table td:nth-child(2) { color:var(--green); font-weight:700; white-space:nowrap; }
+
+    /* Inbox callout */
+    .inbox-steps { counter-reset:inbox; }
+    .inbox-step { display:flex; gap:16px; padding:20px 0; border-bottom:1px solid rgba(30,107,74,0.12); }
+    .inbox-step:last-child { border-bottom:none; }
+    .inbox-step-num {
+      width:32px; height:32px; background:var(--green); border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Plus Jakarta Sans',sans-serif; font-weight:800;
+      color:var(--linen); font-size:14px; flex-shrink:0;
+    }
+    .inbox-step-title { color:var(--black); font-weight:700; font-size:15px; margin-bottom:4px; }
+    .inbox-step-desc  { color:var(--slate); font-size:14px; line-height:1.6; }
+
+    /* ── FAQ (Section 6) ─────────────────────── */
+    .faq-group { margin-bottom:40px; }
+    .faq-group-label {
+      color:var(--green); font-size:13px; font-weight:700;
+      text-transform:uppercase; letter-spacing:1.5px;
+      border-bottom:2px solid var(--green); padding-bottom:8px; margin-bottom:20px;
+    }
+    .faq-item { margin-bottom:12px; border-radius:10px; overflow:hidden; border:1px solid #e0e0e0; background:#fff; }
+    .faq-item input { display:none; }
+    .faq-question {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:18px 20px; cursor:pointer; font-weight:600;
+      color:var(--black); background:#fff; border:none;
+      width:100%; text-align:left; font-size:15px; font-family:'Inter',sans-serif;
+    }
+    .faq-question:hover { background:#f9f9f9; }
+    .faq-toggle { color:var(--green); font-size:20px; font-weight:800; transition:transform 0.3s; flex-shrink:0; }
+    .faq-item input:checked + .faq-question .faq-toggle { transform:rotate(45deg); }
+    .faq-answer { max-height:0; overflow:hidden; transition:max-height 0.3s ease; padding:0 20px; color:var(--slate); font-size:15px; line-height:1.7; }
+    .faq-item input:checked + .faq-question + .faq-answer { max-height:400px; padding:0 20px 20px; }
+
+    /* ── SUPPORT SECTION (Section 7) ──────────── */
+    .contact-card {
+      background:rgba(30,107,74,0.1); border:1px solid rgba(30,107,74,0.3);
+      border-radius:14px; padding:36px; max-width:540px; margin-bottom:48px;
+    }
+    .contact-card h3 { color:var(--linen); margin-bottom:16px; font-size:22px; }
+    .contact-row { display:flex; gap:12px; align-items:center; margin-bottom:10px; }
+    .contact-row .label { color:var(--sage); font-size:14px; font-weight:600; min-width:64px; }
+    .contact-row a { color:var(--gold); font-size:15px; font-weight:500; }
+    .contact-row a:hover { text-decoration:underline; }
+    .contact-note { color:var(--sage); font-size:14px; margin-top:12px; font-style:italic; }
+
+    .pilot-timeline { list-style:none; }
+    .pilot-day {
+      display:flex; gap:16px; padding:16px 0;
+      border-bottom:1px solid var(--border-light);
+    }
+    .pilot-day:last-child { border-bottom:none; }
+    .pilot-badge {
+      background:var(--green); color:var(--linen);
+      font-size:13px; font-weight:700; padding:4px 12px;
+      border-radius:20px; white-space:nowrap; height:fit-content; margin-top:2px;
+    }
+    .pilot-day-desc { color:var(--sage); font-size:15px; }
+
+    .support-checks { list-style:none; }
+    .support-check {
+      display:flex; gap:10px; padding:10px 0;
+      border-bottom:1px solid var(--border-light);
+      color:var(--sage); font-size:15px;
+    }
+    .support-check:last-child { border-bottom:none; }
+    .support-check::before { content:'✓'; color:var(--green); font-weight:800; flex-shrink:0; }
+
+    /* Troubleshoot table */
+    .troubleshoot-table { width:100%; border-collapse:collapse; }
+    .troubleshoot-table thead th { background:var(--green); color:var(--linen); padding:12px 16px; font-size:14px; text-align:left; }
+    .troubleshoot-table thead th:first-child { border-radius:8px 0 0 0; width:38%; }
+    .troubleshoot-table thead th:last-child  { border-radius:0 8px 0 0; }
+    .troubleshoot-table td { padding:12px 16px; font-size:14px; color:var(--slate); border-bottom:1px solid #e8e8e8; vertical-align:top; }
+    .troubleshoot-table tr:nth-child(even) td { background:#F7FAF8; }
+    .troubleshoot-table tr:last-child td { border-bottom:none; }
+    .troubleshoot-table td:first-child { color:var(--black); font-weight:600; }
+
+    /* ── CLOSING CTA ──────────────────────────── */
+    .closing {
+      background:var(--green); padding:80px 40px; text-align:center;
+    }
+    .closing h2 { color:var(--linen); margin-bottom:16px; }
+    .closing p  { color:rgba(245,240,232,0.75); font-size:18px; margin-bottom:32px; }
+    .closing a.email { color:var(--gold); font-weight:600; font-size:16px; }
+    .closing a.email:hover { text-decoration:underline; }
+
+    /* ── FOOTER ───────────────────────────────── */
+    footer {
+      background:var(--black-darker); color:var(--sage);
+      padding:40px; text-align:center;
+      border-top:1px solid var(--border-light);
+    }
+    .footer-brand {
+      display:flex; align-items:center; justify-content:center;
+      gap:10px; margin-bottom:16px;
+      color:var(--linen); font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:17px;
+    }
+    .footer-brand svg { width:28px; height:28px; }
+    .footer-bottom { font-size:13px; color:var(--sage); }
+
+    /* ── RESPONSIVE ──────────────────────────── */
+    @media (max-width:900px) {
+      h1 { font-size:40px; }
+      h2 { font-size:32px; }
+      .hero-inner { grid-template-columns:1fr; }
+      .guide-card { display:none; }
+      .module-grid { grid-template-columns:1fr; }
+      .feature-row, .two-col { grid-template-columns:1fr; direction:ltr; }
+      .feature-row.reverse { direction:ltr; }
+      .metrics-grid { grid-template-columns:1fr; }
+      .navbar-links { display:none; }
+    }
+
+    /* ── PRINT ───────────────────────────────── */
+    @media print {
+      nav { display:none; }
+      .hero { padding:40px 0 32px; }
+      .guide-card { display:none; }
+      .section-dark, .section-linen, .section-white { padding:48px 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAVBAR ─────────────────────────────────────────────────────── -->
+<nav>
+  <div class="navbar">
+    <a href="#" class="navbar-brand">
+      <svg viewBox="0 0 56 56" fill="none">
+        <rect width="56" height="56" fill="#1E6B4A" rx="8"/>
+        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+      </svg>
+      TailWag
+      <span class="navbar-tag">Getting Started</span>
+    </a>
+    <div class="navbar-links">
+      <a href="#section1">How It Works</a>
+      <a href="#section2">Before Day 1</a>
+      <a href="#section3">Setup</a>
+      <a href="#section4">Daily Use</a>
+      <a href="#section5">Results</a>
+      <a href="#section6">FAQ</a>
+      <a href="#section7">Help</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── HERO ───────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <span class="guide-eyebrow">TailWag · <span>Client Guide</span></span>
+      <h1>Getting Started Guide</h1>
+      <p class="hero-sub">Setup, implementation, and daily operations — everything you need to get TailWag running for your daycare, start to finish.</p>
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <span class="meta-label">Prepared by</span>
+          <span class="meta-val">Your TailWag Specialist</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="meta-label">Contact</span>
+          <span class="meta-val">summer@usetailwag.co</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="meta-label">Website</span>
+          <span class="meta-val">usetailwag.co</span>
+        </div>
+      </div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-card-header">
+        <svg viewBox="0 0 56 56" fill="none">
+          <rect width="56" height="56" fill="#1E6B4A" rx="8"/>
+          <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+          <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+        </svg>
+        <span>What's in this guide</span>
+      </div>
+      <ul class="toc-list">
+        <li><a href="#section1">Section 1 — How TailWag Works</a><span class="toc-time">5 min</span></li>
+        <li><a href="#section2">Section 2 — Before Your First Day</a><span class="toc-time">30–45 min</span></li>
+        <li><a href="#section3">Section 3 — Day 1 Setup Walkthrough</a><span class="toc-time">with your specialist</span></li>
+        <li><a href="#section4">Section 4 — Daily Staff Operations</a><span class="toc-time">10 min</span></li>
+        <li><a href="#section5">Section 5 — Understanding Your Results</a><span class="toc-time">5 min</span></li>
+        <li><a href="#section6">Section 6 — Frequently Asked Questions</a><span class="toc-time">reference</span></li>
+        <li><a href="#section7">Section 7 — Getting Help</a><span class="toc-time">keep handy</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION 1: HOW IT WORKS ──────────────────────────────────── -->
+<section class="section-dark" id="section1">
+  <div class="container">
+    <span class="section-label">Section 1</span>
+    <h2 class="section-headline-linen">How TailWag Works</h2>
+    <p class="section-sub-sage">A plain-English overview of the three things TailWag does for your business. TailWag runs three automated communication systems in the background of your daycare — each one designed to do something your team simply doesn't have time to do manually at the end of every busy day.</p>
+
+    <div class="module-grid">
+      <div class="module-card">
+        <div class="module-number">1</div>
+        <h3>Report Cards</h3>
+        <p>AI-personalized SMS to every dog's owner after every visit — built from just a few words your staff types at checkout.</p>
+        <span class="module-tag">📱 Sent automatically</span>
+      </div>
+      <div class="module-card">
+        <div class="module-number">2</div>
+        <h3>Appointment Reminders</h3>
+        <p>Evening-before reminders with YES/NO confirmation. Your morning summary shows exactly who's coming — before you open.</p>
+        <span class="module-tag">📅 Fully automated</span>
+      </div>
+      <div class="module-card">
+        <div class="module-number">3</div>
+        <h3>Review Generation</h3>
+        <p>Staff marks a great day — TailWag sends a Google review request. Smart routing, 30-day throttle, no pestering.</p>
+        <span class="module-tag">⭐ Grows your rating</span>
+      </div>
+    </div>
+
+    <!-- Feature: Report Cards -->
+    <div class="feature-row">
+      <div>
+        <div class="feature-num">01</div>
+        <h3 class="feature-title">Report Cards — Personalized SMS After Every Visit</h3>
+        <p class="feature-desc">After each dog's visit, a staff member enters a few short notes — just a few words. TailWag's AI turns those notes into a warm, personal text message sent automatically to the pet owner's phone.</p>
+        <ul class="feature-bullets">
+          <li>Staff types 3–5 words. That's it.</li>
+          <li>Claude AI generates a full, personal message</li>
+          <li>Owner receives the text within minutes</li>
+          <li>Hard 160-character limit — concise and readable</li>
+        </ul>
+      </div>
+      <div class="sms-mock">
+        <div class="sms-mock-header">
+          <div class="sms-avatar">🐶</div>
+          <div>
+            <div class="sms-name">Jennifer</div>
+            <div class="sms-sub">Luna's owner · Paws & Play</div>
+          </div>
+        </div>
+        <div class="sms-bubble">
+          Hi Jennifer! Just wanted you to know that Luna had such a great day with us today. She played beautifully with her friends this morning, finished every bite of her lunch, and spent the afternoon napping in her favorite sunny spot. She was an absolute joy — we'll see her again soon! 🐾
+        </div>
+        <div class="sms-delivered">Delivered</div>
+        <div class="sms-note">★ Generated from three staff words: "played well, ate great, napped."</div>
+      </div>
+    </div>
+
+    <!-- Feature: Reminders -->
+    <div class="feature-row reverse">
+      <div>
+        <div class="feature-num">02</div>
+        <h3 class="feature-title">Appointment Reminders — Confirmed Headcounts Every Morning</h3>
+        <p class="feature-desc">The evening before each appointment, TailWag automatically texts each pet owner. Owners reply YES to confirm or NO to cancel. You get a morning summary showing exactly who's coming.</p>
+        <ul class="feature-bullets">
+          <li>Reminders go out automatically — staff does nothing</li>
+          <li>Owners reply YES or NO by text</li>
+          <li>Morning summary before your doors open</li>
+          <li>Cancellations alert you immediately</li>
+        </ul>
+      </div>
+      <div class="sms-mock">
+        <div class="sms-mock-header">
+          <div class="sms-avatar">🐕</div>
+          <div>
+            <div class="sms-name">Mike</div>
+            <div class="sms-sub">Cooper's owner · Paws & Play</div>
+          </div>
+        </div>
+        <div class="sms-bubble reminder">
+          Hi Mike! Just a friendly reminder that Cooper is scheduled with us tomorrow, Tuesday March 17. Reply YES to confirm or NO if plans have changed. We can't wait to see him! 🐾
+        </div>
+        <div class="sms-delivered">Delivered</div>
+        <div class="sms-note">★ Owner replies YES → confirmed. Replies NO → flagged instantly.</div>
+      </div>
+    </div>
+
+    <!-- Feature: Reviews -->
+    <div class="feature-row">
+      <div>
+        <div class="feature-num">03</div>
+        <h3 class="feature-title">Review Generation — More 5-Star Reviews, Automatically</h3>
+        <p class="feature-desc">When your staff marks a visit as a "great day," TailWag sends the owner a direct Google review link. Once they've reviewed, future requests become social media shoutouts. Smart, spaced, never annoying.</p>
+        <ul class="feature-bullets">
+          <li>Staff marks "great day" in the portal — that's all</li>
+          <li>Google review link sent automatically</li>
+          <li>After they review: switches to Instagram shoutout requests</li>
+          <li>30-day throttle — max one ask per month per client</li>
+        </ul>
+      </div>
+      <div class="sms-mock">
+        <div class="sms-mock-header">
+          <div class="sms-avatar">🌟</div>
+          <div>
+            <div class="sms-name">Sarah</div>
+            <div class="sms-sub">Buddy's owner · Paws & Play</div>
+          </div>
+        </div>
+        <div class="sms-bubble">
+          We loved having Buddy today! 🐾 If you have a moment, a Google review means the world to us: g.page/r/your-daycare/review
+        </div>
+        <div class="sms-delivered">Delivered</div>
+        <div class="sms-note">★ Staff marked "great day" → this sent automatically. No manual action.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION 2: BEFORE YOUR FIRST DAY ────────────────────────── -->
+<section class="section-linen" id="section2">
+  <div class="container">
+    <span class="section-label">Section 2</span>
+    <h2 class="section-headline-black">Before Your First Day</h2>
+    <p class="section-sub-slate">Your TailWag specialist will handle all the technical configuration. Your job is to gather the information below before your Day 1 setup call or visit. The more prepared you are, the faster you'll be live.</p>
+
+    <div class="callout-box" style="margin-bottom:40px;">
+      <h4>⏱ Time to complete</h4>
+      <p>Most business owners finish this checklist in 30–45 minutes. You can do it in stages — you don't need everything at once, but having it all ready makes Day 1 much smoother.</p>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <h3 style="color:var(--black);margin-bottom:24px;">2.1 Information to Gather</h3>
+
+        <div style="margin-bottom:24px;">
+          <h4 style="color:var(--green);font-size:15px;margin-bottom:6px;">Your Google Business Profile</h4>
+          <p style="color:var(--slate);font-size:15px;">You need a verified Google Business Profile for the review feature to work. If you don't have one, see Section 6. Your TailWag specialist will find your Google Place ID.</p>
+        </div>
+        <div style="margin-bottom:24px;">
+          <h4 style="color:var(--green);font-size:15px;margin-bottom:6px;">Your booking software</h4>
+          <p style="color:var(--slate);font-size:15px;">What do you use to manage appointments? Gingr, Time to Pet, Boulevard, Vagaro, Square, or paper — just let your TailWag specialist know.</p>
+        </div>
+        <div style="margin-bottom:24px;">
+          <h4 style="color:var(--green);font-size:15px;margin-bottom:6px;">Your client list</h4>
+          <p style="color:var(--slate);font-size:15px;">Current active clients with: pet name, owner first name, owner cell phone. A spreadsheet, printed list, or reading them aloud all work fine.</p>
+        </div>
+        <div style="margin-bottom:24px;">
+          <h4 style="color:var(--green);font-size:15px;margin-bottom:6px;">Your business phone number</h4>
+          <p style="color:var(--slate);font-size:15px;">The number TailWag messages will appear to come from — your main business line or a dedicated number Your TailWag specialist sets up for you.</p>
+        </div>
+        <div>
+          <h4 style="color:var(--green);font-size:15px;margin-bottom:6px;">Staff who will use TailWag</h4>
+          <p style="color:var(--slate);font-size:15px;">First name and role of each staff member who will input daily notes. Have them available for a brief 10-minute orientation on Day 1.</p>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="color:var(--black);margin-bottom:24px;">2.2 Pre-Setup Checklist</h3>
+        <p style="color:var(--slate);font-size:15px;margin-bottom:16px;">Check off each item before your Day 1 session:</p>
+        <ul class="checklist">
+          <li><span class="check-open"></span>I have a Google Business Profile set up for my daycare. (If not — business.google.com, free, ~15 min)</li>
+          <li><span class="check-open"></span>I know what booking software I use (or that I use a paper system)</li>
+          <li><span class="check-open"></span>I have a client list with pet name, owner name, and cell phone</li>
+          <li><span class="check-open"></span>I have confirmed clients have agreed to receive texts — see 2.3 below</li>
+          <li><span class="check-open"></span>I know which staff members will enter daily notes</li>
+          <li><span class="check-open"></span>I have a device (phone, tablet, or computer) for staff to access the portal</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:48px;">
+      <h3 style="color:var(--black);margin-bottom:20px;">2.3 SMS Consent — What You Need to Know</h3>
+      <div class="warning-box">
+        <h4>⚠ This step is required</h4>
+        <p>Before TailWag sends any text message to a pet owner, that owner must have agreed to receive text messages from your business. This is a legal requirement under federal law (TCPA). Do not skip this step. Most daycares already have this covered through their enrollment process.</p>
+      </div>
+      <table class="consent-table">
+        <thead>
+          <tr><th>Your Situation</th><th>What to Do</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>My enrollment form already asks clients to agree to texts</td>
+            <td>Great — you're covered. Bring your enrollment form to Day 1 for your TailWag specialist to confirm the language is sufficient.</td>
+          </tr>
+          <tr>
+            <td>My enrollment form doesn't mention texts</td>
+            <td>Add a simple opt-in checkbox before going live. Your TailWag specialist will provide suggested language to add to your form.</td>
+          </tr>
+          <tr>
+            <td>I'm not sure if I have consent for existing clients</td>
+            <td>Your TailWag specialist will help you send a one-time re-consent message to your existing client list before going live. Takes about 10 minutes.</td>
+          </tr>
+          <tr>
+            <td>I'm enrolling new clients after TailWag is live</td>
+            <td>Add the opt-in language to your enrollment form before their first visit. Every new consenting client is automatically eligible.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout-box" style="margin-top:24px;">
+        <h4>Suggested opt-in language for your enrollment form</h4>
+        <p style="font-style:italic;">"By providing your mobile phone number, you agree to receive automated text messages from [Your Business Name] regarding your pet's visits, appointment reminders, and follow-up communications. Message and data rates may apply. You may opt out at any time by replying STOP."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION 3: DAY 1 SETUP ──────────────────────────────────── -->
+<section class="section-dark" id="section3">
+  <div class="container">
+    <span class="section-label">Section 3</span>
+    <h2 class="section-headline-linen">Day 1 Setup Walkthrough</h2>
+    <p class="section-sub-sage">What happens on Day 1 and how to get your team live within hours. Your TailWag specialist handles all technical setup — your role is to be present, provide the information from Section 2, and make sure your relevant staff are available.</p>
+
+    <div style="background:rgba(30,107,74,0.08);border:1px solid rgba(30,107,74,0.25);border-radius:12px;padding:20px 24px;margin-bottom:48px;display:flex;gap:12px;align-items:center;">
+      <span style="color:var(--green);font-size:20px;">✓</span>
+      <p style="color:var(--sage);font-size:15px;margin:0;"><strong style="color:var(--linen);">You do not need any technical knowledge.</strong> Your TailWag specialist handles everything. Your job is to provide information and feedback — not to configure anything yourself. By the end of Day 1, TailWag will be live.</p>
+    </div>
+
+    <div class="two-col" style="gap:80px;">
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot">1</div>
+          <span class="time-badge">15–20 min</span>
+          <h3>Welcome & Information Gathering</h3>
+          <p>Your TailWag specialist reviews your client list, booking software setup, staff roster, and confirms your Google Business Profile is accessible. They'll ask any remaining questions and confirm SMS consent status.</p>
+          <ul class="timeline-arrows">
+            <li>Have your client list ready (pet name, owner name, cell number)</li>
+            <li>Know which staff will be using TailWag daily</li>
+            <li>Have your enrollment form handy if you have one</li>
+          </ul>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">2</div>
+          <span class="time-badge">20–30 min</span>
+          <h3>Platform Configuration</h3>
+          <p>Your TailWag specialist configures your TailWag account — loading your client roster, setting up message templates to match your voice and tone, and connecting your Google Business Profile. You don't touch anything during this step.</p>
+          <ul class="timeline-arrows">
+            <li>Your TailWag specialist may ask: "How do you typically talk to your clients?"</li>
+            <li>You'll review message tone before anything goes live</li>
+            <li>Sample messages will be generated for your approval</li>
+          </ul>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">3</div>
+          <span class="time-badge">10 min</span>
+          <h3>Message Style Approval</h3>
+          <p>Your TailWag specialist generates sample report cards using demo dogs. You read them and give feedback — too formal, too casual, too long, just right. The AI adjusts until messages feel like they came from you.</p>
+          <ul class="timeline-arrows">
+            <li>This is the most important step for authenticity</li>
+            <li>Be honest — if it doesn't sound like your business, say so</li>
+            <li>You can request adjustments anytime after launch</li>
+          </ul>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">4</div>
+          <span class="time-badge">10 min</span>
+          <h3>Staff Orientation</h3>
+          <p>Your TailWag specialist walks your staff through the daily input process — how to open the portal, enter notes, and mark a great day. Most staff are comfortable within 5 minutes.</p>
+          <ul class="timeline-arrows">
+            <li>Any device with a browser — phone, tablet, or computer</li>
+            <li>No app to download — entirely browser-based</li>
+            <li>Your TailWag specialist sets up login credentials before orientation</li>
+          </ul>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">5</div>
+          <span class="time-badge">5 min</span>
+          <h3>First Live Messages (Test)</h3>
+          <p>Your TailWag specialist sends a test message to your phone so you experience exactly what your clients will receive. You approve it, adjust if needed, and confirm everything looks right.</p>
+          <ul class="timeline-arrows">
+            <li>You'll receive the message on your own phone</li>
+            <li>Read it as your client would — does it feel warm and personal?</li>
+            <li>Once approved, the system is live</li>
+          </ul>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">6</div>
+          <span class="time-badge">You're live</span>
+          <h3>Go Live</h3>
+          <p>TailWag is live. Staff enters daily notes, reminders go out automatically, and your first review requests will begin flowing to happy clients within 24–48 hours.</p>
+          <ul class="timeline-arrows">
+            <li>Your TailWag specialist checks in personally on Day 3 and Day 7</li>
+            <li>On Day 14 they'll bring a full results summary</li>
+            <li>You can reach them anytime — see Section 7</li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="color:var(--linen);margin-bottom:20px;font-size:20px;">3.2 What Gets Set Up on Day 1</h3>
+        <table class="setup-table">
+          <tr><td>Client roster</td><td>All active clients loaded with pet name, owner name, and phone number</td></tr>
+          <tr><td>Message templates</td><td>Report card, reminder, and review messages configured to your brand voice</td></tr>
+          <tr><td>Google connection</td><td>Your Google Business Profile connected for review link generation</td></tr>
+          <tr><td>Staff portal access</td><td>Login credentials and portal URL provided to all relevant staff</td></tr>
+          <tr><td>Morning summary</td><td>Your phone number confirmed for daily headcount summary delivery</td></tr>
+          <tr><td>Opt-out handling</td><td>STOP opt-out functionality configured on all outgoing messages</td></tr>
+        </table>
+
+        <h3 style="color:var(--linen);margin-top:40px;margin-bottom:16px;font-size:20px;">3.3 Adding New Clients After Day 1</h3>
+        <p style="color:var(--sage);font-size:15px;margin-bottom:20px;">Adding a new client to TailWag takes about 60 seconds.</p>
+        <div class="inbox-steps">
+          <div class="inbox-step">
+            <div class="inbox-step-num">1</div>
+            <div><div class="inbox-step-title">Log into the TailWag staff portal</div><div class="inbox-step-desc" style="color:var(--sage);">Navigate to your portal URL (provided on Day 1) on any device.</div></div>
+          </div>
+          <div class="inbox-step">
+            <div class="inbox-step-num">2</div>
+            <div><div class="inbox-step-title">Go to Add Dog</div><div class="inbox-step-desc" style="color:var(--sage);">Fill in the pet's name, owner's first name, and owner's cell phone number.</div></div>
+          </div>
+          <div class="inbox-step">
+            <div class="inbox-step-num">3</div>
+            <div><div class="inbox-step-title">Confirm SMS consent</div><div class="inbox-step-desc" style="color:var(--sage);">Confirm this client has agreed to receive text messages. Do not add a client without consent.</div></div>
+          </div>
+          <div class="inbox-step">
+            <div class="inbox-step-num">4</div>
+            <div><div class="inbox-step-title">Save</div><div class="inbox-step-desc" style="color:var(--sage);">The client is now live and will receive their first report card after their next visit.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION 4: DAILY OPERATIONS ─────────────────────────────── -->
+<section class="section-linen" id="section4">
+  <div class="container">
+    <span class="section-label">Section 4</span>
+    <h2 class="section-headline-black">Daily Staff Operations</h2>
+    <p class="section-sub-slate">What your team does every day — and what TailWag handles automatically. This section is written for your staff. Feel free to print it and post it near your computer or tablet. The entire daily process takes about 30 seconds per dog.</p>
+
+    <div style="text-align:center;margin-bottom:48px;">
+      <div style="display:inline-block;background:#fff;border:2px solid var(--green);border-radius:12px;padding:16px 28px;">
+        <p style="color:var(--black);font-size:16px;"><strong>The core principle:</strong> Your staff provides the detail. TailWag provides the words.</p>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="staff-checklist-card">
+          <h3>TailWag Daily Staff Checklist</h3>
+          <div class="staff-group">
+            <h4>During or after each dog's visit</h4>
+            <div class="staff-item">Open the TailWag portal on your device.</div>
+            <div class="staff-item">Find the dog's name in today's check-in list.</div>
+            <div class="staff-item">Type 3–5 words describing their day in the Notes field.</div>
+            <div class="staff-item">If it was a great day, check the 'Great Day' box.</div>
+            <div class="staff-item">Click Save. That's it.</div>
+          </div>
+          <div class="staff-group">
+            <h4>By end of business each day</h4>
+            <div class="staff-item">Make sure every dog checked in today has a note entered.</div>
+            <div class="staff-item">Any dog marked "Great Day" will automatically receive a review follow-up.</div>
+          </div>
+          <div class="staff-group">
+            <h4>For no-shows</h4>
+            <div class="staff-item">Mark any dog that was expected but didn't appear as a no-show so it's captured in the morning summary.</div>
+          </div>
+          <div class="staff-group" style="margin-bottom:0;">
+            <h4>If a client asks to stop receiving texts</h4>
+            <div class="staff-item">Find them in the portal and mark them as opted out — or they can reply STOP to any message and TailWag handles it automatically.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="color:var(--black);margin-bottom:16px;font-size:20px;">4.2 Writing Good Notes</h3>
+        <p style="color:var(--slate);font-size:15px;margin-bottom:20px;">The better the notes, the more personal the message feels. Notes don't need to be sentences — just a few specific words are enough.</p>
+        <table class="notes-table">
+          <thead>
+            <tr><th>❌ Notes to Avoid</th><th>✓ Notes That Work Great</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>"Good day"</td><td>"played fetch, tired out, ate well"</td></tr>
+            <tr><td>"Normal"</td><td>"made a new friend, very social today"</td></tr>
+            <tr><td>"Fine"</td><td>"shy at first, warmed up fast, napped after lunch"</td></tr>
+            <tr><td>"OK"</td><td>"high energy, ran laps, couldn't stop zooming"</td></tr>
+            <tr><td>"Same as usual"</td><td>"gentle as always, cuddled with staff, great listener"</td></tr>
+          </tbody>
+        </table>
+        <div class="callout-box" style="margin-top:20px;">
+          <h4>Tip for staff</h4>
+          <p>Think of the notes as what you'd tell the owner if you had 10 seconds at pickup. Even one specific detail — "finally played with the big dogs" or "discovered she loves the sprinklers" — makes the message feel completely personal.</p>
+        </div>
+
+        <h3 style="color:var(--black);margin-top:36px;margin-bottom:16px;font-size:20px;">4.3 The Morning Summary</h3>
+        <p style="color:var(--slate);font-size:15px;margin-bottom:16px;">Every morning before your doors open, you'll receive a summary text showing the status of the day's expected appointments.</p>
+        <div class="morning-summary">
+          <div class="ms-header">Sample Morning Summary</div>
+          <div class="ms-from">From: TailWag Daily Summary</div>
+          <div class="ms-body">Good morning! Here's today's headcount for Tuesday, March 17:
+
+<span class="ms-confirmed">✅ CONFIRMED (8): Buddy, Luna, Cooper, Bella, Max, Daisy, Rocky, Lola</span>
+<span class="ms-pending">⚠️ NO RESPONSE (2): Zeus, Penny</span>
+<span class="ms-cancelled">❌ CANCELLED (1): Charlie (owner replied NO)</span>
+
+Total expected: 8 confirmed + 2 unconfirmed
+Have a great day! 🐾</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION 5: RESULTS ────────────────────────────────────────── -->
+<section class="section-dark" id="section5">
+  <div class="container">
+    <span class="section-label">Section 5</span>
+    <h2 class="section-headline-linen">Understanding Your Results</h2>
+    <p class="section-sub-sage">How to read your Day 14 report and track TailWag's impact over time. On Day 14 of your pilot, Your TailWag specialist will deliver a written results summary showing what TailWag accomplished during your first two weeks.</p>
+
+    <h3 style="color:var(--linen);margin-bottom:24px;font-size:22px;">5.1 Your Day 14 Report — What's Measured</h3>
+    <div class="metrics-grid" style="margin-bottom:56px;">
+      <div class="metric-card"><div class="metric-icon">📱</div><div><div class="metric-label">Messages Sent</div><div class="metric-desc">Total report card messages delivered to pet owners during the pilot.</div></div></div>
+      <div class="metric-card"><div class="metric-icon">💬</div><div><div class="metric-label">Owner Response Rate</div><div class="metric-desc">How many pet owners replied to or engaged with their messages. High engagement = owners love them.</div></div></div>
+      <div class="metric-card"><div class="metric-icon">📅</div><div><div class="metric-label">Appointments Confirmed</div><div class="metric-desc">Appointments confirmed via YES reply — and how many no-shows were prevented vs. your baseline.</div></div></div>
+      <div class="metric-card"><div class="metric-icon">💰</div><div><div class="metric-label">No-Shows Prevented</div><div class="metric-desc">Estimated revenue recovered based on appointments that would have been missed without reminders.</div></div></div>
+      <div class="metric-card"><div class="metric-icon">⭐</div><div><div class="metric-label">New Google Reviews</div><div class="metric-desc">New reviews directly attributable to TailWag's review requests during the pilot period.</div></div></div>
+      <div class="metric-card"><div class="metric-icon">📥</div><div><div class="metric-label">Direct Client Replies (Inbox)</div><div class="metric-desc">Inbound client messages flagged in your Inbox — questions or concerns caught early.</div></div></div>
+    </div>
+
+    <h3 style="color:var(--linen);margin-bottom:20px;font-size:22px;">5.2 What Good Results Look Like</h3>
+    <p style="color:var(--sage);font-size:15px;margin-bottom:24px;">Every daycare is different, but here are healthy benchmarks to measure your results against:</p>
+    <table class="benchmarks-table" style="margin-bottom:56px;">
+      <thead><tr><th>Metric</th><th>Healthy Range</th><th>What It Means</th></tr></thead>
+      <tbody>
+        <tr><td>Owner response / reply rate</td><td>15%–35%</td><td>Pet owners are engaging with their messages — replying, thanking, reacting.</td></tr>
+        <tr><td>Appointment confirmation rate</td><td>70%–90%</td><td>Most clients are actively confirming — strong headcount predictability.</td></tr>
+        <tr><td>Review conversion rate</td><td>15%–25%</td><td>1 in 5 happy clients who receive a review request actually leave a review.</td></tr>
+        <tr><td>New Google reviews (14 days)</td><td>4–12 reviews</td><td>Depends on your volume. Even 4 new reviews in two weeks is strong momentum.</td></tr>
+        <tr><td>Direct client replies (Inbox)</td><td>1–5% of visits</td><td>A few direct replies per month is normal — conversations caught before they go anywhere else.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="color:var(--linen);margin-bottom:20px;font-size:22px;">5.3 Handling Client Feedback</h3>
+    <p style="color:var(--sage);font-size:15px;margin-bottom:24px;">If a client replies to a TailWag message with a concern or question, their message lands in your Inbox tab in the portal — flagged for your attention. You're seeing it before it can become a public review.</p>
+    <div class="inbox-steps">
+      <div class="inbox-step"><div class="inbox-step-num">1</div><div><div class="inbox-step-title" style="color:var(--linen);">Read the feedback without reacting immediately</div><div class="inbox-step-desc" style="color:var(--sage);">Take a breath before responding. Sometimes negative feedback is a misunderstanding. Read it once to understand what happened.</div></div></div>
+      <div class="inbox-step"><div class="inbox-step-num">2</div><div><div class="inbox-step-title" style="color:var(--linen);">Respond within 24 hours</div><div class="inbox-step-desc" style="color:var(--sage);">Reach out to the owner directly by phone or text. A simple "Thank you for letting me know — can we talk about what happened?" goes a long way.</div></div></div>
+      <div class="inbox-step"><div class="inbox-step-num">3</div><div><div class="inbox-step-title" style="color:var(--linen);">Resolve the issue</div><div class="inbox-step-desc" style="color:var(--sage);">Offer whatever is appropriate — a conversation, a discount on the next visit, or an explanation. Most clients who feel heard do not escalate.</div></div></div>
+      <div class="inbox-step"><div class="inbox-step-num">4</div><div><div class="inbox-step-title" style="color:var(--linen);">Note it internally</div><div class="inbox-step-desc" style="color:var(--sage);">If a pattern emerges — same dog, same staff member, same time of day — that's valuable operational feedback. TailWag is giving you data you wouldn't have had otherwise.</div></div></div>
+    </div>
+    <div style="background:rgba(30,107,74,0.1);border:1px solid rgba(30,107,74,0.3);border-radius:12px;padding:24px;margin-top:28px;">
+      <p style="color:var(--sage);font-size:15px;"><strong style="color:var(--linen);">Why the Inbox matters:</strong> Every client message that comes to your Inbox is a chance to respond before anything escalates. Most businesses only find out something went wrong when they see the one-star review. TailWag surfaces these moments while you can still do something about them.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION 6: FAQ ────────────────────────────────────────────── -->
+<section class="section-linen" id="section6">
+  <div class="container">
+    <span class="section-label">Section 6</span>
+    <h2 class="section-headline-black">Frequently Asked Questions</h2>
+    <p class="section-sub-slate">Answers to the questions owners and staff ask most often.</p>
+
+    <div style="max-width:780px;margin:0 auto;">
+      <div class="faq-group">
+        <div class="faq-group-label">Setup & Technical</div>
+        <div class="faq-item"><input type="checkbox" id="f1"><label class="faq-question" for="f1">Do I need to install any software or apps?<span class="faq-toggle">+</span></label><div class="faq-answer">No. TailWag is entirely browser-based. Your staff accesses the portal through any web browser on any device — phone, tablet, or computer. Nothing to download, nothing to install.</div></div>
+        <div class="faq-item"><input type="checkbox" id="f2"><label class="faq-question" for="f2">What if I don't have a Google Business Profile?<span class="faq-toggle">+</span></label><div class="faq-answer">You'll need one for the review generation feature to work. Setting one up is free and takes about 15–20 minutes at business.google.com. Your TailWag specialist can walk you through it during your Day 1 session if needed. The report card and reminder features work without it.</div></div>
+        <div class="faq-item"><input type="checkbox" id="f3"><label class="faq-question" for="f3">What booking software does TailWag work with?<span class="faq-toggle">+</span></label><div class="faq-answer">TailWag works alongside any booking system — Gingr, Time to Pet, Boulevard, Vagaro, Square, or a paper system. Your staff simply opens both the booking software and TailWag. Advanced integrations that pull data automatically are available at higher service tiers — contact your TailWag specialist.</div></div>
+        <div class="faq-item"><input type="checkbox" id="f4"><label class="faq-question" for="f4">Can TailWag send messages through my existing business number?<span class="faq-toggle">+</span></label><div class="faq-answer">In most cases, yes. Your TailWag specialist will work with you during setup to configure the sending number. Depending on your situation, this may be your existing business number or a dedicated TailWag number with your area code.</div></div>
+        <div class="faq-item"><input type="checkbox" id="f5"><label class="faq-question" for="f5">What happens if the internet goes down at my facility?<span class="faq-toggle">+</span></label><div class="faq-answer">Staff can enter that day's notes later — even the following morning if needed. Report cards go out as notes are submitted, so a brief delay is acceptable. Appointment reminders go out automatically regardless of whether staff logs in that day.</div></div>
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-label">Messages & Client Communication</div>
+        <div class="faq-item"><input type="checkbox" id="f6"><label class="faq-question" for="f6">Will clients know the messages are automated?<span class="faq-toggle">+</span></label><div class="faq-answer">Messages are designed to feel personal and natural — not automated. Because each message is built from specific notes about that specific dog's specific day, they read as though a staff member wrote them personally. Most pet owners never realize the messages are AI-generated. The goal is not to deceive — it's to deliver consistently high-quality, personalized communication your team simply doesn't have time to write manually for every dog, every day.</div></div>
+        <div class="faq-item"><input type="checkbox" id="f7"><label class="faq-question" for="f7">Can I customize or approve messages before they go out?<span class="faq-toggle">+</span></label><div class="faq-answer">During your first week, Your TailWag specialist can configure the system to hold messages for your review before they're sent. Once you're comfortable with the quality and tone, the system switches to automatic delivery. You can request manual approval mode at any time.</div></div>
+        <div class="faq-item"><input type="checkbox" id="f8"><label class="faq-question" for="f8">What if a client doesn't want to receive text messages?<span class="faq-toggle">+</span></label><div class="faq-answer">Clients can opt out at any time by replying STOP to any message. TailWag handles this automatically and removes them from all future messaging. You can also manually opt out any client by finding their name in the portal and unchecking the SMS consent box.</div></div>
+        <div class="faq-item"><input type="checkbox" id="f9"><label class="faq-question" for="f9">Can I control how often clients receive review requests?<span class="faq-toggle">+</span></label><div class="faq-answer">Yes. By default, review requests are sent no more than once every 30 days per client, regardless of how many visits they have. This prevents clients from feeling over-messaged. Your TailWag specialist can adjust this threshold during setup.</div></div>
+        <div class="faq-item"><input type="checkbox" id="f10"><label class="faq-question" for="f10">What if a client changes their phone number?<span class="faq-toggle">+</span></label><div class="faq-answer">Update their number in the TailWag portal as soon as you're aware of the change. Sending messages to a number that's been reassigned can cause compliance issues, so prompt updates are important.</div></div>
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-label">Business & Billing</div>
+        <div class="faq-item"><input type="checkbox" id="f11"><label class="faq-question" for="f11">When does billing start?<span class="faq-toggle">+</span></label><div class="faq-answer">Billing begins on Day 15 — the first day after your 14-day trial period ends. Your subscription is billed quarterly, in advance. No credit card is required during the trial, and there is no long-term contract.</div></div>
+        <div class="faq-item"><input type="checkbox" id="f12"><label class="faq-question" for="f12">How does quarterly billing work?<span class="faq-toggle">+</span></label><div class="faq-answer">You are billed once every three months, in advance, for the upcoming quarter of service. For example, if your subscription starts March 31, your first invoice covers April, May, and June and is due on March 31. Your second invoice covers July, August, and September and is due July 1.</div></div>
+        <div class="faq-item"><input type="checkbox" id="f13"><label class="faq-question" for="f13">What if I want to cancel?<span class="faq-toggle">+</span></label><div class="faq-answer">Written cancellation notice (by email to summer@usetailwag.co) must be provided at least 30 days before the end of your current subscription quarter. Cancellations received with fewer than 30 days left in the quarter take effect at the end of the following quarter. No mid-quarter refunds are issued. See your Service Agreement for full details.</div></div>
+        <div class="faq-item"><input type="checkbox" id="f14"><label class="faq-question" for="f14">Can I add more features later?<span class="faq-toggle">+</span></label><div class="faq-answer">Yes. TailWag offers multiple service tiers. If you want to add capabilities — such as booking software integration, additional message types, or win-back campaigns for lapsed clients — contact your TailWag specialist to discuss an upgrade. Upgrades take effect at the start of the next billing quarter.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION 7: GETTING HELP ──────────────────────────────────── -->
+<section class="section-dark" id="section7">
+  <div class="container">
+    <span class="section-label">Section 7</span>
+    <h2 class="section-headline-linen">Getting Help</h2>
+    <p class="section-sub-sage">How to reach your TailWag specialist and what to expect from ongoing support. TailWag is designed to run quietly in the background without requiring your daily attention — but questions come up, and your TailWag specialist is here when they do.</p>
+
+    <div class="two-col">
+      <div>
+        <h3 style="color:var(--linen);margin-bottom:20px;font-size:20px;">7.1 Contact Information</h3>
+        <div class="contact-card">
+          <h3>Your TailWag Specialist</h3>
+          <div class="contact-row"><span class="label">Email</span><a href="mailto:summer@usetailwag.co">summer@usetailwag.co</a></div>
+          <div class="contact-row"><span class="label">Website</span><a href="https://usetailwag.co">usetailwag.co</a></div>
+          <p class="contact-note">Best way to reach your TailWag specialist: text or email — responses within a few hours during business days.</p>
+        </div>
+
+        <h3 style="color:var(--linen);margin-bottom:16px;font-size:20px;">7.2 Pilot Period Support</h3>
+        <p style="color:var(--sage);font-size:15px;margin-bottom:20px;">During your 14-day pilot, Your TailWag specialist is actively monitoring your account:</p>
+        <ul class="pilot-timeline">
+          <li class="pilot-day"><span class="pilot-badge">Day 1</span><span class="pilot-day-desc">Full setup and onboarding — Your TailWag specialist is on-site or available by phone/video for the full session.</span></li>
+          <li class="pilot-day"><span class="pilot-badge">Day 3</span><span class="pilot-day-desc">Your TailWag specialist checks in to make sure messages are going out correctly and staff is comfortable with the portal.</span></li>
+          <li class="pilot-day"><span class="pilot-badge">Day 7</span><span class="pilot-day-desc">Mid-pilot check-in. Your TailWag specialist shares early results and answers questions. A good time to request tone adjustments.</span></li>
+          <li class="pilot-day"><span class="pilot-badge">Day 14</span><span class="pilot-day-desc">Full results presentation. Your TailWag specialist delivers your pilot summary report and discusses next steps for the subscription period.</span></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 style="color:var(--linen);margin-bottom:16px;font-size:20px;">7.3 Ongoing Support</h3>
+        <p style="color:var(--sage);font-size:15px;margin-bottom:16px;">Once you're a paying subscriber, ongoing support includes:</p>
+        <ul class="support-checks" style="margin-bottom:40px;">
+          <li>Monthly results summary delivered to your phone or email</li>
+          <li>Client roster updates as your business changes</li>
+          <li>Message tone adjustments — refresh the AI templates anytime</li>
+          <li>Staff re-orientation for new hires who need to learn the portal</li>
+          <li>Technical issues resolved within a few hours of contact</li>
+        </ul>
+
+        <h3 style="color:var(--linen);margin-bottom:16px;font-size:20px;">7.4 What to Do If Something Goes Wrong</h3>
+        <table class="troubleshoot-table">
+          <thead><tr><th>Situation</th><th>What to Do</th></tr></thead>
+          <tbody>
+            <tr><td>A client didn't receive their message</td><td>Ask them to check SMS inbox and spam. Verify their phone number in the portal. Contact your TailWag specialist if still not arriving.</td></tr>
+            <tr><td>A client asks to stop receiving messages</td><td>Find them in the portal and uncheck SMS consent, or they can reply STOP — TailWag handles it automatically.</td></tr>
+            <tr><td>A message went out with an error</td><td>Contact your TailWag specialist immediately by text. They can follow up with the affected client if needed.</td></tr>
+            <tr><td>Staff can't log into the portal</td><td>Contact your TailWag specialist for a password reset or access issue. Response within a few hours.</td></tr>
+            <tr><td>A client left a negative Google review</td><td>Contact your TailWag specialist — they can review the messaging history and help you decide how to respond.</td></tr>
+            <tr><td>You received a message in the Inbox</td><td>See Section 5.3 for the recommended response process. Reach out to your TailWag specialist if you need help navigating it.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CLOSING ───────────────────────────────────────────────────── -->
+<section class="closing">
+  <div class="container">
+    <h2>Thank you for choosing TailWag.</h2>
+    <p>Your dogs deserve the best care. Their owners deserve to know about it.</p>
+    <a class="email" href="mailto:summer@usetailwag.co">summer@usetailwag.co  ·  usetailwag.co</a>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-content">
+    <div class="footer-brand">
+      <svg viewBox="0 0 56 56" fill="none">
+        <rect width="56" height="56" fill="#1E6B4A" rx="8"/>
+        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+      </svg>
+      <a href="https://usetailwag.co">TailWag</a>
+    </div>
+    <div class="footer-bottom">TailWag LLC · summer@usetailwag.co · usetailwag.co</div>
+  </div>
+</footer>
+
+</body>
+</html>

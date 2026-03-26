@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TailWag — One-Page Leave-Behind</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black:  #0F1410;
+  --green:  #1E6B4A;
+  --linen:  #F5F0E8;
+  --gold:   #C4933F;
+  --sage:   #A8C5B0;
+  --slate:  #2D3748;
+  --lt:     #EAF4EE;
+  --fn-d:   'Plus Jakarta Sans', sans-serif;
+  --fn-b:   'Inter', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── SCREEN VIEW ── */
+body {
+  font-family: var(--fn-b);
+  background: #E8E4DC;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.page {
+  width: 816px;   /* ~8.5" at 96dpi */
+  min-height: 1056px; /* ~11" at 96dpi */
+  background: var(--linen);
+  box-shadow: 0 20px 80px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--black);
+  padding: 28px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-logo-word {
+  font-family: var(--fn-d);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--linen);
+  letter-spacing: -0.3px;
+}
+.header-tagline {
+  font-family: var(--fn-d);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+  font-style: italic;
+}
+
+/* ── HERO BAND ── */
+.hero-band {
+  background: var(--black);
+  padding: 0 48px 36px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-band::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(30,107,74,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.hero-headline {
+  font-family: var(--fn-d);
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--linen);
+  line-height: 1.1;
+  max-width: 540px;
+  position: relative;
+}
+.hero-headline span { color: var(--gold); }
+
+/* ── ROI STRIPE ── */
+.roi-stripe {
+  background: var(--green);
+  padding: 20px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.roi-main {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.roi-num {
+  font-family: var(--fn-d);
+  font-size: 52px;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+}
+.roi-text {
+  font-family: var(--fn-d);
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(245,240,232,0.8);
+  line-height: 1.3;
+  max-width: 200px;
+}
+.roi-divider {
+  width: 1px;
+  height: 48px;
+  background: rgba(255,255,255,0.2);
+}
+.roi-stat {
+  text-align: center;
+}
+.roi-stat-n {
+  font-family: var(--fn-d);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--linen);
+  display: block;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.roi-stat-l {
+  font-size: 12px;
+  color: rgba(245,240,232,0.7);
+  font-weight: 500;
+}
+
+/* ── BODY ── */
+.body-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  flex: 1;
+  border-top: 3px solid var(--green);
+}
+.body-col {
+  padding: 28px 28px;
+  border-right: 1px solid rgba(0,0,0,0.08);
+}
+.body-col:last-child { border-right: none; }
+
+.col-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--green);
+}
+.col-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--lt);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.col-title {
+  font-family: var(--fn-d);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--black);
+  line-height: 1.2;
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.item-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+.item-text {
+  font-size: 13px;
+  color: var(--slate);
+  line-height: 1.5;
+}
+.item-text strong {
+  color: var(--black);
+  font-weight: 600;
+}
+
+/* Stat callout */
+.stat-callout {
+  background: var(--lt);
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 16px;
+  border-left: 3px solid var(--green);
+}
+.stat-callout-n {
+  font-family: var(--fn-d);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--green);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-callout-l {
+  font-size: 12px;
+  color: var(--slate);
+  line-height: 1.4;
+}
+
+/* ── FOOTER ── */
+.footer {
+  background: var(--black);
+  padding: 20px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.footer-name {
+  font-family: var(--fn-d);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--linen);
+}
+.footer-info {
+  font-size: 12px;
+  color: var(--sage);
+}
+.footer-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.footer-url {
+  font-family: var(--fn-d);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: -0.3px;
+}
+.footer-trial {
+  font-size: 12px;
+  color: var(--sage);
+}
+.footer-pricing {
+  text-align: center;
+  padding: 0 24px;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+.fp-from {
+  font-size: 11px;
+  color: var(--sage);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.fp-price {
+  font-family: var(--fn-d);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--linen);
+  line-height: 1;
+}
+.fp-mo {
+  font-size: 11px;
+  color: var(--sage);
+}
+
+/* Print QR placeholder */
+.qr-box {
+  width: 64px;
+  height: 64px;
+  background: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.qr-inner {
+  width: 52px;
+  height: 52px;
+  background: var(--black);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: #fff;
+  text-align: center;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+
+/* ── PRINT STYLES ── */
+@media print {
+  body {
+    background: white;
+    padding: 0;
+    display: block;
+  }
+  .page {
+    width: 100%;
+    min-height: 100vh;
+    box-shadow: none;
+    page-break-inside: avoid;
+  }
+  .print-btn { display: none !important; }
+}
+
+/* Print button (screen only) */
+.print-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-family: var(--fn-d);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(30,107,74,0.4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all .2s;
+}
+.print-btn:hover { background: #164D35; transform: translateY(-2px); }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-logo">
+      <svg width="36" height="36" viewBox="0 0 56 56" fill="none">
+        <rect width="56" height="56" fill="#1E6B4A" rx="9"/>
+        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+      </svg>
+      <span class="header-logo-word">TailWag</span>
+    </div>
+    <div class="header-tagline">"Every visit, a story."</div>
+  </div>
+
+  <!-- HERO BAND -->
+  <div class="hero-band">
+    <div class="hero-headline">
+      Your daycare works hard.<br>
+      Your clients should <span>hear about it.</span>
+    </div>
+  </div>
+
+  <!-- ROI STRIPE -->
+  <div class="roi-stripe">
+    <div class="roi-main">
+      <div class="roi-num">$6,800</div>
+      <div class="roi-text">average annual value recovered per daycare with TailWag</div>
+    </div>
+    <div class="roi-divider"></div>
+    <div class="roi-stat">
+      <span class="roi-stat-n">2–4×</span>
+      <div class="roi-stat-l">More Google Reviews</div>
+    </div>
+    <div class="roi-divider"></div>
+    <div class="roi-stat">
+      <span class="roi-stat-n">87%</span>
+      <div class="roi-stat-l">Client Retention Rate</div>
+    </div>
+    <div class="roi-divider"></div>
+    <div class="roi-stat">
+      <span class="roi-stat-n">5–8</span>
+      <div class="roi-stat-l">Fewer No-Shows/Month</div>
+    </div>
+    <div class="roi-divider"></div>
+    <div class="roi-stat">
+      <span class="roi-stat-n">14</span>
+      <div class="roi-stat-l">Day Free Trial</div>
+    </div>
+  </div>
+
+  <!-- BODY GRID -->
+  <div class="body-grid">
+
+    <!-- COL 1: THE PROBLEM -->
+    <div class="body-col">
+      <div class="col-header">
+        <div class="col-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E6B4A" stroke-width="2.5" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+          </svg>
+        </div>
+        <div class="col-title">The Problem</div>
+      </div>
+
+      <div class="item">
+        <div class="item-dot"></div>
+        <div class="item-text"><strong>No-shows cost $35–50 per missed booking.</strong> Most daycares have no automated way to confirm appointments before the slot is gone.</div>
+      </div>
+      <div class="item">
+        <div class="item-dot"></div>
+        <div class="item-text"><strong>Good clients leave quietly.</strong> They had a great experience — they just never heard from you again. A little communication goes a long way.</div>
+      </div>
+      <div class="item">
+        <div class="item-dot"></div>
+        <div class="item-text"><strong>Your Google rating is stuck.</strong> Unhappy clients always leave reviews. Happy ones rarely do — unless you make it effortless for them.</div>
+      </div>
+
+      <div class="stat-callout">
+        <div class="stat-callout-n">68%</div>
+        <div class="stat-callout-l">of clients who stop visiting a business never complained — they just stopped coming.</div>
+      </div>
+    </div>
+
+    <!-- COL 2: WHAT TAILWAG DOES -->
+    <div class="body-col">
+      <div class="col-header">
+        <div class="col-icon">
+          <svg width="18" height="18" viewBox="0 0 56 56" fill="none">
+            <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#1E6B4A" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="45" cy="26" r="3" fill="#1E6B4A"/>
+          </svg>
+        </div>
+        <div class="col-title">What TailWag Does</div>
+      </div>
+
+      <div class="item">
+        <div class="item-dot"></div>
+        <div class="item-text"><strong>Personalized report cards</strong> sent to pet parents after every visit — written from staff notes by AI. Appears to come from your number.</div>
+      </div>
+      <div class="item">
+        <div class="item-dot"></div>
+        <div class="item-text"><strong>Appointment reminders</strong> with YES/NO confirmation sent 24 hours before. No-shows flagged before the slot is lost.</div>
+      </div>
+      <div class="item">
+        <div class="item-dot"></div>
+        <div class="item-text"><strong>Smart review requests</strong> after great visits only. Happy clients go to Google. Unhappy clients come directly to you — privately.</div>
+      </div>
+      <div class="item">
+        <div class="item-dot"></div>
+        <div class="item-text"><strong>Zero new work for your staff.</strong> They add a few notes. TailWag handles everything else automatically.</div>
+      </div>
+    </div>
+
+    <!-- COL 3: WHAT CHANGES -->
+    <div class="body-col">
+      <div class="col-header">
+        <div class="col-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E6B4A" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+          </svg>
+        </div>
+        <div class="col-title">What Changes</div>
+      </div>
+
+      <div class="item">
+        <div class="item-dot"></div>
+        <div class="item-text"><strong>Google rating climbs.</strong> Most daycares see 2–4× more reviews within 60 days. A 4.2 becoming a 4.7 changes how many new clients call.</div>
+      </div>
+      <div class="item">
+        <div class="item-dot"></div>
+        <div class="item-text"><strong>Clients feel remembered.</strong> The report card isn't marketing — it's a moment. Pet parents share them. They come back because of how it made them feel.</div>
+      </div>
+      <div class="item">
+        <div class="item-dot"></div>
+        <div class="item-text"><strong>No-shows drop sharply.</strong> The confirmation step alone eliminates 5–8 ghost appointments per month — that's $175–400 recovered monthly.</div>
+      </div>
+
+      <div class="stat-callout">
+        <div class="stat-callout-n">90 days</div>
+        <div class="stat-callout-l">is all it takes to see a measurable change in reviews, retention, and revenue.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-contact">
+      <div class="footer-name">Summer</div>
+      <div class="footer-info">Founder, TailWag</div>
+      <div class="footer-info" style="color:var(--gold);margin-top:2px;">summer@usetailwag.co</div>
+    </div>
+
+    <div class="footer-pricing">
+      <div class="fp-from">Starts at</div>
+      <div class="fp-price">$249<span style="font-size:14px;font-weight:500;">/mo</span></div>
+      <div class="fp-mo">14-day free trial · No setup fees</div>
+    </div>
+
+    <div class="footer-cta">
+      <div class="footer-url">usetailwag.co</div>
+      <div class="footer-trial">Questions? Summer will walk you through it personally.</div>
+    </div>
+
+    <div class="qr-box">
+      <div class="qr-inner">SCAN<br>FOR<br>DEMO</div>
+    </div>
+  </div>
+
+</div>
+
+<button class="print-btn" onclick="window.print()">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+  Print / Save as PDF
+</button>
+
+</body>
+</html>

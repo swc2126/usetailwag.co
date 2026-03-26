@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TailWag — Signal Stack Logo (Direction 2) — Dark Background Version
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 56" width="420" height="112" role="img" aria-label="TailWag">
+  <title>TailWag</title>
+  <defs>
+    <style>
+      .tw-wm {
+        font-family: 'Neue Montreal', 'DM Sans', 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        font-size: 30px;
+        letter-spacing: -0.5px;
+      }
+    </style>
+  </defs>
+
+  <!-- Kennel Black background -->
+  <rect width="210" height="56" fill="#0F1410" rx="6"/>
+
+  <!-- Large arc — Warm Linen, low opacity -->
+  <path d="M 2.8 31.8 A 24 24 0 0 0 49.2 31.8"
+        stroke="#F5F0E8"
+        stroke-width="4.5"
+        stroke-linecap="round"
+        fill="none"
+        opacity="0.35"/>
+
+  <!-- Medium arc -->
+  <path d="M 10.5 33.9 A 16 16 0 0 0 41.5 33.9"
+        stroke="#F5F0E8"
+        stroke-width="4.5"
+        stroke-linecap="round"
+        fill="none"
+        opacity="0.65"/>
+
+  <!-- Small arc -->
+  <path d="M 18.3 35.9 A 8 8 0 0 0 33.7 35.9"
+        stroke="#F5F0E8"
+        stroke-width="4.5"
+        stroke-linecap="round"
+        fill="none"/>
+
+  <!-- Base dot -->
+  <circle cx="26" cy="38" r="3" fill="#C4933F"/>
+
+  <!-- Wordmark in Warm Linen -->
+  <text x="64" y="38" class="tw-wm" fill="#F5F0E8">TailWag</text>
+</svg>

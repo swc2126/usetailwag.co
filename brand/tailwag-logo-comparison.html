@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TailWag — Logo Options</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --black:  #0F1410;
+    --green:  #1E6B4A;
+    --linen:  #F5F0E8;
+    --gold:   #C4933F;
+    --sage:   #A8C5B0;
+    --slate:  #2D3748;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #F7F4EE;
+    color: var(--slate);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--black);
+    padding: 28px 48px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  header svg { flex-shrink: 0; }
+  header .sub {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--sage);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  main {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 64px 40px 80px;
+  }
+
+  .page-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 10px;
+  }
+  .page-heading {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--black);
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .page-sub {
+    font-size: 16px;
+    color: var(--slate);
+    line-height: 1.6;
+    max-width: 600px;
+    margin-bottom: 56px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 56px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+  }
+
+  .card-label {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #EDEBE6;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .card-label-text {}
+  .card-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 2px;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: #888;
+    line-height: 1.4;
+  }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .badge-rec {
+    background: #E6F4ED;
+    color: var(--green);
+  }
+  .badge-alt {
+    background: #F0EDE5;
+    color: #7A6A4A;
+  }
+
+  .logo-swatch {
+    padding: 40px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-swatch.light { background: #FFFFFF; }
+  .logo-swatch.linen { background: var(--linen); }
+  .logo-swatch.dark  { background: var(--black); }
+  .logo-swatch.green { background: var(--green); }
+
+  .swatch-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .swatch-row .logo-swatch {
+    border-top: 1px solid rgba(0,0,0,0.06);
+    padding: 28px 24px;
+  }
+  .swatch-row .logo-swatch:first-child {
+    border-right: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .traits {
+    padding: 20px 24px;
+    border-top: 1px solid #EDEBE6;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .trait {
+    padding: 4px 10px;
+    background: #F5F3EF;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--slate);
+  }
+
+  .section-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #AAAAAA;
+    margin: 0 0 20px;
+  }
+
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 56px;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);
+  }
+  .compare-table th {
+    background: var(--black);
+    color: var(--linen);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-align: left;
+    padding: 14px 20px;
+  }
+  .compare-table td {
+    padding: 14px 20px;
+    font-size: 14px;
+    border-bottom: 1px solid #EDEBE6;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:nth-child(even) td { background: #FAFAF8; }
+  .compare-table td:first-child {
+    font-weight: 600;
+    color: var(--black);
+    width: 22%;
+  }
+  .compare-table td:nth-child(2) { color: var(--green); }
+  .compare-table td:nth-child(3) { color: var(--slate); }
+
+  .icon-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 56px;
+    flex-wrap: wrap;
+  }
+  .icon-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04);
+    min-width: 120px;
+  }
+  .icon-card .ic-label {
+    font-size: 12px;
+    color: #999;
+    text-align: center;
+  }
+
+  footer {
+    text-align: center;
+    padding: 32px;
+    color: #aaa;
+    font-size: 12px;
+    border-top: 1px solid #E8E4DC;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <!-- Inline wag mark icon for header -->
+  <svg width="32" height="32" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+    <rect width="56" height="56" fill="#1E6B4A" rx="10"/>
+    <path d="M 11 50 C 5 30, 23 4, 41 4 C 49 4, 51 18, 45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+  </svg>
+  <div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:700;color:#F5F0E8;">TailWag</div>
+    <div class="sub">Logo Options — Brand Identity</div>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">Visual Identity</div>
+  <h1 class="page-heading">Two Logo Directions</h1>
+  <p class="page-sub">Both use the same color palette, typography, and brand personality. The difference is the icon — what story it tells at a glance.</p>
+
+  <p class="section-title">Side-by-side comparison</p>
+
+  <div class="grid">
+
+    <!-- OPTION A: WAG MARK -->
+    <div class="card">
+      <div class="card-label">
+        <div class="card-label-text">
+          <div class="card-name">Option A — The Wag Mark</div>
+          <div class="card-desc">A flowing curve: the path of a happy tail caught mid-wag</div>
+        </div>
+        <span class="badge badge-rec">★ Recommended</span>
+      </div>
+
+      <!-- Light bg -->
+      <div class="logo-swatch light">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 56" width="315" height="84">
+          <defs><style>.wm{font-family:'Plus Jakarta Sans','Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:30px;letter-spacing:-0.5px;}</style></defs>
+          <path d="M 10 50 C 4 30, 22 4, 40 4 C 48 4, 50 18, 44 26" stroke="#1E6B4A" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+          <circle cx="44" cy="26" r="3.2" fill="#1E6B4A"/>
+          <text x="64" y="38" class="wm" fill="#0F1410">TailWag</text>
+        </svg>
+      </div>
+
+      <!-- Dark swatches row -->
+      <div class="swatch-row">
+        <div class="logo-swatch dark">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 56" width="150" height="40">
+            <defs><style>.wmd{font-family:'Plus Jakarta Sans','Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:30px;letter-spacing:-0.5px;}</style></defs>
+            <path d="M 10 50 C 4 30, 22 4, 40 4 C 48 4, 50 18, 44 26" stroke="#F5F0E8" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+            <circle cx="44" cy="26" r="3.2" fill="#F5F0E8"/>
+            <text x="64" y="38" class="wmd" fill="#F5F0E8">TailWag</text>
+          </svg>
+        </div>
+        <div class="logo-swatch green">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 56" width="150" height="40">
+            <defs><style>.wmg{font-family:'Plus Jakarta Sans','Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:30px;letter-spacing:-0.5px;}</style></defs>
+            <path d="M 10 50 C 4 30, 22 4, 40 4 C 48 4, 50 18, 44 26" stroke="#F5F0E8" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+            <circle cx="44" cy="26" r="3.2" fill="#C4933F"/>
+            <text x="64" y="38" class="wmg" fill="#F5F0E8">TailWag</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="traits">
+        <span class="trait">Emotionally warm</span>
+        <span class="trait">Ownable mark</span>
+        <span class="trait">Motion / joy</span>
+        <span class="trait">Works embroidered</span>
+      </div>
+    </div>
+
+    <!-- OPTION B: SIGNAL STACK -->
+    <div class="card">
+      <div class="card-label">
+        <div class="card-label-text">
+          <div class="card-name">Option B — The Signal Stack</div>
+          <div class="card-desc">Three arcs: wireless signal meets tail-in-motion</div>
+        </div>
+        <span class="badge badge-alt">Alternative</span>
+      </div>
+
+      <!-- Light bg -->
+      <div class="logo-swatch light">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 56" width="315" height="84">
+          <defs><style>.wms{font-family:'Plus Jakarta Sans','Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:30px;letter-spacing:-0.5px;}</style></defs>
+          <path d="M 2.8 31.8 A 24 24 0 0 0 49.2 31.8" stroke="#1E6B4A" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.45"/>
+          <path d="M 10.5 33.9 A 16 16 0 0 0 41.5 33.9" stroke="#1E6B4A" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.72"/>
+          <path d="M 18.3 35.9 A 8 8 0 0 0 33.7 35.9" stroke="#1E6B4A" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+          <circle cx="26" cy="38" r="3" fill="#1E6B4A"/>
+          <text x="64" y="38" class="wms" fill="#0F1410">TailWag</text>
+        </svg>
+      </div>
+
+      <!-- Dark swatches row -->
+      <div class="swatch-row">
+        <div class="logo-swatch dark">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 56" width="150" height="40">
+            <defs><style>.wmsd{font-family:'Plus Jakarta Sans','Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:30px;letter-spacing:-0.5px;}</style></defs>
+            <path d="M 2.8 31.8 A 24 24 0 0 0 49.2 31.8" stroke="#F5F0E8" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.35"/>
+            <path d="M 10.5 33.9 A 16 16 0 0 0 41.5 33.9" stroke="#F5F0E8" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.65"/>
+            <path d="M 18.3 35.9 A 8 8 0 0 0 33.7 35.9" stroke="#F5F0E8" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+            <circle cx="26" cy="38" r="3" fill="#C4933F"/>
+            <text x="64" y="38" class="wmsd" fill="#F5F0E8">TailWag</text>
+          </svg>
+        </div>
+        <div class="logo-swatch green">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 56" width="150" height="40">
+            <defs><style>.wmsg{font-family:'Plus Jakarta Sans','Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:30px;letter-spacing:-0.5px;}</style></defs>
+            <path d="M 2.8 31.8 A 24 24 0 0 0 49.2 31.8" stroke="#F5F0E8" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.45"/>
+            <path d="M 10.5 33.9 A 16 16 0 0 0 41.5 33.9" stroke="#F5F0E8" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.72"/>
+            <path d="M 18.3 35.9 A 8 8 0 0 0 33.7 35.9" stroke="#F5F0E8" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+            <circle cx="26" cy="38" r="3" fill="#C4933F"/>
+            <text x="64" y="38" class="wmsg" fill="#F5F0E8">TailWag</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="traits">
+        <span class="trait">Tech-forward</span>
+        <span class="trait">Geometric precision</span>
+        <span class="trait">Signal / reach</span>
+        <span class="trait">Motion cascade</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Icons -->
+  <p class="section-title">Icon-only versions (app icon, favicon, polo)</p>
+  <div class="icon-row">
+
+    <div class="icon-card">
+      <svg width="64" height="64" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+        <rect width="56" height="56" fill="#1E6B4A" rx="12"/>
+        <path d="M 11 50 C 5 30, 23 4, 41 4 C 49 4, 51 18, 45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+      </svg>
+      <span class="ic-label">Wag Mark<br>on Green</span>
+    </div>
+
+    <div class="icon-card">
+      <svg width="64" height="64" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+        <rect width="56" height="56" fill="#0F1410" rx="12"/>
+        <path d="M 11 50 C 5 30, 23 4, 41 4 C 49 4, 51 18, 45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <circle cx="45" cy="26" r="3.5" fill="#C4933F"/>
+      </svg>
+      <span class="ic-label">Wag Mark<br>on Black</span>
+    </div>
+
+    <div class="icon-card" style="background:#F7F4EE;">
+      <svg width="64" height="64" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+        <rect width="56" height="56" fill="#1E6B4A" rx="12"/>
+        <path d="M 5 31 A 24 24 0 0 0 51 31" stroke="#F5F0E8" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.4"/>
+        <path d="M 12 33 A 16 16 0 0 0 44 33" stroke="#F5F0E8" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.7"/>
+        <path d="M 19 35 A 8 8 0 0 0 37 35" stroke="#F5F0E8" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+        <circle cx="28" cy="37" r="3" fill="#C4933F"/>
+      </svg>
+      <span class="ic-label">Signal Stack<br>on Green</span>
+    </div>
+
+    <div class="icon-card">
+      <svg width="64" height="64" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+        <rect width="56" height="56" fill="#0F1410" rx="12"/>
+        <path d="M 5 31 A 24 24 0 0 0 51 31" stroke="#F5F0E8" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.35"/>
+        <path d="M 12 33 A 16 16 0 0 0 44 33" stroke="#F5F0E8" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.65"/>
+        <path d="M 19 35 A 8 8 0 0 0 37 35" stroke="#F5F0E8" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+        <circle cx="28" cy="37" r="3" fill="#C4933F"/>
+      </svg>
+      <span class="ic-label">Signal Stack<br>on Black</span>
+    </div>
+
+  </div>
+
+  <!-- Comparison table -->
+  <p class="section-title">How they differ</p>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>Option A — Wag Mark</th>
+        <th>Option B — Signal Stack</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Story it tells</td>
+        <td>Joy and motion — the literal wag of a happy dog</td>
+        <td>Reach and signal — connecting daycares to their clients</td>
+      </tr>
+      <tr>
+        <td>First impression</td>
+        <td>Warm, confident, slightly playful</td>
+        <td>Tech-forward, precise, modern SaaS</td>
+      </tr>
+      <tr>
+        <td>Ownable?</td>
+        <td>Completely. No one else can use this mark meaningfully.</td>
+        <td>Somewhat. Concentric arcs are common in tech — the context makes it distinct.</td>
+      </tr>
+      <tr>
+        <td>Best for</td>
+        <td>In-person pitch, business card, polo, emotionally resonant contexts</td>
+        <td>Website, app icon, tech-heavy pitch decks, investor materials</td>
+      </tr>
+      <tr>
+        <td>Risk</td>
+        <td>Could read as abstract if the viewer doesn't make the tail connection</td>
+        <td>Could read as WiFi or generic connectivity without context</td>
+      </tr>
+      <tr>
+        <td>Gold dot treatment</td>
+        <td>Tail tip — adds a finishing punctuation</td>
+        <td>Origin point — the source the signal radiates from</td>
+      </tr>
+      <tr>
+        <td>Recommendation</td>
+        <td>Primary brand mark — use everywhere</td>
+        <td>Strong alternative — use if tech positioning is the priority</td>
+      </tr>
+    </tbody>
+  </table>
+
+</main>
+
+<footer>TailWag Brand Identity &nbsp;·&nbsp; All logo files in /brand folder &nbsp;·&nbsp; Fonts: Plus Jakarta Sans (free, Google Fonts) or Neue Montreal (premium)</footer>
+
+</body>
+</html>

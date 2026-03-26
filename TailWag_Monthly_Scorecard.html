@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TailWag — Monthly Performance Scorecard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --black: #0F1410;
+      --green: #1E6B4A;
+      --green-dark: #164D35;
+      --green-mid: #286050;
+      --linen: #F5F0E8;
+      --gold: #C4933F;
+      --sage: #A8C5B0;
+      --slate: #2D3748;
+      --card-bg: #1A231C;
+      --content-bg: #111812;
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --green-15: rgba(30, 107, 74, 0.15);
+      --green-10: rgba(30, 107, 74, 0.1);
+      --red-alert: #C44A3F;
+      --red-10: rgba(196, 74, 63, 0.1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--black);
+      color: var(--linen);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    .header {
+      background: var(--black);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-mark {
+      flex-shrink: 0;
+    }
+
+    .header-text h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--linen);
+      line-height: 1.2;
+    }
+
+    .header-text .subtitle {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-top: 2px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .period-selector {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--linen);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+    }
+
+    .period-selector:hover {
+      border-color: var(--green);
+    }
+
+    .badge-internal {
+      background: var(--green-15);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 6px;
+    }
+
+    /* ── CONTENT ────────────────────────────────────────────── */
+    .content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 40px 60px;
+    }
+
+    /* ── CLIENT INFO BAR ───────────────────────────────────── */
+    .client-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .client-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .client-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--green), var(--gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .client-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--linen);
+    }
+
+    .client-meta {
+      font-size: 13px;
+      color: var(--sage);
+      margin-top: 2px;
+    }
+
+    .client-status {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .status-dot.active { background: #4ADE80; }
+    .status-dot.inactive { background: var(--red-alert); }
+
+    .plan-badge {
+      background: var(--green-15);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-radius: 6px;
+    }
+
+    .days-active {
+      font-size: 13px;
+      color: var(--sage);
+    }
+
+    /* ── SECTION TITLES ────────────────────────────────────── */
+    .section-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--linen);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title .icon {
+      font-size: 16px;
+    }
+
+    /* ── KPI HERO CARDS ────────────────────────────────────── */
+    .kpi-hero-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .kpi-hero {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-hero::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--green);
+      border-radius: 3px 0 0 3px;
+    }
+
+    .kpi-hero.gold::before { background: var(--gold); }
+    .kpi-hero.alert::before { background: var(--red-alert); }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 36px;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .kpi-hero.green-val .kpi-value { color: var(--green); }
+
+    .kpi-change {
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .kpi-change.up { color: #4ADE80; }
+    .kpi-change.down { color: var(--red-alert); }
+    .kpi-change.neutral { color: var(--sage); }
+
+    /* ── MESSAGE BREAKDOWN ─────────────────────────────────── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .card-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--linen);
+      margin-bottom: 20px;
+    }
+
+    /* ── BAR CHART ─────────────────────────────────────────── */
+    .bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bar-label {
+      font-size: 13px;
+      color: var(--linen);
+      width: 140px;
+      flex-shrink: 0;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 28px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .bar-fill.green { background: var(--green); }
+    .bar-fill.gold { background: var(--gold); }
+    .bar-fill.sage { background: var(--sage); opacity: 0.6; }
+
+    .bar-count {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--linen);
+      width: 50px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── SPARKLINE / TREND ─────────────────────────────────── */
+    .trend-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .trend-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 8px;
+    }
+
+    .trend-label {
+      font-size: 13px;
+      color: var(--sage);
+      width: 160px;
+    }
+
+    .trend-value {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--linen);
+    }
+
+    .trend-value.gold { color: var(--gold); }
+
+    .trend-change {
+      font-size: 12px;
+      font-weight: 600;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    .trend-change.up { color: #4ADE80; }
+    .trend-change.down { color: var(--red-alert); }
+
+    /* ── GOOGLE REVIEWS SECTION ────────────────────────────── */
+    .review-hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .review-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .review-card .star-row {
+      font-size: 24px;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      color: var(--gold);
+    }
+
+    .review-card .review-metric {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 42px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .review-card .review-sublabel {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--sage);
+    }
+
+    .review-card .review-note {
+      font-size: 12px;
+      color: rgba(245,240,232,0.6);
+      margin-top: 8px;
+    }
+
+    .review-card.highlight {
+      background: var(--green-15);
+      border-color: var(--green);
+    }
+
+    /* ── USAGE & LOGINS ────────────────────────────────────── */
+    .three-col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .mini-stat {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+
+    .mini-stat .ms-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 6px;
+    }
+
+    .mini-stat .ms-value {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      color: var(--linen);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .mini-stat .ms-sub {
+      font-size: 12px;
+      color: rgba(245,240,232,0.5);
+    }
+
+    /* ── ROI / SAVINGS SECTION ─────────────────────────────── */
+    .roi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .roi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .roi-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--gold);
+      border-radius: 3px 0 0 3px;
+    }
+
+    .roi-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 8px;
+    }
+
+    .roi-value {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 32px;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .roi-detail {
+      font-size: 13px;
+      color: rgba(245,240,232,0.6);
+      line-height: 1.5;
+    }
+
+    /* ── WEEKLY ACTIVITY HEATMAP ───────────────────────────── */
+    .heatmap-container {
+      margin-bottom: 32px;
+    }
+
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: 60px repeat(4, 1fr);
+      gap: 4px;
+    }
+
+    .heatmap-header {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--sage);
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .heatmap-day {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--sage);
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+    }
+
+    .heatmap-cell {
+      height: 36px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--linen);
+      transition: transform 0.15s ease;
+    }
+
+    .heatmap-cell:hover {
+      transform: scale(1.05);
+    }
+
+    .heat-0 { background: rgba(255,255,255,0.03); color: rgba(245,240,232,0.3); }
+    .heat-1 { background: rgba(30,107,74,0.15); }
+    .heat-2 { background: rgba(30,107,74,0.3); }
+    .heat-3 { background: rgba(30,107,74,0.5); }
+    .heat-4 { background: rgba(30,107,74,0.75); }
+
+    /* ── SUMMARY / NOTES ───────────────────────────────────── */
+    .summary-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--green);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 32px;
+    }
+
+    .summary-card h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--linen);
+      margin-bottom: 12px;
+    }
+
+    .summary-card p {
+      font-size: 14px;
+      color: rgba(245,240,232,0.78);
+      line-height: 1.7;
+      margin-bottom: 8px;
+    }
+
+    .summary-card .highlight-text {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    /* ── FOOTER ─────────────────────────────────────────────── */
+    .scorecard-footer {
+      text-align: center;
+      padding: 32px 0 16px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .footer-logo span {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--linen);
+    }
+
+    .footer-tagline {
+      font-size: 12px;
+      color: var(--sage);
+      font-style: italic;
+    }
+
+    .footer-copy {
+      font-size: 11px;
+      color: rgba(245,240,232,0.3);
+      margin-top: 8px;
+    }
+
+    /* ── PRINT ──────────────────────────────────────────────── */
+    @media print {
+      body { background: white; color: #0F1410; }
+      .header { background: white; border-bottom-color: #ddd; }
+      .card, .kpi-hero, .review-card, .roi-card, .mini-stat, .summary-card, .client-bar {
+        background: white; border-color: #ddd;
+      }
+      .kpi-label, .roi-label, .ms-label, .review-sublabel { color: #666; }
+      .period-selector, .badge-internal { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="header">
+    <div class="header-left">
+      <svg class="logo-mark" width="36" height="36" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="56" height="56" fill="#1E6B4A" rx="9"></rect>
+        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"></path>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"></circle>
+      </svg>
+      <div class="header-text">
+        <h1>TailWag</h1>
+        <div class="subtitle">Monthly Performance Scorecard</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <select class="period-selector" id="periodSelect" onchange="updatePeriod()">
+        <option value="mar2026" selected>March 2026</option>
+        <option value="feb2026">February 2026</option>
+        <option value="jan2026">January 2026</option>
+      </select>
+      <span class="badge-internal">Internal Only</span>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ═══ CLIENT INFO ═══ -->
+    <div class="client-bar">
+      <div class="client-info">
+        <div class="client-avatar">🐾</div>
+        <div>
+          <div class="client-name" id="clientName">Paws & Play Daycare</div>
+          <div class="client-meta" id="clientMeta">Irving, TX · Starter Plan · Since Feb 14, 2026</div>
+        </div>
+      </div>
+      <div class="client-status">
+        <span class="status-pill">
+          <span class="status-dot active"></span>
+          <span style="color: #4ADE80;">Active</span>
+        </span>
+        <span class="plan-badge">Starter</span>
+        <span class="days-active">40 days active</span>
+      </div>
+    </div>
+
+    <!-- ═══ TOP-LINE KPIs ═══ -->
+    <div class="section-title"><span class="icon">📊</span> Top-Line Performance</div>
+    <div class="kpi-hero-grid">
+      <div class="kpi-hero">
+        <div class="kpi-label">Messages Sent</div>
+        <div class="kpi-value" id="kpiMessages">342</div>
+        <div class="kpi-change up">▲ 28% vs last month</div>
+      </div>
+      <div class="kpi-hero gold">
+        <div class="kpi-label">Google Reviews</div>
+        <div class="kpi-value" id="kpiReviews">14</div>
+        <div class="kpi-change up">▲ 8 new this month</div>
+      </div>
+      <div class="kpi-hero">
+        <div class="kpi-label">No-Shows Prevented</div>
+        <div class="kpi-value" id="kpiNoShows">19</div>
+        <div class="kpi-change up">▲ Est. $950 saved</div>
+      </div>
+      <div class="kpi-hero green-val">
+        <div class="kpi-label">Active Dogs</div>
+        <div class="kpi-value" id="kpiDogs">47</div>
+        <div class="kpi-change up">▲ 6 new enrollments</div>
+      </div>
+    </div>
+
+    <!-- ═══ MESSAGE BREAKDOWN + KEY TRENDS ═══ -->
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Message Breakdown</div>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <span class="bar-label">Report Cards</span>
+            <div class="bar-track"><div class="bar-fill green" style="width: 68%"></div></div>
+            <span class="bar-count">232</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Apt. Reminders</span>
+            <div class="bar-track"><div class="bar-fill sage" style="width: 26%"></div></div>
+            <span class="bar-count">88</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Review Requests</span>
+            <div class="bar-track"><div class="bar-fill gold" style="width: 12%"></div></div>
+            <span class="bar-count">41</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Social Requests</span>
+            <div class="bar-track"><div class="bar-fill gold" style="width: 5%"></div></div>
+            <span class="bar-count">18</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Key Trends</div>
+        <div class="trend-rows">
+          <div class="trend-row">
+            <span class="trend-label">Reminder Confirmation Rate</span>
+            <span class="trend-value">84%</span>
+            <span class="trend-change up">▲ 6%</span>
+          </div>
+          <div class="trend-row">
+            <span class="trend-label">Review Conversion Rate</span>
+            <span class="trend-value gold">34%</span>
+            <span class="trend-change up">▲ 4%</span>
+          </div>
+          <div class="trend-row">
+            <span class="trend-label">"Great Day" Rate</span>
+            <span class="trend-value">91%</span>
+            <span class="trend-change up">▲ 2%</span>
+          </div>
+          <div class="trend-row">
+            <span class="trend-label">Avg Messages / Day</span>
+            <span class="trend-value">11.1</span>
+            <span class="trend-change up">▲ 2.3</span>
+          </div>
+          <div class="trend-row">
+            <span class="trend-label">Opt-Out Rate</span>
+            <span class="trend-value" style="color: var(--sage);">1.2%</span>
+            <span class="trend-change neutral">— flat</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ GOOGLE REVIEWS ═══ -->
+    <div class="section-title"><span class="icon">⭐</span> Google Review Impact</div>
+    <div class="review-hero">
+      <div class="review-card">
+        <div class="review-sublabel">Rating at Signup</div>
+        <div class="star-row">★★★★☆</div>
+        <div class="review-metric" style="color: var(--sage);">4.1</div>
+        <div class="review-note">Feb 14, 2026 — Day Zero</div>
+      </div>
+      <div class="review-card highlight">
+        <div class="review-sublabel">Current Rating</div>
+        <div class="star-row">★★★★★</div>
+        <div class="review-metric" style="color: var(--gold);">4.7</div>
+        <div class="review-note">As of Mar 26, 2026</div>
+      </div>
+      <div class="review-card">
+        <div class="review-sublabel">Net New Reviews</div>
+        <div class="review-metric" style="color: var(--green);">+22</div>
+        <div class="review-sublabel" style="margin-top: 4px;">Total Reviews</div>
+        <div style="font-family: 'Plus Jakarta Sans'; font-weight: 700; font-size: 24px; color: var(--linen); margin-top: 4px;">58</div>
+        <div class="review-note">Was 36 at signup</div>
+      </div>
+    </div>
+
+    <!-- ═══ USAGE & ENGAGEMENT ═══ -->
+    <div class="section-title"><span class="icon">👤</span> Usage &amp; Engagement</div>
+    <div class="three-col">
+      <div class="mini-stat">
+        <div class="ms-label">Staff Logins</div>
+        <div class="ms-value">68</div>
+        <div class="ms-sub">Avg 2.2 / day · 3 active users</div>
+      </div>
+      <div class="mini-stat">
+        <div class="ms-label">Dogs Checked In</div>
+        <div class="ms-value">412</div>
+        <div class="ms-sub">Avg 13.3 / day</div>
+      </div>
+      <div class="mini-stat">
+        <div class="ms-label">Inbound Replies</div>
+        <div class="ms-value">94</div>
+        <div class="ms-sub">74 YES · 12 NO · 8 other</div>
+      </div>
+    </div>
+
+    <!-- ═══ WEEKLY ACTIVITY HEATMAP ═══ -->
+    <div class="heatmap-container">
+      <div class="card">
+        <div class="card-title">Weekly Activity — Messages Sent</div>
+        <div class="heatmap-grid">
+          <!-- Header row -->
+          <div class="heatmap-header"></div>
+          <div class="heatmap-header">Week 1</div>
+          <div class="heatmap-header">Week 2</div>
+          <div class="heatmap-header">Week 3</div>
+          <div class="heatmap-header">Week 4</div>
+          <!-- Mon -->
+          <div class="heatmap-day">Mon</div>
+          <div class="heatmap-cell heat-3">12</div>
+          <div class="heatmap-cell heat-4">18</div>
+          <div class="heatmap-cell heat-3">14</div>
+          <div class="heatmap-cell heat-4">16</div>
+          <!-- Tue -->
+          <div class="heatmap-day">Tue</div>
+          <div class="heatmap-cell heat-2">9</div>
+          <div class="heatmap-cell heat-3">13</div>
+          <div class="heatmap-cell heat-4">17</div>
+          <div class="heatmap-cell heat-3">15</div>
+          <!-- Wed -->
+          <div class="heatmap-day">Wed</div>
+          <div class="heatmap-cell heat-3">14</div>
+          <div class="heatmap-cell heat-2">10</div>
+          <div class="heatmap-cell heat-3">13</div>
+          <div class="heatmap-cell heat-4">19</div>
+          <!-- Thu -->
+          <div class="heatmap-day">Thu</div>
+          <div class="heatmap-cell heat-2">8</div>
+          <div class="heatmap-cell heat-3">12</div>
+          <div class="heatmap-cell heat-2">11</div>
+          <div class="heatmap-cell heat-3">14</div>
+          <!-- Fri -->
+          <div class="heatmap-day">Fri</div>
+          <div class="heatmap-cell heat-4">16</div>
+          <div class="heatmap-cell heat-4">19</div>
+          <div class="heatmap-cell heat-3">15</div>
+          <div class="heatmap-cell heat-4">21</div>
+          <!-- Sat -->
+          <div class="heatmap-day">Sat</div>
+          <div class="heatmap-cell heat-1">4</div>
+          <div class="heatmap-cell heat-2">7</div>
+          <div class="heatmap-cell heat-1">5</div>
+          <div class="heatmap-cell heat-2">8</div>
+          <!-- Sun -->
+          <div class="heatmap-day">Sun</div>
+          <div class="heatmap-cell heat-0">0</div>
+          <div class="heatmap-cell heat-0">0</div>
+          <div class="heatmap-cell heat-1">2</div>
+          <div class="heatmap-cell heat-0">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ROI / ESTIMATED SAVINGS ═══ -->
+    <div class="section-title"><span class="icon">💰</span> Estimated ROI &amp; Savings</div>
+    <div class="roi-grid">
+      <div class="roi-card">
+        <div class="roi-label">Est. Cost Savings</div>
+        <div class="roi-value">$2,840</div>
+        <div class="roi-detail">19 no-shows prevented × $50 avg visit + staff time savings from automated messaging</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-label">Est. Revenue Recovered</div>
+        <div class="roi-value">$1,425</div>
+        <div class="roi-detail">Cancellations converted to confirmed visits via reminder follow-ups</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-label">Review Value</div>
+        <div class="roi-value">$3,300</div>
+        <div class="roi-detail">22 new reviews × ~$150 est. lifetime customer value per review-driven acquisition</div>
+      </div>
+    </div>
+
+    <!-- ═══ 30-DAY SNAPSHOT COMPARISON ═══ -->
+    <div class="section-title"><span class="icon">📈</span> 30-Day Snapshot — Before vs. After TailWag</div>
+    <div class="two-col">
+      <div class="card" style="border-left: 3px solid var(--sage);">
+        <div class="card-title" style="color: var(--sage);">Before TailWag</div>
+        <div class="trend-rows">
+          <div class="trend-row">
+            <span class="trend-label">Google Rating</span>
+            <span class="trend-value" style="color: var(--sage);">4.1</span>
+          </div>
+          <div class="trend-row">
+            <span class="trend-label">Reviews / Month</span>
+            <span class="trend-value" style="color: var(--sage);">1–2</span>
+          </div>
+          <div class="trend-row">
+            <span class="trend-label">No-Show Rate</span>
+            <span class="trend-value" style="color: var(--red-alert);">~12%</span>
+          </div>
+          <div class="trend-row">
+            <span class="trend-label">Client Follow-Up</span>
+            <span class="trend-value" style="color: var(--sage); font-size: 14px;">Manual / None</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="border-left: 3px solid var(--green);">
+        <div class="card-title" style="color: var(--green);">With TailWag — March 2026</div>
+        <div class="trend-rows">
+          <div class="trend-row">
+            <span class="trend-label">Google Rating</span>
+            <span class="trend-value gold">4.7</span>
+          </div>
+          <div class="trend-row">
+            <span class="trend-label">Reviews / Month</span>
+            <span class="trend-value gold">8+</span>
+          </div>
+          <div class="trend-row">
+            <span class="trend-label">No-Show Rate</span>
+            <span class="trend-value" style="color: #4ADE80;">~3%</span>
+          </div>
+          <div class="trend-row">
+            <span class="trend-label">Client Follow-Up</span>
+            <span class="trend-value" style="color: var(--green); font-size: 14px;">100% Automated</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ EXECUTIVE SUMMARY ═══ -->
+    <div class="summary-card">
+      <h3>Executive Summary — March 2026</h3>
+      <p>
+        Paws &amp; Play Daycare has been active on TailWag for <span class="highlight-text">40 days</span>. In that time,
+        the system has sent <span class="highlight-text">342 automated messages</span> — including personalized report cards
+        after every visit, appointment reminders with confirmation tracking, and smart review requests sent only to happy pet parents.
+      </p>
+      <p>
+        Google reviews have increased from <span class="highlight-text">36 to 58</span>, and the overall rating has climbed
+        from <span class="highlight-text">4.1 to 4.7 stars</span>. The reminder system is running at an 84% confirmation rate,
+        and an estimated <span class="highlight-text">19 no-shows were prevented</span> this month — roughly $950 in recovered revenue.
+      </p>
+      <p>
+        Combined estimated ROI for March: <span class="highlight-text">$7,565</span> against a $97/mo Starter plan —
+        a return of approximately <span class="highlight-text">78x</span> the subscription cost.
+      </p>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="scorecard-footer">
+      <div class="footer-logo">
+        <svg width="24" height="24" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="56" height="56" fill="#1E6B4A" rx="9"></rect>
+          <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"></path>
+          <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"></circle>
+        </svg>
+        <span>TailWag</span>
+      </div>
+      <div class="footer-tagline">Built for dog people by dog people.</div>
+      <div class="footer-copy">© 2026 TailWag. This report is confidential and intended for internal administration only.</div>
+    </div>
+
+  </div>
+
+  <script>
+    // ── Animate bars on load ──
+    document.addEventListener('DOMContentLoaded', () => {
+      const bars = document.querySelectorAll('.bar-fill');
+      bars.forEach(bar => {
+        const target = bar.style.width;
+        bar.style.width = '0%';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            bar.style.width = target;
+          });
+        });
+      });
+
+      // Animate KPI numbers counting up
+      document.querySelectorAll('.kpi-value, .review-metric, .roi-value, .ms-value').forEach(el => {
+        const text = el.textContent.trim();
+        const isPercent = text.includes('%');
+        const isDollar = text.startsWith('$');
+        const isPlus = text.startsWith('+');
+        const isDecimal = text.includes('.');
+
+        let raw = text.replace(/[^0-9.]/g, '');
+        if (!raw || isNaN(parseFloat(raw))) return;
+
+        const target = parseFloat(raw);
+        const duration = 1200;
+        const start = performance.now();
+
+        const prefix = isDollar ? '$' : isPlus ? '+' : '';
+        const suffix = isPercent ? '%' : '';
+
+        const animate = (now) => {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = target * eased;
+
+          if (isDecimal) {
+            el.textContent = prefix + current.toFixed(1) + suffix;
+          } else if (isDollar && target >= 1000) {
+            el.textContent = prefix + Math.round(current).toLocaleString() + suffix;
+          } else {
+            el.textContent = prefix + Math.round(current) + suffix;
+          }
+
+          if (progress < 1) requestAnimationFrame(animate);
+        };
+
+        el.textContent = prefix + '0' + suffix;
+        requestAnimationFrame(animate);
+      });
+    });
+
+    function updatePeriod() {
+      // Placeholder — in production, this would fetch real data for the selected month
+      const sel = document.getElementById('periodSelect');
+      console.log('Selected period:', sel.value);
+    }
+  </script>
+
+</body>
+</html>

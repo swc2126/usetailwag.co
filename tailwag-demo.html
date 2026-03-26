@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TailWag — Live Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black:  #0F1410;
+  --green:  #1E6B4A;
+  --green-d:#164D35;
+  --linen:  #F5F0E8;
+  --gold:   #C4933F;
+  --sage:   #A8C5B0;
+  --slate:  #2D3748;
+  --lt:     #EAF4EE;
+  --card:   #1A231C;
+  --border: rgba(255,255,255,0.07);
+  --fn-d:   'Plus Jakarta Sans', sans-serif;
+  --fn-b:   'Inter', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--fn-b);background:var(--black);color:var(--linen);min-height:100vh;overflow-x:hidden;}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;height:64px;
+  background:rgba(15,20,16,0.95);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo span{font-family:var(--fn-d);font-weight:700;font-size:18px;color:var(--linen);letter-spacing:-.3px;}
+.nav-badge{
+  background:rgba(196,147,63,0.15);border:1px solid rgba(196,147,63,0.3);
+  color:var(--gold);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;
+  letter-spacing:.05em;
+}
+
+/* ── LAYOUT ── */
+.demo-shell{
+  display:grid;grid-template-columns:420px 1fr;
+  min-height:100vh;padding-top:64px;
+}
+
+/* ── LEFT PANEL ── */
+.left-panel{
+  background:#111812;
+  border-right:1px solid var(--border);
+  padding:40px 32px;
+  position:sticky;top:64px;
+  height:calc(100vh - 64px);
+  overflow-y:auto;
+  display:flex;flex-direction:column;gap:28px;
+}
+.panel-section{}
+.panel-label{
+  font-size:11px;font-weight:600;
+  color:var(--sage);letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:12px;
+}
+.panel-title{
+  font-family:var(--fn-d);font-weight:700;font-size:22px;
+  color:var(--linen);line-height:1.2;margin-bottom:8px;
+}
+.panel-sub{font-size:14px;color:var(--sage);line-height:1.6;}
+
+/* Fields */
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--sage);margin-bottom:6px;}
+.field input,.field textarea,.field select{
+  width:100%;background:#1A231C;border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;padding:10px 14px;color:var(--linen);
+  font-family:var(--fn-b);font-size:14px;outline:none;
+  transition:border-color .2s;
+}
+.field input:focus,.field textarea:focus,.field select:focus{
+  border-color:var(--green);
+}
+.field textarea{resize:vertical;min-height:80px;}
+.field input::placeholder,.field textarea::placeholder{color:rgba(168,197,176,0.4);}
+
+/* Step pills */
+.step-row{display:flex;gap:8px;margin-bottom:24px;}
+.step-pill{
+  flex:1;padding:8px;text-align:center;border-radius:8px;cursor:pointer;
+  font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.08);
+  color:var(--sage);background:transparent;transition:all .2s;
+}
+.step-pill.active{background:var(--green);border-color:var(--green);color:#fff;}
+.step-pill.done{background:rgba(30,107,74,0.2);border-color:rgba(30,107,74,0.4);color:var(--green);}
+
+/* Buttons */
+.btn{
+  width:100%;padding:13px;border-radius:10px;border:none;cursor:pointer;
+  font-family:var(--fn-d);font-size:15px;font-weight:700;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-green{background:var(--green);color:var(--linen);}
+.btn-green:hover{background:var(--green-d);}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--linen);}
+.btn-ghost:hover{border-color:var(--green);color:var(--linen);}
+.btn-gold{background:var(--gold);color:var(--black);}
+.btn-gold:hover{opacity:.9;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* Feature tabs */
+.feature-tabs{display:flex;gap:4px;background:#0D160F;border-radius:10px;padding:4px;}
+.ftab{
+  flex:1;padding:8px 4px;text-align:center;border-radius:7px;cursor:pointer;
+  font-size:12px;font-weight:600;color:var(--sage);transition:all .2s;
+  border:none;background:transparent;
+}
+.ftab.active{background:var(--card);color:var(--linen);}
+
+/* ── RIGHT PANEL ── */
+.right-panel{
+  padding:40px;
+  display:flex;flex-direction:column;align-items:center;
+  background:var(--black);
+}
+
+/* Phone mockup */
+.phone-wrap{
+  position:relative;display:inline-flex;
+  flex-direction:column;align-items:center;
+}
+.phone{
+  width:300px;background:#0A0A0A;border-radius:44px;
+  box-shadow:0 0 0 8px #1E1E1E,0 0 0 10px #2A2A2A,0 60px 120px rgba(0,0,0,0.7);
+  overflow:hidden;position:relative;
+}
+.phone-notch{
+  width:100px;height:28px;background:#0A0A0A;
+  border-radius:0 0 20px 20px;
+  margin:0 auto;position:relative;z-index:2;
+}
+.phone-screen{
+  padding:0 12px 20px;
+  min-height:540px;
+  background:linear-gradient(180deg,#1A1A1A 0%,#0F0F0F 100%);
+}
+/* SMS status bar */
+.phone-status{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:6px 8px;font-size:11px;color:rgba(255,255,255,0.5);
+  font-family:var(--fn-b);
+}
+/* iMessage header */
+.imessage-header{
+  text-align:center;padding:8px 0 12px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  margin-bottom:12px;
+}
+.imessage-contact{font-size:16px;font-weight:600;color:#fff;margin-bottom:2px;}
+.imessage-subtitle{font-size:11px;color:rgba(255,255,255,0.4);}
+
+/* Chat bubbles */
+.chat-area{padding:8px 0;display:flex;flex-direction:column;gap:8px;}
+.bubble-wrap{display:flex;flex-direction:column;align-items:flex-start;}
+.bubble{
+  max-width:86%;background:#1C1C1E;
+  border-radius:18px 18px 18px 4px;
+  padding:10px 14px;font-size:13px;
+  color:rgba(255,255,255,0.9);line-height:1.5;
+}
+.bubble.sent{
+  align-self:flex-end;background:#1E6B4A;
+  border-radius:18px 18px 4px 18px;color:#fff;
+}
+.bubble-time{font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;padding:0 4px;}
+.typing-indicator{
+  display:flex;gap:4px;align-items:center;
+  padding:10px 14px;
+}
+.dot{
+  width:7px;height:7px;background:rgba(255,255,255,0.4);
+  border-radius:50%;animation:bounce .8s infinite ease-in-out;
+}
+.dot:nth-child(2){animation-delay:.16s;}
+.dot:nth-child(3){animation-delay:.32s;}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+
+/* Review bubble (special) */
+.review-card{
+  background:#1C1C1E;border-radius:16px;padding:14px;
+  border:1px solid rgba(30,107,74,0.3);
+}
+.review-stars{color:#FFB800;font-size:14px;margin-bottom:6px;letter-spacing:1px;}
+.review-text{font-size:12px;color:rgba(255,255,255,0.8);line-height:1.5;}
+.review-link{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:10px;padding:8px 14px;
+  background:var(--green);border-radius:10px;
+  font-size:12px;font-weight:600;color:#fff;
+  text-decoration:none;width:100%;justify-content:center;
+}
+
+/* Status labels */
+.status-label{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;color:var(--sage);
+  margin:16px 0 4px;
+  font-weight:500;
+}
+.status-dot{width:8px;height:8px;border-radius:50%;}
+.status-dot.green{background:#2DD4BF;box-shadow:0 0 8px rgba(45,212,191,.5);}
+.status-dot.gold{background:var(--gold);box-shadow:0 0 8px rgba(196,147,63,.5);}
+
+/* Stats row below phone */
+.phone-stats{
+  display:flex;gap:16px;margin-top:28px;
+}
+.p-stat{
+  flex:1;background:var(--card);border-radius:12px;padding:16px;
+  text-align:center;border:1px solid var(--border);
+  min-width:90px;
+}
+.p-stat-n{
+  font-family:var(--fn-d);font-size:24px;font-weight:800;
+  color:var(--gold);display:block;line-height:1;margin-bottom:4px;
+}
+.p-stat-l{font-size:11px;color:var(--sage);line-height:1.3;}
+
+/* Feature description */
+.feature-desc{
+  max-width:580px;width:100%;
+  margin-top:32px;
+  background:var(--card);border-radius:16px;
+  padding:24px;border:1px solid var(--border);
+}
+.fd-title{
+  font-family:var(--fn-d);font-weight:700;font-size:18px;
+  color:var(--linen);margin-bottom:8px;
+}
+.fd-body{font-size:14px;color:var(--sage);line-height:1.65;}
+.fd-points{margin-top:12px;display:flex;flex-direction:column;gap:6px;}
+.fd-point{
+  display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--sage);
+}
+.fd-point::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0;margin-top:1px;}
+
+/* Step indicator (right side) */
+.demo-steps{
+  display:flex;flex-direction:column;gap:0;
+  width:100%;max-width:580px;margin-bottom:32px;
+}
+.demo-step{
+  display:flex;align-items:center;gap:16px;padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  cursor:pointer;transition:opacity .2s;
+}
+.demo-step:last-child{border-bottom:none;}
+.demo-step.inactive{opacity:.4;}
+.demo-step-num{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fn-d);font-size:13px;font-weight:700;
+  transition:all .2s;
+}
+.demo-step.active .demo-step-num{background:var(--green);color:#fff;}
+.demo-step.done .demo-step-num{background:rgba(30,107,74,0.3);color:var(--green);}
+.demo-step.inactive .demo-step-num{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);}
+.demo-step-text{}
+.demo-step-title{font-size:14px;font-weight:600;color:var(--linen);margin-bottom:2px;}
+.demo-step-sub{font-size:12px;color:var(--sage);}
+
+/* Generating animation */
+.generating{
+  display:none;flex-direction:column;align-items:center;gap:12px;
+  padding:24px 0;
+}
+.generating.visible{display:flex;}
+.gen-ring{
+  width:40px;height:40px;border-radius:50%;
+  border:3px solid rgba(30,107,74,0.2);
+  border-top-color:var(--green);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.gen-text{font-size:13px;color:var(--sage);}
+
+/* Section hidden/visible */
+.step-section{display:none;}
+.step-section.active{display:block;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .demo-shell{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
+  .left-panel{position:relative;height:auto;max-height:none;}
+  .right-panel{padding:24px 16px;}
+  .phone{width:260px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">
+    <svg width="28" height="28" viewBox="0 0 56 56" fill="none">
+      <rect width="56" height="56" fill="#1E6B4A" rx="8"/>
+      <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+    </svg>
+    <span>TailWag</span>
+  </a>
+  <span class="nav-badge">Live Demo</span>
+</nav>
+
+<div class="demo-shell">
+
+  <!-- ── LEFT PANEL: INPUT ── -->
+  <div class="left-panel">
+    <div>
+      <div class="panel-label">Interactive Demo</div>
+      <div class="panel-title">See TailWag in action</div>
+      <div class="panel-sub">Enter a real dog's name and visit notes — watch the platform generate a personalized report card, reminder, and review request in seconds.</div>
+    </div>
+
+    <!-- Feature selector -->
+    <div class="panel-section">
+      <div class="panel-label">Choose a feature</div>
+      <div class="feature-tabs" id="featureTabs">
+        <button class="ftab active" onclick="setFeature('reportcard',this)">Report Card</button>
+        <button class="ftab" onclick="setFeature('reminder',this)">Reminder</button>
+        <button class="ftab" onclick="setFeature('review',this)">Review Request</button>
+      </div>
+    </div>
+
+    <!-- Report Card fields -->
+    <div id="section-reportcard" class="step-section active">
+      <div class="field">
+        <label>Dog's name</label>
+        <input type="text" id="rc-dog" placeholder="e.g. Buddy" maxlength="30">
+      </div>
+      <div class="field">
+        <label>Owner's first name</label>
+        <input type="text" id="rc-owner" placeholder="e.g. Sarah" maxlength="30">
+      </div>
+      <div class="field">
+        <label>Daycare name</label>
+        <input type="text" id="rc-daycare" placeholder="e.g. Bark &amp; Board" maxlength="40">
+      </div>
+      <div class="field">
+        <label>Staff notes from today's visit</label>
+        <textarea id="rc-notes" placeholder="e.g. played well with others, ate great, napped after lunch, loved the water fountain..."></textarea>
+      </div>
+      <div class="field">
+        <label>Staff member's name</label>
+        <input type="text" id="rc-staff" placeholder="e.g. Maya" maxlength="30">
+      </div>
+      <button class="btn btn-green" onclick="generateReportCard()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Generate Report Card
+      </button>
+    </div>
+
+    <!-- Reminder fields -->
+    <div id="section-reminder" class="step-section">
+      <div class="field">
+        <label>Dog's name</label>
+        <input type="text" id="rem-dog" placeholder="e.g. Max" maxlength="30">
+      </div>
+      <div class="field">
+        <label>Owner's first name</label>
+        <input type="text" id="rem-owner" placeholder="e.g. James" maxlength="30">
+      </div>
+      <div class="field">
+        <label>Daycare name</label>
+        <input type="text" id="rem-daycare" placeholder="e.g. The Yard Dog" maxlength="40">
+      </div>
+      <div class="field">
+        <label>Appointment day & time</label>
+        <input type="text" id="rem-time" placeholder="e.g. Thursday at 8:00 AM" maxlength="40">
+      </div>
+      <button class="btn btn-green" onclick="generateReminder()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Generate Reminder
+      </button>
+    </div>
+
+    <!-- Review fields -->
+    <div id="section-review" class="step-section">
+      <div class="field">
+        <label>Dog's name</label>
+        <input type="text" id="rev-dog" placeholder="e.g. Luna" maxlength="30">
+      </div>
+      <div class="field">
+        <label>Owner's first name</label>
+        <input type="text" id="rev-owner" placeholder="e.g. Jennifer" maxlength="30">
+      </div>
+      <div class="field">
+        <label>Daycare name</label>
+        <input type="text" id="rev-daycare" placeholder="e.g. Social Pack Dogs" maxlength="40">
+      </div>
+      <div class="field">
+        <label>Visit sentiment</label>
+        <select id="rev-sentiment">
+          <option value="great">Great day — send to Google</option>
+          <option value="okay">Okay day — skip review request</option>
+          <option value="issue">Issue flagged — route to owner</option>
+        </select>
+      </div>
+      <button class="btn btn-green" onclick="generateReview()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Generate Review Request
+      </button>
+    </div>
+
+    <!-- Spacer -->
+    <div style="flex:1;"></div>
+
+    <!-- Bottom note -->
+    <div style="padding:16px;background:#0D160F;border-radius:10px;border:1px solid var(--border);">
+      <div style="font-size:12px;color:var(--sage);line-height:1.6;">
+        <strong style="color:var(--linen);">In production,</strong> these messages are generated by AI from actual staff notes and sent automatically via SMS from your daycare's own number — no apps for pet parents to download.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL: PHONE ── -->
+  <div class="right-panel">
+
+    <!-- Step walkthrough (above phone) -->
+    <div class="demo-steps" id="demoSteps">
+      <div class="demo-step active" id="step-1">
+        <div class="demo-step-num">1</div>
+        <div class="demo-step-text">
+          <div class="demo-step-title">Staff marks the visit</div>
+          <div class="demo-step-sub">Quick notes from the daycare floor — what the dog did, ate, how they played</div>
+        </div>
+      </div>
+      <div class="demo-step inactive" id="step-2">
+        <div class="demo-step-num">2</div>
+        <div class="demo-step-text">
+          <div class="demo-step-title">TailWag generates the message</div>
+          <div class="demo-step-sub">AI writes a personalized, story-form SMS from the staff notes in seconds</div>
+        </div>
+      </div>
+      <div class="demo-step inactive" id="step-3">
+        <div class="demo-step-num">3</div>
+        <div class="demo-step-text">
+          <div class="demo-step-title">Pet parent receives it</div>
+          <div class="demo-step-sub">Lands in their Messages app — feels personal, not automated</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone mockup -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-status">
+            <span>9:41</span>
+            <span>●●●</span>
+          </div>
+          <div class="imessage-header">
+            <div class="imessage-contact" id="phone-contact">Bark &amp; Board</div>
+            <div class="imessage-subtitle">Text Message</div>
+          </div>
+          <div class="chat-area" id="chatArea">
+            <!-- Default state -->
+            <div class="bubble" id="default-bubble">
+              Hi there! 🐾 Fill in the fields and click Generate to see a personalized message appear here.
+            </div>
+          </div>
+          <div class="generating" id="generatingState">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="bubble" style="display:flex;align-items:center;gap:0;">
+                <div class="typing-indicator">
+                  <div class="dot"></div>
+                  <div class="dot"></div>
+                  <div class="dot"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats below phone -->
+    <div class="phone-stats" id="phoneStats" style="display:none;">
+      <div class="p-stat">
+        <span class="p-stat-n" id="stat1">—</span>
+        <div class="p-stat-l" id="stat1-l">Stat</div>
+      </div>
+      <div class="p-stat">
+        <span class="p-stat-n" id="stat2">—</span>
+        <div class="p-stat-l" id="stat2-l">Stat</div>
+      </div>
+      <div class="p-stat">
+        <span class="p-stat-n" id="stat3">—</span>
+        <div class="p-stat-l" id="stat3-l">Stat</div>
+      </div>
+    </div>
+
+    <!-- Feature description card -->
+    <div class="feature-desc" id="featureDesc">
+      <div class="fd-title" id="fd-title">Personalized Report Cards</div>
+      <div class="fd-body" id="fd-body">Enter any dog's name and visit notes, then click Generate to see exactly what a TailWag report card looks like in a pet parent's Messages app.</div>
+      <div class="fd-points" id="fd-points">
+        <div class="fd-point">Personalized from actual staff notes — not a template</div>
+        <div class="fd-point">Sent same afternoon, automatically, no staff action needed</div>
+        <div class="fd-point">Appears to come from your daycare's own phone number</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Feature data ─────────────────────────────────────────────
+const featureData = {
+  reportcard: {
+    title: 'Personalized Report Cards',
+    body: 'Enter any dog\'s name and visit notes, then click Generate to see exactly what a TailWag report card looks like in a pet parent\'s Messages app.',
+    points: [
+      'Personalized from actual staff notes — not a template',
+      'Sent same afternoon, automatically, no staff action needed',
+      'Appears to come from your daycare\'s own phone number'
+    ],
+    stats: [['2–4×','More Google Reviews'],['87%','Client Retention'],['$6,800','Annual Value/Client']]
+  },
+  reminder: {
+    title: 'Smart Appointment Reminders',
+    body: 'TailWag sends a personalized reminder 24 hours before each appointment. The YES/NO reply flags no-shows before the slot is lost.',
+    points: [
+      'Sends automatically 24 hours before the appointment',
+      'YES/NO reply tracked — no-shows flagged to owner immediately',
+      'Reduces no-shows by 5–8 per month on average'
+    ],
+    stats: [['5–8','Fewer No-Shows/Mo'],['$35–50','Saved Per No-Show'],['24hr','Auto-Send Window']]
+  },
+  review: {
+    title: 'Intelligent Review Requests',
+    body: 'After great visits, happy clients receive a Google review link. After flagged visits, the message goes privately to the owner — never to Google.',
+    points: [
+      'Smart sentiment gate — only great days become public reviews',
+      'Unhappy clients go directly to owner inbox for recovery',
+      '30-day throttle prevents review fatigue on repeat clients'
+    ],
+    stats: [['4.9★','Avg Google Rating'],['18%','Review Conversion'],['0','Negative Reviews Missed']]
+  }
+};
+
+let currentFeature = 'reportcard';
+
+function setFeature(f, btn) {
+  currentFeature = f;
+  document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('section-' + f).classList.add('active');
+  // Update desc card
+  const d = featureData[f];
+  document.getElementById('fd-title').textContent = d.title;
+  document.getElementById('fd-body').textContent = d.body;
+  const pts = document.getElementById('fd-points');
+  pts.innerHTML = d.points.map(p => `<div class="fd-point">${p}</div>`).join('');
+  // Reset phone
+  resetPhone();
+  // Reset steps
+  resetSteps();
+  document.getElementById('phoneStats').style.display = 'none';
+}
+
+function resetPhone() {
+  document.getElementById('chatArea').innerHTML = '<div class="bubble" id="default-bubble">Fill in the fields and click Generate to see a personalized message appear here.</div>';
+  document.getElementById('generatingState').classList.remove('visible');
+  document.getElementById('phone-contact').textContent = 'Bark & Board';
+}
+
+function resetSteps() {
+  document.getElementById('step-1').className = 'demo-step active';
+  document.getElementById('step-2').className = 'demo-step inactive';
+  document.getElementById('step-3').className = 'demo-step inactive';
+}
+
+// ── Report Card Generator ─────────────────────────────────────
+const rcTemplates = [
+  (d,o,dc,notes,staff) => `Hi ${o}! 🐾\n\n${d} had a wonderful day at ${dc}.\n\n${buildNarrativeRC(d, notes)}\n\nWe loved having ${d} — see you next time!\n\n— ${staff} & the ${dc} team`,
+  (d,o,dc,notes,staff) => `Hey ${o}!\n\n${d} was absolutely in their element today at ${dc}. ${buildNarrativeRC(d, notes)}\n\nThanks for sharing ${d} with us. We\u2019ll see you soon!\n\n— ${staff} & the team`,
+  (d,o,dc,notes,staff) => `Hi ${o} — just a note from ${dc}!\n\n${d} had a great one today. ${buildNarrativeRC(d, notes)}\n\nAlways a pleasure. See you next time!\n\n— ${staff}`
+];
+
+function buildNarrativeRC(dog, notes) {
+  if (!notes || notes.trim().length < 5) {
+    return `${dog} was social and playful all morning, had a great appetite at lunch, and settled in for a well-earned nap in the afternoon — the mark of a dog who truly enjoyed their day.`;
+  }
+  const n = notes.toLowerCase();
+  let parts = [];
+  if (n.includes('play') || n.includes('social') || n.includes('friends') || n.includes('group')) {
+    parts.push(`${dog} was in great spirits with the group — social, engaged, and loving every minute of the morning.`);
+  }
+  if (n.includes('eat') || n.includes('ate') || n.includes('food') || n.includes('appetite') || n.includes('lunch')) {
+    parts.push(`They had a great appetite and cleaned their bowl — always a good sign.`);
+  }
+  if (n.includes('nap') || n.includes('sleep') || n.includes('rest') || n.includes('tired')) {
+    parts.push(`${dog} settled in for a well-earned rest this afternoon — the mark of a dog who truly enjoyed their day.`);
+  }
+  if (n.includes('swim') || n.includes('water') || n.includes('pool') || n.includes('fountain')) {
+    parts.push(`${dog} discovered the water feature and loved it — didn\u2019t want to leave.`);
+  }
+  if (n.includes('treat') || n.includes('reward') || n.includes('train')) {
+    parts.push(`${dog} earned every treat today — good listener and a joy to work with.`);
+  }
+  if (n.includes('run') || n.includes('fast') || n.includes('zoom') || n.includes('energy')) {
+    parts.push(`${dog} had plenty of energy to burn and made the most of every square foot of the yard.`);
+  }
+  if (parts.length === 0) {
+    parts.push(`${dog} had a great visit — ${notes.trim().toLowerCase().replace(/\.$/, '')}.`);
+  }
+  return parts.join(' ');
+}
+
+function generateReportCard() {
+  const dog    = document.getElementById('rc-dog').value.trim() || 'Buddy';
+  const owner  = document.getElementById('rc-owner').value.trim() || 'Sarah';
+  const daycare= document.getElementById('rc-daycare').value.trim() || 'Bark & Board';
+  const notes  = document.getElementById('rc-notes').value.trim();
+  const staff  = document.getElementById('rc-staff').value.trim() || 'Maya';
+
+  // Update phone contact
+  document.getElementById('phone-contact').textContent = daycare;
+
+  // Step 1 → 2
+  document.getElementById('step-1').className = 'demo-step done';
+  document.getElementById('step-2').className = 'demo-step active';
+
+  // Show typing
+  document.getElementById('chatArea').innerHTML = '';
+  const gen = document.getElementById('generatingState');
+  gen.classList.add('visible');
+  gen.style.display = 'flex';
+
+  setTimeout(() => {
+    gen.classList.remove('visible');
+    gen.style.display = 'none';
+
+    // Step 2 → 3
+    document.getElementById('step-2').className = 'demo-step done';
+    document.getElementById('step-3').className = 'demo-step active';
+
+    // Pick template
+    const tmpl = rcTemplates[Math.floor(Math.random() * rcTemplates.length)];
+    const msg = tmpl(dog, owner, daycare, notes, staff);
+
+    // Render bubble
+    document.getElementById('chatArea').innerHTML =
+      `<div class="bubble-wrap"><div class="bubble">${msg.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>')}</div><div class="bubble-time">Delivered</div></div>`;
+
+    // Show stats
+    showStats('reportcard');
+  }, 1600);
+}
+
+// ── Reminder Generator ────────────────────────────────────────
+function generateReminder() {
+  const dog    = document.getElementById('rem-dog').value.trim() || 'Max';
+  const owner  = document.getElementById('rem-owner').value.trim() || 'James';
+  const daycare= document.getElementById('rem-daycare').value.trim() || 'The Yard Dog';
+  const time   = document.getElementById('rem-time').value.trim() || 'Thursday at 8:00 AM';
+
+  document.getElementById('phone-contact').textContent = daycare;
+  document.getElementById('step-1').className = 'demo-step done';
+  document.getElementById('step-2').className = 'demo-step active';
+  document.getElementById('chatArea').innerHTML = '';
+  const gen = document.getElementById('generatingState');
+  gen.classList.add('visible'); gen.style.display = 'flex';
+
+  setTimeout(() => {
+    gen.classList.remove('visible'); gen.style.display = 'none';
+    document.getElementById('step-2').className = 'demo-step done';
+    document.getElementById('step-3').className = 'demo-step active';
+
+    const msg = `Hi ${owner}! A friendly reminder that ${dog} is scheduled at ${daycare} on ${time}.\n\nReply <strong>YES</strong> to confirm or <strong>NO</strong> to cancel. We\u2019ll hold the spot for ${dog}!\n\n— The ${daycare} Team`;
+    document.getElementById('chatArea').innerHTML = `
+      <div class="bubble-wrap">
+        <div class="bubble">${msg.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>')}</div>
+        <div class="bubble-time">Delivered</div>
+      </div>
+      <div class="bubble-wrap" style="align-items:flex-end;margin-top:8px;">
+        <div class="bubble sent">YES ✓</div>
+        <div class="bubble-time">Read</div>
+      </div>
+      <div class="bubble-wrap" style="margin-top:8px;">
+        <div class="bubble">Great, ${dog}\u2019s spot is confirmed! See you ${time}. 🐾</div>
+      </div>`;
+    showStats('reminder');
+  }, 1600);
+}
+
+// ── Review Generator ──────────────────────────────────────────
+function generateReview() {
+  const dog    = document.getElementById('rev-dog').value.trim() || 'Luna';
+  const owner  = document.getElementById('rev-owner').value.trim() || 'Jennifer';
+  const daycare= document.getElementById('rev-daycare').value.trim() || 'Social Pack Dogs';
+  const sentiment = document.getElementById('rev-sentiment').value;
+
+  document.getElementById('phone-contact').textContent = daycare;
+  document.getElementById('step-1').className = 'demo-step done';
+  document.getElementById('step-2').className = 'demo-step active';
+  document.getElementById('chatArea').innerHTML = '';
+  const gen = document.getElementById('generatingState');
+  gen.classList.add('visible'); gen.style.display = 'flex';
+
+  setTimeout(() => {
+    gen.classList.remove('visible'); gen.style.display = 'none';
+    document.getElementById('step-2').className = 'demo-step done';
+    document.getElementById('step-3').className = 'demo-step active';
+
+    if (sentiment === 'great') {
+      document.getElementById('chatArea').innerHTML = `
+        <div class="bubble-wrap">
+          <div class="bubble">Hi ${owner}! We hope ${dog} had a fantastic time with us today. 🐾<br><br>If you have 30 seconds, an honest review means the world to a small business like ours.</div>
+          <div class="bubble-time">Delivered</div>
+        </div>
+        <div class="bubble-wrap" style="margin-top:12px;">
+          <div class="review-card">
+            <div class="review-stars">★★★★★</div>
+            <div class="review-text">Leave a Google Review for ${daycare}</div>
+            <a class="review-link" href="#">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+              Open Google Review →
+            </a>
+          </div>
+        </div>`;
+    } else if (sentiment === 'issue') {
+      document.getElementById('chatArea').innerHTML = `
+        <div class="bubble-wrap">
+          <div class="bubble">Hi ${owner} — thanks for bringing ${dog} in today. We want to make sure every visit is a great one.<br><br>Our owner would love to connect with you directly. What\u2019s a good time to chat?</div>
+          <div class="bubble-time">Delivered</div>
+        </div>`;
+    } else {
+      document.getElementById('chatArea').innerHTML = `
+        <div class="bubble-wrap">
+          <div class="bubble" style="color:rgba(255,255,255,0.5);font-style:italic;border:1px dashed rgba(255,255,255,0.1);">
+            Review request skipped — visit not marked as a great day.<br><br><span style="color:var(--gold);font-style:normal;font-weight:600;">TailWag never sends a review request unless a staff member explicitly marks the visit as great.</span>
+          </div>
+        </div>`;
+    }
+    showStats('review');
+  }, 1600);
+}
+
+// ── Stats ─────────────────────────────────────────────────────
+function showStats(feature) {
+  const d = featureData[feature];
+  const s = d.stats;
+  document.getElementById('stat1').textContent = s[0][0];
+  document.getElementById('stat1-l').textContent = s[0][1];
+  document.getElementById('stat2').textContent = s[1][0];
+  document.getElementById('stat2-l').textContent = s[1][1];
+  document.getElementById('stat3').textContent = s[2][0];
+  document.getElementById('stat3-l').textContent = s[2][1];
+  document.getElementById('phoneStats').style.display = 'flex';
+}
+</script>
+</body>
+</html>

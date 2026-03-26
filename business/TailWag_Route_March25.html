@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TailWag Sales Route — Master Plan</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, sans-serif; background: #f0ede8; color: #0F1410; padding: 16px; max-width: 860px; margin: 0 auto; }
+
+  /* ---- HEADER ---- */
+  .header { background: #0F1410; color: #F5F0E8; border-radius: 12px; padding: 22px 26px; margin-bottom: 16px; }
+  .header h1 { font-size: 19px; font-weight: 800; }
+  .header .sub { font-size: 12px; color: #A8C5B0; margin-top: 4px; }
+  .header .meta { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: #A8C5B0; }
+
+  /* ---- ONE LINE BANNER ---- */
+  .one-line { background: #C4933F; color: #0F1410; border-radius: 8px; padding: 11px 16px; margin-bottom: 16px; font-size: 13px; font-weight: 700; text-align: center; line-height: 1.5; }
+
+  /* ---- OPENER TIP ---- */
+  .tip { background: #1E6B4A; color: #F5F0E8; border-radius: 8px; padding: 11px 16px; margin-bottom: 20px; font-size: 13px; line-height: 1.6; }
+  .tip strong { color: #C4933F; }
+
+  /* ---- VISIT HISTORY ---- */
+  .section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin: 20px 0 8px; }
+  .history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .history-day { background: white; border-radius: 10px; padding: 12px 14px; border-left: 4px solid #1E6B4A; }
+  .history-day.today { border-left-color: #C4933F; }
+  .history-day .hd-date { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #1E6B4A; margin-bottom: 6px; }
+  .history-day.today .hd-date { color: #C4933F; }
+  .history-day .hd-stop { font-size: 12px; color: #333; line-height: 1.7; }
+  .hd-stop .visited { color: #1E6B4A; font-weight: 600; }
+  .hd-stop .outcome { font-size: 11px; color: #888; margin-left: 4px; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: 4px; vertical-align: middle; }
+  .badge.won { background: #d4edda; color: #155724; }
+  .badge.follow { background: #fff3cd; color: #856404; }
+  .badge.no { background: #f8d7da; color: #721c24; }
+  .badge.today { background: #C4933F; color: white; }
+
+  /* ---- STOP CARDS ---- */
+  .stop { background: white; border-radius: 12px; margin-bottom: 18px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  .stop-header { display: flex; align-items: stretch; }
+  .stop-num { background: #1E6B4A; color: white; font-size: 20px; font-weight: 800; min-width: 52px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .stop-title { padding: 13px 15px; flex: 1; }
+  .stop-title h2 { font-size: 15px; font-weight: 800; margin-bottom: 3px; }
+  .stop-meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11.5px; color: #666; margin-top: 3px; }
+  .stop-meta .time { color: #1E6B4A; font-weight: 700; }
+  .stop-meta .rating { color: #C4933F; font-weight: 700; }
+  .stop-body { padding: 14px 18px; border-top: 1px solid #f0ede8; }
+
+  /* ---- TAGS ---- */
+  .tags { margin-top: 6px; }
+  .tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin: 2px 2px 0 0; }
+  .tag.green { background: #e8f4ee; color: #1E6B4A; }
+  .tag.gold { background: #fdf3e3; color: #C4933F; }
+  .tag.gray { background: #f0ede8; color: #666; }
+  .tag.red { background: #fde8e8; color: #c0392b; }
+  .system-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin: 2px 2px 0 0; background: #0F1410; color: #A8C5B0; }
+  .system-badge.known { background: #1E3A5F; color: #7EC8E3; }
+
+  /* ---- TWO-COL GRID ---- */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
+  @media (max-width: 560px) { .two-col { grid-template-columns: 1fr; } }
+  .col-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-bottom: 5px; }
+  .info-row { font-size: 12.5px; color: #333; margin-bottom: 3px; line-height: 1.5; }
+  .info-row a { color: #1E6B4A; text-decoration: none; }
+  .info-row strong { color: #0F1410; }
+
+  /* ---- REVIEW BOX ---- */
+  .review-box { background: #fffbf3; border-left: 3px solid #C4933F; border-radius: 0 8px 8px 0; padding: 10px 13px; margin-bottom: 12px; }
+  .review-box .rl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C4933F; margin-bottom: 5px; }
+  .review-box .ri { font-size: 12px; color: #555; line-height: 1.6; margin-bottom: 3px; }
+
+  /* ---- PITCH BOX ---- */
+  .pitch-box { background: #f8f5f0; border-left: 3px solid #1E6B4A; border-radius: 0 8px 8px 0; padding: 12px 14px; margin-bottom: 12px; }
+  .pitch-box .pl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #1E6B4A; margin-bottom: 5px; }
+  .pitch-box .opening { font-size: 13px; font-style: italic; color: #0F1410; line-height: 1.65; }
+  .pitch-box .hook { font-size: 12px; color: #555; line-height: 1.6; margin-top: 7px; border-top: 1px solid #e8e4df; padding-top: 7px; }
+
+  /* ---- SCRIPT (EXPANDABLE) ---- */
+  details { margin-bottom: 12px; }
+  details summary { background: #0F1410; color: #F5F0E8; padding: 9px 13px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+  details summary::after { content: "▼"; font-size: 10px; color: #A8C5B0; }
+  details[open] summary::after { content: "▲"; }
+  details summary::-webkit-details-marker { display: none; }
+  .script-body { background: #fafaf8; border: 1px solid #e8e4df; border-radius: 0 0 8px 8px; padding: 14px; }
+  .script-step { margin-bottom: 14px; }
+  .script-step-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #C4933F; margin-bottom: 6px; }
+  .script-line { display: flex; gap: 10px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.6; }
+  .script-line .speaker { font-weight: 800; min-width: 52px; color: #1E6B4A; flex-shrink: 0; }
+  .script-line .speaker.owner { color: #888; }
+  .script-line .speaker.note { color: #C4933F; min-width: 52px; }
+  .script-line .text { color: #333; }
+  .script-line .text em { color: #888; font-style: italic; }
+  .stage-dir { background: #f0ede8; border-radius: 6px; padding: 7px 10px; font-size: 11.5px; color: #666; font-style: italic; margin-bottom: 8px; line-height: 1.5; }
+
+  /* ---- TALKING POINTS ---- */
+  .tp-list { margin-bottom: 12px; }
+  .tp { display: flex; gap: 9px; margin-bottom: 5px; font-size: 12.5px; color: #444; line-height: 1.5; }
+  .tp-dot { width: 17px; height: 17px; background: #1E6B4A; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .tp-dot svg { width: 9px; height: 9px; fill: white; }
+
+  /* ---- PREP CHECKLIST ---- */
+  .prep-list { margin-bottom: 12px; }
+  .prep-item { display: flex; gap: 9px; margin-bottom: 5px; font-size: 12px; color: #444; line-height: 1.5; }
+  .prep-num { width: 20px; height: 20px; background: #f0ede8; border-radius: 50%; font-size: 10px; font-weight: 800; color: #888; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+
+  /* ---- FOLLOW-UP ---- */
+  .followup { background: #0F1410; color: #A8C5B0; border-radius: 8px; padding: 10px 14px; font-size: 12px; line-height: 1.6; margin-bottom: 10px; }
+  .followup strong { color: #C4933F; }
+  .followup .ft { color: #F5F0E8; font-style: italic; margin-top: 5px; }
+
+  /* ---- DIRECTIONS ---- */
+  .directions { background: #1E3A5F; color: #7EC8E3; border-radius: 8px; padding: 9px 13px; font-size: 12px; }
+  .directions strong { color: white; }
+
+  /* ---- OBJECTIONS ---- */
+  .obj-box { background: white; border-radius: 12px; padding: 18px 20px; margin-top: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  .obj-box h3 { font-size: 13px; font-weight: 800; margin-bottom: 12px; color: #0F1410; }
+  .obj { margin-bottom: 10px; font-size: 12.5px; line-height: 1.6; }
+  .obj .q { font-weight: 700; color: #0F1410; }
+  .obj .a { color: #1E6B4A; font-style: italic; margin-top: 3px; }
+
+  /* ---- THREE PIECES ---- */
+  .three-pieces { background: #f8f5f0; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .three-pieces h4 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #999; margin-bottom: 10px; }
+  .piece { display: flex; gap: 10px; margin-bottom: 8px; }
+  .piece-num { width: 22px; height: 22px; background: #1E6B4A; color: white; border-radius: 50%; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .piece-text { font-size: 12.5px; color: #444; line-height: 1.5; }
+  .piece-text strong { color: #0F1410; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>TailWag Sales Route — Master Plan</h1>
+  <div class="sub">Single-site independent pet daycares only · Coppell · Carrollton · The Colony · Plano</div>
+  <div class="meta">
+    <span>📅 Campaign Start: March 16, 2026</span>
+    <span>📍 Base: 648 Whicker Ln, Irving TX</span>
+    <span>🎯 Goal: 14-day trial, owner present, live demo</span>
+  </div>
+</div>
+
+<div class="one-line">
+  THE ONE LINE THAT CLOSES EVERY PITCH: &ldquo;14 days. Free. I set everything up. You judge the results. If it doesn&rsquo;t work, you owe me nothing.&rdquo;
+</div>
+
+<div class="tip">
+  <strong>Walk-in opener (use every time):</strong> &ldquo;Hi &mdash; I&rsquo;m Summer. Is [owner name] in today?&rdquo; &mdash; If yes, great. If busy: <em>&ldquo;Could you let them know Summer from TailWag stopped by? It&rsquo;s about their client communication &mdash; takes about 5 minutes.&rdquo;</em> If not in: get a return time and come back.
+</div>
+
+<!-- VISIT HISTORY -->
+<div class="section-title">Campaign History &amp; Today&rsquo;s Route</div>
+<div class="history-grid">
+
+  <div class="history-day">
+    <div class="hd-date">✓ Monday, March 16</div>
+    <div class="hd-stop">
+      <div><span class="visited">1. Barney&rsquo;s Ranch</span> <span class="outcome">&mdash; update outcome</span></div>
+      <div><span class="visited">2. Social Pack Dogs</span> <span class="outcome">&mdash; update outcome</span></div>
+      <div><span class="visited">3. Playful Pet Resort</span> <span class="outcome">&mdash; update outcome</span></div>
+    </div>
+  </div>
+
+  <div class="history-day">
+    <div class="hd-date">✓ Tuesday, March 17</div>
+    <div class="hd-stop">
+      <div><span class="visited">4. Dog&rsquo;s Day Out</span> <span class="outcome">&mdash; update outcome</span></div>
+      <div><span class="visited">5. The Yard Dog</span> <span class="outcome">&mdash; update outcome</span></div>
+      <div><span class="visited">6. Canine Courtyard</span> <span class="outcome">&mdash; update outcome</span></div>
+    </div>
+  </div>
+
+  <div class="history-day">
+    <div class="hd-date">✓ Wednesday, March 18</div>
+    <div class="hd-stop">
+      <div><span class="visited">7. Wag Time Pets</span> <span class="outcome">&mdash; update outcome</span></div>
+      <div><span class="visited">8. Wuf Pet Resort &amp; Spa</span> <span class="outcome">&mdash; update outcome</span></div>
+      <div><span class="visited">9. Underdog Kennels</span> <span class="outcome">&mdash; update outcome</span></div>
+    </div>
+  </div>
+
+  <div class="history-day today">
+    <div class="hd-date">⭐ TODAY &mdash; March 25, 2026</div>
+    <div class="hd-stop">
+      <div><s>Boarding Boutique Carrollton</s> <span class="badge no">Closed</span></div>
+      <div>1. Social Pack Dogs <span class="badge today">10:30</span></div>
+      <div>2. Barney&rsquo;s Ranch <span class="badge today">11am</span></div>
+      <div>3. Petz Mania <span class="badge today">11:30</span></div>
+      <div>4. Toothacres Petcare Center <span class="badge today">12pm</span></div>
+      <div>5. Top Paw Resort <span class="badge today">12:30</span></div>
+      <div>6. Paw Oasis Pet Resort <span class="badge today">1pm</span></div>
+      <div>8. Cosmic Canine <span class="badge today">1:30</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- THE THREE PIECES (universal) -->
+<div class="section-title">The Three Pieces &mdash; Know This Cold</div>
+<div class="three-pieces" style="margin-bottom:20px;">
+  <h4>Use this in every pitch after the demo</h4>
+  <div class="piece">
+    <div class="piece-num">1</div>
+    <div class="piece-text"><strong>Daily Report Cards</strong> &mdash; Staff types 3 words. Owner gets a personalized text about their dog&rsquo;s day within a minute of checkout. Every dog. Every day. Automatically.</div>
+  </div>
+  <div class="piece">
+    <div class="piece-num">2</div>
+    <div class="piece-text"><strong>Appointment Reminders</strong> &mdash; System texts each owner the evening before. They reply YES or NO. You get a morning summary of who&rsquo;s confirmed. No more no-shows without warning.</div>
+  </div>
+  <div class="piece">
+    <div class="piece-num">3</div>
+    <div class="piece-text"><strong>Review Generation</strong> &mdash; After a great visit, TailWag sends a follow-up. Enthusiastic responses go straight to your Google page. Anything less than enthusiastic comes to you privately first &mdash; nothing negative goes public without you seeing it.</div>
+  </div>
+</div>
+
+<div class="section-title">Today&rsquo;s 7 Stops &mdash; March 25, 2026</div>
+
+<!-- ======================== STOP 1 ======================== -->
+<div class="stop">
+  <div class="stop-header">
+    <div class="stop-num">1</div>
+    <div class="stop-title">
+      <h2>Social Pack Dogs</h2>
+      <div class="stop-meta">
+        <span class="time">10:30 AM</span>
+        <span>2408 Tarpley Rd, Carrollton TX 75006</span>
+        <span class="rating">⭐ 4.7 (93 Google) · 4.8 (22 Yelp)</span>
+      </div>
+      <div class="tags">
+        <span class="tag green">Independent</span>
+        <span class="tag green">Daycare + Boarding</span>
+        <span class="tag gold">Owner-Responsive</span>
+        <span class="system-badge known">Uses iTrust</span>
+      </div>
+    </div>
+  </div>
+  <div class="stop-body">
+
+    <div class="two-col">
+      <div>
+        <div class="col-label">Contact</div>
+        <div class="info-row">📞 (214) 803-9208</div>
+        <div class="info-row">🌐 <a href="https://socialpackdogs.com">socialpackdogs.com</a></div>
+        <div class="info-row">👤 Owners: <strong>Chris &amp; Britton White</strong> (took over 2023)</div>
+        <div class="info-row">👤 Key Staff: <strong>Natasha</strong> (named in reviews)</div>
+        <div class="info-row">🕐 7–9:30am &amp; 4:30–7pm weekdays</div>
+      </div>
+      <div>
+        <div class="col-label">Business Intel</div>
+        <div class="info-row">New ownership 2023, strong review turnaround. Uses <strong>iTrust</strong> for scheduling &mdash; TailWag is NOT a replacement, it&rsquo;s the communication layer on top. Post photos to Instagram throughout the day. Small groups, max 20 dogs. Indoor/outdoor play, pools, bubbles.</div>
+      </div>
+    </div>
+
+    <div class="review-box">
+      <div class="rl">📝 Real Review Intel</div>
+      <div class="ri">✦ &ldquo;They post on Instagram all day so you can keep up with your pup&rdquo; &mdash; clients love the updates but have to seek them out on a feed. Instagram is broadcast; TailWag is personal delivery.</div>
+      <div class="ri">✦ Natasha mentioned by name in multiple reviews &mdash; the personal relationship IS the product. TailWag extends Natasha&rsquo;s care to every dog even when she&rsquo;s running the whole floor.</div>
+      <div class="ri">✦ &ldquo;Pools, bubbles, siren singalongs&rdquo; &mdash; incredible things happening that most parents never hear about in detail. Every one of those moments is a TailWag message waiting to be sent.</div>
+    </div>
+
+    <div class="pitch-box">
+      <div class="pl">Opening Line</div>
+      <div class="opening">&ldquo;Chris, Britton &mdash; hi, I&rsquo;m Summer. I noticed you took over here in 2023 and the turnaround in your reviews is genuinely impressive. 4.7 stars and 93 reviews &mdash; that&rsquo;s not luck, that&rsquo;s care. I work with pet daycares on the communication piece &mdash; the part between &lsquo;great visit&rsquo; and &lsquo;loyal client forever.&rsquo; Mind if I show you something that takes about 30 seconds to demo?&rdquo;</div>
+      <div class="hook">Hook: They&rsquo;re already doing Instagram posts all day &mdash; TailWag is the upgrade from broadcast to personal delivery. iTrust runs their operations; TailWag runs client relationships after they leave. Know that angle cold.</div>
+    </div>
+
+    <details>
+      <summary>Full Pitch Script</summary>
+      <div class="script-body">
+        <div class="script-step">
+          <div class="script-step-label">Walk-In</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Hi &mdash; are Chris or Britton in today?</span></div>
+          <div class="stage-dir">If both are there, address both. They make decisions together &mdash; expect them to want to discuss it. That&rsquo;s healthy, not a no.</div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Opening</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Chris, Britton &mdash; hi, I&rsquo;m Summer. I noticed you took over here in 2023 and the turnaround in your reviews is genuinely impressive. 4.7 stars and almost 90 reviews &mdash; that&rsquo;s not luck, that&rsquo;s care. I work with pet daycares on the communication piece &mdash; the part between &lsquo;great visit&rsquo; and &lsquo;loyal client forever.&rsquo; Mind if I show you something that took me about 30 seconds to demo?</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Discovery Question</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">You&rsquo;re using iTrust for scheduling &mdash; that&rsquo;s a solid system. What happens on the communication side after a dog&rsquo;s visit? Does the owner hear about their dog&rsquo;s day?</span></div>
+          <div class="script-line"><span class="speaker owner">OWNER</span><span class="text"><em>[Likely: &ldquo;We post on Instagram&rdquo; or &ldquo;We try to reach out when we can&rdquo;]</em></span></div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Right &mdash; and that&rsquo;s exactly the gap TailWag fills. iTrust runs your operations. TailWag runs your client relationships after they leave. Let me show you what that looks like.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Live Demo</div>
+          <div class="stage-dir">Same demo as always. Type three words, show the message, let them read it silently.</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Three words from staff. One personal message to the owner. Every dog, every day, automatically. It doesn&rsquo;t replace what iTrust does &mdash; it starts where iTrust ends.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Tie to Their Business</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">You&rsquo;ve done the hard work &mdash; you took over a business, turned the culture around, and built real loyalty in under two years. What TailWag does is make sure every single client feels that loyalty every day, not just when they&rsquo;re standing in front of you. 93 reviews is good. 200 makes you the obvious choice in Carrollton.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">The Offer</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">14-day free trial &mdash; no credit card, no contract, I handle the setup. Want to try it before you decide anything?</span></div>
+          <div class="stage-dir">Stop talking. If they say &ldquo;we need to discuss it together&rdquo; &mdash; that&rsquo;s not a no. Offer to come back when both are available, or follow up in 48 hours.</div>
+        </div>
+      </div>
+    </details>
+
+    <div class="col-label">Key Talking Points</div>
+    <div class="tp-list">
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>An Instagram post is broadcast. A TailWag message says &ldquo;Scout swam today and made a new friend&rdquo; &mdash; that&rsquo;s personal. That&rsquo;s what creates emotional loyalty.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>iTrust and TailWag do different things. Know this cold: &ldquo;iTrust handles scheduling. TailWag handles client relationships after they leave.&rdquo;</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Starter tier $97/mo. 12-month net ROI: $1,512 based on typical retention improvement.</div>
+    </div>
+
+    <div class="followup">
+      <strong>Follow-up text &mdash; send by 6 PM:</strong>
+      <div class="ft">&ldquo;Chris / Britton, great meeting you today. Attached is a sample TailWag report card for one of your dogs &mdash; this is exactly what your clients would receive. No pressure. &mdash; Summer&rdquo;</div>
+    </div>
+
+    <div class="directions"><strong>Next →</strong> Head east on Trinity Mills, north on I-35E ~2 mi. (~7 min)</div>
+  </div>
+</div>
+
+<!-- ======================== STOP 2 ======================== -->
+<div class="stop">
+  <div class="stop-header">
+    <div class="stop-num">2</div>
+    <div class="stop-title">
+      <h2>Barney&rsquo;s Ranch</h2>
+      <div class="stop-meta">
+        <span class="time">11:00 AM</span>
+        <span>1932 N I-35E, Carrollton TX 75006</span>
+        <span class="rating">⭐ 4.7 (409 Google) · 4.2 (101 Yelp)</span>
+      </div>
+      <div class="tags">
+        <span class="tag green">Independent</span>
+        <span class="tag green">Cage-Free</span>
+        <span class="tag green">Daycare + Boarding + Grooming</span>
+        <span class="tag gold">High Volume</span>
+        <span class="system-badge">System: Unknown · Has Webcam</span>
+      </div>
+    </div>
+  </div>
+  <div class="stop-body">
+
+    <div class="two-col">
+      <div>
+        <div class="col-label">Contact</div>
+        <div class="info-row">📞 (469) 450-7040</div>
+        <div class="info-row">🌐 <a href="https://barneysranch.com">barneysranch.com</a></div>
+        <div class="info-row">👤 Owner: <strong>Mathias J. Stromberg</strong></div>
+        <div class="info-row">👤 Front desk: <strong>Chad</strong> &mdash; ask for Mathias</div>
+        <div class="info-row">🕐 7am–6:30pm daily</div>
+      </div>
+      <div>
+        <div class="col-label">Business Intel</div>
+        <div class="info-row">409 reviews at 4.7★ but 4.2★ on Yelp &mdash; a notable gap. Live webcam in 16+ reviews. Staff &ldquo;Bree&rdquo; runs zen room for anxious dogs. Some reviews cite poor injury communication &mdash; proactive communication layer directly addresses this. No booking system identified.</div>
+      </div>
+    </div>
+
+    <div class="review-box">
+      <div class="rl">📝 Real Review Intel</div>
+      <div class="ri">✦ Webcam appears in 16+ reviews as top selling point &mdash; clients value visibility. But it&rsquo;s reactive: they have to check it themselves. TailWag is proactive.</div>
+      <div class="ri">✦ Staff &ldquo;Bree&rdquo; is named for giving 1-on-1 zen room attention to anxious dogs &mdash; clients love knowing their dog got individual care. Use Bree&rsquo;s name &mdash; it shows you&rsquo;ve done your homework.</div>
+      <div class="ri">✦ Negative pattern: a few reviews cite poor communication when incidents occurred. This is precisely the gap &mdash; parents felt out of the loop. TailWag prevents that.</div>
+    </div>
+
+    <div class="pitch-box">
+      <div class="pl">Opening Line</div>
+      <div class="opening">&ldquo;Mathias &mdash; hi, I&rsquo;m Summer. I looked at your Google reviews before coming in &mdash; you&rsquo;ve built something genuinely excellent here. 4.7 stars, 409 reviews, and I noticed your staff member Bree gets called out by name for the care she gives anxious dogs in the zen room. That&rsquo;s remarkable. The one thing I noticed &mdash; clients love the webcam, but they have to remember to check it. TailWag sends them the story instead. Could I show you in five minutes?&rdquo;</div>
+      <div class="hook">Hook: Reference Bree and the webcam by name &mdash; instant credibility. Webcam = reactive. TailWag = proactive. The Yelp gap (4.2 vs 4.7) is a concrete number you can mention &mdash; usually from parents who felt out of the loop.</div>
+    </div>
+
+    <details>
+      <summary>Full Pitch Script</summary>
+      <div class="script-body">
+        <div class="script-step">
+          <div class="script-step-label">Walk-In</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Hi &mdash; is Mathias in today?</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Discovery Question</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">You already have webcams &mdash; and 16 of your reviewers mentioned loving that. What made you decide to add cameras?</span></div>
+          <div class="script-line"><span class="speaker owner">OWNER</span><span class="text"><em>[Likely talks about client peace of mind, transparency]</em></span></div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">That&rsquo;s exactly it &mdash; parents want to feel connected. The camera lets them check in. TailWag reaches out to them. When Bree gives a dog extra attention in the zen room, that parent gets a message saying so &mdash; they don&rsquo;t have to figure it out from a video feed.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Live Demo + Three Pieces</div>
+          <div class="stage-dir">Demo as usual. Three pieces as usual.</div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Tie to Their Business</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Mathias, you&rsquo;re at 4.7 on Google &mdash; that&rsquo;s excellent. But your Yelp is at 4.2. That gap almost always comes from parents who felt out of the loop when something happened. TailWag closes that gap before it becomes a one-star review.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">The Offer</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">14 days. Free. I set everything up. You judge the results. If it doesn&rsquo;t work, you owe me nothing.</span></div>
+          <div class="stage-dir">Stop. Let him respond.</div>
+        </div>
+      </div>
+    </details>
+
+    <div class="col-label">Key Talking Points</div>
+    <div class="tp-list">
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>At their volume, a 5% retention improvement = significant monthly revenue. Daily report cards drive that.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Yelp 4.2 vs Google 4.7 &mdash; that gap usually means frustrated clients going elsewhere to vent. Proactive communication prevents it.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Growth tier $147/mo right fit given volume. Up to 60 dogs/day.</div>
+    </div>
+
+    <div class="followup">
+      <strong>Follow-up text &mdash; send by 6 PM:</strong>
+      <div class="ft">&ldquo;Mathias, great meeting you today. I put together a sample TailWag report card for one of your dogs &mdash; wanted you to see exactly what your clients would receive. [Attach sample]. No pressure at all. &mdash; Summer&rdquo;</div>
+    </div>
+
+    <div class="directions"><strong>Next →</strong> Continue north on I-35E, exit Frankford Rd, head west then south on Timberglen. (~8 min)</div>
+  </div>
+</div>
+
+<!-- ======================== STOP 3 ======================== -->
+<div class="stop">
+  <div class="stop-header">
+    <div class="stop-num">3</div>
+    <div class="stop-title">
+      <h2>Petz Mania</h2>
+      <div class="stop-meta">
+        <span class="time">11:30 AM</span>
+        <span>3585 Timberglen Rd, Dallas TX 75287</span>
+        <span class="rating">⭐ 4.5 (454 reviews) &mdash; most-reviewed independent in the area</span>
+      </div>
+      <div class="tags">
+        <span class="tag green">Independent</span>
+        <span class="tag green">Daycare + Boarding + Grooming</span>
+        <span class="tag green">Webcam</span>
+        <span class="tag gold">Most Reviews in Area</span>
+        <span class="system-badge known">Uses PetExec</span>
+      </div>
+    </div>
+  </div>
+  <div class="stop-body">
+
+    <div class="two-col">
+      <div>
+        <div class="col-label">Contact</div>
+        <div class="info-row">📞 (214) 731-6605</div>
+        <div class="info-row">🌐 <a href="https://petzmania.net">petzmania.net</a></div>
+        <div class="info-row">👤 Owner: Ask at front desk</div>
+        <div class="info-row">🕐 Mon–Fri 6:30am–7pm, Sat 7:30am–7pm</div>
+      </div>
+      <div>
+        <div class="col-label">Business Intel</div>
+        <div class="info-row">Confirmed <strong>PetExec</strong> user for booking/management. Has webcam for monitoring. 454 reviews at 4.5★ &mdash; the most-reviewed independent pet daycare in this corridor. Small group setting. Near Belt Line / Frankford area.</div>
+      </div>
+    </div>
+
+    <div class="review-box">
+      <div class="rl">📝 Real Review Intel</div>
+      <div class="ri">✦ 454 reviews at 4.5★ &mdash; they have an enormous, loyal client base. Most of those happy clients were probably never asked for a review at exactly the right moment.</div>
+      <div class="ri">✦ Webcam available &mdash; they already invest in transparency. TailWag is the proactive companion: camera is reactive, daily message is proactive.</div>
+      <div class="ri">✦ Small group focus &mdash; clients pay for individualized care. A personalized daily message reinforces that individual attention every single day.</div>
+    </div>
+
+    <div class="pitch-box">
+      <div class="pl">Opening Line</div>
+      <div class="opening">&ldquo;You&rsquo;re already on PetExec &mdash; so setup for TailWag takes about 20 minutes, and your client data is already in the system. But beyond the logistics, you have 454 reviews at 4.5 stars &mdash; that&rsquo;s the most reviews of any independent pet daycare in this area. That tells me you have an enormous base of happy clients. TailWag makes sure those clients keep coming back, and that their satisfaction starts showing up in your review count.&rdquo;</div>
+      <div class="hook">Hook: Lead with PetExec &mdash; removes all friction, makes this near-zero-effort. Then the review count angle: 454 reviews is impressive but 4.5 means there&rsquo;s real room to grow. Moving to 4.7 on that volume of reviews is meaningful.</div>
+    </div>
+
+    <details>
+      <summary>Full Pitch Script</summary>
+      <div class="script-body">
+        <div class="script-step">
+          <div class="script-step-label">Walk-In</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Hi &mdash; is the owner in today?</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Discovery Question</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">You&rsquo;re using PetExec for scheduling &mdash; smart system. What happens on the client communication side after a dog&rsquo;s visit? Does the owner hear about their dog&rsquo;s day?</span></div>
+          <div class="script-line"><span class="speaker owner">OWNER</span><span class="text"><em>[Likely: &ldquo;We try when we can&rdquo; or &ldquo;We post updates&rdquo;]</em></span></div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">That&rsquo;s exactly the gap TailWag fills. PetExec runs your operations. TailWag runs the relationship with the client after they drive away. Let me show you what that looks like in about 30 seconds.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Live Demo + Three Pieces</div>
+          <div class="stage-dir">Demo as usual. Three pieces as usual.</div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Tie to Their Business</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">You have 454 reviews &mdash; that&rsquo;s a remarkable base. Most of those clients are loyal and happy. TailWag makes sure that loyalty compounds &mdash; every day they get a message about their dog is another day they don&rsquo;t think about trying anywhere else.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">The Offer</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">14 days. Free. I set everything up. You judge the results. If it doesn&rsquo;t work, you owe me nothing.</span></div>
+        </div>
+      </div>
+    </details>
+
+    <div class="col-label">Key Talking Points</div>
+    <div class="tp-list">
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>PetExec integration is the lead: client data already in the system, setup is ~20 minutes, no data re-entry.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>454 reviews = enormous loyal client base. TailWag&rsquo;s review module converts silent loyalty into public proof.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Growth tier $147/mo given volume. Webcam infrastructure shows they already invest in client trust.</div>
+    </div>
+
+    <div class="followup">
+      <strong>Follow-up text &mdash; send by 6 PM:</strong>
+      <div class="ft">&ldquo;Hi &mdash; great meeting you at Petz Mania today. Since you&rsquo;re on PetExec, I mapped out exactly how TailWag would connect &mdash; attached is a sample report card your clients would receive. Takes 20 min to set up. &mdash; Summer&rdquo;</div>
+    </div>
+
+    <div class="directions"><strong>Next →</strong> Head north on Josey Ln, turn right on Parker Rd. (~6 min)</div>
+  </div>
+</div>
+
+<!-- ======================== STOP 4 ======================== -->
+<div class="stop">
+  <div class="stop-header">
+    <div class="stop-num">4</div>
+    <div class="stop-title">
+      <h2>Toothacres Petcare Center</h2>
+      <div class="stop-meta">
+        <span class="time">12:00 PM</span>
+        <span>1639 Parker Rd, Carrollton TX 75010</span>
+        <span class="rating">⭐ 4.3 Google · 4.0 Yelp · 4.6 Facebook · Est. 1967</span>
+      </div>
+      <div class="tags">
+        <span class="tag green">Family-Owned</span>
+        <span class="tag green">59 Years in Business</span>
+        <span class="tag green">Daycare + Boarding</span>
+        <span class="tag gold">Legacy Business</span>
+        <span class="system-badge">Custom Online + Phone</span>
+      </div>
+    </div>
+  </div>
+  <div class="stop-body">
+
+    <div class="two-col">
+      <div>
+        <div class="col-label">Contact</div>
+        <div class="info-row">📞 (972) 492-3711</div>
+        <div class="info-row">🌐 <a href="https://www.toothacres.com">toothacres.com</a></div>
+        <div class="info-row">👤 Owner: <strong>Truman Clem</strong> (multi-generational)</div>
+        <div class="info-row">🕐 Mon–Fri 7–11am &amp; 3–7pm · Sat 10am–12pm</div>
+      </div>
+      <div>
+        <div class="col-label">Business Intel</div>
+        <div class="info-row">Est. 1967 &mdash; 59 years of operation. Multi-generational Clem family. BBB A+ since 1995. Has online reservation system + phone for holidays. Kennel Cam available. Also operates a pet cemetery &mdash; deep community trust. Most reviews are about cremation services, not daycare.</div>
+      </div>
+    </div>
+
+    <div class="review-box">
+      <div class="rl">📝 Real Review Intel</div>
+      <div class="ri">✦ The majority of 120 Google reviews are about cremation &mdash; &ldquo;compassionate,&rdquo; &ldquo;paw prints in a nice box.&rdquo; Deeply moving reviews. But their pet daycare clients are invisible online.</div>
+      <div class="ri">✦ Daycare clients clearly trust this place &mdash; they&rsquo;ve been coming for generations. That silent loyalty isn&rsquo;t showing up on Google anywhere.</div>
+      <div class="ri">✦ They have a Kennel Cam &mdash; reactive transparency. No one is reaching out to parents proactively.</div>
+    </div>
+
+    <div class="pitch-box">
+      <div class="pl">Opening Line</div>
+      <div class="opening">&ldquo;Truman &mdash; 59 years. That&rsquo;s built on trust and relationships that most businesses never achieve. I looked at your Google reviews before coming in, and almost all of them are about your cremation services &mdash; the love people have for this place at the hardest moments. But your daycare clients? They&rsquo;re loyal and quiet. TailWag turns that silent loyalty into public proof. A review request after a great day, from a family who&rsquo;s been coming here for 20 years &mdash; that&rsquo;s a five-star review waiting to happen.&rdquo;</div>
+      <div class="hook">Hook: The review gap isn&rsquo;t a failure &mdash; it&rsquo;s a reflection of who their clients are (loyal, older, not online reviewers by habit). Reframe the silence as untapped trust. TailWag reaches them through text in a way that feels natural, not tech-heavy.</div>
+    </div>
+
+    <details>
+      <summary>Full Pitch Script</summary>
+      <div class="script-body">
+        <div class="script-step">
+          <div class="script-step-label">Walk-In</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Hi &mdash; is Truman in today?</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Discovery Question</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">You&rsquo;ve been here since 1967 &mdash; that&rsquo;s incredible. The families who&rsquo;ve been coming that long, how do they find out how their dog&rsquo;s day went? Do they hear from you, or do they just trust that things went well?</span></div>
+          <div class="script-line"><span class="speaker owner">OWNER</span><span class="text"><em>[Likely: &ldquo;They know us, they trust us&rdquo;]</em></span></div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">That&rsquo;s earned over decades &mdash; and it&rsquo;s real. But the next generation of pet parents &mdash; the millennial and Gen Z clients who are now the majority of new daycare clients &mdash; they expect a text. TailWag bridges that gap without changing who you are.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Live Demo + Three Pieces</div>
+          <div class="stage-dir">Demo as usual. Emphasize how simple it is &mdash; one browser screen, staff types 3 words, done.</div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Tie to Their Business</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Truman, you have families who&rsquo;ve been coming here for 30 years. Those families have kids now, and those kids have dogs. TailWag is how you keep those next-generation clients as loyal as their parents were &mdash; because they speak a different language, and it&rsquo;s text.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">The Offer</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">14 days. Free. I set everything up. You judge the results. If it doesn&rsquo;t work, you owe me nothing.</span></div>
+        </div>
+      </div>
+    </details>
+
+    <div class="col-label">Key Talking Points</div>
+    <div class="tp-list">
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Google reviews dominated by cremation &mdash; daycare clients are invisible. Review module surfaces the daycare experience specifically.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Already has online reservation system &mdash; TailWag works alongside it, no process changes. Staff sees one simple screen.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div">Starter tier $97/mo. Framed as the tool that keeps the legacy alive for the next generation of pet parents.</div>
+    </div>
+
+    <div class="followup">
+      <strong>Follow-up text &mdash; send by 6 PM:</strong>
+      <div class="ft">&ldquo;Truman, it was a pleasure meeting you today. I put together a sample TailWag message for one of your daycare clients &mdash; this is exactly what they&rsquo;d receive after a great day. [Attach sample]. No pressure &mdash; Summer&rdquo;</div>
+    </div>
+
+    <div class="directions"><strong>Next →</strong> Continue east on Parker Rd, north on Marsh Ridge Rd. (~5 min)</div>
+  </div>
+</div>
+
+<!-- ======================== STOP 5 ======================== -->
+<div class="stop">
+  <div class="stop-header">
+    <div class="stop-num">5</div>
+    <div class="stop-title">
+      <h2>Top Paw Resort</h2>
+      <div class="stop-meta">
+        <span class="time">12:30 PM</span>
+        <span>4272 Marsh Ridge Rd, Carrollton TX 75010</span>
+        <span class="rating">⭐ 4.7 Google (194 reviews) · 4.5 Yelp · 4.9 Facebook (98% recommend)</span>
+      </div>
+      <div class="tags">
+        <span class="tag green">Family-Owned</span>
+        <span class="tag green">Luxury</span>
+        <span class="tag green">Live Cameras</span>
+        <span class="tag green">Daycare + Boarding + Spa</span>
+        <span class="tag gold">Premium Opportunity</span>
+        <span class="system-badge">System: Unknown · Cameras in 15 reviews</span>
+      </div>
+    </div>
+  </div>
+  <div class="stop-body">
+
+    <div class="two-col">
+      <div>
+        <div class="col-label">Contact</div>
+        <div class="info-row">📞 (972) 307-7648</div>
+        <div class="info-row">🌐 <a href="https://www.toppawresort.com">toppawresort.com</a></div>
+        <div class="info-row">👤 Owner: Family-owned (ask at front desk)</div>
+        <div class="info-row">🕐 Mon–Fri 7am–7pm, Sat 9am–4pm, Sun 9am–1pm</div>
+      </div>
+      <div>
+        <div class="col-label">Business Intel</div>
+        <div class="info-row">4.9★ Facebook, 98% recommend on Yelp. Cameras in 15+ reviews. Staff noted in reviews for recording each dog&rsquo;s eating habits and special requests at check-in. Dogs rotated every 30 min between yards. On-site grooming, pet shop. Individual care at intake.</div>
+      </div>
+    </div>
+
+    <div class="review-box">
+      <div class="rl">📝 Real Review Intel</div>
+      <div class="ri">✦ &ldquo;Staff took specific note of her eating habits and special requests&rdquo; &mdash; they already track individual dog details at intake. That information never makes it back to the parent.</div>
+      <div class="ri">✦ &ldquo;I&rsquo;m not sure how they get such great people to work here&rdquo; &mdash; staff quality is the differentiator. TailWag lets that quality show up in the parent&rsquo;s phone every day.</div>
+      <div class="ri">✦ Cameras in 15+ reviews &mdash; they invest in visibility and it resonates. TailWag takes that further: camera is passive viewing, daily message is active storytelling.</div>
+    </div>
+
+    <div class="pitch-box">
+      <div class="pl">Opening Line</div>
+      <div class="opening">&ldquo;Your staff takes specific notes on each dog at check-in &mdash; eating habits, special requests. I read that in your reviews. That level of care is remarkable. But right now that information stays on your end. TailWag takes what your staff already knows and puts it in the parent&rsquo;s hands at 5pm: &lsquo;Franklin had a big lunch, ran the east yard twice, and made a new friend today.&rsquo; That message is worth more to a loyal client than any camera.&rdquo;</div>
+      <div class="hook">Hook: The individual care they&rsquo;re already providing is invisible to parents. TailWag makes the invisible visible &mdash; using information their staff is already collecting. Zero new work, maximum impact per client.</div>
+    </div>
+
+    <details>
+      <summary>Full Pitch Script</summary>
+      <div class="script-body">
+        <div class="script-step">
+          <div class="script-step-label">Walk-In</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Hi &mdash; is the owner in today?</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Discovery Question</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">I noticed your staff takes intake notes on each dog &mdash; eating habits, special needs. That&rsquo;s incredible care. When does that information make it back to the owner?</span></div>
+          <div class="script-line"><span class="speaker owner">OWNER</span><span class="text"><em>[Likely: &ldquo;Mostly at pickup&rdquo;]</em></span></div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">So all that individual attention &mdash; it lives in your staff&rsquo;s heads and at the front desk. TailWag takes it and puts it in the parent&rsquo;s phone. Let me show you what I mean.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Live Demo + Three Pieces</div>
+          <div class="stage-dir">Demo as usual. Emphasize the personalization &mdash; it sounds like it was written by someone who actually spent the day with the dog.</div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Tie to Their Business</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">You have 98% recommend on Yelp. That&rsquo;s loyalty most businesses will never see. TailWag converts that loyalty into reviews by asking at exactly the right moment after a great day &mdash; and it keeps those clients coming back by making sure they feel that same connection even when they&rsquo;re not here.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">The Offer</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">14 days. Free. I set everything up. You judge the results. If it doesn&rsquo;t work, you owe me nothing.</span></div>
+        </div>
+      </div>
+    </details>
+
+    <div class="col-label">Key Talking Points</div>
+    <div class="tp-list">
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Spa and suite clients are highest-value. A personalized message reinforces the luxury they paid for and drives rebooking.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>98% recommend on Yelp &mdash; TailWag&rsquo;s review module converts that recommendation into Google reviews they don&rsquo;t currently have.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Growth tier $147/mo. Staff quality plus TailWag personalization = unbeatable retention.</div>
+    </div>
+
+    <div class="followup">
+      <strong>Follow-up text &mdash; send by 6 PM:</strong>
+      <div class="ft">&ldquo;Great meeting you today at Top Paw. Here&rsquo;s a sample of what your clients would receive &mdash; note how the individual details your staff already tracks come through in the message. [Attach]. &mdash; Summer&rdquo;</div>
+    </div>
+
+    <div class="directions"><strong>Next →</strong> Head north on Marsh Ridge Rd, merge onto Sam Rayburn Tollway (Hwy 121) north. (~10 min)</div>
+  </div>
+</div>
+
+<!-- ======================== STOP 6 ======================== -->
+<div class="stop">
+  <div class="stop-header">
+    <div class="stop-num">6</div>
+    <div class="stop-title">
+      <h2>Paw Oasis Pet Resort</h2>
+      <div class="stop-meta">
+        <span class="time">1:00 PM</span>
+        <span>4770 Windhaven Pkwy, The Colony TX 75056</span>
+        <span class="rating">⭐ 4.4 Google (201 reviews) · 2.7 Yelp ⚠️</span>
+      </div>
+      <div class="tags">
+        <span class="tag green">Women-Owned</span>
+        <span class="tag green">Independent</span>
+        <span class="tag green">Daycare + Grooming + Boarding</span>
+        <span class="tag gold">Gingr Integration</span>
+        <span class="tag red">Yelp Risk ⚠️</span>
+        <span class="system-badge known">✓ Uses GINGR</span>
+      </div>
+    </div>
+  </div>
+  <div class="stop-body">
+
+    <div class="two-col">
+      <div>
+        <div class="col-label">Contact</div>
+        <div class="info-row">📞 (214) 432-1579</div>
+        <div class="info-row">🌐 <a href="https://pawoasispetresort.com">pawoasispetresort.com</a></div>
+        <div class="info-row">👤 Owner: <strong>Nicole Linden</strong></div>
+        <div class="info-row">🕐 Daily 7am–12:30pm &amp; 2–6:30pm</div>
+      </div>
+      <div>
+        <div class="col-label">Business Intel</div>
+        <div class="info-row"><strong>Confirmed Gingr user</strong> (portal at gingrapp.com) &mdash; TailWag integrates directly, setup ~20 min. 30,000+ sq ft of turf, bone-shaped pool, drive-through drop-off. Groomer Trevor praised by name. Owner not always on-site (per employee reviews). Separated from Bliss Pet Resort 2022.</div>
+      </div>
+    </div>
+
+    <div class="review-box">
+      <div class="rl">📝 Real Review Intel</div>
+      <div class="ri">✦ Yelp 2.7★ vs Google 4.4★ &mdash; a serious platform gap. Yelp reviews cite: dog injury with no follow-up, grooming damage ($125 upcharge, dog left bleeding), hidden fees. Google masks this.</div>
+      <div class="ri">✦ Groomer Trevor specifically praised for remembering clients and adding personal touches &mdash; the personal care IS there when it&rsquo;s there, but it&rsquo;s inconsistent.</div>
+      <div class="ri">✦ Owner rarely on-site &mdash; a communication layer that works automatically keeps client experience visible to Nicole even when she&rsquo;s not there.</div>
+    </div>
+
+    <div class="pitch-box">
+      <div class="pl">Opening Line</div>
+      <div class="opening">&ldquo;Nicole &mdash; you&rsquo;re already on Gingr, which means TailWag integrates directly &mdash; setup is about 20 minutes, your client data is already there. But I want to be straight with you: I looked at your Yelp reviews, and there&rsquo;s a real gap between how your Google clients see you and how a few others do. Almost every one of those complaints has the same root &mdash; a parent who felt like they weren&rsquo;t being kept in the loop. TailWag closes that loop.&rdquo;</div>
+      <div class="hook">Hook: Lead with Gingr &mdash; zero friction. Then address the Yelp gap honestly. She&rsquo;ll respect you more for seeing it, and it makes the case concrete and specific. Be direct, not defensive.</div>
+    </div>
+
+    <details>
+      <summary>Full Pitch Script</summary>
+      <div class="script-body">
+        <div class="script-step">
+          <div class="script-step-label">Walk-In</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Hi &mdash; is Nicole in today?</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Discovery Question</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">You&rsquo;re on Gingr for scheduling &mdash; that&rsquo;s a great system. What happens on the communication side after a client picks up? Does the owner hear about their dog&rsquo;s day?</span></div>
+          <div class="script-line"><span class="speaker owner">OWNER</span><span class="text"><em>[Likely: &ldquo;We try when we can&rdquo;]</em></span></div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">That&rsquo;s exactly the gap. Gingr runs your operations beautifully. TailWag runs the relationship with the client after they leave. And since you&rsquo;re already on Gingr, the integration is about 20 minutes. Let me show you the demo.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Live Demo + Three Pieces</div>
+          <div class="stage-dir">Demo as usual.</div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Tie to Their Business</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Nicole, I looked at your reviews across platforms before coming in. Your Google is strong. But there&rsquo;s a gap on Yelp, and almost every one of those complaints is from a parent who felt uninformed. TailWag doesn&rsquo;t fix a bad experience &mdash; but it prevents a good experience from being perceived as a bad one because nobody reached out.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">The Offer</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">14 days. Free. I set everything up. You judge the results. If it doesn&rsquo;t work, you owe me nothing.</span></div>
+        </div>
+      </div>
+    </details>
+
+    <div class="col-label">Key Talking Points</div>
+    <div class="tp-list">
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div><strong>Gingr integration is the lead:</strong> client data already in Gingr, no re-entry, ~20 min setup.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>With owner not always on-site, TailWag is how Nicole sees client satisfaction without being there.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Review module only sends to &ldquo;great day&rdquo; flagged clients &mdash; protects against unhappy clients being pushed public.</div>
+    </div>
+
+    <div class="followup">
+      <strong>Follow-up text &mdash; send by 6 PM:</strong>
+      <div class="ft">&ldquo;Nicole, great meeting you today. Since you&rsquo;re on Gingr, I put together exactly how the integration would work &mdash; plus a sample report card. Setup is about 20 minutes. [Attach]. &mdash; Summer&rdquo;</div>
+    </div>
+
+    <div class="directions"><strong>Next →</strong> Take Sam Rayburn Tollway (121) east to Dallas Pkwy, south to Ohio Dr. (~12 min)</div>
+  </div>
+</div>
+
+<!-- ======================== STOP 7 ======================== -->
+<div class="stop">
+  <div class="stop-header">
+    <div class="stop-num">7</div>
+    <div class="stop-title">
+      <h2>Cosmic Canine</h2>
+      <div class="stop-meta">
+        <span class="time">1:30 PM</span>
+        <span>1101 Ohio Dr, Ste 101, Plano TX 75093</span>
+        <span class="rating">⭐ 4.7 Google · 4.5 Yelp (59 reviews)</span>
+      </div>
+      <div class="tags">
+        <span class="tag green">Locally Owned</span>
+        <span class="tag green">All-Certified Trainers</span>
+        <span class="tag green">Daycare + Training + Boarding + Grooming</span>
+        <span class="tag gold">Premium Opportunity</span>
+        <span class="system-badge">System: Unknown</span>
+      </div>
+    </div>
+  </div>
+  <div class="stop-body">
+
+    <div class="two-col">
+      <div>
+        <div class="col-label">Contact</div>
+        <div class="info-row">📞 (972) 596-5976</div>
+        <div class="info-row">🌐 <a href="https://www.cosmiccanine.com">cosmiccanine.com</a></div>
+        <div class="info-row">👤 Owner: Certified trainers (ask at front desk)</div>
+        <div class="info-row">🕐 Mon–Fri 7am–7pm, Sat 9am–4pm</div>
+      </div>
+      <div>
+        <div class="col-label">Business Intel</div>
+        <div class="info-row">Every staff member is a certified trainer or in a 2,000-hour apprenticeship. Already send daily updates, photos, videos &mdash; manual and inconsistent. BBB A+. Recommended by local vets. Clients report significant behavioral improvements after training.</div>
+      </div>
+    </div>
+
+    <div class="review-box">
+      <div class="rl">📝 Real Review Intel</div>
+      <div class="ri">✦ &ldquo;Dogs go home enriched and fulfilled, not just tired&rdquo; &mdash; their philosophy centers on individual dog progress. Clients notice and rave about it specifically.</div>
+      <div class="ri">✦ Reviewers report behavioral improvements &mdash; decreased anxiety, better recall, improved manners. That transformation story deserves to be told every single day in a message home.</div>
+      <div class="ri">✦ They already send daily updates, photos, videos &mdash; the instinct is there but it&rsquo;s manual and inconsistent. TailWag makes it automatic for every dog every day.</div>
+    </div>
+
+    <div class="pitch-box">
+      <div class="pl">Opening Line</div>
+      <div class="opening">&ldquo;Every one of your staff is a certified trainer. Your clients leave reviews saying their dog came home with better recall, less anxiety, more confidence. That&rsquo;s extraordinary &mdash; and it&rsquo;s not what most pet daycares can say. But imagine if at the end of every single day, the parent got a message: &lsquo;Max worked on his recall today and really nailed the stay command.&rsquo; That message doesn&rsquo;t just make them smile &mdash; it makes them realize their dog is in the most valuable place they could possibly be.&rdquo;</div>
+      <div class="hook">Hook: No other pet daycare in the area can send training-specific report cards. It&rsquo;s a differentiation that reinforces their premium positioning and makes the value of the service tangible every day &mdash; not just at eval time. This is their competitive moat.</div>
+    </div>
+
+    <details>
+      <summary>Full Pitch Script</summary>
+      <div class="script-body">
+        <div class="script-step">
+          <div class="script-step-label">Walk-In</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">Hi &mdash; is the owner or manager in today?</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Discovery Question</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">You already send daily updates &mdash; photos, videos. How does that process work right now? Is it consistent across every dog every day, or does it depend on who&rsquo;s working?</span></div>
+          <div class="script-line"><span class="speaker owner">OWNER</span><span class="text"><em>[Likely: &ldquo;We try but it depends on the day&rdquo;]</em></span></div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">That&rsquo;s exactly what TailWag solves. The instinct you already have &mdash; to keep parents informed &mdash; it just makes sure every dog gets it every day, not just when someone remembers. And for a trainer-run facility, you can make those messages reflect what the dog actually worked on. Let me show you.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Live Demo + Three Pieces</div>
+          <div class="stage-dir">Demo as usual. Emphasize the customization: staff can note training-specific details that become part of the message.</div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">Tie to Their Business</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">No franchise, no big-box competitor can send &ldquo;your dog mastered a new skill today.&rdquo; That&rsquo;s a TailWag plus Cosmic Canine exclusive. It makes the value of your training program visible every single day &mdash; not just at eval time.</span></div>
+        </div>
+        <div class="script-step">
+          <div class="script-step-label">The Offer</div>
+          <div class="script-line"><span class="speaker">YOU</span><span class="text">14 days. Free. I set everything up. You judge the results. If it doesn&rsquo;t work, you owe me nothing.</span></div>
+          <div class="stage-dir">Done by 2:00 PM. Head south on Dallas Pkwy back toward Irving (~25 min).</div>
+        </div>
+      </div>
+    </details>
+
+    <div class="col-label">Key Talking Points</div>
+    <div class="tp-list">
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>They already send updates &mdash; TailWag systematizes it. Every dog, every day. Ends with a review request to the right clients.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Training progress in a report card is a competitive moat no franchise can replicate. &ldquo;Your dog mastered a new skill today&rdquo; is a Cosmic Canine exclusive.</div>
+      <div class="tp"><div class="tp-dot"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Pro tier $197/mo. BBB A+ clients expect premium everything &mdash; including communication.</div>
+    </div>
+
+    <div class="followup">
+      <strong>Follow-up text &mdash; send by 6 PM:</strong>
+      <div class="ft">&ldquo;Great meeting you at Cosmic Canine today. I customized a sample TailWag report card to reflect training-specific language &mdash; this is what your clients would receive after a training day. [Attach]. &mdash; Summer&rdquo;</div>
+    </div>
+
+    <div class="directions"><strong>🎉 Done by 2:00 PM.</strong> Head south on Dallas Pkwy back toward Irving (~25 min).</div>
+  </div>
+</div>
+
+<!-- OBJECTION HANDLERS -->
+<div class="obj-box">
+  <h3>Universal Objection Handlers</h3>
+
+  <div class="obj">
+    <div class="q">&ldquo;My staff is already good about telling people at pickup.&rdquo;</div>
+    <div class="a">&ldquo;That&rsquo;s great &mdash; and pickup communication is valuable. But think about the owner who&rsquo;s also wrangling kids in the car, or the one who wants to share a cute update with their spouse later that night. A text they can read at their own pace and screenshot &mdash; that&rsquo;s a different experience than a 30-second conversation at the door. Both matter. This just adds the one they&rsquo;re missing.&rdquo;</div>
+  </div>
+
+  <div class="obj">
+    <div class="q">&ldquo;We already post on Instagram / send photos manually.&rdquo;</div>
+    <div class="a">&ldquo;That&rsquo;s exactly the instinct TailWag is built on. This makes sure every single parent gets that experience every day &mdash; not just the ones who follow you or the ones you remember to text. Automated, personalized, consistent.&rdquo;</div>
+  </div>
+
+  <div class="obj">
+    <div class="q">&ldquo;We already have webcams.&rdquo;</div>
+    <div class="a">&ldquo;Webcams are great &mdash; but they&rsquo;re passive. Parents have to remember to check. TailWag reaches out to them. Proactive always outperforms reactive for client satisfaction.&rdquo;</div>
+  </div>
+
+  <div class="obj">
+    <div class="q">&ldquo;I don&rsquo;t want my clients getting too many texts.&rdquo;</div>
+    <div class="a">&ldquo;Built in &mdash; one message per dog per visit. That&rsquo;s it. They can opt out any time with a single reply. We&rsquo;re not spamming anyone &mdash; it&rsquo;s one personal update on a day their dog was actually there.&rdquo;</div>
+  </div>
+
+  <div class="obj">
+    <div class="q">&ldquo;We&rsquo;re not interested in more tech.&rdquo;</div>
+    <div class="a">&ldquo;No new system to learn &mdash; it runs in a browser, your staff sees one simple screen at the end of the day. Setup is 20 minutes. It&rsquo;s not a platform change, it&rsquo;s one extra touchpoint that runs itself.&rdquo;</div>
+  </div>
+
+  <div class="obj">
+    <div class="q">&ldquo;How much does it cost?&rdquo;</div>
+    <div class="a">&ldquo;For a facility your size it&rsquo;s $97 to $147 a month &mdash; but the trial is completely free. You don&rsquo;t pay anything until you&rsquo;ve seen it work. Let the 14 days answer the question for you.&rdquo;</div>
+  </div>
+
+  <div class="obj">
+    <div class="q">&ldquo;I need to think about it.&rdquo;</div>
+    <div class="a">&ldquo;Of course. What part would you want to think through? I&rsquo;d rather answer it while I&rsquo;m here than make you track me down later. Is it the price, how your staff would use it, or something about whether it fits your setup?&rdquo;</div>
+  </div>
+</div>
+
+</body>
+</html>

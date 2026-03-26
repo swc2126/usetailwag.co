@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TailWag — Signal Stack Logo (Direction 2)
+  Three concentric arcs: reads as wireless signal + dog tail in motion
+  Full Color | Light Background
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 56" width="420" height="112" role="img" aria-label="TailWag">
+  <title>TailWag</title>
+  <defs>
+    <style>
+      .tw-wm {
+        font-family: 'Neue Montreal', 'DM Sans', 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        font-size: 30px;
+        letter-spacing: -0.5px;
+      }
+    </style>
+  </defs>
+
+  <!-- White background -->
+  <rect width="210" height="56" fill="#FFFFFF"/>
+
+  <!--
+    Signal Stack icon — three arcs fanning upward from a base point.
+    Center: (26, 38). Arc angles: 195° to 345° (150° span).
+    All arcs use sweep-flag=0 (counter-clockwise = upward bow in screen coords).
+    Arcs are ordered large-to-small so larger arcs render below smaller ones.
+  -->
+
+  <!-- Large arc (r=24) — outermost signal ring -->
+  <path d="M 2.8 31.8 A 24 24 0 0 0 49.2 31.8"
+        stroke="#1E6B4A"
+        stroke-width="4.5"
+        stroke-linecap="round"
+        fill="none"
+        opacity="0.45"/>
+
+  <!-- Medium arc (r=16) — middle signal ring -->
+  <path d="M 10.5 33.9 A 16 16 0 0 0 41.5 33.9"
+        stroke="#1E6B4A"
+        stroke-width="4.5"
+        stroke-linecap="round"
+        fill="none"
+        opacity="0.72"/>
+
+  <!-- Small arc (r=8) — innermost signal ring -->
+  <path d="M 18.3 35.9 A 8 8 0 0 0 33.7 35.9"
+        stroke="#1E6B4A"
+        stroke-width="4.5"
+        stroke-linecap="round"
+        fill="none"/>
+
+  <!-- Base dot — the origin point / tail base -->
+  <circle cx="26" cy="38" r="3" fill="#1E6B4A"/>
+
+  <!-- Wordmark -->
+  <text x="64" y="38" class="tw-wm" fill="#0F1410">TailWag</text>
+</svg>
