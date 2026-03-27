@@ -106,7 +106,7 @@
       background: #fff; border-radius: 12px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 28px;
     }
-    .table-card-header { padding: 20px 20px 0; margin-bottom: 16px; }
+    .table-card-header { padding: 20px 20px 0; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
     .table-card-header h2 {
       font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 18px; color: var(--black);
     }
@@ -119,7 +119,7 @@
     tbody tr { border-bottom: 1px solid rgba(0,0,0,0.05); }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: rgba(30,107,74,0.02); }
-    tbody td { padding: 13px 20px; font-size: 13px; color: var(--slate); }
+    tbody td { padding: 13px 20px; font-size: 13px; color: var(--slate); vertical-align: middle; }
 
     .status-badge {
       display: inline-block; padding: 3px 9px; border-radius: 20px;
@@ -129,6 +129,26 @@
     .status-sent { background: rgba(66,153,225,0.12); color: #2b6cb0; }
     .status-failed { background: rgba(229,62,62,0.1); color: #e53e3e; }
     .status-queued, .status-none { background: rgba(0,0,0,0.06); color: #999; }
+
+    /* Review status badges */
+    .rev-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
+    }
+    .rev-badge-gray { background: rgba(0,0,0,0.06); color: #888; }
+    .rev-badge-amber { background: rgba(196,147,63,0.15); color: var(--gold); }
+    .rev-badge-green { background: rgba(30,107,74,0.12); color: var(--green); }
+
+    /* Action buttons in status table */
+    .rev-action-btn {
+      background: none; border: 1px solid #ddd; color: var(--slate);
+      padding: 5px 12px; border-radius: 6px; font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .rev-action-btn:hover { border-color: var(--green); color: var(--green); background: rgba(30,107,74,0.05); }
+    .rev-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .rev-action-btn.sending { opacity: 0.6; cursor: not-allowed; }
 
     /* PREVIEW MODAL */
     .modal-overlay {
@@ -270,6 +290,29 @@
       <div class="send-result" id="sendResult"></div>
     </div>
 
+    <!-- Review Status section -->
+    <div class="table-card" id="reviewStatusCard">
+      <div class="table-card-header">
+        <h2>Review Status</h2>
+      </div>
+      <div id="reviewStatusLoading" style="text-align:center;padding:30px;">
+        <div class="loading-spinner" style="width:22px;height:22px;border-width:2px;"></div>
+      </div>
+      <div id="reviewStatusContent" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>Client &amp; Dog</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="reviewStatusBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- History -->
     <div class="table-card">
       <div class="table-card-header">
@@ -322,6 +365,24 @@
   let daycareName = '';
   let googleLink = '';
 
+  // Review status stored in localStorage
+  // Key: tailwag_review_status
+  // Value: { [clientId]: 'not_requested' | 'requested' | 'reviewed' }
+  function getReviewStatuses() {
+    try {
+      return JSON.parse(localStorage.getItem('tailwag_review_status') || '{}');
+    } catch { return {}; }
+  }
+  function setReviewStatus(clientId, status) {
+    const statuses = getReviewStatuses();
+    statuses[clientId] = status;
+    localStorage.setItem('tailwag_review_status', JSON.stringify(statuses));
+  }
+  function getReviewStatus(clientId) {
+    const statuses = getReviewStatuses();
+    return statuses[clientId] || 'not_requested';
+  }
+
   function escHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -329,28 +390,24 @@
 
   async function getShortLink(originalUrl) {
     try {
-      const session = JSON.parse(localStorage.getItem('tailwag_session'));
       const res = await fetch('/api/shortlinks', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify({ original_url: originalUrl, label: 'Google Review' })
       });
       const data = await res.json();
       return data.short_url || originalUrl;
     } catch {
-      return originalUrl; // fallback to original
+      return originalUrl;
     }
   }
 
   async function buildTemplate(clientName, dogName) {
     if (!googleLink) {
-      return 'Hi ' + clientName + '! \uD83D\uDC3E Thanks for bringing ' + dogName + ' to ' + (daycareName || 'our daycare') + ' today. We\'d love a quick review \u2014 it means the world to us! \uD83C\uDF1F';
+      return `Hi ${clientName}! \uD83D\uDC3E Thanks for bringing ${dogName} to ${daycareName || 'our daycare'} today. We'd love a quick review \u2014 it means the world to us! \uD83C\uDF1F`;
     }
     const shortUrl = await getShortLink(googleLink);
-    return 'Hi ' + clientName + '! \uD83D\uDC3E Thanks for bringing ' + dogName + ' to ' + (daycareName || 'our daycare') + ' today. We\'d love a quick review: ' + shortUrl + ' \u2014 it means the world to us! \uD83C\uDF1F';
+    return `Hi ${clientName}! \uD83D\uDC3E Thanks for bringing ${dogName} to ${daycareName || 'our daycare'} today. We'd love a quick review: ${shortUrl} \u2014 it means the world to us! \uD83C\uDF1F`;
   }
 
   async function onClientChange() {
@@ -372,38 +429,26 @@
       document.getElementById('sendResult').style.display = 'none';
     }
 
-    const client = allClients.find(function(c) { return c.id === clientId; });
+    const client = allClients.find(c => c.id === clientId);
     if (!client) return;
 
-    // Populate dog dropdown
     if (client.dogs && client.dogs.length) {
-      client.dogs.forEach(function(d) {
-        var opt = document.createElement('option');
+      client.dogs.forEach(d => {
+        const opt = document.createElement('option');
         opt.value = d.id;
         opt.textContent = d.name;
         dogSel.appendChild(opt);
       });
-      // Auto-select first dog and fill template
       dogSel.value = client.dogs[0].id;
-      document.getElementById('msgBody').value = 'Loading...';
-      document.getElementById('msgBody').value = await buildTemplate(
-        client.first_name,
-        client.dogs[0].name
-      );
+      document.getElementById('msgBody').value = await buildTemplate(client.first_name, client.dogs[0].name);
     } else {
-      document.getElementById('msgBody').value = 'Loading...';
       document.getElementById('msgBody').value = await buildTemplate(client.first_name, '[their dog]');
     }
 
-    // Update template when dog changes
     dogSel.onchange = async function() {
       const dogId = dogSel.value;
-      const dog = (client.dogs || []).find(function(d) { return d.id === dogId; });
-      document.getElementById('msgBody').value = 'Loading...';
-      document.getElementById('msgBody').value = await buildTemplate(
-        client.first_name,
-        dog ? dog.name : '[their dog]'
-      );
+      const dog = (client.dogs || []).find(d => d.id === dogId);
+      document.getElementById('msgBody').value = await buildTemplate(client.first_name, dog ? dog.name : '[their dog]');
     };
   }
 
@@ -432,7 +477,7 @@
       resultEl.className = 'send-result error'; resultEl.style.display = 'block'; return;
     }
 
-    const client = allClients.find(function(c) { return c.id === clientId; });
+    const client = allClients.find(c => c.id === clientId);
     if (!client || !client.phone) {
       resultEl.textContent = 'Selected client has no phone number.';
       resultEl.className = 'send-result error'; resultEl.style.display = 'block'; return;
@@ -445,11 +490,7 @@
       const res = await fetch('/api/sms/send', {
         method: 'POST',
         headers: authHeaders,
-        body: JSON.stringify({
-          client_id: client.id,
-          recipient_phone: client.phone,
-          body: body
-        })
+        body: JSON.stringify({ client_id: client.id, recipient_phone: client.phone, body })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Send failed');
@@ -457,14 +498,17 @@
       resultEl.textContent = 'Review request sent successfully!';
       resultEl.className = 'send-result success'; resultEl.style.display = 'block';
 
+      // Mark as requested in localStorage
+      setReviewStatus(clientId, 'requested');
+
       // Reset form
       document.getElementById('clientSelect').value = '';
       document.getElementById('dogSelect').innerHTML = '<option value="">— Select client first —</option>';
       document.getElementById('msgBody').value = '';
 
-      // Reload history
       loadHistory();
       loadStats();
+      renderReviewStatus();
 
     } catch (err) {
       resultEl.textContent = err.message;
@@ -472,6 +516,119 @@
     } finally {
       sendBtn.textContent = 'Send Review Request'; sendBtn.disabled = false;
     }
+  }
+
+  // ── Review Status Table ──
+  async function sendReviewRequestForClient(clientId) {
+    const client = allClients.find(c => c.id === clientId);
+    if (!client || !client.phone) {
+      alert('This client has no phone number on file.');
+      return;
+    }
+
+    const btn = document.getElementById(`rev-btn-${clientId}`);
+    if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
+
+    try {
+      const dogName = (client.dogs && client.dogs[0]) ? client.dogs[0].name : '[their dog]';
+      const body = await buildTemplate(client.first_name, dogName);
+
+      const res = await fetch('/api/sms/send', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ client_id: client.id, recipient_phone: client.phone, body })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Send failed');
+
+      setReviewStatus(clientId, 'requested');
+      renderReviewStatus();
+      loadHistory();
+      loadStats();
+
+    } catch (err) {
+      alert('Failed to send: ' + err.message);
+      if (btn) { btn.textContent = 'Send Review Request'; btn.disabled = false; }
+    }
+  }
+
+  async function requestSocialPost(clientId) {
+    const client = allClients.find(c => c.id === clientId);
+    if (!client || !client.phone) {
+      alert('This client has no phone number on file.');
+      return;
+    }
+
+    const btn = document.getElementById(`rev-btn-${clientId}`);
+    if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
+
+    try {
+      const dogName = (client.dogs && client.dogs[0]) ? client.dogs[0].name : 'your pup';
+      const dc = daycareName || 'us';
+      const body = `Hi ${client.first_name}! Thank you so much for the kind review. 🐾 Would you be willing to share a photo of ${dogName} and tag us on social? We'd love to feature you! — ${dc}`;
+
+      const res = await fetch('/api/sms/send', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ client_id: client.id, recipient_phone: client.phone, body })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Send failed');
+
+      alert('Social post request sent!');
+      loadHistory();
+
+    } catch (err) {
+      alert('Failed to send: ' + err.message);
+    } finally {
+      if (btn) { btn.textContent = 'Request Social Post'; btn.disabled = false; }
+    }
+  }
+
+  function renderReviewStatus() {
+    const tbody = document.getElementById('reviewStatusBody');
+    document.getElementById('reviewStatusLoading').style.display = 'none';
+    document.getElementById('reviewStatusContent').style.display = 'block';
+
+    if (!allClients.length) {
+      tbody.innerHTML = '<tr><td colspan="3"><div class="empty-state">No clients yet.</div></td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = allClients.map(c => {
+      const status = getReviewStatus(c.id);
+      const dogLabel = (c.dogs && c.dogs.length)
+        ? c.dogs.map(d => escHtml(d.name)).join(', ')
+        : 'No dogs';
+
+      let badge, actionHtml;
+
+      if (status === 'not_requested') {
+        badge = '<span class="rev-badge rev-badge-gray">Not yet requested</span>';
+        actionHtml = `<button class="rev-action-btn" id="rev-btn-${c.id}" onclick="sendReviewRequestForClient('${c.id}')">Send Review Request</button>`;
+      } else if (status === 'requested') {
+        badge = '<span class="rev-badge rev-badge-amber">Requested</span>';
+        actionHtml = `<button class="rev-action-btn" id="rev-btn-${c.id}" onclick="markReviewed('${c.id}')">Mark as Reviewed</button>`;
+      } else if (status === 'reviewed') {
+        badge = '<span class="rev-badge rev-badge-green">Reviewed</span>';
+        actionHtml = `<button class="rev-action-btn" id="rev-btn-${c.id}" onclick="requestSocialPost('${c.id}')">Request Social Post</button>`;
+      }
+
+      return `
+        <tr>
+          <td>
+            <div style="font-weight:600">${escHtml(c.first_name)} ${escHtml(c.last_name)}</div>
+            <div style="font-size:11px;color:#bbb;margin-top:2px;">${dogLabel}</div>
+          </td>
+          <td>${badge}</td>
+          <td>${actionHtml}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  function markReviewed(clientId) {
+    setReviewStatus(clientId, 'reviewed');
+    renderReviewStatus();
   }
 
   async function loadStats() {
@@ -500,23 +657,23 @@
         return;
       }
 
-      tbody.innerHTML = messages.map(function(m) {
+      tbody.innerHTML = messages.map(m => {
         const clientName = m.clients
-          ? ((m.clients.first_name || '') + ' ' + (m.clients.last_name || '')).trim()
+          ? `${m.clients.first_name || ''} ${m.clients.last_name || ''}`.trim()
           : (m.recipient_phone || '—');
         const date = new Date(m.created_at).toLocaleString('en-US', {
           month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
         });
         const preview = (m.body || '').length > 70 ? m.body.substring(0, 70) + '\u2026' : (m.body || '');
         const status = m.status || 'queued';
-        return '<tr>' +
-          '<td style="white-space:nowrap;color:#999">' + date + '</td>' +
-          '<td style="font-weight:600">' + escHtml(clientName) + '</td>' +
-          '<td style="color:#666;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(preview) + '</td>' +
-          '<td><span class="status-badge status-' + status + '">' + status + '</span></td>' +
-          '</tr>';
+        return `<tr>
+          <td style="white-space:nowrap;color:#999">${date}</td>
+          <td style="font-weight:600">${escHtml(clientName)}</td>
+          <td style="color:#666;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(preview)}</td>
+          <td><span class="status-badge status-${status}">${status}</span></td>
+        </tr>`;
       }).join('');
-    } catch (e) {
+    } catch {
       document.getElementById('historyLoading').style.display = 'none';
       document.getElementById('historyContent').style.display = 'block';
       document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="4"><div class="empty-state">Could not load history.</div></td></tr>';
@@ -540,32 +697,29 @@
 
       if (daycareRes.ok) {
         const dashData = await daycareRes.json();
-        if (dashData.daycare && dashData.daycare.name) {
-          daycareName = dashData.daycare.name;
-        }
-        if (dashData.daycare && dashData.daycare.google_link) {
-          googleLink = dashData.daycare.google_link;
-        }
+        if (dashData.daycare && dashData.daycare.name) daycareName = dashData.daycare.name;
+        if (dashData.daycare && dashData.daycare.google_link) googleLink = dashData.daycare.google_link;
       }
 
       // Populate client dropdown
       const clientSel = document.getElementById('clientSelect');
-      allClients.forEach(function(c) {
+      allClients.forEach(c => {
         const opt = document.createElement('option');
         opt.value = c.id;
-        opt.textContent = c.first_name + ' ' + c.last_name + (c.phone ? ' (' + c.phone + ')' : '');
+        opt.textContent = `${c.first_name} ${c.last_name}${c.phone ? ' (' + c.phone + ')' : ''}`;
         clientSel.appendChild(opt);
       });
 
-      document.getElementById('userName').textContent = session.user && session.user.email ? session.user.email : '';
+      document.getElementById('userName').textContent = session.user?.email || '';
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('pageContent').style.display = 'block';
 
       loadStats();
       loadHistory();
+      renderReviewStatus();
 
     } catch (err) {
-      document.getElementById('loadingState').innerHTML = '<p style="color:#e53e3e;font-size:14px;">' + escHtml(err.message) + '</p>';
+      document.getElementById('loadingState').innerHTML = `<p style="color:#e53e3e;font-size:14px;">${escHtml(err.message)}</p>`;
     }
   }
 

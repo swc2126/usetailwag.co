@@ -126,6 +126,8 @@
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: rgba(30,107,74,0.03); }
     tbody td { padding: 14px 20px; font-size: 14px; color: var(--slate); }
+
+    /* ── DOG CHIPS ── */
     .dog-chip {
       display: inline-block;
       background: rgba(168,197,176,0.25);
@@ -135,7 +137,13 @@
       padding: 2px 8px;
       border-radius: 12px;
       margin: 2px 2px 0 0;
+      cursor: pointer;
+      transition: background 0.15s;
     }
+    .dog-chip:hover {
+      background: rgba(30,107,74,0.2);
+    }
+
     .action-btn {
       background: none;
       border: none;
@@ -150,6 +158,8 @@
     .edit-btn:hover { background: rgba(30,107,74,0.1); }
     .delete-btn { color: #e53e3e; }
     .delete-btn:hover { background: rgba(229,62,62,0.1); }
+    .add-dog-btn { color: var(--gold); }
+    .add-dog-btn:hover { background: rgba(196,147,63,0.1); }
 
     /* ── EMPTY / LOADING ── */
     .empty-state { text-align: center; padding: 60px 20px; color: #999; }
@@ -190,7 +200,7 @@
     }
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--slate); margin-bottom: 6px; }
-    .form-group input, .form-group textarea {
+    .form-group input, .form-group textarea, .form-group select {
       width: 100%;
       padding: 10px 14px;
       border: 1px solid #ddd;
@@ -201,7 +211,7 @@
       transition: border-color 0.2s;
       outline: none;
     }
-    .form-group input:focus, .form-group textarea:focus { border-color: var(--green); }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--green); }
     .form-group textarea { resize: vertical; min-height: 80px; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
@@ -218,8 +228,25 @@
       transition: border-color 0.2s;
     }
     .btn-secondary:hover { border-color: #999; }
+    .btn-danger {
+      background: none;
+      border: 1px solid #fed7d7;
+      color: #e53e3e;
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-danger:hover { background: rgba(229,62,62,0.08); }
 
     .error-msg { background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; border-radius: 8px; padding: 12px 16px; font-size: 13px; margin-bottom: 16px; display: none; }
+
+    /* Dog modal delete btn aligned left */
+    .modal-actions-split { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+    .modal-actions-right { display: flex; gap: 12px; }
 
     @media (max-width: 640px) {
       .dashboard-nav { padding: 0 16px; }
@@ -294,7 +321,7 @@
   </div>
 </div>
 
-<!-- Add / Edit Modal -->
+<!-- Add / Edit Client Modal -->
 <div class="modal-overlay" id="clientModal">
   <div class="modal">
     <h2 id="modalTitle">Add Client</h2>
@@ -323,8 +350,99 @@
       <textarea id="notes" placeholder="Any notes about this client..."></textarea>
     </div>
     <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
-      <button class="btn-primary" id="saveBtn" onclick="saveClient()">Save Client</button>
+      <button class="btn-secondary" onclick="closeClientModal()">Cancel</button>
+      <button class="btn-primary" id="saveClientBtn" onclick="saveClient()">Save Client</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Dog Modal -->
+<div class="modal-overlay" id="addDogModal">
+  <div class="modal">
+    <h2>Add Dog</h2>
+    <div class="error-msg" id="addDogError"></div>
+    <input type="hidden" id="addDogClientId">
+    <div class="form-group">
+      <label>Dog Name *</label>
+      <input type="text" id="dogName" placeholder="Buddy">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Breed</label>
+        <input type="text" id="dogBreed" placeholder="Golden Retriever">
+      </div>
+      <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="dogAge" placeholder="3" min="0" max="30">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Weight (lbs)</label>
+        <input type="number" id="dogWeight" placeholder="65" min="0">
+      </div>
+      <div class="form-group">
+        <!-- spacer -->
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Medications</label>
+      <input type="text" id="dogMedications" placeholder="e.g. Benadryl 25mg">
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="dogNotes" placeholder="Anything staff should know..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeAddDogModal()">Cancel</button>
+      <button class="btn-primary" id="saveAddDogBtn" onclick="saveAddDog()">Add Dog</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Dog Modal -->
+<div class="modal-overlay" id="editDogModal">
+  <div class="modal">
+    <h2>Edit Dog</h2>
+    <div class="error-msg" id="editDogError"></div>
+    <input type="hidden" id="editDogId">
+    <div class="form-group">
+      <label>Dog Name *</label>
+      <input type="text" id="editDogName" placeholder="Buddy">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Breed</label>
+        <input type="text" id="editDogBreed" placeholder="Golden Retriever">
+      </div>
+      <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="editDogAge" placeholder="3" min="0" max="30">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Weight (lbs)</label>
+        <input type="number" id="editDogWeight" placeholder="65" min="0">
+      </div>
+      <div class="form-group">
+        <!-- spacer -->
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Medications</label>
+      <input type="text" id="editDogMedications" placeholder="e.g. Benadryl 25mg">
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="editDogNotes" placeholder="Anything staff should know..."></textarea>
+    </div>
+    <div class="modal-actions-split">
+      <button class="btn-danger" onclick="removeDog()">Remove Dog</button>
+      <div class="modal-actions-right">
+        <button class="btn-secondary" onclick="closeEditDogModal()">Cancel</button>
+        <button class="btn-primary" id="saveEditDogBtn" onclick="saveEditDog()">Save Changes</button>
+      </div>
     </div>
   </div>
 </div>
@@ -362,18 +480,26 @@
       tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No clients yet. Add your first client above.</div></td></tr>';
       return;
     }
-    tbody.innerHTML = clients.map(c => `
-      <tr>
-        <td><strong>${escHtml(c.first_name)} ${escHtml(c.last_name)}</strong></td>
-        <td>${escHtml(c.phone || '—')}</td>
-        <td>${escHtml(c.email || '—')}</td>
-        <td>${(c.dogs || []).map(d => `<span class="dog-chip">${escHtml(d.name)}</span>`).join('')||'—'}</td>
-        <td>
-          <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit</button>
-          <button class="action-btn delete-btn" onclick="deleteClient('${c.id}', '${escHtml(c.first_name)} ${escHtml(c.last_name)}')">Delete</button>
-        </td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = clients.map(c => {
+      const dogsHtml = (c.dogs || []).length
+        ? (c.dogs || []).map(d =>
+            `<span class="dog-chip" onclick="openEditDogModal(${JSON.stringify(d).replace(/"/g,'&quot;')}, '${c.id}')" title="Edit ${escHtml(d.name)}">${escHtml(d.name)}</span>`
+          ).join('')
+        : '—';
+      return `
+        <tr>
+          <td><strong>${escHtml(c.first_name)} ${escHtml(c.last_name)}</strong></td>
+          <td>${escHtml(c.phone || '—')}</td>
+          <td>${escHtml(c.email || '—')}</td>
+          <td>${dogsHtml}</td>
+          <td>
+            <button class="action-btn add-dog-btn" onclick="openAddDogModal('${c.id}')">+ Dog</button>
+            <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit</button>
+            <button class="action-btn delete-btn" onclick="deleteClient('${c.id}', '${escHtml(c.first_name)} ${escHtml(c.last_name)}')">Delete</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
   }
 
   function escHtml(str) {
@@ -381,6 +507,7 @@
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  // ── CLIENT MODAL ──
   function openAddModal() {
     document.getElementById('modalTitle').textContent = 'Add Client';
     document.getElementById('clientId').value = '';
@@ -389,7 +516,7 @@
     document.getElementById('phone').value = '';
     document.getElementById('email').value = '';
     document.getElementById('notes').value = '';
-    document.getElementById('saveBtn').textContent = 'Save Client';
+    document.getElementById('saveClientBtn').textContent = 'Save Client';
     document.getElementById('modalError').style.display = 'none';
     document.getElementById('clientModal').classList.add('open');
   }
@@ -402,12 +529,12 @@
     document.getElementById('phone').value = client.phone || '';
     document.getElementById('email').value = client.email || '';
     document.getElementById('notes').value = client.notes || '';
-    document.getElementById('saveBtn').textContent = 'Update Client';
+    document.getElementById('saveClientBtn').textContent = 'Update Client';
     document.getElementById('modalError').style.display = 'none';
     document.getElementById('clientModal').classList.add('open');
   }
 
-  function closeModal() {
+  function closeClientModal() {
     document.getElementById('clientModal').classList.remove('open');
   }
 
@@ -426,7 +553,7 @@
       return;
     }
 
-    const saveBtn = document.getElementById('saveBtn');
+    const saveBtn = document.getElementById('saveClientBtn');
     saveBtn.textContent = 'Saving...';
     saveBtn.disabled = true;
 
@@ -439,7 +566,7 @@
         body: JSON.stringify({ first_name, last_name, phone, email, notes })
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to save'); }
-      closeModal();
+      closeClientModal();
       await loadClients();
     } catch (err) {
       errEl.textContent = err.message;
@@ -463,15 +590,171 @@
     }
   }
 
+  // ── ADD DOG MODAL ──
+  function openAddDogModal(clientId) {
+    document.getElementById('addDogClientId').value = clientId;
+    document.getElementById('dogName').value = '';
+    document.getElementById('dogBreed').value = '';
+    document.getElementById('dogAge').value = '';
+    document.getElementById('dogWeight').value = '';
+    document.getElementById('dogMedications').value = '';
+    document.getElementById('dogNotes').value = '';
+    document.getElementById('addDogError').style.display = 'none';
+    document.getElementById('addDogModal').classList.add('open');
+  }
+
+  function closeAddDogModal() {
+    document.getElementById('addDogModal').classList.remove('open');
+  }
+
+  async function saveAddDog() {
+    const client_id = document.getElementById('addDogClientId').value;
+    const name = document.getElementById('dogName').value.trim();
+    const breed = document.getElementById('dogBreed').value.trim();
+    const age = document.getElementById('dogAge').value.trim();
+    const weight = document.getElementById('dogWeight').value.trim();
+    const medications = document.getElementById('dogMedications').value.trim();
+    const notes = document.getElementById('dogNotes').value.trim();
+    const errEl = document.getElementById('addDogError');
+
+    if (!name) {
+      errEl.textContent = 'Dog name is required.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('saveAddDogBtn');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/dogs', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          client_id,
+          name,
+          breed: breed || null,
+          age: age ? parseInt(age) : null,
+          weight: weight ? parseFloat(weight) : null,
+          medications: medications || null,
+          notes: notes || null
+        })
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to add dog'); }
+      closeAddDogModal();
+      await loadClients();
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+    } finally {
+      btn.textContent = 'Add Dog';
+      btn.disabled = false;
+    }
+  }
+
+  // ── EDIT DOG MODAL ──
+  let _editDogClientId = null;
+
+  function openEditDogModal(dog, clientId) {
+    _editDogClientId = clientId;
+    document.getElementById('editDogId').value = dog.id;
+    document.getElementById('editDogName').value = dog.name || '';
+    document.getElementById('editDogBreed').value = dog.breed || '';
+    document.getElementById('editDogAge').value = dog.age != null ? dog.age : '';
+    document.getElementById('editDogWeight').value = dog.weight != null ? dog.weight : '';
+    document.getElementById('editDogMedications').value = dog.medications || '';
+    document.getElementById('editDogNotes').value = dog.notes || '';
+    document.getElementById('editDogError').style.display = 'none';
+    document.getElementById('editDogModal').classList.add('open');
+  }
+
+  function closeEditDogModal() {
+    document.getElementById('editDogModal').classList.remove('open');
+    _editDogClientId = null;
+  }
+
+  async function saveEditDog() {
+    const id = document.getElementById('editDogId').value;
+    const name = document.getElementById('editDogName').value.trim();
+    const breed = document.getElementById('editDogBreed').value.trim();
+    const age = document.getElementById('editDogAge').value.trim();
+    const weight = document.getElementById('editDogWeight').value.trim();
+    const medications = document.getElementById('editDogMedications').value.trim();
+    const notes = document.getElementById('editDogNotes').value.trim();
+    const errEl = document.getElementById('editDogError');
+
+    if (!name) {
+      errEl.textContent = 'Dog name is required.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('saveEditDogBtn');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`/api/dogs/${id}`, {
+        method: 'PUT',
+        headers: authHeaders,
+        body: JSON.stringify({
+          name,
+          breed: breed || null,
+          age: age ? parseInt(age) : null,
+          weight: weight ? parseFloat(weight) : null,
+          medications: medications || null,
+          notes: notes || null
+        })
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to save dog'); }
+      closeEditDogModal();
+      await loadClients();
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+    } finally {
+      btn.textContent = 'Save Changes';
+      btn.disabled = false;
+    }
+  }
+
+  async function removeDog() {
+    const id = document.getElementById('editDogId').value;
+    const name = document.getElementById('editDogName').value || 'this dog';
+    if (!confirm(`Remove ${name}? This cannot be undone.`)) return;
+
+    const btn = document.getElementById('saveEditDogBtn');
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`/api/dogs/${id}`, { method: 'DELETE', headers: authHeaders });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Delete failed'); }
+      closeEditDogModal();
+      await loadClients();
+    } catch (err) {
+      const errEl = document.getElementById('editDogError');
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+      btn.disabled = false;
+    }
+  }
+
   function handleLogout() {
     localStorage.removeItem('tailwag_session');
     localStorage.removeItem('tailwag_user');
     window.location.href = '/';
   }
 
-  // Close modal on overlay click
+  // Close modals on overlay click
   document.getElementById('clientModal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
+    if (e.target === this) closeClientModal();
+  });
+  document.getElementById('addDogModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAddDogModal();
+  });
+  document.getElementById('editDogModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditDogModal();
   });
 
   loadClients();

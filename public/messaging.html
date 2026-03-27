@@ -35,6 +35,7 @@
     .logout-btn {
       background: transparent; border: 1px solid rgba(245,240,232,0.3); color: var(--linen);
       padding: 7px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: border-color 0.2s;
     }
     .logout-btn:hover { border-color: var(--linen); }
 
@@ -54,88 +55,149 @@
     .usage-bar-fill.danger { background: #e53e3e; }
     .usage-count { font-size: 13px; font-weight: 700; color: var(--slate); white-space: nowrap; }
 
-    /* Main layout */
-    .messaging-layout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; margin-bottom: 32px; }
+    /* Main two-column layout */
+    .messaging-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; margin-bottom: 32px; align-items: start; }
 
-    /* Client list */
+    /* ── LEFT PANEL: Client Roster ── */
     .client-panel {
       background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      overflow: hidden; height: fit-content; max-height: 560px; display: flex; flex-direction: column;
+      overflow: hidden; display: flex; flex-direction: column; max-height: 700px;
     }
-    .client-panel-header { padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.06); }
-    .client-panel-header h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; color: var(--black); margin-bottom: 10px; }
+    .client-panel-header { padding: 16px 16px 12px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .client-panel-header h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px;
+      color: var(--black); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
     .search-input {
       width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px;
-      font-family: 'Inter', sans-serif; font-size: 13px; outline: none;
+      font-family: 'Inter', sans-serif; font-size: 13px; outline: none; color: var(--slate);
     }
     .search-input:focus { border-color: var(--green); }
     .client-list { overflow-y: auto; flex: 1; }
     .client-item {
       padding: 12px 16px; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.04);
-      transition: background 0.15s; display: flex; justify-content: space-between; align-items: center;
+      transition: background 0.15s;
     }
+    .client-item:last-child { border-bottom: none; }
     .client-item:hover { background: rgba(30,107,74,0.05); }
-    .client-item.selected { background: rgba(30,107,74,0.1); }
-    .client-item-name { font-size: 13px; font-weight: 600; color: var(--slate); }
-    .client-item-phone { font-size: 11px; color: #999; margin-top: 2px; }
-    .check-icon { color: var(--green); font-size: 16px; display: none; }
-    .client-item.selected .check-icon { display: block; }
-
-    /* Compose panel */
-    .compose-panel { display: flex; flex-direction: column; gap: 16px; }
-    .compose-card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-    .compose-card h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 16px; color: var(--black); margin-bottom: 16px; }
-
-    /* Recipients chips */
-    .recipients-area {
-      min-height: 44px; border: 1px solid #ddd; border-radius: 8px; padding: 8px;
-      display: flex; flex-wrap: wrap; gap: 6px; cursor: text;
+    .client-item.selected { background: rgba(30,107,74,0.1); border-left: 3px solid var(--green); }
+    .client-item:not(.selected) { border-left: 3px solid transparent; }
+    .client-item-dog { font-size: 13px; font-weight: 700; color: var(--slate); }
+    .client-item-owner { font-size: 12px; color: #888; margin-top: 2px; }
+    .client-item-bottom { margin-top: 5px; display: flex; justify-content: space-between; align-items: center; }
+    .breed-chip {
+      display: inline-block; background: rgba(196,147,63,0.12); color: var(--gold);
+      font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
     }
-    .recipients-area.has-focus { border-color: var(--green); }
-    .recipient-chip {
-      background: rgba(30,107,74,0.12); color: var(--green-dark); font-size: 12px; font-weight: 600;
-      padding: 4px 10px 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 6px;
+    .selected-tag {
+      font-size: 10px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.5px;
+      display: none;
     }
-    .chip-remove { cursor: pointer; font-size: 14px; color: var(--green); line-height: 1; }
-    .chip-remove:hover { color: #e53e3e; }
-    .no-recipients { font-size: 13px; color: #bbb; padding: 4px; }
+    .client-item.selected .selected-tag { display: block; }
 
-    /* Textarea */
+    /* No dogs fallback row */
+    .client-item-no-dog { font-size: 13px; font-weight: 600; color: var(--slate); }
+    .client-item-no-dog-sub { font-size: 11px; color: #bbb; margin-top: 2px; }
+
+    /* ── RIGHT PANEL: Compose ── */
+    .compose-panel { display: flex; flex-direction: column; gap: 0; }
+
+    /* Empty state */
+    .compose-empty {
+      background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 80px 40px; text-align: center; min-height: 360px;
+    }
+    .compose-empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+    .compose-empty p { font-size: 15px; color: #aaa; }
+
+    /* Compose active */
+    .compose-active { display: flex; flex-direction: column; gap: 16px; }
+
+    .compose-card {
+      background: #fff; border-radius: 12px; padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .section-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      color: #999; margin-bottom: 10px; display: block;
+    }
+
+    /* Staff notes */
+    .notes-textarea {
+      width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--slate);
+      resize: vertical; min-height: 90px; outline: none; line-height: 1.6;
+    }
+    .notes-textarea:focus { border-color: var(--green); }
+
+    /* Quick note chips */
+    .quick-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .quick-chip {
+      display: inline-block; background: var(--linen); border: 1px solid rgba(0,0,0,0.1);
+      color: var(--slate); font-size: 12px; font-weight: 500; padding: 4px 10px;
+      border-radius: 20px; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+    .quick-chip:hover { background: rgba(30,107,74,0.08); border-color: var(--green); color: var(--green-dark); }
+
+    /* Template selector */
+    .template-select {
+      width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--slate);
+      outline: none; background: #fff; cursor: pointer; margin-bottom: 12px;
+    }
+    .template-select:focus { border-color: var(--green); }
+
     .msg-textarea {
       width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px;
       font-family: 'Inter', sans-serif; font-size: 14px; color: var(--slate);
-      resize: vertical; min-height: 120px; outline: none; line-height: 1.6;
+      resize: vertical; min-height: 130px; outline: none; line-height: 1.6;
     }
     .msg-textarea:focus { border-color: var(--green); }
-    .char-count { text-align: right; font-size: 12px; color: #999; margin-top: 4px; }
+
+    /* Great Day toggle */
+    .toggle-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .toggle-label-wrap { flex: 1; }
+    .toggle-subtext { font-size: 12px; color: #999; margin-top: 3px; }
+    .toggle-subtext.on { color: var(--green); }
+
+    /* Pure CSS pill toggle */
+    .toggle-switch { position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: #ddd; border-radius: 26px; transition: background 0.2s;
+    }
+    .toggle-slider:before {
+      content: ''; position: absolute;
+      height: 20px; width: 20px; left: 3px; bottom: 3px;
+      background: #fff; border-radius: 50%; transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--green); }
+    .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+    /* Char count + send */
+    .send-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .char-count { font-size: 13px; color: #999; }
     .char-count.warning { color: var(--gold); }
     .char-count.over { color: #e53e3e; }
-
-    /* Media section */
-    .media-section { margin-top: 12px; }
-    .media-toggle-btn {
-      background: none; border: 1px solid #ddd; color: var(--slate);
-      padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
-      cursor: pointer; display: flex; align-items: center; gap: 6px;
-    }
-    .media-toggle-btn:hover { border-color: var(--green); color: var(--green); }
-    .media-preview { margin-top: 10px; display: none; }
-    .media-preview img, .media-preview video { max-height: 140px; border-radius: 8px; border: 1px solid #ddd; }
-    .media-remove { font-size: 12px; color: #e53e3e; cursor: pointer; margin-top: 4px; display: block; }
-
-    /* Action buttons */
-    .compose-actions { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+    .compose-actions { display: flex; gap: 10px; margin-left: auto; }
     .btn-outline {
       background: none; border: 1px solid var(--green); color: var(--green);
       padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: background 0.2s; font-family: 'Inter', sans-serif;
     }
     .btn-outline:hover { background: rgba(30,107,74,0.06); }
     .btn-primary {
       background: var(--green); color: var(--linen); border: none; padding: 10px 24px;
-      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: background 0.2s; font-family: 'Inter', sans-serif; white-space: nowrap;
     }
     .btn-primary:hover { background: var(--green-dark); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary.sent { background: var(--green-dark); }
 
     .send-result { font-size: 13px; margin-top: 8px; display: none; }
     .send-result.success { color: var(--green); }
@@ -143,7 +205,10 @@
 
     /* History table */
     .history-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
-    .history-card h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 16px; color: var(--black); padding: 20px 20px 0; margin-bottom: 16px; }
+    .history-card-header { padding: 20px 20px 0; margin-bottom: 16px; }
+    .history-card-header h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 16px; color: var(--black);
+    }
     table { width: 100%; border-collapse: collapse; }
     thead { background: var(--black); }
     thead th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--sage); }
@@ -152,7 +217,6 @@
     tbody tr:hover { background: rgba(30,107,74,0.02); }
     tbody td { padding: 12px 16px; font-size: 13px; color: var(--slate); }
     .msg-preview { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
     .status-badge {
       display: inline-block; padding: 3px 9px; border-radius: 20px;
       font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
@@ -183,11 +247,9 @@
       padding: 10px 14px; font-size: 13px; line-height: 1.5; text-align: left;
       max-width: 90%; align-self: flex-end; word-break: break-word;
     }
-    .bubble-media { max-width: 90%; align-self: flex-end; }
-    .bubble-media img { max-width: 180px; border-radius: 12px; }
     .btn-secondary {
       background: none; border: 1px solid #ddd; color: var(--slate); padding: 9px 20px;
-      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+      border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer;
     }
 
     .empty-state { text-align: center; padding: 40px 20px; color: #bbb; font-size: 13px; }
@@ -198,11 +260,16 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       .messaging-layout { grid-template-columns: 1fr; }
+      .client-panel { max-height: 320px; }
+    }
+    @media (max-width: 640px) {
       .nav-links { display: none; }
       .dashboard-nav { padding: 0 16px; }
       .page-container { padding: 20px 16px; }
+      .send-row { flex-direction: column; align-items: flex-start; }
+      .compose-actions { margin-left: 0; }
     }
   </style>
 </head>
@@ -242,6 +309,7 @@
   </div>
 
   <div id="pageContent" style="display:none;">
+
     <!-- Usage banner -->
     <div class="usage-banner">
       <span class="usage-label">Messages this month</span>
@@ -253,59 +321,103 @@
       <span class="usage-count" id="usageCount">— / —</span>
     </div>
 
-    <!-- Main layout -->
+    <!-- Two-column layout -->
     <div class="messaging-layout">
-      <!-- Client list panel -->
+
+      <!-- LEFT: Client Roster -->
       <div class="client-panel">
         <div class="client-panel-header">
-          <h3>Clients</h3>
-          <input type="text" class="search-input" id="clientSearch" placeholder="Search clients..." oninput="filterClients()">
+          <h3>Client Roster</h3>
+          <input type="text" class="search-input" id="clientSearch"
+            placeholder="Search by dog or owner name..." oninput="filterClients()">
         </div>
         <div class="client-list" id="clientList">
           <div class="empty-state">No clients found.</div>
         </div>
       </div>
 
-      <!-- Compose panel -->
-      <div class="compose-panel">
-        <div class="compose-card">
-          <h3>Compose Message</h3>
+      <!-- RIGHT: Compose -->
+      <div class="compose-panel" id="composePanel">
 
-          <div style="margin-bottom:12px;">
-            <label style="font-size:12px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">To</label>
-            <div class="recipients-area" id="recipientsArea">
-              <span class="no-recipients" id="noRecipientsHint">Click clients on the left to add recipients</span>
+        <!-- Empty state -->
+        <div class="compose-empty" id="composeEmpty">
+          <div class="compose-empty-icon">&#8592;</div>
+          <p>Select a client to get started</p>
+        </div>
+
+        <!-- Active compose (hidden until client selected) -->
+        <div class="compose-active" id="composeActive" style="display:none;">
+
+          <!-- Section 1: Staff Notes -->
+          <div class="compose-card">
+            <span class="section-label">Staff Notes</span>
+            <textarea class="notes-textarea" id="staffNotes"
+              placeholder="What happened today? Even a few words helps."
+              oninput="onStaffNotesChange()"></textarea>
+            <div class="quick-chips">
+              <span class="quick-chip" onclick="appendNote('Loved fetch 🎾')">Loved fetch 🎾</span>
+              <span class="quick-chip" onclick="appendNote('New friend 🐾')">New friend 🐾</span>
+              <span class="quick-chip" onclick="appendNote('Water obsessed 💦')">Water obsessed 💦</span>
+              <span class="quick-chip" onclick="appendNote('Napped hard 😴')">Napped hard 😴</span>
+              <span class="quick-chip" onclick="appendNote('Zoomies 🌀')">Zoomies 🌀</span>
+              <span class="quick-chip" onclick="appendNote('Star listener ⭐')">Star listener ⭐</span>
+              <span class="quick-chip" onclick="appendNote('High energy 🔥')">High energy 🔥</span>
+              <span class="quick-chip" onclick="appendNote('Shy but sweet 🤍')">Shy but sweet 🤍</span>
+              <span class="quick-chip" onclick="appendNote('Ate everything 🍖')">Ate everything 🍖</span>
+              <span class="quick-chip" onclick="appendNote('Extra playful 🎉')">Extra playful 🎉</span>
             </div>
           </div>
 
-          <div style="margin-bottom:4px;">
-            <label style="font-size:12px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Message</label>
-            <textarea class="msg-textarea" id="msgBody" placeholder="Type your message here..." oninput="updateCharCount()"></textarea>
-            <div class="char-count" id="charCount">0 / 160</div>
+          <!-- Section 2: Message Template -->
+          <div class="compose-card">
+            <span class="section-label">Message Template</span>
+            <select class="template-select" id="templateSelect" onchange="onTemplateChange()">
+              <option value="report_card">Report Card</option>
+              <option value="appt_reminder">Appointment Reminder</option>
+              <option value="review_request">Review Request</option>
+              <option value="custom">Custom Message</option>
+            </select>
+            <textarea class="msg-textarea" id="msgBody"
+              placeholder="Select a client and template to generate a message..."
+              oninput="updateCharCount()"></textarea>
           </div>
 
-          <!-- Media attach (shown for growth/pro plans) -->
-          <div class="media-section" id="mediaSection" style="display:none;">
-            <button class="media-toggle-btn" onclick="document.getElementById('fileInput').click()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-              Attach Image / Video
-            </button>
-            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/quicktime" style="display:none;" onchange="handleFileSelect(event)">
-            <div class="media-preview" id="mediaPreview"></div>
+          <!-- Section 3: Great Day toggle -->
+          <div class="compose-card">
+            <div class="toggle-row">
+              <div class="toggle-label-wrap">
+                <span class="section-label" style="margin-bottom:4px;">Great Day?</span>
+                <div class="toggle-subtext" id="toggleSubtext">Toggle on to append a Google review request</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="greatDayToggle" onchange="onGreatDayToggle()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
           </div>
 
-          <div class="compose-actions" style="margin-top:16px;">
-            <button class="btn-outline" onclick="openPreviewModal()">Preview</button>
-            <button class="btn-primary" id="sendBtn" onclick="sendMessage()">Send</button>
+          <!-- Section 4: Char count + Send -->
+          <div class="compose-card">
+            <div class="send-row">
+              <span class="char-count" id="charCount">0 / 160</span>
+              <div class="compose-actions">
+                <button class="btn-outline" onclick="openPreviewModal()">Preview</button>
+                <button class="btn-primary" id="sendBtn" onclick="sendMessage()">Send Report Card 📱</button>
+              </div>
+            </div>
+            <div class="send-result" id="sendResult"></div>
           </div>
-          <div class="send-result" id="sendResult"></div>
-        </div>
-      </div>
-    </div>
 
-    <!-- History table -->
+        </div><!-- /compose-active -->
+      </div><!-- /compose-panel -->
+
+    </div><!-- /messaging-layout -->
+
+    <!-- Message History -->
     <div class="history-card">
-      <h3>Message History</h3>
+      <div class="history-card-header">
+        <h3>Message History</h3>
+      </div>
       <div id="historyLoading" style="text-align:center;padding:30px;">
         <div class="loading-spinner" style="width:22px;height:22px;border-width:2px;"></div>
       </div>
@@ -313,8 +425,8 @@
         <table>
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Recipient</th>
+              <th>Time</th>
+              <th>Client</th>
               <th>Message</th>
               <th>Status</th>
             </tr>
@@ -325,7 +437,8 @@
         </table>
       </div>
     </div>
-  </div>
+
+  </div><!-- /pageContent -->
 </div>
 
 <!-- Preview Modal -->
@@ -344,27 +457,53 @@
   if (!session || !session.access_token) window.location.href = '/login.html';
 
   const authHeaders = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` };
+
   let allClients = [];
-  let selectedClients = [];
-  let currentPlan = 'starter';
-  let uploadedMediaUrl = null;
-  let uploadedMediaType = null;
+  let selectedClient = null;
+  let selectedDog = null;
+  let daycareName = '';
+  let googleLink = '';
+  let shortReviewLink = '';
+
+  const TEMPLATES = {
+    report_card: (owner, dog, dc, notes) =>
+      `Hi ${owner}! 🐾 ${dog} had a great day at ${dc} today.${notes ? ' ' + notes : ''} See you next time!`,
+    appt_reminder: (owner, dog, dc) =>
+      `Hi ${owner}! A friendly reminder that ${dog} is scheduled at ${dc} tomorrow. Reply YES to confirm or NO to cancel. We'll hold the spot! — The ${dc} Team`,
+    review_request: (owner, dog, dc, notes, link) =>
+      `Hi ${owner}! We hope ${dog} had a fantastic time with us today. 🐾 If you have 30 seconds, an honest review means the world: ${link || '[review link]'} Thank you! — ${dc}`,
+    custom: () => ''
+  };
+
+  const SEND_LABELS = {
+    report_card: 'Send Report Card 📱',
+    appt_reminder: 'Send Reminder 📱',
+    review_request: 'Send Review Request 📱',
+    custom: 'Send Message 📱'
+  };
 
   async function init() {
     try {
-      const [clientsRes, usageRes, historyRes] = await Promise.all([
+      const [clientsRes, usageRes, historyRes, statsRes] = await Promise.all([
         fetch('/api/clients', { headers: authHeaders }),
         fetch('/api/sms/usage', { headers: authHeaders }),
-        fetch('/api/sms/history', { headers: authHeaders })
+        fetch('/api/sms/history', { headers: authHeaders }),
+        fetch('/api/dashboard/stats', { headers: authHeaders })
       ]);
 
       if (clientsRes.status === 401) { localStorage.removeItem('tailwag_session'); window.location.href = '/login.html'; return; }
 
       allClients = clientsRes.ok ? await clientsRes.json() : [];
-      const usage = usageRes.ok ? await usageRes.json() : { usage: 0, limit: 500, plan: 'starter' };
+      const usage = usageRes.ok ? await usageRes.json() : { usage: 0, limit: 500 };
       const history = historyRes.ok ? await historyRes.json() : [];
 
-      currentPlan = usage.plan || 'starter';
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        if (statsData.daycare) {
+          daycareName = statsData.daycare.name || '';
+          googleLink = statsData.daycare.google_link || '';
+        }
+      }
 
       // Update usage bar
       const pct = usage.limit > 0 ? Math.min(100, Math.round((usage.usage / usage.limit) * 100)) : 0;
@@ -372,11 +511,6 @@
       const bar = document.getElementById('usageBar');
       bar.style.width = pct + '%';
       bar.className = 'usage-bar-fill' + (pct >= 90 ? ' danger' : pct >= 75 ? ' warning' : '');
-
-      // Show media for growth/pro
-      if (['growth', 'pro'].includes(currentPlan)) {
-        document.getElementById('mediaSection').style.display = 'block';
-      }
 
       renderClientList(allClients);
       renderHistory(history);
@@ -395,63 +529,174 @@
       listEl.innerHTML = '<div class="empty-state">No clients found.</div>';
       return;
     }
-    listEl.innerHTML = clients.map(c => {
-      const isSelected = selectedClients.some(s => s.id === c.id);
-      return `
-        <div class="client-item ${isSelected ? 'selected' : ''}" onclick="toggleClient('${c.id}')" id="ci-${c.id}">
-          <div>
-            <div class="client-item-name">${escHtml(c.first_name)} ${escHtml(c.last_name)}</div>
-            <div class="client-item-phone">${escHtml(c.phone || '—')}</div>
-          </div>
-          <span class="check-icon">&#10003;</span>
-        </div>
-      `;
+
+    // Expand each client into per-dog rows, plus a fallback row if no dogs
+    const rows = [];
+    clients.forEach(c => {
+      if (c.dogs && c.dogs.length) {
+        c.dogs.forEach(d => {
+          rows.push({ client: c, dog: d });
+        });
+      } else {
+        rows.push({ client: c, dog: null });
+      }
+    });
+
+    listEl.innerHTML = rows.map(({ client: c, dog: d }) => {
+      const isSelected = selectedClient && selectedClient.id === c.id && selectedDog && d && selectedDog.id === d.id;
+      const isSelectedNoDog = selectedClient && selectedClient.id === c.id && !d && !selectedDog;
+      const sel = isSelected || isSelectedNoDog;
+      const key = d ? `${c.id}__${d.id}` : `${c.id}__none`;
+      if (d) {
+        return `
+          <div class="client-item ${sel ? 'selected' : ''}" id="ci-${key}" onclick="selectClientDog('${c.id}','${d.id}')">
+            <div class="client-item-dog">${escHtml(d.name)}</div>
+            <div class="client-item-owner">${escHtml(c.first_name)} ${escHtml(c.last_name)}</div>
+            <div class="client-item-bottom">
+              ${d.breed ? `<span class="breed-chip">${escHtml(d.breed)}</span>` : '<span></span>'}
+              <span class="selected-tag">Selected</span>
+            </div>
+          </div>`;
+      } else {
+        return `
+          <div class="client-item ${sel ? 'selected' : ''}" id="ci-${key}" onclick="selectClientDog('${c.id}', null)">
+            <div class="client-item-no-dog">${escHtml(c.first_name)} ${escHtml(c.last_name)}</div>
+            <div class="client-item-no-dog-sub">No dogs on file</div>
+            <div class="client-item-bottom">
+              <span></span>
+              <span class="selected-tag">Selected</span>
+            </div>
+          </div>`;
+      }
     }).join('');
   }
 
   function filterClients() {
     const q = document.getElementById('clientSearch').value.toLowerCase();
-    const filtered = allClients.filter(c =>
-      `${c.first_name} ${c.last_name}`.toLowerCase().includes(q) ||
-      (c.phone || '').includes(q)
-    );
+    const filtered = allClients.filter(c => {
+      const name = `${c.first_name} ${c.last_name}`.toLowerCase();
+      const dogNames = (c.dogs || []).map(d => d.name.toLowerCase()).join(' ');
+      return name.includes(q) || dogNames.includes(q);
+    });
     renderClientList(filtered);
   }
 
-  function toggleClient(clientId) {
-    const client = allClients.find(c => c.id === clientId);
-    if (!client) return;
-    const idx = selectedClients.findIndex(s => s.id === clientId);
-    if (idx > -1) {
-      selectedClients.splice(idx, 1);
+  async function selectClientDog(clientId, dogId) {
+    selectedClient = allClients.find(c => c.id === clientId) || null;
+    selectedDog = dogId && selectedClient
+      ? (selectedClient.dogs || []).find(d => d.id === dogId) || null
+      : null;
+
+    // Re-render list to show selection highlight
+    const q = document.getElementById('clientSearch').value.toLowerCase();
+    const filtered = q
+      ? allClients.filter(c => {
+          const name = `${c.first_name} ${c.last_name}`.toLowerCase();
+          const dogNames = (c.dogs || []).map(d => d.name.toLowerCase()).join(' ');
+          return name.includes(q) || dogNames.includes(q);
+        })
+      : allClients;
+    renderClientList(filtered);
+
+    // Show compose panel
+    document.getElementById('composeEmpty').style.display = 'none';
+    document.getElementById('composeActive').style.display = 'flex';
+
+    // Reset
+    document.getElementById('staffNotes').value = '';
+    document.getElementById('greatDayToggle').checked = false;
+    document.getElementById('toggleSubtext').textContent = 'Toggle on to append a Google review request';
+    document.getElementById('toggleSubtext').className = 'toggle-subtext';
+    document.getElementById('sendResult').style.display = 'none';
+
+    await populateTemplate();
+    updateSendLabel();
+  }
+
+  async function getShortLink() {
+    if (!googleLink) return '';
+    if (shortReviewLink) return shortReviewLink;
+    try {
+      const res = await fetch('/api/shortlinks', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ original_url: googleLink, label: 'Google Review' })
+      });
+      const data = await res.json();
+      shortReviewLink = data.short_url || googleLink;
+      return shortReviewLink;
+    } catch {
+      return googleLink;
+    }
+  }
+
+  async function populateTemplate() {
+    if (!selectedClient) return;
+    const template = document.getElementById('templateSelect').value;
+    const ownerFirst = selectedClient.first_name || 'there';
+    const dogName = selectedDog ? selectedDog.name : '[dog]';
+    const dc = daycareName || 'our daycare';
+    const notes = document.getElementById('staffNotes').value.trim();
+
+    let msg = '';
+    if (template === 'report_card') {
+      msg = TEMPLATES.report_card(ownerFirst, dogName, dc, notes);
+      // Append review if great day toggle is on
+      if (document.getElementById('greatDayToggle').checked) {
+        const link = await getShortLink();
+        if (link) msg += ` If you have 30 seconds, an honest review means the world: ${link}`;
+      }
+    } else if (template === 'appt_reminder') {
+      msg = TEMPLATES.appt_reminder(ownerFirst, dogName, dc);
+    } else if (template === 'review_request') {
+      const link = await getShortLink();
+      msg = TEMPLATES.review_request(ownerFirst, dogName, dc, notes, link);
+    } else if (template === 'custom') {
+      msg = '';
+    }
+
+    document.getElementById('msgBody').value = msg;
+    updateCharCount();
+  }
+
+  function onStaffNotesChange() {
+    const template = document.getElementById('templateSelect').value;
+    if (template === 'report_card') {
+      populateTemplate();
+    }
+  }
+
+  async function onTemplateChange() {
+    updateSendLabel();
+    await populateTemplate();
+  }
+
+  function updateSendLabel() {
+    const template = document.getElementById('templateSelect').value;
+    document.getElementById('sendBtn').textContent = SEND_LABELS[template] || 'Send Message 📱';
+  }
+
+  async function onGreatDayToggle() {
+    const on = document.getElementById('greatDayToggle').checked;
+    const subtextEl = document.getElementById('toggleSubtext');
+    if (on) {
+      subtextEl.textContent = 'A review request link will be included in the message';
+      subtextEl.className = 'toggle-subtext on';
     } else {
-      selectedClients.push(client);
+      subtextEl.textContent = 'Toggle on to append a Google review request';
+      subtextEl.className = 'toggle-subtext';
     }
-    // Update UI
-    const itemEl = document.getElementById(`ci-${clientId}`);
-    if (itemEl) itemEl.classList.toggle('selected', selectedClients.some(s => s.id === clientId));
-    renderRecipients();
+    const template = document.getElementById('templateSelect').value;
+    if (template === 'report_card') {
+      await populateTemplate();
+    }
   }
 
-  function removeRecipient(clientId) {
-    selectedClients = selectedClients.filter(s => s.id !== clientId);
-    const itemEl = document.getElementById(`ci-${clientId}`);
-    if (itemEl) itemEl.classList.remove('selected');
-    renderRecipients();
-  }
-
-  function renderRecipients() {
-    const area = document.getElementById('recipientsArea');
-    if (!selectedClients.length) {
-      area.innerHTML = '<span class="no-recipients" id="noRecipientsHint">Click clients on the left to add recipients</span>';
-      return;
-    }
-    area.innerHTML = selectedClients.map(c => `
-      <div class="recipient-chip">
-        ${escHtml(c.first_name)} ${escHtml(c.last_name)}
-        <span class="chip-remove" onclick="removeRecipient('${c.id}')">&times;</span>
-      </div>
-    `).join('');
+  function appendNote(text) {
+    const ta = document.getElementById('staffNotes');
+    const current = ta.value.trim();
+    ta.value = current ? current + ' ' + text : text;
+    onStaffNotesChange();
   }
 
   function updateCharCount() {
@@ -462,55 +707,9 @@
     el.className = 'char-count' + (len > 160 ? ' over' : len > 140 ? ' warning' : '');
   }
 
-  async function handleFileSelect(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const uploadHeaders = { 'Authorization': `Bearer ${session.access_token}` };
-
-    try {
-      const res = await fetch('/api/media/upload', { method: 'POST', headers: uploadHeaders, body: formData });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Upload failed'); }
-      const data = await res.json();
-      uploadedMediaUrl = data.url;
-      uploadedMediaType = data.type;
-
-      const previewEl = document.getElementById('mediaPreview');
-      if (data.type === 'video') {
-        previewEl.innerHTML = `<video src="${data.url}" controls style="max-height:140px;border-radius:8px;"></video><span class="media-remove" onclick="clearMedia()">Remove</span>`;
-      } else {
-        previewEl.innerHTML = `<img src="${data.url}" alt="preview"><span class="media-remove" onclick="clearMedia()">Remove</span>`;
-      }
-      previewEl.style.display = 'block';
-    } catch (err) {
-      alert('Upload failed: ' + err.message);
-    }
-  }
-
-  function clearMedia() {
-    uploadedMediaUrl = null;
-    uploadedMediaType = null;
-    document.getElementById('mediaPreview').style.display = 'none';
-    document.getElementById('mediaPreview').innerHTML = '';
-    document.getElementById('fileInput').value = '';
-  }
-
   function openPreviewModal() {
     const body = document.getElementById('msgBody').value || '(empty message)';
-    const bubbleArea = document.getElementById('previewBubbleArea');
-    let html = '';
-    if (uploadedMediaUrl) {
-      if (uploadedMediaType === 'video') {
-        html += `<div class="bubble-media"><video src="${uploadedMediaUrl}" style="max-width:180px;border-radius:12px;"></video></div>`;
-      } else {
-        html += `<div class="bubble-media"><img src="${uploadedMediaUrl}" alt="media"></div>`;
-      }
-    }
-    html += `<div class="bubble">${escHtml(body)}</div>`;
-    bubbleArea.innerHTML = html;
+    document.getElementById('previewBubbleText').textContent = body;
     document.getElementById('previewModal').classList.add('open');
   }
 
@@ -523,59 +722,52 @@
     const resultEl = document.getElementById('sendResult');
     resultEl.style.display = 'none';
 
-    if (!selectedClients.length) {
-      resultEl.textContent = 'Please select at least one recipient.';
+    if (!selectedClient) {
+      resultEl.textContent = 'Please select a client first.';
       resultEl.className = 'send-result error'; resultEl.style.display = 'block'; return;
     }
     if (!body) {
-      resultEl.textContent = 'Please type a message.';
+      resultEl.textContent = 'Please compose a message.';
+      resultEl.className = 'send-result error'; resultEl.style.display = 'block'; return;
+    }
+    if (!selectedClient.phone) {
+      resultEl.textContent = 'This client has no phone number on file.';
       resultEl.className = 'send-result error'; resultEl.style.display = 'block'; return;
     }
 
     const sendBtn = document.getElementById('sendBtn');
+    const origLabel = sendBtn.textContent;
     sendBtn.textContent = 'Sending...'; sendBtn.disabled = true;
 
     try {
-      let res, data;
-      if (selectedClients.length === 1) {
-        const c = selectedClients[0];
-        res = await fetch('/api/sms/send', {
-          method: 'POST', headers: authHeaders,
-          body: JSON.stringify({
-            client_id: c.id, recipient_phone: c.phone, body,
-            media_url: uploadedMediaUrl, media_type: uploadedMediaType || 'none'
-          })
-        });
-      } else {
-        const recipients = selectedClients.map(c => ({ client_id: c.id, phone: c.phone }));
-        res = await fetch('/api/sms/bulk', {
-          method: 'POST', headers: authHeaders,
-          body: JSON.stringify({ recipients, body, media_url: uploadedMediaUrl, media_type: uploadedMediaType || 'none' })
-        });
-      }
-
-      data = await res.json();
+      const res = await fetch('/api/sms/send', {
+        method: 'POST', headers: authHeaders,
+        body: JSON.stringify({
+          client_id: selectedClient.id,
+          recipient_phone: selectedClient.phone,
+          body
+        })
+      });
+      const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Send failed');
 
-      const sent = data.sent !== undefined ? data.sent : 1;
-      resultEl.textContent = `Sent to ${sent} recipient${sent !== 1 ? 's' : ''}. Usage: ${data.usage} / ${data.limit}`;
-      resultEl.className = 'send-result success';
-      resultEl.style.display = 'block';
+      sendBtn.textContent = '✓ Sent!';
+      sendBtn.classList.add('sent');
+      resultEl.textContent = `Sent! Usage: ${data.usage} / ${data.limit}`;
+      resultEl.className = 'send-result success'; resultEl.style.display = 'block';
 
-      // Clear form
-      document.getElementById('msgBody').value = '';
-      updateCharCount();
-      clearMedia();
-      selectedClients = [];
-      renderRecipients();
-      renderClientList(allClients);
+      setTimeout(() => {
+        sendBtn.textContent = origLabel;
+        sendBtn.classList.remove('sent');
+        sendBtn.disabled = false;
+      }, 2500);
 
-      // Refresh history
-      const histRes = await fetch('/api/sms/history', { headers: authHeaders });
+      // Refresh history + usage
+      const [histRes, usRes] = await Promise.all([
+        fetch('/api/sms/history', { headers: authHeaders }),
+        fetch('/api/sms/usage', { headers: authHeaders })
+      ]);
       if (histRes.ok) renderHistory(await histRes.json());
-
-      // Refresh usage
-      const usRes = await fetch('/api/sms/usage', { headers: authHeaders });
       if (usRes.ok) {
         const usage = await usRes.json();
         const pct = usage.limit > 0 ? Math.min(100, Math.round((usage.usage / usage.limit) * 100)) : 0;
@@ -587,10 +779,9 @@
 
     } catch (err) {
       resultEl.textContent = err.message;
-      resultEl.className = 'send-result error';
-      resultEl.style.display = 'block';
-    } finally {
-      sendBtn.textContent = 'Send'; sendBtn.disabled = false;
+      resultEl.className = 'send-result error'; resultEl.style.display = 'block';
+      sendBtn.textContent = origLabel;
+      sendBtn.disabled = false;
     }
   }
 
@@ -598,25 +789,28 @@
     document.getElementById('historyLoading').style.display = 'none';
     document.getElementById('historyContent').style.display = 'block';
     const tbody = document.getElementById('historyTableBody');
-    if (!messages.length) {
+    const recent = messages.slice(0, 10);
+    if (!recent.length) {
       tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">No messages yet.</div></td></tr>';
       return;
     }
-    tbody.innerHTML = messages.map(m => {
-      const clientName = m.clients ? `${m.clients.first_name || ''} ${m.clients.last_name || ''}`.trim() : m.recipient_phone;
+    tbody.innerHTML = recent.map(m => {
+      const clientName = m.clients
+        ? `${m.clients.first_name || ''} ${m.clients.last_name || ''}`.trim()
+        : (m.recipient_phone || '—');
       const date = new Date(m.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
       const status = m.status || 'queued';
+      const preview = (m.body || '').length > 60 ? m.body.substring(0, 60) + '…' : (m.body || '');
       return `
         <tr>
           <td style="white-space:nowrap;color:#999">${date}</td>
           <td>
             <div style="font-weight:600">${escHtml(clientName)}</div>
-            <div style="font-size:11px;color:#bbb">${escHtml(m.recipient_phone)}</div>
+            <div style="font-size:11px;color:#bbb">${escHtml(m.recipient_phone || '')}</div>
           </td>
-          <td><div class="msg-preview">${escHtml(m.body)}</div></td>
+          <td><div class="msg-preview">${escHtml(preview)}</div></td>
           <td><span class="status-badge status-${status}">${status}</span></td>
-        </tr>
-      `;
+        </tr>`;
     }).join('');
   }
 
