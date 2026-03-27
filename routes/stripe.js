@@ -85,9 +85,12 @@ router.post('/create-checkout-session', async (req, res) => {
   try {
     await ensureStripeProducts();
 
-    const { plan, billing, userId, email } = req.body;
+    const { plan, billing, userId, email, addReport } = req.body;
     const priceKey = `${plan}_${billing}`;
     const priceId = PRICE_MAP[priceKey];
+
+    // Price ID for the one-time Customer Analysis Report add-on ($150)
+    const REPORT_PRICE_ID = 'price_1TFavTRGw9X4KQP0g8aRitoq';
 
     if (!priceId) {
       return res.status(400).json({ error: `Invalid plan/billing: ${priceKey}` });
@@ -120,14 +123,21 @@ router.post('/create-checkout-session', async (req, res) => {
       ? `https://${req.get('host')}`
       : `http://localhost:${process.env.PORT || 3000}`;
 
+    // Build line items — always include the plan, optionally add the report
+    const lineItems = [{ price: priceId, quantity: 1 }];
+    if (addReport) {
+      lineItems.push({ price: REPORT_PRICE_ID, quantity: 1 });
+    }
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: lineItems,
       mode: 'subscription',
+      allow_promotion_codes: true,
       success_url: `${baseUrl}/dashboard.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/signup.html?cancelled=true`,
-      metadata: { userId, plan, billing }
+      metadata: { userId, plan, billing, addReport: addReport ? 'true' : 'false' }
     });
 
     res.json({ url: session.url });
