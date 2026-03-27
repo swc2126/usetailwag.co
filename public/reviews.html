@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reviews — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #0F1410; --green: #1E6B4A; --green-dark: #164D35;
+      --linen: #F5F0E8; --gold: #C4933F; --sage: #A8C5B0; --slate: #2D3748;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
+
+    /* NAV */
+    .dashboard-nav {
+      background: var(--black); padding: 0 32px;
+      display: flex; justify-content: space-between; align-items: center; height: 60px;
+    }
+    .nav-left { display: flex; align-items: center; gap: 32px; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link {
+      color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; font-weight: 500;
+      padding: 6px 14px; border-radius: 6px; transition: color 0.2s, background 0.2s;
+    }
+    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
+    .nav-link.active { color: var(--linen); background: rgba(255,255,255,0.1); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .user-name { font-size: 14px; color: var(--sage); }
+    .logout-btn {
+      background: transparent; border: 1px solid rgba(245,240,232,0.3); color: var(--linen);
+      padding: 7px 18px; border-radius: 8px; font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color 0.2s;
+    }
+    .logout-btn:hover { border-color: var(--linen); }
+
+    /* LAYOUT */
+    .page-container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+    .page-header { margin-bottom: 32px; }
+    .page-header h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+      font-size: 30px; color: var(--black); letter-spacing: -0.5px;
+    }
+    .page-header p { font-size: 15px; color: #888; margin-top: 4px; }
+
+    /* STATS ROW */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: #fff; border-radius: 12px; padding: 22px 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 8px; }
+    .stat-value { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 34px; color: var(--black); line-height: 1; }
+    .stat-sub { font-size: 12px; color: #bbb; margin-top: 5px; }
+
+    /* COMPOSE CARD */
+    .compose-card {
+      background: #fff; border-radius: 12px; padding: 28px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 24px;
+    }
+    .compose-card h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 18px; color: var(--black); margin-bottom: 22px;
+    }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: #999; margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--slate);
+      outline: none; transition: border-color 0.2s; background: #fff;
+    }
+    .form-control:focus { border-color: var(--green); }
+    textarea.form-control { resize: vertical; min-height: 120px; line-height: 1.6; }
+
+    .compose-actions { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--green); color: var(--linen); border: none; padding: 10px 24px;
+      border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--green-dark); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-outline {
+      background: none; border: 1px solid var(--green); color: var(--green);
+      padding: 9px 20px; border-radius: 8px; font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-outline:hover { background: rgba(30,107,74,0.06); }
+
+    .send-result { font-size: 13px; margin-top: 10px; display: none; }
+    .send-result.success { color: var(--green); }
+    .send-result.error { color: #e53e3e; }
+
+    /* HISTORY TABLE */
+    .table-card {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 28px;
+    }
+    .table-card-header { padding: 20px 20px 0; margin-bottom: 16px; }
+    .table-card-header h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 18px; color: var(--black);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--black); }
+    thead th {
+      padding: 12px 20px; text-align: left; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; color: var(--sage);
+    }
+    tbody tr { border-bottom: 1px solid rgba(0,0,0,0.05); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(30,107,74,0.02); }
+    tbody td { padding: 13px 20px; font-size: 13px; color: var(--slate); }
+
+    .status-badge {
+      display: inline-block; padding: 3px 9px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .status-delivered { background: rgba(30,107,74,0.1); color: var(--green); }
+    .status-sent { background: rgba(66,153,225,0.12); color: #2b6cb0; }
+    .status-failed { background: rgba(229,62,62,0.1); color: #e53e3e; }
+    .status-queued, .status-none { background: rgba(0,0,0,0.06); color: #999; }
+
+    /* PREVIEW MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 100; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 14px; padding: 32px; width: 100%; max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center;
+    }
+    .modal h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 18px; color: var(--black); margin-bottom: 20px;
+    }
+    .phone-mockup {
+      background: #1a1a1a; border-radius: 28px; padding: 20px 16px;
+      margin: 0 auto 20px; max-width: 260px; min-height: 180px;
+      display: flex; flex-direction: column; justify-content: flex-end; gap: 8px;
+    }
+    .bubble {
+      background: #3a7d5f; color: #fff; border-radius: 16px 16px 4px 16px;
+      padding: 10px 14px; font-size: 13px; line-height: 1.5; text-align: left;
+      max-width: 90%; align-self: flex-end; word-break: break-word;
+    }
+    .btn-secondary {
+      background: none; border: 1px solid #ddd; color: var(--slate); padding: 9px 20px;
+      border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px;
+      font-weight: 600; cursor: pointer; transition: border-color 0.2s;
+    }
+    .btn-secondary:hover { border-color: #999; }
+
+    .empty-state { text-align: center; padding: 40px 20px; color: #bbb; font-size: 13px; }
+    .loading-spinner {
+      width: 28px; height: 28px; border: 3px solid rgba(30,107,74,0.2);
+      border-top-color: var(--green); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .dashboard-nav { padding: 0 16px; }
+      .page-container { padding: 24px 16px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="/" class="logo">
+      <svg width="26" height="26" viewBox="0 0 56 56" fill="none">
+        <rect width="56" height="56" fill="#1E6B4A" rx="9"/>
+        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+      </svg>
+      <span class="logo-text">TailWag</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/clients.html" class="nav-link">Clients</a>
+      <a href="/messaging.html" class="nav-link">Messaging</a>
+      <a href="/reviews.html" class="nav-link active">Reviews</a>
+      <a href="/team.html" class="nav-link">Team</a>
+      <a href="/settings.html" class="nav-link">Settings</a>
+    </nav>
+  </div>
+  <div class="nav-right">
+    <span class="user-name" id="userName"></span>
+    <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+  </div>
+</nav>
+
+<div class="page-container">
+
+  <!-- Loading -->
+  <div id="loadingState" style="text-align:center;padding:80px 20px;">
+    <div class="loading-spinner"></div>
+    <p style="color:#999;font-size:14px;">Loading reviews...</p>
+  </div>
+
+  <div id="pageContent" style="display:none;">
+
+    <div class="page-header">
+      <h1>Review Requests</h1>
+      <p>Send Google review requests to clients after their dog's visit.</p>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Sent This Month</div>
+        <div class="stat-value" id="statTotal">—</div>
+        <div class="stat-sub">review requests</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Delivered</div>
+        <div class="stat-value" id="statDelivered">—</div>
+        <div class="stat-sub">confirmed deliveries</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Response Rate</div>
+        <div class="stat-value" style="font-size:22px;padding-top:6px;">Coming Soon</div>
+        <div class="stat-sub">tracking in future update</div>
+      </div>
+    </div>
+
+    <!-- Compose -->
+    <div class="compose-card">
+      <h2>Send Review Request</h2>
+
+      <div class="form-grid">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Client</label>
+          <select class="form-control" id="clientSelect" onchange="onClientChange()">
+            <option value="">— Select a client —</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Dog</label>
+          <select class="form-control" id="dogSelect">
+            <option value="">— Select client first —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Message</label>
+        <textarea class="form-control" id="msgBody" rows="5" placeholder="Select a client to auto-fill the template..."></textarea>
+      </div>
+
+      <div class="compose-actions">
+        <button class="btn-outline" onclick="openPreview()">Preview</button>
+        <button class="btn-primary" id="sendBtn" onclick="sendReviewRequest()">Send Review Request</button>
+      </div>
+      <div class="send-result" id="sendResult"></div>
+    </div>
+
+    <!-- History -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <h2>Recent Review Requests</h2>
+      </div>
+      <div id="historyLoading" style="text-align:center;padding:30px;">
+        <div class="loading-spinner" style="width:22px;height:22px;border-width:2px;"></div>
+      </div>
+      <div id="historyContent" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Client</th>
+              <th>Message</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr><td colspan="4"><div class="empty-state">No review requests sent yet.</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal-overlay" id="previewModal">
+  <div class="modal">
+    <h3>Message Preview</h3>
+    <div class="phone-mockup">
+      <div class="bubble" id="previewBubble">Your message will appear here.</div>
+    </div>
+    <button class="btn-secondary" onclick="closePreview()">Close</button>
+  </div>
+</div>
+
+<script>
+  const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+  if (!session || !session.access_token) window.location.href = '/login.html';
+
+  const authHeaders = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + session.access_token
+  };
+
+  let allClients = [];
+  let daycareName = '';
+  let googleLink = 'https://g.page/r/YOUR_REVIEW_LINK/review';
+
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function buildTemplate(clientName, dogName) {
+    return 'Hi ' + clientName + '! \uD83D\uDC3E Thanks for bringing ' + dogName + ' to ' + (daycareName || 'our daycare') + ' today. We\'d love it if you left us a review: ' + googleLink + ' \u2014 it means the world to us! \uD83C\uDF1F';
+  }
+
+  function onClientChange() {
+    const clientId = document.getElementById('clientSelect').value;
+    const dogSel = document.getElementById('dogSelect');
+    dogSel.innerHTML = '<option value="">— Select a dog —</option>';
+
+    if (!clientId) {
+      document.getElementById('msgBody').value = '';
+      return;
+    }
+
+    const client = allClients.find(function(c) { return c.id === clientId; });
+    if (!client) return;
+
+    // Populate dog dropdown
+    if (client.dogs && client.dogs.length) {
+      client.dogs.forEach(function(d) {
+        var opt = document.createElement('option');
+        opt.value = d.id;
+        opt.textContent = d.name;
+        dogSel.appendChild(opt);
+      });
+      // Auto-select first dog and fill template
+      dogSel.value = client.dogs[0].id;
+      document.getElementById('msgBody').value = buildTemplate(
+        client.first_name,
+        client.dogs[0].name
+      );
+    } else {
+      document.getElementById('msgBody').value = buildTemplate(client.first_name, '[their dog]');
+    }
+
+    // Update template when dog changes
+    dogSel.onchange = function() {
+      const dogId = dogSel.value;
+      const dog = (client.dogs || []).find(function(d) { return d.id === dogId; });
+      document.getElementById('msgBody').value = buildTemplate(
+        client.first_name,
+        dog ? dog.name : '[their dog]'
+      );
+    };
+  }
+
+  function openPreview() {
+    const body = document.getElementById('msgBody').value || '(empty message)';
+    document.getElementById('previewBubble').textContent = body;
+    document.getElementById('previewModal').classList.add('open');
+  }
+
+  function closePreview() {
+    document.getElementById('previewModal').classList.remove('open');
+  }
+
+  async function sendReviewRequest() {
+    const clientId = document.getElementById('clientSelect').value;
+    const body = document.getElementById('msgBody').value.trim();
+    const resultEl = document.getElementById('sendResult');
+    resultEl.style.display = 'none';
+
+    if (!clientId) {
+      resultEl.textContent = 'Please select a client.';
+      resultEl.className = 'send-result error'; resultEl.style.display = 'block'; return;
+    }
+    if (!body) {
+      resultEl.textContent = 'Please enter a message.';
+      resultEl.className = 'send-result error'; resultEl.style.display = 'block'; return;
+    }
+
+    const client = allClients.find(function(c) { return c.id === clientId; });
+    if (!client || !client.phone) {
+      resultEl.textContent = 'Selected client has no phone number.';
+      resultEl.className = 'send-result error'; resultEl.style.display = 'block'; return;
+    }
+
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.textContent = 'Sending...'; sendBtn.disabled = true;
+
+    try {
+      const res = await fetch('/api/sms/send', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          client_id: client.id,
+          recipient_phone: client.phone,
+          body: body
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Send failed');
+
+      resultEl.textContent = 'Review request sent successfully!';
+      resultEl.className = 'send-result success'; resultEl.style.display = 'block';
+
+      // Reset form
+      document.getElementById('clientSelect').value = '';
+      document.getElementById('dogSelect').innerHTML = '<option value="">— Select client first —</option>';
+      document.getElementById('msgBody').value = '';
+
+      // Reload history
+      loadHistory();
+      loadStats();
+
+    } catch (err) {
+      resultEl.textContent = err.message;
+      resultEl.className = 'send-result error'; resultEl.style.display = 'block';
+    } finally {
+      sendBtn.textContent = 'Send Review Request'; sendBtn.disabled = false;
+    }
+  }
+
+  async function loadStats() {
+    try {
+      const res = await fetch('/api/reviews/stats', { headers: authHeaders });
+      if (res.ok) {
+        const data = await res.json();
+        document.getElementById('statTotal').textContent = data.total || 0;
+        document.getElementById('statDelivered').textContent = data.delivered || 0;
+      }
+    } catch (e) { /* non-fatal */ }
+  }
+
+  async function loadHistory() {
+    try {
+      const res = await fetch('/api/reviews/history', { headers: authHeaders });
+      document.getElementById('historyLoading').style.display = 'none';
+      document.getElementById('historyContent').style.display = 'block';
+
+      if (!res.ok) throw new Error('Failed to load history');
+      const messages = await res.json();
+
+      const tbody = document.getElementById('historyTableBody');
+      if (!messages.length) {
+        tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">No review requests sent yet.</div></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = messages.map(function(m) {
+        const clientName = m.clients
+          ? ((m.clients.first_name || '') + ' ' + (m.clients.last_name || '')).trim()
+          : (m.recipient_phone || '—');
+        const date = new Date(m.created_at).toLocaleString('en-US', {
+          month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+        });
+        const preview = (m.body || '').length > 70 ? m.body.substring(0, 70) + '\u2026' : (m.body || '');
+        const status = m.status || 'queued';
+        return '<tr>' +
+          '<td style="white-space:nowrap;color:#999">' + date + '</td>' +
+          '<td style="font-weight:600">' + escHtml(clientName) + '</td>' +
+          '<td style="color:#666;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escHtml(preview) + '</td>' +
+          '<td><span class="status-badge status-' + status + '">' + status + '</span></td>' +
+          '</tr>';
+      }).join('');
+    } catch (e) {
+      document.getElementById('historyLoading').style.display = 'none';
+      document.getElementById('historyContent').style.display = 'block';
+      document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="4"><div class="empty-state">Could not load history.</div></td></tr>';
+    }
+  }
+
+  async function init() {
+    try {
+      const [clientsRes, daycareRes] = await Promise.all([
+        fetch('/api/clients', { headers: authHeaders }),
+        fetch('/api/dashboard/stats', { headers: authHeaders })
+      ]);
+
+      if (clientsRes.status === 401) {
+        localStorage.removeItem('tailwag_session');
+        window.location.href = '/login.html';
+        return;
+      }
+
+      allClients = clientsRes.ok ? await clientsRes.json() : [];
+
+      if (daycareRes.ok) {
+        const dashData = await daycareRes.json();
+        if (dashData.daycare && dashData.daycare.name) {
+          daycareName = dashData.daycare.name;
+        }
+      }
+
+      // Populate client dropdown
+      const clientSel = document.getElementById('clientSelect');
+      allClients.forEach(function(c) {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.first_name + ' ' + c.last_name + (c.phone ? ' (' + c.phone + ')' : '');
+        clientSel.appendChild(opt);
+      });
+
+      document.getElementById('userName').textContent = session.user && session.user.email ? session.user.email : '';
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('pageContent').style.display = 'block';
+
+      loadStats();
+      loadHistory();
+
+    } catch (err) {
+      document.getElementById('loadingState').innerHTML = '<p style="color:#e53e3e;font-size:14px;">' + escHtml(err.message) + '</p>';
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('tailwag_session');
+    localStorage.removeItem('tailwag_user');
+    window.location.href = '/';
+  }
+
+  document.getElementById('previewModal').addEventListener('click', function(e) {
+    if (e.target === this) closePreview();
+  });
+
+  init();
+</script>
+
+<!-- Intercom -->
+<script>window.intercomSettings={app_id:"ov6sdlds"};</script>
+<script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/ov6sdlds';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();</script>
+</body>
+</html>

@@ -25,6 +25,8 @@ app.use('/api/dogs', require('./routes/dogs'));
 app.use('/api/team', require('./routes/team'));
 app.use('/api/sms', require('./routes/sms'));
 app.use('/api/media', require('./routes/media'));
+app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/reviews', require('./routes/reviews'));
 
 // Serve index.html for root
 app.get('/', (req, res) => {

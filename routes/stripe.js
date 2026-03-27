@@ -174,6 +174,48 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
             status: 'active'
           })
           .eq('user_id', userId);
+
+        // Auto-provision Twilio number for the daycare
+        try {
+          const twilioClient = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+          // Get daycare for this user
+          const { data: daycare } = await supabaseAdmin
+            .from('daycares')
+            .select('id')
+            .eq('owner_id', userId)
+            .single();
+
+          if (daycare) {
+            // Check if already has a number
+            const { data: existingConfig } = await supabaseAdmin
+              .from('twilio_config')
+              .select('id')
+              .eq('daycare_id', daycare.id)
+              .single();
+
+            if (!existingConfig) {
+              // Find and purchase a number
+              const available = await twilioClient.availablePhoneNumbers('US').local.list({ limit: 1 });
+              if (available.length > 0) {
+                const purchased = await twilioClient.incomingPhoneNumbers.create({
+                  phoneNumber: available[0].phoneNumber,
+                  friendlyName: `TailWag - ${daycare.id}`
+                });
+                await supabaseAdmin.from('twilio_config').insert({
+                  daycare_id: daycare.id,
+                  phone_number: purchased.phoneNumber,
+                  twilio_sid: purchased.sid,
+                  status: 'active'
+                });
+                console.log(`Provisioned Twilio number ${purchased.phoneNumber} for daycare ${daycare.id}`);
+              }
+            }
+          }
+        } catch (twilioErr) {
+          console.error('Auto-provision Twilio error:', twilioErr.message);
+          // Don't fail the webhook — just log
+        }
       }
       break;
     }

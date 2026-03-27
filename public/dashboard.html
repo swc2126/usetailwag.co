@@ -7,10 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
       --black: #0F1410;
       --green: #1E6B4A;
@@ -19,321 +17,384 @@
       --gold: #C4933F;
       --sage: #A8C5B0;
       --slate: #2D3748;
-      --border-subtle: rgba(255, 255, 255, 0.08);
     }
+    body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--linen);
-      color: var(--slate);
-      min-height: 100vh;
-    }
-
-    /* ── NAV ── */
+    /* NAV */
     .dashboard-nav {
-      background: var(--black);
-      padding: 16px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      background: var(--black); padding: 0 32px;
+      display: flex; justify-content: space-between; align-items: center; height: 60px;
     }
-
-    .dashboard-nav .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
+    .nav-left { display: flex; align-items: center; gap: 32px; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link {
+      color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; font-weight: 500;
+      padding: 6px 14px; border-radius: 6px; transition: color 0.2s, background 0.2s;
     }
-
-    .dashboard-nav .logo-text {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 700;
-      font-size: 20px;
-      color: var(--linen);
-    }
-
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .user-name {
-      font-size: 14px;
-      color: var(--sage);
-    }
-
+    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
+    .nav-link.active { color: var(--linen); background: rgba(255,255,255,0.1); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .daycare-name { font-size: 14px; color: var(--sage); font-weight: 500; }
     .logout-btn {
-      background: transparent;
-      border: 1px solid rgba(245, 240, 232, 0.3);
-      color: var(--linen);
-      padding: 8px 20px;
-      border-radius: 8px;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: border-color 0.2s;
+      background: transparent; border: 1px solid rgba(245,240,232,0.3); color: var(--linen);
+      padding: 7px 18px; border-radius: 8px; font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color 0.2s;
     }
-
     .logout-btn:hover { border-color: var(--linen); }
 
-    /* ── CONTAINER ── */
-    .dashboard-container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 48px 24px;
-    }
+    /* CONTAINER */
+    .page-container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
 
-    .welcome-header {
-      margin-bottom: 32px;
+    .page-header { margin-bottom: 32px; }
+    .page-header h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+      font-size: 32px; color: var(--black); letter-spacing: -0.5px;
     }
+    .page-header p { font-size: 15px; color: #888; margin-top: 4px; }
 
-    .welcome-header h1 {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 800;
-      font-size: 36px;
-      color: var(--black);
-      margin-bottom: 8px;
-      letter-spacing: -0.5px;
+    /* STATS GRID */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px;
     }
-
-    .welcome-header p {
-      font-size: 16px;
-      color: var(--slate);
-      line-height: 1.6;
+    .stat-card {
+      background: #fff; border-radius: 12px; padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
-
-    /* ── CARDS GRID ── */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 24px;
-      margin-bottom: 32px;
+    .stat-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      color: #999; margin-bottom: 10px;
     }
+    .stat-value {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+      font-size: 38px; color: var(--black); line-height: 1;
+    }
+    .stat-value.danger { color: #e53e3e; }
+    .stat-sub { font-size: 12px; color: #bbb; margin-top: 6px; }
 
+    /* QUICK ACTIONS */
+    .section-title {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 18px; color: var(--black); margin-bottom: 16px;
+    }
+    .quick-actions { display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
+    .action-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--green); color: var(--linen); text-decoration: none;
+      padding: 11px 22px; border-radius: 8px; font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 600; transition: background 0.2s;
+    }
+    .action-btn:hover { background: var(--green-dark); }
+    .action-btn.secondary {
+      background: #fff; color: var(--slate);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    .action-btn.secondary:hover { background: rgba(30,107,74,0.06); border-color: var(--green); color: var(--green); }
+
+    /* RECENT MESSAGES */
     .card {
-      background: #fff;
-      border-radius: 12px;
-      border-left: 4px solid var(--green);
-      padding: 28px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 28px;
     }
-
-    .card h2 {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 700;
-      font-size: 18px;
-      color: var(--black);
-      margin-bottom: 16px;
+    .card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 20px 0;
     }
-
-    .card-label {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--green);
-      margin-bottom: 4px;
+    .card-header h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 16px; color: var(--black);
     }
+    .card-link { font-size: 13px; color: var(--green); text-decoration: none; font-weight: 600; }
+    .card-link:hover { text-decoration: underline; }
 
-    .card-value {
-      font-size: 16px;
-      color: var(--slate);
-      margin-bottom: 16px;
-      line-height: 1.5;
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    thead { background: var(--black); }
+    thead th {
+      padding: 12px 20px; text-align: left; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; color: var(--sage);
     }
+    tbody tr { border-bottom: 1px solid rgba(0,0,0,0.05); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(30,107,74,0.02); }
+    tbody td { padding: 13px 20px; font-size: 13px; color: var(--slate); }
 
-    .card-value.large {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 700;
-      font-size: 28px;
-      color: var(--gold);
-    }
-
-    /* ── STATUS BADGES ── */
     .status-badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      display: inline-block; padding: 3px 9px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
     }
+    .status-delivered { background: rgba(30,107,74,0.1); color: var(--green); }
+    .status-sent { background: rgba(66,153,225,0.12); color: #2b6cb0; }
+    .status-failed { background: rgba(229,62,62,0.1); color: #e53e3e; }
+    .status-queued, .status-none { background: rgba(0,0,0,0.06); color: #999; }
 
-    .status-active {
-      background: rgba(30, 107, 74, 0.12);
-      color: var(--green);
+    /* ONBOARDING CHECKLIST */
+    .onboarding-card {
+      background: #fff; border-radius: 12px; padding: 28px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 28px;
+      border-left: 4px solid var(--gold);
     }
-
-    .status-inactive {
-      background: rgba(196, 147, 63, 0.12);
-      color: var(--gold);
+    .onboarding-card h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 18px; color: var(--black); margin-bottom: 20px;
     }
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .checklist li { display: flex; align-items: center; gap: 12px; font-size: 15px; }
+    .check-done { color: var(--green); font-size: 18px; font-weight: 700; }
+    .check-todo { width: 20px; height: 20px; border: 2px solid #ddd; border-radius: 4px; flex-shrink: 0; }
+    .checklist a { color: var(--green); text-decoration: none; font-weight: 600; }
+    .checklist a:hover { text-decoration: underline; }
 
-    /* ── LOADING ── */
-    .loading {
-      text-align: center;
-      padding: 80px 20px;
-      color: var(--slate);
-    }
-
+    /* EMPTY + LOADING */
+    .empty-state { text-align: center; padding: 40px 20px; color: #bbb; font-size: 13px; }
     .loading-spinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid rgba(30, 107, 74, 0.2);
-      border-top-color: var(--green);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 16px;
+      width: 28px; height: 28px; border: 3px solid rgba(30,107,74,0.2);
+      border-top-color: var(--green); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 12px;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 480px) {
-      .dashboard-nav { padding: 16px 20px; }
-      .dashboard-container { padding: 32px 16px; }
-      .welcome-header h1 { font-size: 28px; }
-      .cards-grid { grid-template-columns: 1fr; }
+    @media (max-width: 900px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .dashboard-nav { padding: 0 16px; }
+      .nav-links { display: none; }
+      .page-container { padding: 24px 16px; }
     }
   </style>
 </head>
 <body>
-  <nav class="dashboard-nav">
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
     <a href="/" class="logo">
-      <svg width="28" height="28" viewBox="0 0 56 56" fill="none">
-        <rect width="56" height="56" fill="#1E6B4A" rx="9"></rect>
-        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"></path>
-        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"></circle>
+      <svg width="26" height="26" viewBox="0 0 56 56" fill="none">
+        <rect width="56" height="56" fill="#1E6B4A" rx="9"/>
+        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
       </svg>
       <span class="logo-text">TailWag</span>
     </a>
-    <div class="nav-right">
-      <span class="user-name" id="userName"></span>
-      <button class="logout-btn" onclick="handleLogout()">Log out</button>
-    </div>
-  </nav>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="nav-link active">Dashboard</a>
+      <a href="/clients.html" class="nav-link">Clients</a>
+      <a href="/messaging.html" class="nav-link">Messaging</a>
+      <a href="/reviews.html" class="nav-link">Reviews</a>
+      <a href="/team.html" class="nav-link">Team</a>
+      <a href="/settings.html" class="nav-link">Settings</a>
+    </nav>
+  </div>
+  <div class="nav-right">
+    <span class="daycare-name" id="daycareName"></span>
+    <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+  </div>
+</nav>
 
-  <div class="dashboard-container">
-    <!-- Loading state -->
-    <div class="loading" id="loadingState">
-      <div class="loading-spinner"></div>
-      <p>Loading your dashboard...</p>
-    </div>
+<div class="page-container">
 
-    <!-- Dashboard content (hidden until loaded) -->
-    <div id="dashboardContent" style="display: none;">
-      <div class="welcome-header">
-        <h1 id="welcomeText">Welcome to TailWag</h1>
-        <p id="welcomeSubtext">Here's an overview of your account.</p>
-      </div>
-
-      <div class="cards-grid">
-        <!-- Daycare Info -->
-        <div class="card">
-          <h2>Your Daycare</h2>
-          <div class="card-label">Name</div>
-          <div class="card-value" id="daycareName">—</div>
-          <div class="card-label">Location</div>
-          <div class="card-value" id="daycareAddress">—</div>
-          <div class="card-label">Email</div>
-          <div class="card-value" id="userEmail">—</div>
-        </div>
-
-        <!-- Subscription Info -->
-        <div class="card">
-          <h2>Subscription</h2>
-          <div class="card-label">Plan</div>
-          <div class="card-value" id="planName">—</div>
-          <div class="card-label">Status</div>
-          <div class="card-value" id="planStatus">—</div>
-          <div class="card-label">Billing</div>
-          <div class="card-value" id="planBilling">—</div>
-        </div>
-      </div>
-    </div>
+  <!-- Loading state -->
+  <div id="loadingState" style="text-align:center;padding:80px 20px;">
+    <div class="loading-spinner"></div>
+    <p style="color:#999;font-size:14px;">Loading dashboard...</p>
   </div>
 
-  <script>
-    // Check if user is authenticated
-    const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+  <!-- Page content -->
+  <div id="pageContent" style="display:none;">
 
-    if (!session || !session.access_token) {
-      window.location.href = '/login.html';
-    } else {
-      loadDashboard();
-    }
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <p id="welcomeText">Welcome back!</p>
+    </div>
 
-    async function loadDashboard() {
-      try {
-        const res = await fetch('/api/auth/me', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ access_token: session.access_token })
-        });
+    <!-- Onboarding checklist (only shown if 0 clients) -->
+    <div class="onboarding-card" id="onboardingCard" style="display:none;">
+      <h2>Get started with TailWag</h2>
+      <ul class="checklist">
+        <li>
+          <span class="check-done">&#10003;</span>
+          <span>Account created</span>
+        </li>
+        <li>
+          <div class="check-todo"></div>
+          <span><a href="/clients.html">Add your first client</a></span>
+        </li>
+        <li>
+          <div class="check-todo"></div>
+          <span><a href="/messaging.html">Send your first message</a></span>
+        </li>
+      </ul>
+    </div>
 
-        if (!res.ok) {
-          // Session expired
-          localStorage.removeItem('tailwag_session');
-          localStorage.removeItem('tailwag_user');
-          window.location.href = '/login.html';
-          return;
-        }
+    <!-- Stats row -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Clients</div>
+        <div class="stat-value" id="statClients">—</div>
+        <div class="stat-sub">active clients</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Dogs</div>
+        <div class="stat-value" id="statDogs">—</div>
+        <div class="stat-sub">registered dogs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Messages This Month</div>
+        <div class="stat-value" id="statMsgUsage">—</div>
+        <div class="stat-sub">messages sent</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Messages Remaining</div>
+        <div class="stat-value" id="statMsgRemaining">—</div>
+        <div class="stat-sub" id="statMsgLimit">of your monthly limit</div>
+      </div>
+    </div>
 
-        const data = await res.json();
+    <!-- Quick Actions -->
+    <div class="section-title">Quick Actions</div>
+    <div class="quick-actions">
+      <a href="/clients.html" class="action-btn">&#10010; Add Client</a>
+      <a href="/messaging.html" class="action-btn">&#9993; Send Message</a>
+      <a href="/team.html" class="action-btn secondary">&#128101; Manage Team</a>
+    </div>
 
-        // Populate nav
-        document.getElementById('userName').textContent = data.user.name || data.user.email;
+    <!-- Recent Messages -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Recent Messages</h2>
+        <a href="/messaging.html" class="card-link">View all messages &rarr;</a>
+      </div>
+      <div id="messagesLoading" style="text-align:center;padding:30px;">
+        <div class="loading-spinner" style="width:22px;height:22px;border-width:2px;"></div>
+      </div>
+      <div id="messagesContent" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Recipient</th>
+              <th>Message</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="messagesTableBody">
+            <tr><td colspan="4"><div class="empty-state">No messages yet.</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-        // Populate welcome
-        const firstName = data.user.name || 'there';
-        document.getElementById('welcomeText').textContent = `Welcome back, ${firstName}`;
+  </div>
+</div>
 
-        // Populate daycare card
-        document.getElementById('daycareName').textContent = data.daycare?.name || '—';
-        document.getElementById('daycareAddress').textContent = data.daycare?.address || '—';
-        document.getElementById('userEmail').textContent = data.user.email;
+<script>
+  const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+  if (!session || !session.access_token) window.location.href = '/login.html';
 
-        // Populate subscription card
-        const sub = data.subscription;
-        if (sub && sub.status === 'active') {
-          document.getElementById('planName').textContent = (sub.plan || '').charAt(0).toUpperCase() + (sub.plan || '').slice(1);
-          document.getElementById('planStatus').innerHTML = '<span class="status-badge status-active">Active</span>';
-          document.getElementById('planBilling').textContent = sub.billing_cycle === 'annual' ? 'Annual' : 'Quarterly';
-        } else {
-          document.getElementById('planName').textContent = 'No active plan';
-          document.getElementById('planStatus').innerHTML = '<span class="status-badge status-inactive">Inactive</span>';
-          document.getElementById('planBilling').textContent = '—';
-        }
+  const authHeaders = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${session.access_token}`
+  };
 
-        // Show dashboard, hide loading
-        document.getElementById('loadingState').style.display = 'none';
-        document.getElementById('dashboardContent').style.display = 'block';
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
 
-        // Initialize Intercom with user data
-        window.intercomSettings = {
-          api_base: "https://api-iam.intercom.io",
-          app_id: "ov6sdlds",
-          user_id: data.user.id,
-          name: data.user.name || '',
-          email: data.user.email,
-          created_at: Math.floor(new Date(data.profile?.created_at || Date.now()).getTime() / 1000)
-        };
-        (function(){var w=document,ic=w.createElement('script');ic.type='text/javascript';ic.async=true;ic.src='https://widget.intercom.io/widget/ov6sdlds';var s=w.getElementsByTagName('script')[0];s.parentNode.insertBefore(ic,s);})();
+  async function loadDashboard() {
+    try {
+      const [statsRes, usageRes, historyRes] = await Promise.all([
+        fetch('/api/dashboard/stats', { headers: authHeaders }),
+        fetch('/api/sms/usage', { headers: authHeaders }),
+        fetch('/api/sms/history?limit=5', { headers: authHeaders })
+      ]);
 
-      } catch (err) {
-        console.error('Dashboard load error:', err);
-        document.getElementById('loadingState').innerHTML = '<p>Something went wrong loading your dashboard. <a href="/login.html">Try logging in again.</a></p>';
+      if (statsRes.status === 401 || usageRes.status === 401) {
+        localStorage.removeItem('tailwag_session');
+        window.location.href = '/login.html';
+        return;
       }
+
+      const stats = statsRes.ok ? await statsRes.json() : { clients: 0, dogs: 0 };
+      const usage = usageRes.ok ? await usageRes.json() : { usage: 0, limit: 500 };
+      const messages = historyRes.ok ? await historyRes.json() : [];
+
+      // Update daycare name in nav
+      if (stats.daycare && stats.daycare.name) {
+        document.getElementById('daycareName').textContent = stats.daycare.name;
+      }
+      document.getElementById('welcomeText').textContent =
+        (stats.daycare && stats.daycare.name) ? `Overview for ${stats.daycare.name}` : 'Welcome back!';
+
+      // Stats
+      document.getElementById('statClients').textContent = stats.clients != null ? stats.clients : 0;
+      document.getElementById('statDogs').textContent = stats.dogs != null ? stats.dogs : 0;
+      document.getElementById('statMsgUsage').textContent = usage.usage != null ? usage.usage : 0;
+
+      const remaining = (usage.limit || 0) - (usage.usage || 0);
+      const remainingEl = document.getElementById('statMsgRemaining');
+      remainingEl.textContent = remaining;
+      const pctRemaining = usage.limit > 0 ? remaining / usage.limit : 1;
+      if (pctRemaining < 0.2) remainingEl.classList.add('danger');
+      document.getElementById('statMsgLimit').textContent = `of ${usage.limit || 0} monthly`;
+
+      // Onboarding checklist — show only when no clients yet
+      if ((stats.clients || 0) === 0) {
+        document.getElementById('onboardingCard').style.display = 'block';
+      }
+
+      // Messages table
+      renderMessages(messages);
+
+      // Show content
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('pageContent').style.display = 'block';
+
+    } catch (err) {
+      document.getElementById('loadingState').innerHTML = `<p style="color:#e53e3e;font-size:14px;">${err.message}</p>`;
+    }
+  }
+
+  function renderMessages(messages) {
+    document.getElementById('messagesLoading').style.display = 'none';
+    document.getElementById('messagesContent').style.display = 'block';
+
+    const tbody = document.getElementById('messagesTableBody');
+    if (!messages.length) {
+      tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">No messages yet. <a href="/messaging.html" style="color:var(--green);font-weight:600;">Send your first message</a></div></td></tr>';
+      return;
     }
 
-    function handleLogout() {
-      localStorage.removeItem('tailwag_session');
-      localStorage.removeItem('tailwag_user');
-      window.location.href = '/';
-    }
-  </script>
+    tbody.innerHTML = messages.map(function(m) {
+      var clientName = m.clients
+        ? ((m.clients.first_name || '') + ' ' + (m.clients.last_name || '')).trim()
+        : escHtml(m.recipient_phone || '—');
+      var date = new Date(m.created_at).toLocaleString('en-US', {
+        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+      });
+      var preview = (m.body || '').length > 60 ? m.body.substring(0, 60) + '\u2026' : (m.body || '');
+      var status = m.status || 'queued';
+      return '<tr>' +
+        '<td style="white-space:nowrap;color:#999">' + date + '</td>' +
+        '<td style="font-weight:600">' + escHtml(clientName) + '</td>' +
+        '<td style="color:#666">' + escHtml(preview) + '</td>' +
+        '<td><span class="status-badge status-' + status + '">' + status + '</span></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('tailwag_session');
+    localStorage.removeItem('tailwag_user');
+    window.location.href = '/';
+  }
+
+  loadDashboard();
+</script>
+
+<!-- Intercom -->
+<script>window.intercomSettings={app_id:"ov6sdlds"};</script>
+<script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/ov6sdlds';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();</script>
 </body>
 </html>
