@@ -29,7 +29,7 @@ Rules:
 - Match the dog's energy in word choice (use the notes to infer energy level)
 - Use the owner's first name ONCE, naturally woven in — never at the start
 - End with at most ONE casual emoji, only if it feels natural
-- Keep the message between 120-155 characters total
+- Keep the message between 175-200 characters total
 - Sound like a real person wrote it, not a template
 - Be specific to the notes provided — no generic openers
 
@@ -38,7 +38,7 @@ Write ONLY the SMS message text. No quotes, no explanation.`;
   try {
     const message = await anthropic.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 200,
+      max_tokens: 300,
       messages: [{ role: 'user', content: prompt }]
     });
 
