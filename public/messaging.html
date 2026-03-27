@@ -472,6 +472,7 @@
   let selectedDog = null;
   let daycareName = '';
   let googleLink = '';
+  let aiGeneratedBase = null; // stores AI message before any review link appended
   let shortReviewLink = '';
   let daycareInfo = null;
 
@@ -614,6 +615,7 @@
     document.getElementById('composeActive').style.display = 'flex';
 
     // Reset
+    aiGeneratedBase = null;
     document.getElementById('staffNotes').value = '';
     document.getElementById('greatDayToggle').checked = false;
     document.getElementById('toggleSubtext').textContent = 'Toggle on to append a Google review request';
@@ -681,6 +683,7 @@
   }
 
   async function onTemplateChange() {
+    aiGeneratedBase = null;
     updateSendLabel();
     updateGenerateBtn();
     await populateTemplate();
@@ -703,7 +706,22 @@
     }
     const template = document.getElementById('templateSelect').value;
     if (template === 'report_card') {
-      await populateTemplate();
+      if (aiGeneratedBase !== null) {
+        // AI message exists — just append/remove review link without overwriting
+        const msgTextarea = document.getElementById('msgBody');
+        if (on) {
+          const link = await getShortLink();
+          msgTextarea.value = link
+            ? aiGeneratedBase + ` If you have 30 seconds, an honest review means the world: ${link}`
+            : aiGeneratedBase;
+        } else {
+          msgTextarea.value = aiGeneratedBase;
+        }
+        updateCharCount();
+      } else {
+        // No AI message yet — use static template
+        await populateTemplate();
+      }
     }
   }
 
@@ -760,7 +778,16 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      msgTextarea.value = data.message;
+      aiGeneratedBase = data.message;
+      // If great day toggle is already on, append review link
+      if (document.getElementById('greatDayToggle').checked) {
+        const link = await getShortLink();
+        msgTextarea.value = link
+          ? aiGeneratedBase + ` If you have 30 seconds, an honest review means the world: ${link}`
+          : aiGeneratedBase;
+      } else {
+        msgTextarea.value = aiGeneratedBase;
+      }
       updateCharCount();
       btn.textContent = '✨ Regenerate';
     } catch (err) {
