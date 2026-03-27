@@ -8,6 +8,7 @@
     "dev": "node --watch server.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
     "@intercom/messenger-js-sdk": "^0.0.18",
     "@supabase/supabase-js": "^2.45.0",
     "dotenv": "^16.4.0",

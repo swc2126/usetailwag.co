@@ -368,6 +368,15 @@
             </div>
           </div>
 
+          <!-- AI Generate Report Card -->
+          <div id="generateSection" style="display:none;">
+            <button id="generateBtn" onclick="generateReportCard()"
+              style="width:100%;background:#1E6B4A;color:#fff;border:none;border-radius:10px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.2s,opacity 0.2s;">
+              ✨ Generate Report Card
+            </button>
+            <div id="generateError" style="display:none;margin-top:6px;font-size:12px;color:#e53e3e;"></div>
+          </div>
+
           <!-- Section 2: Message Template -->
           <div class="compose-card">
             <span class="section-label">Message Template</span>
@@ -464,6 +473,7 @@
   let daycareName = '';
   let googleLink = '';
   let shortReviewLink = '';
+  let daycareInfo = null;
 
   const TEMPLATES = {
     report_card: (owner, dog, dc, notes) =>
@@ -500,6 +510,7 @@
       if (statsRes.ok) {
         const statsData = await statsRes.json();
         if (statsData.daycare) {
+          daycareInfo = statsData.daycare;
           daycareName = statsData.daycare.name || '';
           googleLink = statsData.daycare.google_link || '';
         }
@@ -608,9 +619,12 @@
     document.getElementById('toggleSubtext').textContent = 'Toggle on to append a Google review request';
     document.getElementById('toggleSubtext').className = 'toggle-subtext';
     document.getElementById('sendResult').style.display = 'none';
+    document.getElementById('generateBtn').textContent = '✨ Generate Report Card';
+    document.getElementById('generateError').style.display = 'none';
 
     await populateTemplate();
     updateSendLabel();
+    updateGenerateBtn();
   }
 
   async function getShortLink() {
@@ -668,6 +682,7 @@
 
   async function onTemplateChange() {
     updateSendLabel();
+    updateGenerateBtn();
     await populateTemplate();
   }
 
@@ -705,6 +720,56 @@
     const el = document.getElementById('charCount');
     el.textContent = `${len} / 160`;
     el.className = 'char-count' + (len > 160 ? ' over' : len > 140 ? ' warning' : '');
+  }
+
+  function updateGenerateBtn() {
+    const template = document.getElementById('templateSelect').value;
+    const section = document.getElementById('generateSection');
+    if (selectedClient && template === 'report_card') {
+      section.style.display = 'block';
+    } else {
+      section.style.display = 'none';
+    }
+  }
+
+  async function generateReportCard() {
+    const btn = document.getElementById('generateBtn');
+    const msgTextarea = document.getElementById('msgBody');
+    const errEl = document.getElementById('generateError');
+    errEl.style.display = 'none';
+
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+    btn.textContent = 'Crafting message…';
+
+    try {
+      const res = await fetch('/api/ai/report-card', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          dog_name: selectedDog?.name || (selectedClient?.dogs?.[0]?.name) || '',
+          owner_first_name: selectedClient?.first_name || '',
+          breed: selectedDog?.breed || (selectedClient?.dogs?.[0]?.breed) || '',
+          notes: document.getElementById('staffNotes').value || '',
+          daycare_name: daycareInfo?.name || daycareName || ''
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      msgTextarea.value = data.message;
+      updateCharCount();
+      btn.textContent = '✨ Regenerate';
+    } catch (err) {
+      btn.textContent = '✨ Generate Report Card';
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+    }
+    btn.disabled = false;
+    btn.style.opacity = '1';
   }
 
   function openPreviewModal() {
