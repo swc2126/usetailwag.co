@@ -14,6 +14,34 @@ app.use('/api/sms/status', express.urlencoded({ extended: false }));
 // Parse JSON bodies
 app.use(express.json());
 
+// Short link redirects — must be before static middleware
+app.get('/r/:code', async (req, res) => {
+  const { createClient } = require('@supabase/supabase-js');
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+
+  const { data, error } = await supabase
+    .from('short_links')
+    .select('original_url, clicks, id')
+    .eq('code', req.params.code.toUpperCase())
+    .single();
+
+  if (error || !data) {
+    return res.status(404).send(`
+      <!DOCTYPE html><html><head><title>Link not found — TailWag</title></head>
+      <body style="font-family:sans-serif;text-align:center;padding:60px;">
+        <h2>🐾 Link not found</h2>
+        <p>This link may have expired or been removed.</p>
+        <a href="https://usetailwag.co">Visit TailWag</a>
+      </body></html>
+    `);
+  }
+
+  // Increment click count (fire and forget)
+  supabase.from('short_links').update({ clicks: (data.clicks || 0) + 1 }).eq('id', data.id).then(() => {});
+
+  res.redirect(301, data.original_url);
+});
+
 // Serve static files from /public
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -27,6 +55,7 @@ app.use('/api/sms', require('./routes/sms'));
 app.use('/api/media', require('./routes/media'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/reviews', require('./routes/reviews'));
+app.use('/api/shortlinks', require('./routes/shortlinks'));
 
 // Serve index.html for root
 app.get('/', (req, res) => {

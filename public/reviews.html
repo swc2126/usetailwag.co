@@ -320,18 +320,40 @@
 
   let allClients = [];
   let daycareName = '';
-  let googleLink = 'https://g.page/r/YOUR_REVIEW_LINK/review';
+  let googleLink = '';
 
   function escHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  function buildTemplate(clientName, dogName) {
-    return 'Hi ' + clientName + '! \uD83D\uDC3E Thanks for bringing ' + dogName + ' to ' + (daycareName || 'our daycare') + ' today. We\'d love it if you left us a review: ' + googleLink + ' \u2014 it means the world to us! \uD83C\uDF1F';
+  async function getShortLink(originalUrl) {
+    try {
+      const session = JSON.parse(localStorage.getItem('tailwag_session'));
+      const res = await fetch('/api/shortlinks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ original_url: originalUrl, label: 'Google Review' })
+      });
+      const data = await res.json();
+      return data.short_url || originalUrl;
+    } catch {
+      return originalUrl; // fallback to original
+    }
   }
 
-  function onClientChange() {
+  async function buildTemplate(clientName, dogName) {
+    if (!googleLink) {
+      return 'Hi ' + clientName + '! \uD83D\uDC3E Thanks for bringing ' + dogName + ' to ' + (daycareName || 'our daycare') + ' today. We\'d love a quick review \u2014 it means the world to us! \uD83C\uDF1F';
+    }
+    const shortUrl = await getShortLink(googleLink);
+    return 'Hi ' + clientName + '! \uD83D\uDC3E Thanks for bringing ' + dogName + ' to ' + (daycareName || 'our daycare') + ' today. We\'d love a quick review: ' + shortUrl + ' \u2014 it means the world to us! \uD83C\uDF1F';
+  }
+
+  async function onClientChange() {
     const clientId = document.getElementById('clientSelect').value;
     const dogSel = document.getElementById('dogSelect');
     dogSel.innerHTML = '<option value="">— Select a dog —</option>';
@@ -339,6 +361,15 @@
     if (!clientId) {
       document.getElementById('msgBody').value = '';
       return;
+    }
+
+    if (!googleLink) {
+      const resultEl = document.getElementById('sendResult');
+      resultEl.textContent = 'Add your Google review link in Settings to use this feature';
+      resultEl.className = 'send-result error';
+      resultEl.style.display = 'block';
+    } else {
+      document.getElementById('sendResult').style.display = 'none';
     }
 
     const client = allClients.find(function(c) { return c.id === clientId; });
@@ -354,19 +385,22 @@
       });
       // Auto-select first dog and fill template
       dogSel.value = client.dogs[0].id;
-      document.getElementById('msgBody').value = buildTemplate(
+      document.getElementById('msgBody').value = 'Loading...';
+      document.getElementById('msgBody').value = await buildTemplate(
         client.first_name,
         client.dogs[0].name
       );
     } else {
-      document.getElementById('msgBody').value = buildTemplate(client.first_name, '[their dog]');
+      document.getElementById('msgBody').value = 'Loading...';
+      document.getElementById('msgBody').value = await buildTemplate(client.first_name, '[their dog]');
     }
 
     // Update template when dog changes
-    dogSel.onchange = function() {
+    dogSel.onchange = async function() {
       const dogId = dogSel.value;
       const dog = (client.dogs || []).find(function(d) { return d.id === dogId; });
-      document.getElementById('msgBody').value = buildTemplate(
+      document.getElementById('msgBody').value = 'Loading...';
+      document.getElementById('msgBody').value = await buildTemplate(
         client.first_name,
         dog ? dog.name : '[their dog]'
       );
@@ -508,6 +542,9 @@
         const dashData = await daycareRes.json();
         if (dashData.daycare && dashData.daycare.name) {
           daycareName = dashData.daycare.name;
+        }
+        if (dashData.daycare && dashData.daycare.google_link) {
+          googleLink = dashData.daycare.google_link;
         }
       }
 
