@@ -312,6 +312,17 @@
         document.getElementById('loadingState').style.display = 'none';
         document.getElementById('dashboardContent').style.display = 'block';
 
+        // Initialize Intercom with user data
+        window.intercomSettings = {
+          api_base: "https://api-iam.intercom.io",
+          app_id: "ov6sdlds",
+          user_id: data.user.id,
+          name: data.user.name || '',
+          email: data.user.email,
+          created_at: Math.floor(new Date(data.profile?.created_at || Date.now()).getTime() / 1000)
+        };
+        (function(){var w=document,ic=w.createElement('script');ic.type='text/javascript';ic.async=true;ic.src='https://widget.intercom.io/widget/ov6sdlds';var s=w.getElementsByTagName('script')[0];s.parentNode.insertBefore(ic,s);})();
+
       } catch (err) {
         console.error('Dashboard load error:', err);
         document.getElementById('loadingState').innerHTML = '<p>Something went wrong loading your dashboard. <a href="/login.html">Try logging in again.</a></p>';
