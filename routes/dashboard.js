@@ -14,7 +14,7 @@ router.get('/stats', requireAuth, async (req, res) => {
     supabaseAdmin.from('clients').select('id', { count: 'exact', head: true }).eq('daycare_id', req.daycareId).eq('active', true),
     supabaseAdmin.from('dogs').select('id', { count: 'exact', head: true }).eq('daycare_id', req.daycareId).eq('active', true),
     supabaseAdmin.from('messages').select('id', { count: 'exact', head: true }).eq('daycare_id', req.daycareId).gte('created_at', start.toISOString()),
-    supabaseAdmin.from('daycares').select('name, city, state').eq('id', req.daycareId).single()
+    supabaseAdmin.from('daycares').select('name, city, state, google_link').eq('id', req.daycareId).single()
   ]);
 
   res.json({
@@ -23,6 +23,29 @@ router.get('/stats', requireAuth, async (req, res) => {
     messages_this_month: messagesRes.count || 0,
     daycare: daycareRes.data
   });
+});
+
+// PUT /api/dashboard/daycare — update daycare settings
+router.put('/daycare', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+  if (!['owner', 'admin'].includes(req.userRole)) return res.status(403).json({ error: 'Insufficient permissions' });
+
+  const { google_link } = req.body;
+
+  // Validate URL if provided
+  if (google_link) {
+    try { new URL(google_link); } catch { return res.status(400).json({ error: 'Invalid URL' }); }
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('daycares')
+    .update({ google_link: google_link || null })
+    .eq('id', req.daycareId)
+    .select('name, city, state, google_link')
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
 });
 
 module.exports = router;
