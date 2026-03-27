@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clients — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --black: #0F1410;
+      --green: #1E6B4A;
+      --green-dark: #164D35;
+      --linen: #F5F0E8;
+      --gold: #C4933F;
+      --sage: #A8C5B0;
+      --slate: #2D3748;
+      --border-subtle: rgba(255,255,255,0.08);
+    }
+
+    body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
+
+    /* ── NAV ── */
+    .dashboard-nav {
+      background: var(--black);
+      padding: 0 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 60px;
+    }
+    .nav-left { display: flex; align-items: center; gap: 32px; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link {
+      color: rgba(245,240,232,0.6);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
+    .nav-link.active { color: var(--linen); background: rgba(255,255,255,0.1); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .user-name { font-size: 14px; color: var(--sage); }
+    .logout-btn {
+      background: transparent;
+      border: 1px solid rgba(245,240,232,0.3);
+      color: var(--linen);
+      padding: 7px 18px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .logout-btn:hover { border-color: var(--linen); }
+
+    /* ── CONTAINER ── */
+    .page-container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .page-header-left h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 30px;
+      color: var(--black);
+      letter-spacing: -0.5px;
+    }
+    .count-badge {
+      display: inline-block;
+      background: rgba(30,107,74,0.12);
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 6px;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: var(--linen);
+      border: none;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--green-dark); }
+
+    /* ── TABLE ── */
+    .table-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--black); }
+    thead th {
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--sage);
+    }
+    tbody tr { border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(30,107,74,0.03); }
+    tbody td { padding: 14px 20px; font-size: 14px; color: var(--slate); }
+    .dog-chip {
+      display: inline-block;
+      background: rgba(168,197,176,0.25);
+      color: var(--green-dark);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin: 2px 2px 0 0;
+    }
+    .action-btn {
+      background: none;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .edit-btn { color: var(--green); }
+    .edit-btn:hover { background: rgba(30,107,74,0.1); }
+    .delete-btn { color: #e53e3e; }
+    .delete-btn:hover { background: rgba(229,62,62,0.1); }
+
+    /* ── EMPTY / LOADING ── */
+    .empty-state { text-align: center; padding: 60px 20px; color: #999; }
+    .loading-spinner {
+      width: 28px; height: 28px;
+      border: 3px solid rgba(30,107,74,0.2);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 14px;
+      padding: 32px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--black);
+      margin-bottom: 24px;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--slate); margin-bottom: 6px; }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--slate);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--green); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+    .btn-secondary {
+      background: none;
+      border: 1px solid #ddd;
+      color: var(--slate);
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .btn-secondary:hover { border-color: #999; }
+
+    .error-msg { background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; border-radius: 8px; padding: 12px 16px; font-size: 13px; margin-bottom: 16px; display: none; }
+
+    @media (max-width: 640px) {
+      .dashboard-nav { padding: 0 16px; }
+      .nav-links { display: none; }
+      .page-container { padding: 24px 16px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="/" class="logo">
+      <svg width="26" height="26" viewBox="0 0 56 56" fill="none">
+        <rect width="56" height="56" fill="#1E6B4A" rx="9"/>
+        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+      </svg>
+      <span class="logo-text">TailWag</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/clients.html" class="nav-link active">Clients</a>
+      <a href="/messaging.html" class="nav-link">Messaging</a>
+      <a href="/team.html" class="nav-link">Team</a>
+      <a href="/settings.html" class="nav-link">Settings</a>
+    </nav>
+  </div>
+  <div class="nav-right">
+    <span class="user-name" id="userName"></span>
+    <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+  </div>
+</nav>
+
+<div class="page-container">
+  <!-- Loading state -->
+  <div id="loadingState" style="text-align:center;padding:80px 20px;">
+    <div class="loading-spinner"></div>
+    <p style="color:#999;font-size:14px;">Loading clients...</p>
+  </div>
+
+  <!-- Page content -->
+  <div id="pageContent" style="display:none;">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Clients</h1>
+        <span class="count-badge" id="clientCount">0 clients</span>
+      </div>
+      <button class="btn-primary" onclick="openAddModal()">+ Add Client</button>
+    </div>
+
+    <div class="error-msg" id="pageError"></div>
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Dogs</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="clientsTableBody">
+          <tr><td colspan="5"><div class="empty-state">No clients yet. Add your first client above.</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="modal-overlay" id="clientModal">
+  <div class="modal">
+    <h2 id="modalTitle">Add Client</h2>
+    <div class="error-msg" id="modalError"></div>
+    <input type="hidden" id="clientId">
+    <div class="form-row">
+      <div class="form-group">
+        <label>First Name *</label>
+        <input type="text" id="firstName" placeholder="Jane">
+      </div>
+      <div class="form-group">
+        <label>Last Name *</label>
+        <input type="text" id="lastName" placeholder="Smith">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Phone *</label>
+      <input type="tel" id="phone" placeholder="+1 555-000-0000">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="jane@example.com">
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="notes" placeholder="Any notes about this client..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" id="saveBtn" onclick="saveClient()">Save Client</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+  if (!session || !session.access_token) window.location.href = '/login.html';
+
+  const authHeaders = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${session.access_token}`
+  };
+
+  let clients = [];
+
+  async function loadClients() {
+    try {
+      const res = await fetch('/api/clients', { headers: authHeaders });
+      if (res.status === 401) { localStorage.removeItem('tailwag_session'); window.location.href = '/login.html'; return; }
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to load clients'); }
+      clients = await res.json();
+      renderClients();
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('pageContent').style.display = 'block';
+      document.getElementById('userName').textContent = session.user?.email || '';
+    } catch (err) {
+      document.getElementById('loadingState').innerHTML = `<p style="color:#e53e3e">${err.message}</p>`;
+    }
+  }
+
+  function renderClients() {
+    const tbody = document.getElementById('clientsTableBody');
+    document.getElementById('clientCount').textContent = `${clients.length} client${clients.length !== 1 ? 's' : ''}`;
+    if (!clients.length) {
+      tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No clients yet. Add your first client above.</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = clients.map(c => `
+      <tr>
+        <td><strong>${escHtml(c.first_name)} ${escHtml(c.last_name)}</strong></td>
+        <td>${escHtml(c.phone || '—')}</td>
+        <td>${escHtml(c.email || '—')}</td>
+        <td>${(c.dogs || []).map(d => `<span class="dog-chip">${escHtml(d.name)}</span>`).join('')||'—'}</td>
+        <td>
+          <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit</button>
+          <button class="action-btn delete-btn" onclick="deleteClient('${c.id}', '${escHtml(c.first_name)} ${escHtml(c.last_name)}')">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function openAddModal() {
+    document.getElementById('modalTitle').textContent = 'Add Client';
+    document.getElementById('clientId').value = '';
+    document.getElementById('firstName').value = '';
+    document.getElementById('lastName').value = '';
+    document.getElementById('phone').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('notes').value = '';
+    document.getElementById('saveBtn').textContent = 'Save Client';
+    document.getElementById('modalError').style.display = 'none';
+    document.getElementById('clientModal').classList.add('open');
+  }
+
+  function openEditModal(client) {
+    document.getElementById('modalTitle').textContent = 'Edit Client';
+    document.getElementById('clientId').value = client.id;
+    document.getElementById('firstName').value = client.first_name || '';
+    document.getElementById('lastName').value = client.last_name || '';
+    document.getElementById('phone').value = client.phone || '';
+    document.getElementById('email').value = client.email || '';
+    document.getElementById('notes').value = client.notes || '';
+    document.getElementById('saveBtn').textContent = 'Update Client';
+    document.getElementById('modalError').style.display = 'none';
+    document.getElementById('clientModal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('clientModal').classList.remove('open');
+  }
+
+  async function saveClient() {
+    const id = document.getElementById('clientId').value;
+    const first_name = document.getElementById('firstName').value.trim();
+    const last_name = document.getElementById('lastName').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const notes = document.getElementById('notes').value.trim();
+    const errEl = document.getElementById('modalError');
+
+    if (!first_name || !last_name || !phone) {
+      errEl.textContent = 'First name, last name, and phone are required.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.textContent = 'Saving...';
+    saveBtn.disabled = true;
+
+    try {
+      const url = id ? `/api/clients/${id}` : '/api/clients';
+      const method = id ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: authHeaders,
+        body: JSON.stringify({ first_name, last_name, phone, email, notes })
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to save'); }
+      closeModal();
+      await loadClients();
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+    } finally {
+      saveBtn.textContent = id ? 'Update Client' : 'Save Client';
+      saveBtn.disabled = false;
+    }
+  }
+
+  async function deleteClient(id, name) {
+    if (!confirm(`Remove ${name} from your clients? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`/api/clients/${id}`, { method: 'DELETE', headers: authHeaders });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Delete failed'); }
+      await loadClients();
+    } catch (err) {
+      const errEl = document.getElementById('pageError');
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('tailwag_session');
+    localStorage.removeItem('tailwag_user');
+    window.location.href = '/';
+  }
+
+  // Close modal on overlay click
+  document.getElementById('clientModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  loadClients();
+</script>
+
+<!-- Intercom -->
+<script>window.intercomSettings={app_id:"ov6sdlds"};</script>
+<script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/ov6sdlds';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();</script>
+</body>
+</html>

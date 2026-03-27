@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #0F1410; --green: #1E6B4A; --green-dark: #164D35;
+      --linen: #F5F0E8; --gold: #C4933F; --sage: #A8C5B0; --slate: #2D3748;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
+
+    .dashboard-nav {
+      background: var(--black); padding: 0 32px;
+      display: flex; justify-content: space-between; align-items: center; height: 60px;
+    }
+    .nav-left { display: flex; align-items: center; gap: 32px; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link {
+      color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; font-weight: 500;
+      padding: 6px 14px; border-radius: 6px; transition: color 0.2s, background 0.2s;
+    }
+    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
+    .nav-link.active { color: var(--linen); background: rgba(255,255,255,0.1); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .user-name { font-size: 14px; color: var(--sage); }
+    .logout-btn {
+      background: transparent; border: 1px solid rgba(245,240,232,0.3); color: var(--linen);
+      padding: 7px 18px; border-radius: 8px; font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color 0.2s;
+    }
+    .logout-btn:hover { border-color: var(--linen); }
+
+    .page-container { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
+    .page-header { margin-bottom: 32px; }
+    .page-header h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+      font-size: 30px; color: var(--black); letter-spacing: -0.5px;
+    }
+
+    .settings-card {
+      background: #fff; border-radius: 12px; border-left: 4px solid var(--green);
+      padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 24px;
+    }
+    .settings-card h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 18px; color: var(--black); margin-bottom: 20px;
+    }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 13px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-value { font-size: 15px; color: var(--slate); font-weight: 500; }
+    .info-value.highlight { color: var(--green); font-weight: 700; }
+    .info-value.gold { color: var(--gold); font-weight: 700; font-size: 18px; }
+
+    /* Usage bar */
+    .usage-bar-wrap { margin-top: 14px; }
+    .usage-bar-label { display: flex; justify-content: space-between; font-size: 13px; color: #999; margin-bottom: 6px; }
+    .usage-bar-track { height: 8px; background: rgba(0,0,0,0.08); border-radius: 20px; overflow: hidden; }
+    .usage-bar-fill { height: 100%; background: var(--green); border-radius: 20px; transition: width 0.5s; }
+    .usage-bar-fill.warning { background: var(--gold); }
+    .usage-bar-fill.danger { background: #e53e3e; }
+
+    .plan-badge {
+      display: inline-block; padding: 4px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .plan-starter { background: rgba(0,0,0,0.06); color: #666; }
+    .plan-growth { background: rgba(30,107,74,0.12); color: var(--green); }
+    .plan-pro { background: rgba(196,147,63,0.15); color: var(--gold); }
+
+    .phone-display {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 22px; color: var(--black); letter-spacing: 1px;
+    }
+    .no-number { color: #999; font-style: italic; }
+
+    .btn-primary {
+      background: var(--green); color: var(--linen); border: none; padding: 10px 22px;
+      border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s; margin-top: 12px;
+    }
+    .btn-primary:hover { background: var(--green-dark); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-danger {
+      background: none; border: 1px solid #feb2b2; color: #e53e3e; padding: 9px 20px;
+      border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-danger:hover { background: #fff5f5; }
+
+    .provision-form { display: flex; gap: 12px; align-items: flex-end; margin-top: 12px; flex-wrap: wrap; }
+    .provision-form input {
+      width: 140px; padding: 9px 14px; border: 1px solid #ddd; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 14px; outline: none;
+    }
+    .provision-form input:focus { border-color: var(--green); }
+
+    .msg { border-radius: 8px; padding: 12px 16px; font-size: 13px; margin-top: 12px; display: none; }
+    .msg-error { background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; }
+    .msg-success { background: #f0fff4; color: var(--green); border: 1px solid #c6f6d5; }
+
+    .loading-spinner {
+      width: 28px; height: 28px; border: 3px solid rgba(30,107,74,0.2);
+      border-top-color: var(--green); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 640px) {
+      .dashboard-nav { padding: 0 16px; }
+      .nav-links { display: none; }
+      .page-container { padding: 24px 16px; }
+      .info-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="/" class="logo">
+      <svg width="26" height="26" viewBox="0 0 56 56" fill="none">
+        <rect width="56" height="56" fill="#1E6B4A" rx="9"/>
+        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+      </svg>
+      <span class="logo-text">TailWag</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/clients.html" class="nav-link">Clients</a>
+      <a href="/messaging.html" class="nav-link">Messaging</a>
+      <a href="/team.html" class="nav-link">Team</a>
+      <a href="/settings.html" class="nav-link active">Settings</a>
+    </nav>
+  </div>
+  <div class="nav-right">
+    <span class="user-name" id="userName"></span>
+    <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+  </div>
+</nav>
+
+<div class="page-container">
+  <div id="loadingState" style="text-align:center;padding:80px 20px;">
+    <div class="loading-spinner"></div>
+    <p style="color:#999;font-size:14px;">Loading settings...</p>
+  </div>
+
+  <div id="pageContent" style="display:none;">
+    <div class="page-header">
+      <h1>Settings</h1>
+    </div>
+
+    <!-- Plan Card -->
+    <div class="settings-card">
+      <h2>Your Plan</h2>
+      <div class="info-row">
+        <span class="info-label">Plan</span>
+        <span class="info-value"><span class="plan-badge" id="planBadge">—</span></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Status</span>
+        <span class="info-value highlight" id="planStatus">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Next Renewal</span>
+        <span class="info-value" id="planRenewal">—</span>
+      </div>
+      <div class="usage-bar-wrap">
+        <div class="usage-bar-label">
+          <span>Messages this month</span>
+          <span id="usageText">— / —</span>
+        </div>
+        <div class="usage-bar-track">
+          <div class="usage-bar-fill" id="usageBar" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TailWag Number Card -->
+    <div class="settings-card">
+      <h2>Your TailWag Number</h2>
+      <div id="numberDisplay">
+        <p class="no-number">No number assigned yet.</p>
+      </div>
+      <div id="provisionSection" style="display:none;">
+        <p style="font-size:13px;color:#999;margin-bottom:8px;">Request a dedicated phone number for your daycare.</p>
+        <div class="provision-form">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#999;display:block;margin-bottom:4px;">AREA CODE (optional)</label>
+            <input type="text" id="areaCodeInput" placeholder="e.g. 415" maxlength="3">
+          </div>
+          <button class="btn-primary" id="requestNumberBtn" onclick="requestNumber()">Request Number</button>
+        </div>
+        <div class="msg msg-error" id="provisionError"></div>
+        <div class="msg msg-success" id="provisionSuccess"></div>
+      </div>
+    </div>
+
+    <!-- Daycare Info Card -->
+    <div class="settings-card">
+      <h2>Daycare Info</h2>
+      <div class="info-row">
+        <span class="info-label">Daycare Name</span>
+        <span class="info-value" id="daycareName">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">City</span>
+        <span class="info-value" id="daycareCity">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">State</span>
+        <span class="info-value" id="daycareState">—</span>
+      </div>
+    </div>
+
+    <!-- Account Card -->
+    <div class="settings-card">
+      <h2>Account</h2>
+      <div class="info-row">
+        <span class="info-label">Email</span>
+        <span class="info-value" id="accountEmail">—</span>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn-danger" onclick="handleLogout()">Sign Out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+  if (!session || !session.access_token) window.location.href = '/login.html';
+
+  const authHeaders = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` };
+
+  async function loadSettings() {
+    try {
+      // Load usage + auth/me in parallel
+      const [usageRes, meRes] = await Promise.all([
+        fetch('/api/sms/usage', { headers: authHeaders }),
+        fetch('/api/auth/me', { method: 'POST', headers: authHeaders, body: JSON.stringify({ access_token: session.access_token }) })
+      ]);
+
+      if (usageRes.status === 401 || meRes.status === 401) {
+        localStorage.removeItem('tailwag_session');
+        window.location.href = '/login.html';
+        return;
+      }
+
+      const usage = usageRes.ok ? await usageRes.json() : { usage: 0, limit: 500, plan: 'starter' };
+      const meData = meRes.ok ? await meRes.json() : null;
+
+      // Plan badge
+      const planBadge = document.getElementById('planBadge');
+      const planName = usage.plan || 'starter';
+      planBadge.textContent = planName.charAt(0).toUpperCase() + planName.slice(1);
+      planBadge.className = `plan-badge plan-${planName}`;
+
+      document.getElementById('planStatus').textContent = meData?.subscription?.status === 'active' ? 'Active' : 'No active subscription';
+
+      // Renewal date
+      const periodEnd = meData?.subscription?.current_period_end;
+      document.getElementById('planRenewal').textContent = periodEnd
+        ? new Date(periodEnd * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        : '—';
+
+      // Usage bar
+      const pct = usage.limit > 0 ? Math.min(100, Math.round((usage.usage / usage.limit) * 100)) : 0;
+      document.getElementById('usageText').textContent = `${usage.usage} / ${usage.limit}`;
+      const bar = document.getElementById('usageBar');
+      bar.style.width = pct + '%';
+      bar.className = 'usage-bar-fill' + (pct >= 90 ? ' danger' : pct >= 75 ? ' warning' : '');
+
+      // TailWag number
+      await loadTwilioNumber();
+
+      // Daycare info
+      if (meData?.daycare) {
+        document.getElementById('daycareName').textContent = meData.daycare.name || '—';
+        document.getElementById('daycareCity').textContent = meData.daycare.city || '—';
+        document.getElementById('daycareState').textContent = meData.daycare.state || '—';
+      }
+
+      // Account
+      document.getElementById('accountEmail').textContent = session.user?.email || meData?.user?.email || '—';
+      document.getElementById('userName').textContent = session.user?.email || '';
+
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('pageContent').style.display = 'block';
+    } catch (err) {
+      document.getElementById('loadingState').innerHTML = `<p style="color:#e53e3e">${err.message}</p>`;
+    }
+  }
+
+  async function loadTwilioNumber() {
+    // We infer from usage endpoint — the number comes from the daycare
+    // For now, attempt a soft check by catching a provision error if already has number
+    // Since there's no dedicated GET endpoint, show the provision form and let status reveal it
+    const numDiv = document.getElementById('numberDisplay');
+    const provSection = document.getElementById('provisionSection');
+    // Show provision section — if they already have a number the API will return it as an error
+    provSection.style.display = 'block';
+    numDiv.innerHTML = ''; // clear "no number" placeholder until we know
+  }
+
+  async function requestNumber() {
+    const areaCode = document.getElementById('areaCodeInput').value.trim();
+    const btn = document.getElementById('requestNumberBtn');
+    const errEl = document.getElementById('provisionError');
+    const succEl = document.getElementById('provisionSuccess');
+    errEl.style.display = 'none';
+    succEl.style.display = 'none';
+    btn.textContent = 'Requesting...'; btn.disabled = true;
+
+    try {
+      const body = areaCode ? { areaCode } : {};
+      const res = await fetch('/api/sms/provision', {
+        method: 'POST', headers: authHeaders, body: JSON.stringify(body)
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.number) {
+          // Already has a number
+          showExistingNumber(data.number);
+          document.getElementById('provisionSection').style.display = 'none';
+          return;
+        }
+        throw new Error(data.error || 'Failed to provision number');
+      }
+
+      showExistingNumber(data.phone_number);
+      document.getElementById('provisionSection').style.display = 'none';
+      succEl.textContent = `Number ${data.phone_number} successfully assigned!`;
+      succEl.style.display = 'block';
+    } catch (err) {
+      errEl.textContent = err.message; errEl.style.display = 'block';
+    } finally {
+      btn.textContent = 'Request Number'; btn.disabled = false;
+    }
+  }
+
+  function showExistingNumber(number) {
+    const numDiv = document.getElementById('numberDisplay');
+    numDiv.innerHTML = `<div class="phone-display">${number}</div><p style="font-size:12px;color:#999;margin-top:6px;">This is your dedicated TailWag outbound number.</p>`;
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('tailwag_session');
+    localStorage.removeItem('tailwag_user');
+    window.location.href = '/';
+  }
+
+  loadSettings();
+</script>
+
+<script>window.intercomSettings={app_id:"ov6sdlds"};</script>
+<script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/ov6sdlds';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();</script>
+</body>
+</html>
