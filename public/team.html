@@ -238,16 +238,21 @@
 
   async function loadTeam() {
     try {
-      const res = await fetch('/api/team', { headers: authHeaders });
-      if (res.status === 401) { localStorage.removeItem('tailwag_session'); window.location.href = '/login.html'; return; }
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to load team'); }
-      const members = await res.json();
+      const [teamRes, meRes] = await Promise.all([
+        fetch('/api/team', { headers: authHeaders }),
+        fetch('/api/auth/me', { headers: authHeaders })
+      ]);
+      if (teamRes.status === 401) { localStorage.removeItem('tailwag_session'); window.location.href = '/login.html'; return; }
+      if (!teamRes.ok) { const e = await teamRes.json(); throw new Error(e.error || 'Failed to load team'); }
+      const members = await teamRes.json();
 
-      // Determine current user's role
-      const me = members.find(m => m.user_id === session.user?.id);
-      currentRole = me?.role || null;
+      // Get role from /api/auth/me (handles owner fallback correctly)
+      if (meRes.ok) {
+        const meData = await meRes.json();
+        currentRole = meData.role || null;
+      }
 
-      // Show invite button for owner/admin
+      // Show invite button for site managers (owner/admin)
       if (['owner', 'admin'].includes(currentRole)) {
         document.getElementById('inviteBtn').style.display = '';
       }
