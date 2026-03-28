@@ -295,7 +295,6 @@
 
       // Daycare info
       if (meData?.daycare) {
-        document.getElementById('daycareName').textContent = meData.daycare.name || '—';
         document.getElementById('daycareCity').textContent = meData.daycare.city || '—';
         document.getElementById('daycareState').textContent = meData.daycare.state || '—';
         if (meData.daycare.google_link) {
@@ -305,7 +304,6 @@
 
       // Account
       document.getElementById('accountEmail').textContent = session.user?.email || meData?.user?.email || '—';
-      document.getElementById('userName').textContent = session.user?.email || '';
 
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('pageContent').style.display = 'block';

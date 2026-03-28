@@ -465,7 +465,6 @@
       renderClients();
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('pageContent').style.display = 'block';
-      document.getElementById('userName').textContent = session.user?.email || '';
     } catch (err) {
       document.getElementById('loadingState').innerHTML = `<p style="color:#e53e3e">${err.message}</p>`;
     }

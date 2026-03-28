@@ -320,7 +320,6 @@
 
       // Update daycare name in nav
       if (stats.daycare && stats.daycare.name) {
-        document.getElementById('daycareName').textContent = stats.daycare.name;
       }
       document.getElementById('welcomeText').textContent =
         (stats.daycare && stats.daycare.name) ? `Overview for ${stats.daycare.name}` : 'Welcome back!';
