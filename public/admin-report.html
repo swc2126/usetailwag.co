@@ -224,9 +224,7 @@
       <a href="/settings.html" class="nav-link">Settings</a>
     </nav>
   </div>
-  <div class="nav-right">
-    <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
-  </div>
+  <div class="nav-right"><div id="navUserWidget"></div></div>
 </nav>
 
 <div id="loadingState" class="loading">
@@ -459,8 +457,13 @@
       const res = await fetch('/api/admin-report', { headers: authHeaders });
       if (res.status === 401) { window.location.href = '/login.html'; return; }
       if (res.status === 403) {
-        document.getElementById('loadingState').innerHTML =
-          '<p style="color:#e53e3e;font-size:14px;padding:60px;">Access restricted to owners and admins.</p>';
+        document.getElementById('loadingState').innerHTML = `
+          <div style="max-width:420px;margin:80px auto;text-align:center;padding:40px;background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.07);">
+            <div style="font-size:44px;margin-bottom:16px;">🔒</div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;color:#0F1410;margin-bottom:10px;">Report available for admins only</div>
+            <p style="font-size:14px;color:#888;line-height:1.6;margin-bottom:24px;">This report is restricted to owners and admins. Please contact your admin if you need access to location performance data.</p>
+            <a href="/dashboard.html" style="display:inline-block;background:#1E6B4A;color:#F5F0E8;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Back to Dashboard</a>
+          </div>`;
         return;
       }
       const d = await res.json();
@@ -559,7 +562,8 @@
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  function handleLogout() {
+  function handleLogout() { window.__nuLogout && window.__nuLogout(); }
+  function _handleLogout_legacy() {
     localStorage.removeItem('tailwag_session');
     window.location.href = '/login.html';
   }
@@ -571,5 +575,6 @@
 <script>window.intercomSettings={app_id:"ov6sdlds"};</script>
 <script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/ov6sdlds';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();</script>
 
+<script src="/js/nav-user.js"></script>
 </body>
 </html>

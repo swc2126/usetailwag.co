@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { supabaseAdmin } = require('../config/supabase');
+const { requireAuth } = require('../middleware/auth');
 
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {
@@ -142,6 +143,69 @@ router.post('/me', async (req, res) => {
   } catch (err) {
     console.error('Me error:', err);
     res.status(500).json({ error: 'Something went wrong.' });
+  }
+});
+
+// GET /api/auth/me — get current user's profile + role (uses Authorization header)
+router.get('/me', requireAuth, async (req, res) => {
+  try {
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email, first_name, last_name, phone, daycare_name')
+      .eq('id', req.user.id)
+      .single();
+
+    const { data: daycare } = await supabaseAdmin
+      .from('daycares')
+      .select('id, name, city, state')
+      .eq('id', req.daycareId)
+      .single();
+
+    res.json({
+      user: { id: req.user.id, email: req.user.email },
+      profile: profile || {},
+      role: req.userRole || 'staff',
+      daycare_id: req.daycareId,
+      daycare: daycare || {}
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load profile' });
+  }
+});
+
+// PUT /api/auth/profile — update the current user's profile
+router.put('/profile', requireAuth, async (req, res) => {
+  try {
+    const { first_name, last_name, phone } = req.body;
+    if (!first_name && !last_name && !phone) {
+      return res.status(400).json({ error: 'Nothing to update' });
+    }
+
+    const updates = {};
+    if (first_name !== undefined) updates.first_name = first_name.trim();
+    if (last_name !== undefined) updates.last_name = last_name.trim();
+    if (phone !== undefined) updates.phone = phone.trim();
+
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .update(updates)
+      .eq('id', req.user.id)
+      .select('id, email, first_name, last_name, phone')
+      .single();
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    // Keep auth metadata in sync
+    await supabaseAdmin.auth.admin.updateUserById(req.user.id, {
+      user_metadata: {
+        first_name: updates.first_name ?? data.first_name,
+        last_name:  updates.last_name  ?? data.last_name
+      }
+    });
+
+    res.json({ success: true, profile: data });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update profile' });
   }
 });
 

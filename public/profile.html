@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #0F1410; --green: #1E6B4A; --green-dark: #164D35;
+      --linen: #F5F0E8; --gold: #C4933F; --sage: #A8C5B0; --slate: #2D3748;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
+
+    .dashboard-nav {
+      background: var(--black); padding: 0 32px;
+      display: flex; justify-content: space-between; align-items: center; height: 60px;
+    }
+    .nav-left { display: flex; align-items: center; gap: 32px; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link {
+      color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; font-weight: 500;
+      padding: 6px 14px; border-radius: 6px; transition: color 0.2s, background 0.2s;
+    }
+    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+
+    .page-container { max-width: 680px; margin: 0 auto; padding: 48px 24px; }
+
+    /* AVATAR HEADER */
+    .profile-header {
+      display: flex; align-items: center; gap: 24px; margin-bottom: 36px;
+    }
+    .profile-avatar-lg {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--green); display: flex; align-items: center; justify-content: center;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 26px;
+      color: var(--linen); flex-shrink: 0; border: 3px solid rgba(168,197,176,0.3);
+    }
+    .profile-header-info h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+      font-size: 26px; color: var(--black); letter-spacing: -0.5px;
+    }
+    .profile-header-meta { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+    .profile-email { font-size: 14px; color: #888; }
+    .role-badge {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.5px; padding: 3px 10px; border-radius: 20px;
+    }
+    .role-badge.owner { background: rgba(196,147,63,0.15); color: var(--gold); }
+    .role-badge.admin { background: rgba(30,107,74,0.12); color: var(--green); }
+    .role-badge.staff { background: rgba(0,0,0,0.07); color: #888; }
+
+    /* CARDS */
+    .card {
+      background: #fff; border-radius: 14px; padding: 28px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px;
+    }
+    .card h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 15px; color: var(--black); margin-bottom: 22px;
+      padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-label {
+      display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: #999; margin-bottom: 7px;
+    }
+    .form-control {
+      width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--slate);
+      background: #fff; outline: none; transition: border-color 0.2s;
+    }
+    .form-control:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(30,107,74,0.08); }
+    .form-control:disabled { background: #f8f9fa; color: #aaa; cursor: not-allowed; }
+    .form-hint { font-size: 11px; color: #bbb; margin-top: 5px; }
+
+    /* INFO ROWS (read-only) */
+    .info-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 12px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-value { font-size: 14px; font-weight: 500; color: var(--slate); }
+
+    /* ACTIONS */
+    .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+    .btn-primary {
+      background: var(--green); color: var(--linen); border: none;
+      padding: 10px 26px; border-radius: 8px; font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--green-dark); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .save-msg { font-size: 13px; display: none; }
+    .save-msg.success { color: var(--green); }
+    .save-msg.error { color: #e53e3e; }
+
+    /* LOADING */
+    .loading { text-align: center; padding: 80px; }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid rgba(30,107,74,0.15);
+      border-top-color: var(--green); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .profile-header { flex-direction: column; text-align: center; }
+      .profile-header-meta { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="/dashboard.html" class="logo">
+      <svg width="26" height="26" viewBox="0 0 56 56" fill="none">
+        <rect width="56" height="56" fill="#1E6B4A" rx="9"/>
+        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+      </svg>
+      <span class="logo-text">TailWag</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/clients.html" class="nav-link">Clients</a>
+      <a href="/messaging.html" class="nav-link">Messaging</a>
+      <a href="/reviews.html" class="nav-link">Reviews</a>
+      <a href="/team.html" class="nav-link">Team</a>
+      <a href="/admin-report.html" class="nav-link">Report</a>
+      <a href="/settings.html" class="nav-link">Settings</a>
+    </nav>
+  </div>
+  <div class="nav-right"><div id="navUserWidget"></div></div>
+</nav>
+
+<div id="loadingState" class="loading">
+  <div class="spinner"></div>
+  <p style="color:#999;font-size:14px;">Loading profile...</p>
+</div>
+
+<div id="pageContent" style="display:none;">
+<div class="page-container">
+
+  <!-- HEADER -->
+  <div class="profile-header">
+    <div class="profile-avatar-lg" id="avatarLg">?</div>
+    <div class="profile-header-info">
+      <h1 id="headerName">—</h1>
+      <div class="profile-header-meta">
+        <span class="profile-email" id="headerEmail">—</span>
+        <span class="role-badge" id="headerRole">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT INFO -->
+  <div class="card">
+    <h2>Personal Information</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input class="form-control" id="firstName" type="text" placeholder="First name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input class="form-control" id="lastName" type="text" placeholder="Last name">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Phone</label>
+      <input class="form-control" id="phone" type="tel" placeholder="+1 (555) 000-0000">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input class="form-control" id="email" type="email" disabled>
+      <div class="form-hint">To change your email address, contact support.</div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" id="saveBtn" onclick="saveProfile()">Save Changes</button>
+      <span class="save-msg" id="saveMsg"></span>
+    </div>
+  </div>
+
+  <!-- READ-ONLY INFO -->
+  <div class="card">
+    <h2>Account Details</h2>
+    <div class="info-row">
+      <span class="info-label">Role</span>
+      <span class="info-value" id="roleValue">—</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Location</span>
+      <span class="info-value" id="daycareValue">—</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Member Since</span>
+      <span class="info-value" id="memberSince">—</span>
+    </div>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="card">
+    <h2>Security</h2>
+    <div class="info-row">
+      <div>
+        <div class="info-label">Password</div>
+        <div style="font-size:13px;color:#888;margin-top:3px;">Use the forgot password flow to set a new password.</div>
+      </div>
+      <a href="/forgot-password.html" style="font-size:13px;font-weight:600;color:var(--green);text-decoration:none;">Reset Password →</a>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+  const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+  if (!session?.access_token) window.location.href = '/login.html';
+
+  const authHeaders = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + session.access_token
+  };
+
+  const ROLE_LABELS = { owner: 'Owner', admin: 'Admin', staff: 'Staff' };
+
+  function initials(first, last, email) {
+    const f = (first || '')[0] || '';
+    const l = (last || '')[0] || '';
+    return (f + l).toUpperCase() || (email || '?')[0].toUpperCase();
+  }
+
+  function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function load() {
+    try {
+      const res = await fetch('/api/auth/me', { headers: authHeaders });
+      if (res.status === 401) { window.location.href = '/login.html'; return; }
+      const data = await res.json();
+
+      const p = data.profile || {};
+      const role = data.role || 'staff';
+      const email = data.user?.email || '';
+      const fullName = [p.first_name, p.last_name].filter(Boolean).join(' ') || email;
+
+      // Header
+      document.getElementById('avatarLg').textContent = initials(p.first_name, p.last_name, email);
+      document.getElementById('headerName').textContent = fullName;
+      document.getElementById('headerEmail').textContent = email;
+      const roleEl = document.getElementById('headerRole');
+      roleEl.textContent = ROLE_LABELS[role] || role;
+      roleEl.className = `role-badge ${role}`;
+
+      // Form fields
+      document.getElementById('firstName').value = p.first_name || '';
+      document.getElementById('lastName').value  = p.last_name  || '';
+      document.getElementById('phone').value     = p.phone      || '';
+      document.getElementById('email').value     = email;
+
+      // Account details
+      document.getElementById('roleValue').textContent    = ROLE_LABELS[role] || role;
+      document.getElementById('daycareValue').textContent = data.daycare?.name || '—';
+      document.getElementById('memberSince').textContent  =
+        data.user?.created_at
+          ? new Date(data.user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+          : '—';
+
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('pageContent').style.display  = 'block';
+
+    } catch (err) {
+      document.getElementById('loadingState').innerHTML =
+        `<p style="color:#e53e3e;padding:60px;font-size:14px;">${escHtml(err.message)}</p>`;
+    }
+  }
+
+  async function saveProfile() {
+    const btn = document.getElementById('saveBtn');
+    const msg = document.getElementById('saveMsg');
+    msg.style.display = 'none';
+    btn.textContent = 'Saving…';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: authHeaders,
+        body: JSON.stringify({
+          first_name: document.getElementById('firstName').value.trim(),
+          last_name:  document.getElementById('lastName').value.trim(),
+          phone:      document.getElementById('phone').value.trim()
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+
+      // Update header + avatar immediately
+      const fn = data.profile?.first_name || '';
+      const ln = data.profile?.last_name  || '';
+      const email = document.getElementById('email').value;
+      const fullName = [fn, ln].filter(Boolean).join(' ') || email;
+      document.getElementById('headerName').textContent = fullName;
+      document.getElementById('avatarLg').textContent   = initials(fn, ln, email);
+
+      // Clear nav cache so widget refreshes on next load
+      localStorage.removeItem('tailwag_nav_user');
+
+      msg.textContent = '✓ Profile saved';
+      msg.className = 'save-msg success';
+      msg.style.display = 'inline';
+      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+
+    } catch (err) {
+      msg.textContent = err.message;
+      msg.className = 'save-msg error';
+      msg.style.display = 'inline';
+    } finally {
+      btn.textContent = 'Save Changes';
+      btn.disabled = false;
+    }
+  }
+
+  load();
+</script>
+
+<script src="/js/nav-user.js"></script>
+
+<!-- Intercom -->
+<script>window.intercomSettings={app_id:"ov6sdlds"};</script>
+<script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/ov6sdlds';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();</script>
+
+</body>
+</html>
