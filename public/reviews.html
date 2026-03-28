@@ -492,7 +492,7 @@
       const dogName = dog ? dog.name : "[their dog]";
       const link = resolvedLink ? ` ${resolvedLink}` : '';
       document.getElementById('msgBody').value =
-        `${_currentClient.first_name}, thanks for bringing ${dogName} to ${daycareName || 'us'} today!${link ? ' If you have a moment, we'd love a review:' + link : ' A quick Google review means the world to us.'} 🐾`;
+        `${_currentClient.first_name}, thanks for bringing ${dogName} to ${daycareName || 'us'} today!${link ? " If you have a moment, we'd love a review: " + link : " A quick Google review means the world to us."} 🐾`;
       console.error('AI generation failed:', err.message);
     } finally {
       setAISpinner(false);
