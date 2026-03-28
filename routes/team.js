@@ -6,13 +6,37 @@ const { requireAuth } = require('../middleware/auth');
 // GET /api/team — list team members
 router.get('/', requireAuth, async (req, res) => {
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
-  const { data, error } = await supabaseAdmin
+
+  // Step 1: fetch team members
+  const { data: members, error } = await supabaseAdmin
     .from('team_members')
-    .select('*, profiles(email, first_name, last_name)')
+    .select('*')
     .eq('daycare_id', req.daycareId)
     .neq('status', 'disabled');
+
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  if (!members || !members.length) return res.json([]);
+
+  // Step 2: fetch profiles for all user_ids that exist
+  const userIds = members.map(m => m.user_id).filter(Boolean);
+  let profileMap = {};
+  if (userIds.length) {
+    const { data: profiles } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email, first_name, last_name')
+      .in('id', userIds);
+    if (profiles) {
+      profiles.forEach(p => { profileMap[p.id] = p; });
+    }
+  }
+
+  // Step 3: merge profile data onto each member
+  const result = members.map(m => ({
+    ...m,
+    profiles: m.user_id ? (profileMap[m.user_id] || null) : null
+  }));
+
+  res.json(result);
 });
 
 // POST /api/team/invite — invite a team member by email
