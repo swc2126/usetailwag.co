@@ -253,9 +253,9 @@
         <div class="stat-sub">confirmed deliveries</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Response Rate</div>
-        <div class="stat-value" style="font-size:22px;padding-top:6px;">Coming Soon</div>
-        <div class="stat-sub">tracking in future update</div>
+        <div class="stat-label">Reviews Received</div>
+        <div class="stat-value" id="statReviewed">—</div>
+        <div class="stat-sub">marked by staff</div>
       </div>
     </div>
 
@@ -304,6 +304,7 @@
             <tr>
               <th>Client &amp; Dog</th>
               <th>Status</th>
+              <th>Date</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -365,22 +366,42 @@
   let daycareName = '';
   let googleLink = '';
 
-  // Review status stored in localStorage
-  // Key: tailwag_review_status
-  // Value: { [clientId]: 'not_requested' | 'requested' | 'reviewed' }
-  function getReviewStatuses() {
+  // ── Review status helpers (DB-backed via review_requested_at / review_received_at) ──
+  function getClientStatus(client) {
+    if (client.review_received_at) return 'reviewed';
+    if (client.review_requested_at) return 'requested';
+    return 'not_requested';
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  async function stampRequested(clientId) {
     try {
-      return JSON.parse(localStorage.getItem('tailwag_review_status') || '{}');
-    } catch { return {}; }
+      const res = await fetch(`/api/reviews/client/${clientId}/requested`, {
+        method: 'PATCH', headers: authHeaders
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const c = allClients.find(x => x.id === clientId);
+        if (c) c.review_requested_at = data.review_requested_at;
+      }
+    } catch (e) { console.error('stampRequested error', e); }
   }
-  function setReviewStatus(clientId, status) {
-    const statuses = getReviewStatuses();
-    statuses[clientId] = status;
-    localStorage.setItem('tailwag_review_status', JSON.stringify(statuses));
-  }
-  function getReviewStatus(clientId) {
-    const statuses = getReviewStatuses();
-    return statuses[clientId] || 'not_requested';
+
+  async function stampReceived(clientId) {
+    try {
+      const res = await fetch(`/api/reviews/client/${clientId}/received`, {
+        method: 'PATCH', headers: authHeaders
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const c = allClients.find(x => x.id === clientId);
+        if (c) c.review_received_at = data.review_received_at;
+      }
+    } catch (e) { console.error('stampReceived error', e); }
   }
 
   function escHtml(str) {
@@ -498,8 +519,8 @@
       resultEl.textContent = 'Review request sent successfully!';
       resultEl.className = 'send-result success'; resultEl.style.display = 'block';
 
-      // Mark as requested in localStorage
-      setReviewStatus(clientId, 'requested');
+      // Stamp review_requested_at in DB
+      await stampRequested(clientId);
 
       // Reset form
       document.getElementById('clientSelect').value = '';
@@ -541,7 +562,7 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Send failed');
 
-      setReviewStatus(clientId, 'requested');
+      await stampRequested(clientId);
       renderReviewStatus();
       loadHistory();
       loadStats();
@@ -591,26 +612,35 @@
     document.getElementById('reviewStatusContent').style.display = 'block';
 
     if (!allClients.length) {
-      tbody.innerHTML = '<tr><td colspan="3"><div class="empty-state">No clients yet.</div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">No clients yet.</div></td></tr>';
       return;
     }
 
-    tbody.innerHTML = allClients.map(c => {
-      const status = getReviewStatus(c.id);
+    // Sort: not_requested first, then requested, then reviewed
+    const sorted = [...allClients].sort((a, b) => {
+      const order = { not_requested: 0, requested: 1, reviewed: 2 };
+      return order[getClientStatus(a)] - order[getClientStatus(b)];
+    });
+
+    tbody.innerHTML = sorted.map(c => {
+      const status = getClientStatus(c);
       const dogLabel = (c.dogs && c.dogs.length)
         ? c.dogs.map(d => escHtml(d.name)).join(', ')
         : 'No dogs';
 
-      let badge, actionHtml;
+      let badge, dateLabel, actionHtml;
 
       if (status === 'not_requested') {
         badge = '<span class="rev-badge rev-badge-gray">Not yet requested</span>';
+        dateLabel = '—';
         actionHtml = `<button class="rev-action-btn" id="rev-btn-${c.id}" onclick="sendReviewRequestForClient('${c.id}')">Send Review Request</button>`;
       } else if (status === 'requested') {
         badge = '<span class="rev-badge rev-badge-amber">Requested</span>';
-        actionHtml = `<button class="rev-action-btn" id="rev-btn-${c.id}" onclick="markReviewed('${c.id}')">Mark as Reviewed</button>`;
+        dateLabel = fmtDate(c.review_requested_at);
+        actionHtml = `<button class="rev-action-btn" id="rev-btn-${c.id}" onclick="markReviewed('${c.id}')">Mark as Reviewed ✓</button>`;
       } else if (status === 'reviewed') {
-        badge = '<span class="rev-badge rev-badge-green">Reviewed</span>';
+        badge = '<span class="rev-badge rev-badge-green">✓ Reviewed</span>';
+        dateLabel = `<span title="Requested: ${fmtDate(c.review_requested_at)}">${fmtDate(c.review_received_at)}</span>`;
         actionHtml = `<button class="rev-action-btn" id="rev-btn-${c.id}" onclick="requestSocialPost('${c.id}')">Request Social Post</button>`;
       }
 
@@ -621,13 +651,20 @@
             <div style="font-size:11px;color:#bbb;margin-top:2px;">${dogLabel}</div>
           </td>
           <td>${badge}</td>
+          <td style="font-size:12px;color:#999;white-space:nowrap;">${dateLabel}</td>
           <td>${actionHtml}</td>
         </tr>`;
     }).join('');
+
+    // Update reviewed count stat
+    const reviewedCount = allClients.filter(c => c.review_received_at).length;
+    document.getElementById('statReviewed').textContent = reviewedCount;
   }
 
-  function markReviewed(clientId) {
-    setReviewStatus(clientId, 'reviewed');
+  async function markReviewed(clientId) {
+    const btn = document.getElementById(`rev-btn-${clientId}`);
+    if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
+    await stampReceived(clientId);
     renderReviewStatus();
   }
 
