@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pet Parents — TailWag</title>
+  <title>Directory — TailWag</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -62,6 +62,20 @@
       transition: border-color 0.2s;
     }
     .logout-btn:hover { border-color: var(--linen); }
+
+    /* ── SORT TOGGLE ── */
+    .sort-toggle {
+      display: inline-flex; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px;
+      overflow: hidden; background: #fff;
+    }
+    .sort-btn {
+      padding: 7px 16px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif;
+      background: none; border: none; cursor: pointer; color: #888;
+      transition: background 0.15s, color 0.15s; white-space: nowrap;
+    }
+    .sort-btn + .sort-btn { border-left: 1px solid rgba(0,0,0,0.1); }
+    .sort-btn.active { background: var(--black); color: var(--linen); }
+    .sort-btn:not(.active):hover { background: rgba(0,0,0,0.04); color: var(--slate); }
 
     /* ── CONTAINER ── */
     .page-container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
@@ -270,7 +284,7 @@
     </a>
     <nav class="nav-links">
       <a href="/dashboard.html" class="nav-link">Dashboard</a>
-      <a href="/clients.html" class="nav-link">Pet Parents</a>
+      <a href="/clients.html" class="nav-link">Directory</a>
       <a href="/messaging.html" class="nav-link">Messaging</a>
       <a href="/reviews.html" class="nav-link">Reviews</a>
       <a href="/team.html" class="nav-link">Team</a>
@@ -292,19 +306,25 @@
   <div id="pageContent" style="display:none;">
     <div class="page-header">
       <div class="page-header-left">
-        <h1>Pet Parents</h1>
+        <h1>Directory</h1>
         <span class="count-badge" id="clientCount">0 pet parents</span>
       </div>
-      <button class="btn-primary" onclick="openAddModal()">+ Add Pet Parent</button>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="sort-toggle">
+          <button class="sort-btn active" id="sortByOwnerBtn" onclick="setSort('owner')">By Pet Parent</button>
+          <button class="sort-btn" id="sortByDogBtn" onclick="setSort('dog')">By Dog</button>
+        </div>
+        <button class="btn-primary" id="addRecordBtn" onclick="openAddRecord()">+ Add Pet Parent</button>
+      </div>
     </div>
 
     <div class="error-msg" id="pageError"></div>
 
     <div class="table-card">
       <table>
-        <thead>
+        <thead id="tableHead">
           <tr>
-            <th>Name</th>
+            <th>Pet Parent</th>
             <th>Phone</th>
             <th>Email</th>
             <th>Dogs</th>
@@ -319,10 +339,114 @@
   </div>
 </div>
 
-<!-- Add / Edit Client Modal -->
+<!-- Add Record Modal (two-step: pet parent + dog, either order) -->
+<div class="modal-overlay" id="addRecordModal">
+  <div class="modal" style="max-width:520px;">
+    <!-- Step indicator -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
+      <div id="stepDot1" style="width:8px;height:8px;border-radius:50%;background:var(--green);transition:background 0.2s;"></div>
+      <div id="stepLine" style="flex:1;height:2px;background:#eee;border-radius:2px;overflow:hidden;">
+        <div id="stepLineFill" style="height:100%;width:0%;background:var(--green);transition:width 0.3s;"></div>
+      </div>
+      <div id="stepDot2" style="width:8px;height:8px;border-radius:50%;background:#eee;transition:background 0.2s;"></div>
+    </div>
+
+    <h2 id="addRecordTitle" style="margin-bottom:6px;">Add Pet Parent</h2>
+    <p id="addRecordSubtitle" style="font-size:13px;color:#888;margin-bottom:20px;">Step 1 of 2 — Pet parent info</p>
+    <div class="error-msg" id="addRecordError"></div>
+
+    <!-- Step 1A: Pet Parent fields (shown when starting from owner) -->
+    <div id="stepOwner">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name *</label>
+          <input type="text" id="ar_firstName" placeholder="Jane" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Last Name *</label>
+          <input type="text" id="ar_lastName" placeholder="Smith" autocomplete="off">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Phone *</label>
+        <input type="tel" id="ar_phone" placeholder="+1 555-000-0000" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="ar_email" placeholder="jane@example.com" autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Step 1B: Dog fields (shown when starting from dog) -->
+    <div id="stepDogFirst" style="display:none;">
+      <div class="form-group">
+        <label>Dog Name *</label>
+        <input type="text" id="ar_dogName1" placeholder="Buddy" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Breed</label>
+          <input type="text" id="ar_dogBreed1" placeholder="Golden Retriever" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Age</label>
+          <input type="number" id="ar_dogAge1" placeholder="3" min="0" max="30" autocomplete="off">
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2A: Dog fields (after owner step) -->
+    <div id="stepDogSecond" style="display:none;">
+      <div class="form-group">
+        <label>Dog Name *</label>
+        <input type="text" id="ar_dogName2" placeholder="Buddy" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Breed</label>
+          <input type="text" id="ar_dogBreed2" placeholder="Golden Retriever" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Age</label>
+          <input type="number" id="ar_dogAge2" placeholder="3" min="0" max="30" autocomplete="off">
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2B: Pet Parent fields (after dog step) -->
+    <div id="stepOwnerSecond" style="display:none;">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name *</label>
+          <input type="text" id="ar_firstName2" placeholder="Jane" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Last Name *</label>
+          <input type="text" id="ar_lastName2" placeholder="Smith" autocomplete="off">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Phone *</label>
+        <input type="tel" id="ar_phone2" placeholder="+1 555-000-0000" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="ar_email2" placeholder="jane@example.com" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:24px;">
+      <button class="btn-secondary" id="addRecordBackBtn" onclick="addRecordBack()" style="display:none;">← Back</button>
+      <button class="btn-secondary" onclick="closeAddRecordModal()">Cancel</button>
+      <button class="btn-primary" id="addRecordNextBtn" onclick="addRecordNext()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Client Modal (unchanged — used for editing existing pet parents) -->
 <div class="modal-overlay" id="clientModal">
   <div class="modal">
-    <h2 id="modalTitle">Add Pet Parent</h2>
+    <h2 id="modalTitle">Edit Pet Parent</h2>
     <div class="error-msg" id="modalError"></div>
     <input type="hidden" id="clientId">
     <div class="form-row">
@@ -349,7 +473,7 @@
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeClientModal()">Cancel</button>
-      <button class="btn-primary" id="saveClientBtn" onclick="saveClient()">Save Pet Parent</button>
+      <button class="btn-primary" id="saveClientBtn" onclick="saveClient()">Update Pet Parent</button>
     </div>
   </div>
 </div>
@@ -455,6 +579,15 @@
   };
 
   let clients = [];
+  let currentSort = 'owner'; // 'owner' | 'dog'
+
+  function setSort(mode) {
+    currentSort = mode;
+    document.getElementById('sortByOwnerBtn').classList.toggle('active', mode === 'owner');
+    document.getElementById('sortByDogBtn').classList.toggle('active', mode === 'dog');
+    document.getElementById('addRecordBtn').textContent = mode === 'dog' ? '+ Add Dog' : '+ Add Pet Parent';
+    renderClients();
+  }
 
   async function loadClients() {
     try {
@@ -472,19 +605,98 @@
 
   function renderClients() {
     const tbody = document.getElementById('clientsTableBody');
-    document.getElementById('clientCount').textContent = `${clients.length} client${clients.length !== 1 ? 's' : ''}`;
-    if (!clients.length) {
-      tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No pet parents yet. Add your first pet parent above.</div></td></tr>';
-      return;
-    }
-    tbody.innerHTML = clients.map(c => {
-      const dogsHtml = (c.dogs || []).length
-        ? (c.dogs || []).map(d =>
-            `<span class="dog-chip" onclick="openEditDogModal(${JSON.stringify(d).replace(/"/g,'&quot;')}, '${c.id}')" title="Edit ${escHtml(d.name)}">${escHtml(d.name)}</span>`
-          ).join('')
-        : '—';
-      return `
-        <tr>
+    const thead = document.getElementById('tableHead');
+    const total = clients.length;
+
+    if (currentSort === 'dog') {
+      // ── BY DOG view: one row per dog, sorted A–Z by dog name ──
+      thead.innerHTML = `<tr>
+        <th>Dog</th>
+        <th>Pet Parent</th>
+        <th>Phone</th>
+        <th>Breed</th>
+        <th>Actions</th>
+      </tr>`;
+
+      // Flatten to one row per dog
+      const rows = [];
+      clients.forEach(c => {
+        if ((c.dogs || []).length) {
+          c.dogs.forEach(d => rows.push({ dog: d, client: c }));
+        } else {
+          rows.push({ dog: null, client: c }); // pet parent with no dog yet
+        }
+      });
+      rows.sort((a, b) => {
+        const nameA = a.dog?.name || '';
+        const nameB = b.dog?.name || '';
+        return nameA.localeCompare(nameB);
+      });
+
+      document.getElementById('clientCount').textContent =
+        `${rows.filter(r => r.dog).length} dog${rows.filter(r => r.dog).length !== 1 ? 's' : ''} · ${total} pet parent${total !== 1 ? 's' : ''}`;
+
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No entries yet.</div></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map(({ dog, client: c }) => {
+        if (!dog) {
+          return `<tr style="opacity:0.6;">
+            <td><em style="color:#bbb;">No dog added</em></td>
+            <td><strong>${escHtml(c.first_name)} ${escHtml(c.last_name)}</strong></td>
+            <td>${escHtml(c.phone || '—')}</td>
+            <td>—</td>
+            <td>
+              <button class="action-btn add-dog-btn" onclick="openAddDogModal('${c.id}')">+ Add Dog</button>
+              <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit</button>
+            </td>
+          </tr>`;
+        }
+        return `<tr>
+          <td>
+            <span class="dog-chip" onclick="openEditDogModal(${JSON.stringify(dog).replace(/"/g,'&quot;')}, '${c.id}')" title="Edit ${escHtml(dog.name)}">${escHtml(dog.name)}</span>
+          </td>
+          <td>${escHtml(c.first_name)} ${escHtml(c.last_name)}</td>
+          <td>${escHtml(c.phone || '—')}</td>
+          <td style="color:#999;">${escHtml(dog.breed || '—')}</td>
+          <td>
+            <button class="action-btn edit-btn" onclick="openEditDogModal(${JSON.stringify(dog).replace(/"/g,'&quot;')}, '${c.id}')">Edit Dog</button>
+            <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit Owner</button>
+          </td>
+        </tr>`;
+      }).join('');
+
+    } else {
+      // ── BY PET PARENT view: one row per owner, sorted A–Z by last name ──
+      thead.innerHTML = `<tr>
+        <th>Pet Parent</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Dogs</th>
+        <th>Actions</th>
+      </tr>`;
+
+      const sorted = [...clients].sort((a, b) =>
+        (a.last_name || '').localeCompare(b.last_name || '')
+      );
+
+      document.getElementById('clientCount').textContent =
+        `${total} pet parent${total !== 1 ? 's' : ''}`;
+
+      if (!sorted.length) {
+        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No pet parents yet. Add your first pet parent above.</div></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = sorted.map(c => {
+        const dogsHtml = (c.dogs || []).length
+          ? (c.dogs || []).map(d =>
+              `<span class="dog-chip" onclick="openEditDogModal(${JSON.stringify(d).replace(/"/g,'&quot;')}, '${c.id}')" title="Edit ${escHtml(d.name)}">${escHtml(d.name)}</span>`
+            ).join('')
+          : '<span style="color:#ccc;font-size:12px;">None yet</span>';
+        return `<tr>
           <td><strong>${escHtml(c.first_name)} ${escHtml(c.last_name)}</strong></td>
           <td>${escHtml(c.phone || '—')}</td>
           <td>${escHtml(c.email || '—')}</td>
@@ -494,9 +706,9 @@
             <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit</button>
             <button class="action-btn delete-btn" onclick="deleteClient('${c.id}', '${escHtml(c.first_name)} ${escHtml(c.last_name)}')">Delete</button>
           </td>
-        </tr>
-      `;
-    }).join('');
+        </tr>`;
+      }).join('');
+    }
   }
 
   function escHtml(str) {
@@ -504,20 +716,184 @@
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ── CLIENT MODAL ──
-  function openAddModal() {
-    document.getElementById('modalTitle').textContent = 'Add Pet Parent';
-    document.getElementById('clientId').value = '';
-    document.getElementById('firstName').value = '';
-    document.getElementById('lastName').value = '';
-    document.getElementById('phone').value = '';
-    document.getElementById('email').value = '';
-    document.getElementById('notes').value = '';
-    document.getElementById('saveClientBtn').textContent = 'Save Pet Parent';
-    document.getElementById('modalError').style.display = 'none';
-    document.getElementById('clientModal').classList.add('open');
+  // ── ADD RECORD MODAL (two-step) ──
+  let _addStartMode = 'owner'; // 'owner' | 'dog'
+  let _addStep = 1;
+
+  function openAddRecord() {
+    _addStartMode = currentSort === 'dog' ? 'dog' : 'owner';
+    _addStep = 1;
+    // Clear all fields
+    ['ar_firstName','ar_lastName','ar_phone','ar_email',
+     'ar_dogName1','ar_dogBreed1','ar_dogAge1',
+     'ar_dogName2','ar_dogBreed2','ar_dogAge2',
+     'ar_firstName2','ar_lastName2','ar_phone2','ar_email2'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('addRecordError').style.display = 'none';
+    renderAddRecordStep();
+    document.getElementById('addRecordModal').classList.add('open');
   }
 
+  function renderAddRecordStep() {
+    const step = _addStep;
+    const mode = _addStartMode;
+
+    // Show/hide step panels
+    document.getElementById('stepOwner').style.display     = (step === 1 && mode === 'owner') ? '' : 'none';
+    document.getElementById('stepDogFirst').style.display  = (step === 1 && mode === 'dog')   ? '' : 'none';
+    document.getElementById('stepDogSecond').style.display = (step === 2 && mode === 'owner') ? '' : 'none';
+    document.getElementById('stepOwnerSecond').style.display= (step === 2 && mode === 'dog')  ? '' : 'none';
+
+    // Step indicator
+    document.getElementById('stepDot1').style.background = 'var(--green)';
+    document.getElementById('stepDot2').style.background = step === 2 ? 'var(--green)' : '#eee';
+    document.getElementById('stepLineFill').style.width = step === 2 ? '100%' : '0%';
+
+    // Title + subtitle
+    if (step === 1 && mode === 'owner') {
+      document.getElementById('addRecordTitle').textContent = 'Add Pet Parent';
+      document.getElementById('addRecordSubtitle').textContent = 'Step 1 of 2 — Pet parent info';
+    } else if (step === 1 && mode === 'dog') {
+      document.getElementById('addRecordTitle').textContent = 'Add Dog';
+      document.getElementById('addRecordSubtitle').textContent = 'Step 1 of 2 — Dog info';
+    } else if (step === 2 && mode === 'owner') {
+      document.getElementById('addRecordTitle').textContent = 'Add Dog';
+      document.getElementById('addRecordSubtitle').textContent = 'Step 2 of 2 — Dog info (required)';
+    } else {
+      document.getElementById('addRecordTitle').textContent = 'Add Pet Parent';
+      document.getElementById('addRecordSubtitle').textContent = 'Step 2 of 2 — Pet parent info (required)';
+    }
+
+    // Buttons
+    document.getElementById('addRecordBackBtn').style.display = step === 2 ? '' : 'none';
+    const nextBtn = document.getElementById('addRecordNextBtn');
+    nextBtn.textContent = step === 1 ? 'Next →' : 'Create Record';
+  }
+
+  function addRecordBack() {
+    _addStep = 1;
+    document.getElementById('addRecordError').style.display = 'none';
+    renderAddRecordStep();
+  }
+
+  function addRecordNext() {
+    const errEl = document.getElementById('addRecordError');
+    errEl.style.display = 'none';
+
+    if (_addStep === 1) {
+      // Validate step 1
+      if (_addStartMode === 'owner') {
+        const fn = document.getElementById('ar_firstName').value.trim();
+        const ln = document.getElementById('ar_lastName').value.trim();
+        const ph = document.getElementById('ar_phone').value.trim();
+        if (!fn || !ln || !ph) {
+          errEl.textContent = 'First name, last name, and phone are required.';
+          errEl.style.display = 'block';
+          return;
+        }
+      } else {
+        const dn = document.getElementById('ar_dogName1').value.trim();
+        if (!dn) {
+          errEl.textContent = 'Dog name is required.';
+          errEl.style.display = 'block';
+          return;
+        }
+      }
+      _addStep = 2;
+      renderAddRecordStep();
+    } else {
+      // Validate step 2 then save
+      if (_addStartMode === 'owner') {
+        const dn = document.getElementById('ar_dogName2').value.trim();
+        if (!dn) {
+          errEl.textContent = 'Dog name is required.';
+          errEl.style.display = 'block';
+          return;
+        }
+      } else {
+        const fn = document.getElementById('ar_firstName2').value.trim();
+        const ln = document.getElementById('ar_lastName2').value.trim();
+        const ph = document.getElementById('ar_phone2').value.trim();
+        if (!fn || !ln || !ph) {
+          errEl.textContent = 'First name, last name, and phone are required.';
+          errEl.style.display = 'block';
+          return;
+        }
+      }
+      saveAddRecord();
+    }
+  }
+
+  async function saveAddRecord() {
+    const errEl = document.getElementById('addRecordError');
+    const btn = document.getElementById('addRecordNextBtn');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    try {
+      // Collect values depending on start mode
+      let ownerData, dogData;
+      if (_addStartMode === 'owner') {
+        ownerData = {
+          first_name: document.getElementById('ar_firstName').value.trim(),
+          last_name:  document.getElementById('ar_lastName').value.trim(),
+          phone:      document.getElementById('ar_phone').value.trim(),
+          email:      document.getElementById('ar_email').value.trim() || null
+        };
+        dogData = {
+          name:  document.getElementById('ar_dogName2').value.trim(),
+          breed: document.getElementById('ar_dogBreed2').value.trim() || null,
+          age:   document.getElementById('ar_dogAge2').value ? parseInt(document.getElementById('ar_dogAge2').value) : null
+        };
+      } else {
+        ownerData = {
+          first_name: document.getElementById('ar_firstName2').value.trim(),
+          last_name:  document.getElementById('ar_lastName2').value.trim(),
+          phone:      document.getElementById('ar_phone2').value.trim(),
+          email:      document.getElementById('ar_email2').value.trim() || null
+        };
+        dogData = {
+          name:  document.getElementById('ar_dogName1').value.trim(),
+          breed: document.getElementById('ar_dogBreed1').value.trim() || null,
+          age:   document.getElementById('ar_dogAge1').value ? parseInt(document.getElementById('ar_dogAge1').value) : null
+        };
+      }
+
+      // 1) Create the pet parent
+      const clientRes = await fetch('/api/clients', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify(ownerData)
+      });
+      if (!clientRes.ok) { const e = await clientRes.json(); throw new Error(e.error || 'Failed to save pet parent'); }
+      const newClient = await clientRes.json();
+
+      // 2) Create the dog linked to that pet parent
+      const dogRes = await fetch('/api/dogs', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ client_id: newClient.id, ...dogData })
+      });
+      if (!dogRes.ok) { const e = await dogRes.json(); throw new Error(e.error || 'Failed to save dog'); }
+
+      closeAddRecordModal();
+      await loadClients();
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+    } finally {
+      btn.textContent = 'Create Record';
+      btn.disabled = false;
+    }
+  }
+
+  function closeAddRecordModal() {
+    document.getElementById('addRecordModal').classList.remove('open');
+  }
+
+  // ── EDIT CLIENT MODAL ──
   function openEditModal(client) {
     document.getElementById('modalTitle').textContent = 'Edit Pet Parent';
     document.getElementById('clientId').value = client.id;
@@ -555,10 +931,8 @@
     saveBtn.disabled = true;
 
     try {
-      const url = id ? `/api/clients/${id}` : '/api/clients';
-      const method = id ? 'PUT' : 'POST';
-      const res = await fetch(url, {
-        method,
+      const res = await fetch(`/api/clients/${id}`, {
+        method: 'PUT',
         headers: authHeaders,
         body: JSON.stringify({ first_name, last_name, phone, email, notes })
       });
@@ -569,7 +943,7 @@
       errEl.textContent = err.message;
       errEl.style.display = 'block';
     } finally {
-      saveBtn.textContent = id ? 'Update Pet Parent' : 'Save Pet Parent';
+      saveBtn.textContent = 'Update Pet Parent';
       saveBtn.disabled = false;
     }
   }
@@ -744,6 +1118,9 @@
   }
 
   // Close modals on overlay click
+  document.getElementById('addRecordModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAddRecordModal();
+  });
   document.getElementById('clientModal').addEventListener('click', function(e) {
     if (e.target === this) closeClientModal();
   });
