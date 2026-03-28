@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Location Report — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #0F1410; --green: #1E6B4A; --green-dark: #164D35;
+      --linen: #F5F0E8; --gold: #C4933F; --sage: #A8C5B0; --slate: #2D3748;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
+
+    /* NAV */
+    .dashboard-nav {
+      background: var(--black); padding: 0 32px;
+      display: flex; justify-content: space-between; align-items: center; height: 60px;
+    }
+    .nav-left { display: flex; align-items: center; gap: 32px; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link {
+      color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; font-weight: 500;
+      padding: 6px 14px; border-radius: 6px; transition: color 0.2s, background 0.2s;
+    }
+    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
+    .nav-link.active { color: var(--linen); background: rgba(255,255,255,0.1); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .logout-btn {
+      background: transparent; border: 1px solid rgba(245,240,232,0.3); color: var(--linen);
+      padding: 7px 18px; border-radius: 8px; font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color 0.2s;
+    }
+    .logout-btn:hover { border-color: var(--linen); }
+
+    /* LAYOUT */
+    .page-container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+    .page-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .page-header h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+      font-size: 30px; color: var(--black); letter-spacing: -0.5px;
+    }
+    .page-header p { font-size: 15px; color: #888; margin-top: 4px; }
+    .plan-badge {
+      font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 5px 14px;
+      border-radius: 20px; letter-spacing: 0.5px;
+    }
+    .plan-badge.pro { background: var(--gold); color: var(--black); }
+    .plan-badge.growth { background: var(--green); color: var(--linen); }
+    .plan-badge.starter { background: rgba(0,0,0,0.08); color: #666; }
+
+    /* SECTION */
+    .section-title {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 16px; color: var(--black); margin-bottom: 14px; margin-top: 32px;
+      text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; color: #999;
+    }
+
+    /* STAT GRIDS */
+    .stats-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 8px; }
+    .stats-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 8px; }
+    .stats-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 8px; }
+
+    .stat-card {
+      background: #fff; border-radius: 12px; padding: 20px 22px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .stat-card.dark { background: var(--black); }
+    .stat-card.dark .stat-label { color: var(--sage); }
+    .stat-card.dark .stat-value { color: var(--linen); }
+    .stat-card.dark .stat-sub { color: rgba(245,240,232,0.35); }
+    .stat-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: #999; margin-bottom: 8px;
+    }
+    .stat-value {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+      font-size: 34px; color: var(--black); line-height: 1;
+    }
+    .stat-value.warn { color: #d97706; }
+    .stat-value.danger { color: #e53e3e; }
+    .stat-value.good { color: var(--green); }
+    .stat-sub { font-size: 12px; color: #bbb; margin-top: 5px; }
+
+    /* USAGE BAR */
+    .usage-bar-wrap {
+      background: #fff; border-radius: 12px; padding: 22px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 8px;
+    }
+    .usage-bar-label {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; font-weight: 600; color: var(--slate); margin-bottom: 10px;
+    }
+    .usage-bar-label span { font-size: 12px; color: #999; font-weight: 400; }
+    .usage-bar-track {
+      background: rgba(0,0,0,0.06); border-radius: 99px; height: 10px; overflow: hidden;
+    }
+    .usage-bar-fill {
+      height: 100%; border-radius: 99px; background: var(--green);
+      transition: width 0.6s ease;
+    }
+    .usage-bar-fill.warn { background: #d97706; }
+    .usage-bar-fill.danger { background: #e53e3e; }
+    .usage-bar-sub {
+      display: flex; justify-content: space-between; margin-top: 7px;
+      font-size: 11px; color: #bbb;
+    }
+
+    /* CARD */
+    .card {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 8px;
+    }
+    .card-header {
+      display: flex; justify-content: space-between; align-items: center; padding: 18px 20px 0;
+    }
+    .card-header h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px; color: var(--black);
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    thead { background: var(--black); }
+    thead th {
+      padding: 10px 20px; text-align: left; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; color: var(--sage);
+    }
+    tbody tr { border-bottom: 1px solid rgba(0,0,0,0.05); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(30,107,74,0.02); }
+    tbody td { padding: 12px 20px; font-size: 13px; color: var(--slate); }
+
+    /* TREND CHART */
+    .chart-card {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); padding: 22px; margin-bottom: 8px;
+    }
+    .chart-card h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px;
+      color: var(--black); margin-bottom: 20px;
+    }
+    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .bar-chart { width: 100%; }
+    .bar-chart-title { font-size: 12px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .bar-row-label { font-size: 11px; color: #999; width: 46px; text-align: right; flex-shrink: 0; }
+    .bar-track { flex: 1; background: rgba(0,0,0,0.05); border-radius: 4px; height: 20px; position: relative; }
+    .bar-fill {
+      height: 100%; border-radius: 4px; background: var(--green);
+      transition: width 0.5s ease; min-width: 0; display: flex; align-items: center;
+    }
+    .bar-fill.gold { background: var(--gold); }
+    .bar-fill.sage { background: var(--sage); }
+    .bar-val { font-size: 11px; font-weight: 700; color: #666; margin-left: 6px; white-space: nowrap; }
+    .bar-val-inside { font-size: 10px; font-weight: 700; color: #fff; padding-left: 6px; }
+
+    /* REVIEW FUNNEL */
+    .funnel-row {
+      display: flex; align-items: center; gap: 14px; padding: 14px 20px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .funnel-row:last-child { border-bottom: none; }
+    .funnel-icon { font-size: 20px; width: 36px; text-align: center; }
+    .funnel-label { flex: 1; font-size: 13px; font-weight: 600; color: var(--slate); }
+    .funnel-sub { font-size: 11px; color: #bbb; font-weight: 400; }
+    .funnel-count { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 24px; color: var(--black); }
+    .funnel-pct { font-size: 11px; color: #bbb; text-align: right; }
+
+    /* ROLE BADGE */
+    .role-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 20px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .role-owner { background: rgba(196,147,63,0.15); color: var(--gold); }
+    .role-admin { background: rgba(30,107,74,0.12); color: var(--green); }
+    .role-staff { background: rgba(0,0,0,0.06); color: #888; }
+
+    /* MINI BAR IN TABLE */
+    .mini-bar-track { background: rgba(0,0,0,0.06); border-radius: 4px; height: 6px; width: 100px; display: inline-block; vertical-align: middle; margin-left: 10px; }
+    .mini-bar-fill { height: 100%; border-radius: 4px; background: var(--green); }
+
+    /* LOADING */
+    .loading { text-align: center; padding: 80px; }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid rgba(30,107,74,0.15);
+      border-top-color: var(--green); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 900px) {
+      .stats-grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .chart-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .stats-grid-3, .stats-grid-2 { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+      .page-container { padding: 24px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="/dashboard.html" class="logo">
+      <svg width="26" height="26" viewBox="0 0 56 56" fill="none">
+        <rect width="56" height="56" fill="#1E6B4A" rx="9"/>
+        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+      </svg>
+      <span class="logo-text">TailWag</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/clients.html" class="nav-link">Clients</a>
+      <a href="/messaging.html" class="nav-link">Messaging</a>
+      <a href="/reviews.html" class="nav-link">Reviews</a>
+      <a href="/team.html" class="nav-link">Team</a>
+      <a href="/admin-report.html" class="nav-link active">Report</a>
+      <a href="/settings.html" class="nav-link">Settings</a>
+    </nav>
+  </div>
+  <div class="nav-right">
+    <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+  </div>
+</nav>
+
+<div id="loadingState" class="loading">
+  <div class="spinner"></div>
+  <p style="color:#999;font-size:14px;">Building your report...</p>
+</div>
+
+<div id="pageContent" style="display:none;">
+<div class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1 id="pageTitle">Location Report</h1>
+      <p id="pageSubtitle">Loading...</p>
+    </div>
+    <span id="planBadge" class="plan-badge starter">—</span>
+  </div>
+
+  <!-- ── THIS MONTH ── -->
+  <div class="section-title">This Month</div>
+  <div class="stats-grid-4">
+    <div class="stat-card dark">
+      <div class="stat-label">Messages Sent</div>
+      <div class="stat-value" id="msgSent">—</div>
+      <div class="stat-sub" id="msgSentSub">of — limit</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Delivered</div>
+      <div class="stat-value good" id="msgDelivered">—</div>
+      <div class="stat-sub">confirmed by carrier</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">New Clients</div>
+      <div class="stat-value" id="newClients">—</div>
+      <div class="stat-sub">joined this month</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Review Requests</div>
+      <div class="stat-value" id="reviewReqs">—</div>
+      <div class="stat-sub" id="reviewReqSub">— received</div>
+    </div>
+  </div>
+
+  <!-- Usage bar -->
+  <div class="usage-bar-wrap">
+    <div class="usage-bar-label">
+      SMS Usage <span id="usageBarLabel">0 of 500 used</span>
+    </div>
+    <div class="usage-bar-track">
+      <div class="usage-bar-fill" id="usageBarFill" style="width:0%"></div>
+    </div>
+    <div class="usage-bar-sub">
+      <span>0</span>
+      <span id="usageBarMax">500</span>
+    </div>
+  </div>
+
+  <!-- ── ALL TIME TOTALS ── -->
+  <div class="section-title" style="margin-top:28px;">All Time</div>
+  <div class="stats-grid-4">
+    <div class="stat-card">
+      <div class="stat-label">Active Clients</div>
+      <div class="stat-value" id="totalClients">—</div>
+      <div class="stat-sub">pet owners enrolled</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Active Dogs</div>
+      <div class="stat-value" id="totalDogs">—</div>
+      <div class="stat-sub">in your system</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Reviews Requested</div>
+      <div class="stat-value" id="totalReqsAllTime">—</div>
+      <div class="stat-sub">total requests sent</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Reviews Received</div>
+      <div class="stat-value good" id="totalRevsAllTime">—</div>
+      <div class="stat-sub">confirmed by staff</div>
+    </div>
+  </div>
+
+  <!-- ── REVIEW FUNNEL ── -->
+  <div class="section-title" style="margin-top:28px;">Review Funnel</div>
+  <div class="card" id="reviewFunnelCard">
+    <div class="funnel-row">
+      <div class="funnel-icon">👥</div>
+      <div class="funnel-label">Total Active Clients<div class="funnel-sub">everyone enrolled</div></div>
+      <div>
+        <div class="funnel-count" id="funnelTotal">—</div>
+        <div class="funnel-pct">100%</div>
+      </div>
+    </div>
+    <div class="funnel-row">
+      <div class="funnel-icon">📤</div>
+      <div class="funnel-label">Review Requested<div class="funnel-sub">SMS sent at least once</div></div>
+      <div>
+        <div class="funnel-count" id="funnelRequested">—</div>
+        <div class="funnel-pct" id="funnelRequestedPct">—</div>
+      </div>
+    </div>
+    <div class="funnel-row">
+      <div class="funnel-icon">⭐</div>
+      <div class="funnel-label">Review Received<div class="funnel-sub">confirmed by staff</div></div>
+      <div>
+        <div class="funnel-count" id="funnelReceived">—</div>
+        <div class="funnel-pct" id="funnelReceivedPct">—</div>
+      </div>
+    </div>
+    <div class="funnel-row">
+      <div class="funnel-icon">🙋</div>
+      <div class="funnel-label">Never Asked<div class="funnel-sub">opportunity to request</div></div>
+      <div>
+        <div class="funnel-count" id="funnelNeverAsked">—</div>
+        <div class="funnel-pct" id="funnelNeverPct">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 6 MONTH TREND ── -->
+  <div class="section-title" style="margin-top:28px;">6-Month Trend</div>
+  <div class="chart-card">
+    <div class="chart-grid">
+      <div>
+        <div class="bar-chart-title">Messages Sent</div>
+        <div id="msgTrendChart"></div>
+      </div>
+      <div>
+        <div class="bar-chart-title">Reviews Requested vs Received</div>
+        <div id="reviewTrendChart"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-grid">
+      <div>
+        <div class="bar-chart-title">New Clients Added</div>
+        <div id="clientTrendChart"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;">
+        <div style="text-align:center;padding:20px;">
+          <div style="font-size:40px;margin-bottom:8px;">📈</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;color:var(--black);margin-bottom:4px;">Growth Tracking</div>
+          <div style="font-size:13px;color:#999;">Month-over-month client enrollment shows how your daycare is growing over time.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STAFF USAGE ── -->
+  <div class="section-title" style="margin-top:28px;">Staff Activity — This Month</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Team Member</th>
+          <th>Role</th>
+          <th>Messages Sent</th>
+          <th>Activity</th>
+        </tr>
+      </thead>
+      <tbody id="staffTable">
+        <tr><td colspan="4" style="text-align:center;color:#bbb;padding:30px;">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</div>
+
+<script>
+  const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+  if (!session?.access_token) window.location.href = '/login.html';
+
+  const authHeaders = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + session.access_token
+  };
+
+  function pct(num, denom) {
+    if (!denom) return '0%';
+    return Math.round((num / denom) * 100) + '%';
+  }
+
+  function buildBarChart(container, rows, color) {
+    const max = Math.max(...rows.map(r => r.value), 1);
+    container.innerHTML = rows.map(r => {
+      const w = Math.round((r.value / max) * 100);
+      return `<div class="bar-row">
+        <div class="bar-row-label">${r.label}</div>
+        <div class="bar-track">
+          <div class="bar-fill ${color}" style="width:${w}%">
+            ${r.value > 0 ? `<span class="bar-val-inside">${r.value}</span>` : ''}
+          </div>
+        </div>
+        ${r.value === 0 ? '<span class="bar-val" style="color:#ddd">0</span>' : ''}
+      </div>`;
+    }).join('');
+  }
+
+  function buildDualBarChart(container, rows, colorA, colorB, labelA, labelB) {
+    const max = Math.max(...rows.map(r => Math.max(r.a, r.b)), 1);
+    container.innerHTML = rows.map(r => {
+      const wA = Math.round((r.a / max) * 100);
+      const wB = Math.round((r.b / max) * 100);
+      return `<div style="margin-bottom:10px;">
+        <div style="font-size:10px;color:#bbb;margin-bottom:3px;">${r.label}</div>
+        <div style="display:flex;gap:4px;flex-direction:column;">
+          <div class="bar-track" style="height:10px;" title="${labelA}: ${r.a}">
+            <div class="bar-fill ${colorA}" style="width:${wA}%;height:10px;">
+              ${r.a > 0 ? `<span class="bar-val-inside" style="font-size:9px;">${r.a}</span>` : ''}
+            </div>
+          </div>
+          <div class="bar-track" style="height:10px;" title="${labelB}: ${r.b}">
+            <div class="bar-fill ${colorB}" style="width:${wB}%;height:10px;opacity:0.7;">
+              ${r.b > 0 ? `<span class="bar-val-inside" style="font-size:9px;">${r.b}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('') + `<div style="display:flex;gap:16px;margin-top:10px;font-size:11px;color:#999;">
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--${colorA === '' ? 'green' : colorA});display:inline-block;"></span>${labelA}</span>
+      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--gold);opacity:0.7;display:inline-block;"></span>${labelB}</span>
+    </div>`;
+  }
+
+  async function load() {
+    try {
+      const res = await fetch('/api/admin-report', { headers: authHeaders });
+      if (res.status === 401) { window.location.href = '/login.html'; return; }
+      if (res.status === 403) {
+        document.getElementById('loadingState').innerHTML =
+          '<p style="color:#e53e3e;font-size:14px;padding:60px;">Access restricted to owners and admins.</p>';
+        return;
+      }
+      const d = await res.json();
+
+      // Header
+      document.getElementById('pageTitle').textContent = d.daycare.name || 'Location Report';
+      document.getElementById('pageSubtitle').textContent =
+        `${d.daycare.city || ''}${d.daycare.state ? ', ' + d.daycare.state : ''} · ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+      const pb = document.getElementById('planBadge');
+      const p = d.daycare.plan || 'starter';
+      pb.textContent = p.charAt(0).toUpperCase() + p.slice(1);
+      pb.className = `plan-badge ${p}`;
+
+      // This month
+      const cm = d.current_month;
+      document.getElementById('msgSent').textContent = cm.messages_sent;
+      document.getElementById('msgSentSub').textContent = `of ${cm.message_limit.toLocaleString()} limit`;
+      document.getElementById('msgDelivered').textContent = cm.messages_delivered;
+      document.getElementById('newClients').textContent = cm.new_clients;
+      document.getElementById('reviewReqs').textContent = cm.review_requests_sent;
+      document.getElementById('reviewReqSub').textContent = `${cm.reviews_received} received this month`;
+
+      // Usage bar
+      const usedPct = Math.min(100, Math.round((cm.messages_sent / cm.message_limit) * 100));
+      const fill = document.getElementById('usageBarFill');
+      fill.style.width = usedPct + '%';
+      if (usedPct >= 90) fill.className = 'usage-bar-fill danger';
+      else if (usedPct >= 70) fill.className = 'usage-bar-fill warn';
+      document.getElementById('usageBarLabel').textContent = `${cm.messages_sent.toLocaleString()} of ${cm.message_limit.toLocaleString()} used (${usedPct}%)`;
+      document.getElementById('usageBarMax').textContent = cm.message_limit.toLocaleString();
+
+      // Totals
+      const t = d.totals;
+      document.getElementById('totalClients').textContent = t.active_clients;
+      document.getElementById('totalDogs').textContent = t.active_dogs;
+      document.getElementById('totalReqsAllTime').textContent = t.review_requests_all_time;
+      document.getElementById('totalRevsAllTime').textContent = t.reviews_received_all_time;
+
+      // Review funnel
+      const neverAsked = t.active_clients - t.review_requests_all_time;
+      document.getElementById('funnelTotal').textContent = t.active_clients;
+      document.getElementById('funnelRequested').textContent = t.review_requests_all_time;
+      document.getElementById('funnelRequestedPct').textContent = pct(t.review_requests_all_time, t.active_clients);
+      document.getElementById('funnelReceived').textContent = t.reviews_received_all_time;
+      document.getElementById('funnelReceivedPct').textContent = pct(t.reviews_received_all_time, t.active_clients);
+      document.getElementById('funnelNeverAsked').textContent = Math.max(0, neverAsked);
+      document.getElementById('funnelNeverPct').textContent = pct(Math.max(0, neverAsked), t.active_clients);
+
+      // Trend charts
+      const trend = d.monthly_trend;
+      buildBarChart(
+        document.getElementById('msgTrendChart'),
+        trend.map(m => ({ label: m.label, value: m.messages })),
+        ''
+      );
+      buildDualBarChart(
+        document.getElementById('reviewTrendChart'),
+        trend.map(m => ({ label: m.label, a: m.review_requests, b: m.reviews_received })),
+        '', 'gold', 'Requested', 'Received'
+      );
+      buildBarChart(
+        document.getElementById('clientTrendChart'),
+        trend.map(m => ({ label: m.label, value: m.new_clients })),
+        'sage'
+      );
+
+      // Staff table
+      const maxMsgs = Math.max(...d.staff_usage.map(s => s.messages_this_month), 1);
+      document.getElementById('staffTable').innerHTML = d.staff_usage.length
+        ? d.staff_usage.map(s => {
+            const w = Math.round((s.messages_this_month / maxMsgs) * 100);
+            return `<tr>
+              <td style="font-weight:600">${escHtml(s.name)}</td>
+              <td><span class="role-badge role-${s.role}">${s.role}</span></td>
+              <td style="font-weight:700">${s.messages_this_month}</td>
+              <td>
+                <span class="mini-bar-track">
+                  <span class="mini-bar-fill" style="width:${w}%;display:block;"></span>
+                </span>
+              </td>
+            </tr>`;
+          }).join('')
+        : '<tr><td colspan="4" style="text-align:center;color:#bbb;padding:24px;">No team activity this month.</td></tr>';
+
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('pageContent').style.display = 'block';
+
+    } catch (err) {
+      document.getElementById('loadingState').innerHTML =
+        `<p style="color:#e53e3e;font-size:14px;padding:60px;">${err.message}</p>`;
+    }
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('tailwag_session');
+    window.location.href = '/login.html';
+  }
+
+  load();
+</script>
+
+<!-- Intercom -->
+<script>window.intercomSettings={app_id:"ov6sdlds"};</script>
+<script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/ov6sdlds';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();</script>
+
+</body>
+</html>
