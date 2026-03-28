@@ -57,6 +57,7 @@ app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/shortlinks', require('./routes/shortlinks'));
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/ceo', require('./routes/ceo'));
 
 // Serve index.html for root
 app.get('/', (req, res) => {
