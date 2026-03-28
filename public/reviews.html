@@ -101,6 +101,16 @@
     .send-result.success { color: var(--green); }
     .send-result.error { color: #e53e3e; }
 
+    .btn-ai {
+      background: linear-gradient(135deg, #1E6B4A, #2d8f65);
+      color: #fff; border: none; padding: 5px 13px; border-radius: 20px;
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+      cursor: pointer; letter-spacing: 0.2px; transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .btn-ai:hover { opacity: 0.88; }
+    .btn-ai:disabled { opacity: 0.4; cursor: not-allowed; }
+
     /* HISTORY TABLE */
     .table-card {
       background: #fff; border-radius: 12px;
@@ -277,8 +287,18 @@
       </div>
 
       <div class="form-group">
-        <label>Message</label>
-        <textarea class="form-control" id="msgBody" rows="5" placeholder="Select a pet parent to auto-fill the template..."></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <label style="margin-bottom:0;">Message</label>
+          <button class="btn-ai" id="regenBtn" onclick="generateAIMessage()" style="display:none;">✨ Regenerate</button>
+        </div>
+        <div style="position:relative;">
+          <textarea class="form-control" id="msgBody" rows="5" placeholder="Select a pet parent to generate a personalized message..."></textarea>
+          <div id="aiSpinner" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,0.85);border-radius:8px;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;">
+            <div class="loading-spinner" style="width:22px;height:22px;border-width:2px;margin:0;"></div>
+            <span style="font-size:12px;color:#888;">Crafting your message...</span>
+          </div>
+        </div>
+        <div id="aiCharCount" style="font-size:11px;color:#bbb;margin-top:4px;text-align:right;display:none;"></div>
       </div>
 
       <div class="compose-actions">
@@ -421,27 +441,81 @@
     }
   }
 
-  async function buildTemplate(clientName, dogName) {
-    if (!googleLink) {
-      return `Hi ${clientName}! \uD83D\uDC3E Thanks for bringing ${dogName} to ${daycareName || 'our daycare'} today. We'd love a quick review \u2014 it means the world to us! \uD83C\uDF1F`;
+  // ── AI message generation ──
+  let _currentClient = null;
+  let _currentDog = null;
+
+  function setAISpinner(on) {
+    const spinner = document.getElementById('aiSpinner');
+    const ta = document.getElementById('msgBody');
+    const regen = document.getElementById('regenBtn');
+    spinner.style.display = on ? 'flex' : 'none';
+    ta.disabled = on;
+    if (regen) regen.disabled = on;
+  }
+
+  async function generateAIMessage() {
+    if (!_currentClient) return;
+
+    const dog = _currentDog;
+    const resolvedLink = googleLink ? await getShortLink(googleLink) : null;
+
+    setAISpinner(true);
+
+    try {
+      const res = await fetch('/api/ai/review-request', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          owner_first_name: _currentClient.first_name,
+          dog_name:   dog ? dog.name   : _currentClient.first_name + "'s dog",
+          breed:      dog ? dog.breed  : null,
+          age:        dog ? dog.age    : null,
+          weight:     dog ? dog.weight : null,
+          dog_notes:  dog ? dog.notes  : null,
+          medications: dog ? dog.medications : null,
+          daycare_name: daycareName,
+          google_link: resolvedLink || null
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Generation failed');
+
+      document.getElementById('msgBody').value = data.message;
+      const charEl = document.getElementById('aiCharCount');
+      charEl.textContent = `${data.chars} characters`;
+      charEl.style.display = 'block';
+
+    } catch (err) {
+      // Fallback to basic template on error
+      const dogName = dog ? dog.name : "[their dog]";
+      const link = resolvedLink ? ` ${resolvedLink}` : '';
+      document.getElementById('msgBody').value =
+        `${_currentClient.first_name}, thanks for bringing ${dogName} to ${daycareName || 'us'} today!${link ? ' If you have a moment, we'd love a review:' + link : ' A quick Google review means the world to us.'} 🐾`;
+      console.error('AI generation failed:', err.message);
+    } finally {
+      setAISpinner(false);
     }
-    const shortUrl = await getShortLink(googleLink);
-    return `Hi ${clientName}! \uD83D\uDC3E Thanks for bringing ${dogName} to ${daycareName || 'our daycare'} today. We'd love a quick review: ${shortUrl} \u2014 it means the world to us! \uD83C\uDF1F`;
   }
 
   async function onClientChange() {
     const clientId = document.getElementById('clientSelect').value;
     const dogSel = document.getElementById('dogSelect');
     dogSel.innerHTML = '<option value="">— Select a dog —</option>';
+    document.getElementById('msgBody').value = '';
+    document.getElementById('aiCharCount').style.display = 'none';
+    document.getElementById('regenBtn').style.display = 'none';
 
     if (!clientId) {
-      document.getElementById('msgBody').value = '';
+      _currentClient = null;
+      _currentDog = null;
       return;
     }
 
     if (!googleLink) {
       const resultEl = document.getElementById('sendResult');
-      resultEl.textContent = 'Add your Google review link in Settings to use this feature';
+      resultEl.textContent = 'Add your Google review link in Settings for best results (message will still generate without it)';
       resultEl.className = 'send-result error';
       resultEl.style.display = 'block';
     } else {
@@ -451,6 +525,8 @@
     const client = allClients.find(c => c.id === clientId);
     if (!client) return;
 
+    _currentClient = client;
+
     if (client.dogs && client.dogs.length) {
       client.dogs.forEach(d => {
         const opt = document.createElement('option');
@@ -459,16 +535,52 @@
         dogSel.appendChild(opt);
       });
       dogSel.value = client.dogs[0].id;
-      document.getElementById('msgBody').value = await buildTemplate(client.first_name, client.dogs[0].name);
+      _currentDog = client.dogs[0];
     } else {
-      document.getElementById('msgBody').value = await buildTemplate(client.first_name, '[their dog]');
+      _currentDog = null;
     }
+
+    document.getElementById('regenBtn').style.display = '';
+    await generateAIMessage();
 
     dogSel.onchange = async function() {
       const dogId = dogSel.value;
-      const dog = (client.dogs || []).find(d => d.id === dogId);
-      document.getElementById('msgBody').value = await buildTemplate(client.first_name, dog ? dog.name : '[their dog]');
+      _currentDog = (client.dogs || []).find(d => d.id === dogId) || null;
+      document.getElementById('regenBtn').style.display = '';
+      await generateAIMessage();
     };
+  }
+
+  // Build a fast AI message for the quick-send in the status table
+  async function buildAIMessageForClient(client) {
+    const dog = (client.dogs && client.dogs[0]) ? client.dogs[0] : null;
+    const resolvedLink = googleLink ? await getShortLink(googleLink) : null;
+
+    try {
+      const res = await fetch('/api/ai/review-request', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          owner_first_name: client.first_name,
+          dog_name:   dog ? dog.name   : client.first_name + "'s dog",
+          breed:      dog ? dog.breed  : null,
+          age:        dog ? dog.age    : null,
+          weight:     dog ? dog.weight : null,
+          dog_notes:  dog ? dog.notes  : null,
+          medications: dog ? dog.medications : null,
+          daycare_name: daycareName,
+          google_link: resolvedLink || null
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      return data.message;
+    } catch {
+      // Fallback
+      const dogName = dog ? dog.name : "[their dog]";
+      const link = resolvedLink ? ` ${resolvedLink}` : '';
+      return `${client.first_name}, thanks for trusting us with ${dogName}!${link ? ' A quick review would mean so much:' + link : ' A Google review means the world to us.'} 🐾`;
+    }
   }
 
   function openPreview() {
@@ -524,6 +636,10 @@
       document.getElementById('clientSelect').value = '';
       document.getElementById('dogSelect').innerHTML = '<option value="">— Select client first —</option>';
       document.getElementById('msgBody').value = '';
+      document.getElementById('aiCharCount').style.display = 'none';
+      document.getElementById('regenBtn').style.display = 'none';
+      _currentClient = null;
+      _currentDog = null;
 
       loadHistory();
       loadStats();
@@ -546,11 +662,11 @@
     }
 
     const btn = document.getElementById(`rev-btn-${clientId}`);
-    if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
+    if (btn) { btn.textContent = 'Crafting…'; btn.disabled = true; }
 
     try {
-      const dogName = (client.dogs && client.dogs[0]) ? client.dogs[0].name : '[their dog]';
-      const body = await buildTemplate(client.first_name, dogName);
+      const body = await buildAIMessageForClient(client);
+      if (btn) btn.textContent = 'Sending...';
 
       const res = await fetch('/api/sms/send', {
         method: 'POST',

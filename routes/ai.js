@@ -50,4 +50,58 @@ Write ONLY the SMS message text. No quotes, no explanation.`;
   }
 });
 
+// POST /api/ai/review-request — generate a personalized review request SMS
+router.post('/review-request', requireAuth, async (req, res) => {
+  const { owner_first_name, dog_name, breed, age, weight, dog_notes, medications, daycare_name, google_link } = req.body;
+
+  if (!owner_first_name || !dog_name) {
+    return res.status(400).json({ error: 'owner_first_name and dog_name required' });
+  }
+
+  // Build rich dog context
+  const dogDetails = [
+    breed                    && `Breed: ${breed}`,
+    age != null && age !== '' && `Age: ${age} year${age == 1 ? '' : 's'} old`,
+    weight                   && `Weight: ${weight} lbs`,
+    medications              && `Medications: ${medications}`,
+    dog_notes                && `Staff notes: ${dog_notes}`
+  ].filter(Boolean).join('\n');
+
+  const prompt = `You write highly personalized review request SMS messages for dog daycares. Each message should feel like it came from someone who genuinely knows and loves this specific dog — not a template.
+
+PET PARENT FIRST NAME: ${owner_first_name}
+DOG NAME: ${dog_name}
+${dogDetails}
+DAYCARE NAME: ${daycare_name || 'our daycare'}
+${google_link ? `REVIEW LINK: ${google_link}` : '(no link — ask them to search for the daycare on Google)'}
+
+RULES (all are mandatory):
+1. Do NOT open with "Hi", "Hey", "Hello", or any greeting word
+2. Do NOT use "fur baby", "pup", "furry friend", or "pooch"
+3. Open with something specific and vivid about THIS dog — reference their breed personality, age, size, or a detail from staff notes. Make it feel observed, not guessed.
+4. Use ${dog_name}'s name at least once, naturally
+5. Use ${owner_first_name}'s name exactly once, woven in mid-message or near the end — never first word
+6. The review ask should feel warm and earned — something like "if you have a moment" or "it would mean a lot" — never pushy or transactional
+${google_link ? `7. Include the review link naturally in the message flow` : `7. Ask them to search for ${daycare_name || 'the daycare'} on Google to leave a review`}
+8. Total message: 160–230 characters${google_link ? ' (including the link)' : ''}
+9. At most one emoji — only if it genuinely fits. No forced emoji.
+10. Sound like a real, warm human wrote it — not a bot, not marketing copy
+
+Write ONLY the final SMS text. No quotes. No explanation. No labels.`;
+
+  try {
+    const message = await anthropic.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 400,
+      messages: [{ role: 'user', content: prompt }]
+    });
+
+    const text = message.content[0].text.trim();
+    res.json({ message: text, chars: text.length });
+  } catch (err) {
+    console.error('AI review-request error:', err.message);
+    res.status(500).json({ error: 'Failed to generate message' });
+  }
+});
+
 module.exports = router;
