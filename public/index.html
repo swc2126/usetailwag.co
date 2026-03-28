@@ -1327,7 +1327,7 @@
 
             <div class="navbar-right">
                 <a href="/login.html" style="color:var(--sage);text-decoration:none;font-size:15px;font-weight:500;display:flex;align-items:center;">Log in</a>
-                <a href="#cta" class="btn btn-primary">Get a demo</a>
+                <a href="" onclick="openCalendly(event)" class="btn btn-primary">Get a demo</a>
             </div>
 
             <button class="hamburger">
@@ -1745,7 +1745,7 @@
         <div class="container">
             <h2 class="cta-headline">Ready to make every visit count?</h2>
             <div class="cta-button">
-                <a href="mailto:summer@usetailwag.com" class="btn btn-primary" style="font-size: 16px; padding: 18px 40px;">Get a demo today</a>
+                <a href="" onclick="openCalendly(event)" class="btn btn-primary" style="font-size: 16px; padding: 18px 40px;">Get a demo today</a>
             </div>
             <p class="cta-contact">
                 Questions? <a href="mailto:summer@usetailwag.com">summer@usetailwag.com</a>
@@ -1830,6 +1830,16 @@
             });
         });
     </script>
+    <!-- Calendly popup widget -->
+    <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+    <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+    <script>
+      function openCalendly(e) {
+        e.preventDefault();
+        Calendly.initPopupWidget({ url: 'https://calendly.com/summer-usetailwag/30min' });
+      }
+    </script>
+
     <script>
       window.intercomSettings = { api_base: "https://api-iam.intercom.io", app_id: "ov6sdlds" };
       (function(){var w=document,ic=w.createElement('script');ic.type='text/javascript';ic.async=true;ic.src='https://widget.intercom.io/widget/ov6sdlds';var s=w.getElementsByTagName('script')[0];s.parentNode.insertBefore(ic,s);})();
