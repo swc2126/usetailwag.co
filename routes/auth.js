@@ -146,6 +146,99 @@ router.post('/me', async (req, res) => {
   }
 });
 
+// GET /api/auth/lookup-invite?token=XXX — validate an invite token, return daycare + email (public)
+router.get('/lookup-invite', async (req, res) => {
+  const { token } = req.query;
+  if (!token) return res.status(400).json({ error: 'token required' });
+
+  const { data, error } = await supabaseAdmin
+    .from('team_members')
+    .select('id, invited_email, role, invite_expires_at, daycare_id, daycares(name, city, state)')
+    .eq('invite_token', token)
+    .eq('status', 'invited')
+    .single();
+
+  if (error || !data) return res.status(404).json({ error: 'Invite not found or already used.' });
+
+  if (new Date(data.invite_expires_at) < new Date()) {
+    return res.status(410).json({ error: 'This invite link has expired. Please ask your Site Manager to send a new one.' });
+  }
+
+  res.json({
+    email: data.invited_email,
+    role: data.role,
+    daycare_name: data.daycares?.name || '',
+    daycare_location: [data.daycares?.city, data.daycares?.state].filter(Boolean).join(', ')
+  });
+});
+
+// POST /api/auth/join — complete registration from an invite link
+router.post('/join', async (req, res) => {
+  try {
+    const { token, first_name, last_name, password } = req.body;
+    if (!token || !first_name || !password) {
+      return res.status(400).json({ error: 'token, first_name, and password are required' });
+    }
+
+    // Validate token
+    const { data: member, error: memberErr } = await supabaseAdmin
+      .from('team_members')
+      .select('id, invited_email, role, invite_expires_at, daycare_id')
+      .eq('invite_token', token)
+      .eq('status', 'invited')
+      .single();
+
+    if (memberErr || !member) return res.status(404).json({ error: 'Invite not found or already used.' });
+    if (new Date(member.invite_expires_at) < new Date()) {
+      return res.status(410).json({ error: 'This invite link has expired.' });
+    }
+
+    // Create the Supabase auth user
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: member.invited_email,
+      password,
+      email_confirm: true,
+      user_metadata: { first_name, last_name: last_name || '' }
+    });
+    if (authError) return res.status(400).json({ error: authError.message });
+
+    const userId = authData.user.id;
+
+    // Create profile (location is inherited from daycare — no need to store separately)
+    await supabaseAdmin.from('profiles').insert({
+      id: userId,
+      email: member.invited_email,
+      first_name,
+      last_name: last_name || ''
+    });
+
+    // Activate the team_members record
+    await supabaseAdmin
+      .from('team_members')
+      .update({
+        user_id: userId,
+        status: 'active',
+        invite_token: null,      // consume the token
+        invite_expires_at: null
+      })
+      .eq('id', member.id);
+
+    // Sign in and return session
+    const { data: signInData, error: signInErr } = await supabaseAdmin.auth.signInWithPassword({
+      email: member.invited_email,
+      password
+    });
+    if (signInErr) {
+      return res.json({ success: true, session: null, message: 'Account created. Please log in.' });
+    }
+
+    res.json({ success: true, session: signInData.session });
+  } catch (err) {
+    console.error('Join error:', err);
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  }
+});
+
 // GET /api/auth/me — get current user's profile + role (uses Authorization header)
 router.get('/me', requireAuth, async (req, res) => {
   try {

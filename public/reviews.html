@@ -212,7 +212,7 @@
     </a>
     <nav class="nav-links">
       <a href="/dashboard.html" class="nav-link">Dashboard</a>
-      <a href="/clients.html" class="nav-link">Clients</a>
+      <a href="/clients.html" class="nav-link">Pet Parents</a>
       <a href="/messaging.html" class="nav-link">Messaging</a>
       <a href="/reviews.html" class="nav-link active">Reviews</a>
       <a href="/team.html" class="nav-link">Team</a>
@@ -263,9 +263,9 @@
 
       <div class="form-grid">
         <div class="form-group" style="margin-bottom:0;">
-          <label>Client</label>
+          <label>Pet Parent</label>
           <select class="form-control" id="clientSelect" onchange="onClientChange()">
-            <option value="">— Select a client —</option>
+            <option value="">— Select a pet parent —</option>
           </select>
         </div>
         <div class="form-group" style="margin-bottom:0;">
@@ -278,7 +278,7 @@
 
       <div class="form-group">
         <label>Message</label>
-        <textarea class="form-control" id="msgBody" rows="5" placeholder="Select a client to auto-fill the template..."></textarea>
+        <textarea class="form-control" id="msgBody" rows="5" placeholder="Select a pet parent to auto-fill the template..."></textarea>
       </div>
 
       <div class="compose-actions">
@@ -300,7 +300,7 @@
         <table>
           <thead>
             <tr>
-              <th>Client &amp; Dog</th>
+              <th>Pet Parent &amp; Dog</th>
               <th>Status</th>
               <th>Date</th>
               <th>Action</th>
@@ -325,7 +325,7 @@
           <thead>
             <tr>
               <th>Date</th>
-              <th>Client</th>
+              <th>Pet Parent</th>
               <th>Message</th>
               <th>Status</th>
             </tr>
@@ -610,7 +610,7 @@
     document.getElementById('reviewStatusContent').style.display = 'block';
 
     if (!allClients.length) {
-      tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">No clients yet.</div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">No pet parents yet.</div></td></tr>';
       return;
     }
 

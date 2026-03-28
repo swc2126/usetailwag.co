@@ -4,10 +4,10 @@
  * an avatar + name + role badge + dropdown in #navUserWidget.
  */
 (function () {
-  const ROLE_LABELS = { owner: 'Owner', admin: 'Admin', staff: 'Staff' };
+  const ROLE_LABELS = { owner: 'Site Manager', admin: 'Site Manager', staff: 'Team Member' };
   const ROLE_COLORS = {
     owner: 'background:rgba(196,147,63,0.18);color:#C4933F;',
-    admin: 'background:rgba(30,107,74,0.15);color:#1E6B4A;',
+    admin: 'background:rgba(196,147,63,0.18);color:#C4933F;',
     staff: 'background:rgba(255,255,255,0.1);color:rgba(245,240,232,0.6);'
   };
 

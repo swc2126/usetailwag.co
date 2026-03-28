@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clients — TailWag</title>
+  <title>Pet Parents — TailWag</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -270,7 +270,7 @@
     </a>
     <nav class="nav-links">
       <a href="/dashboard.html" class="nav-link">Dashboard</a>
-      <a href="/clients.html" class="nav-link active">Clients</a>
+      <a href="/clients.html" class="nav-link">Pet Parents</a>
       <a href="/messaging.html" class="nav-link">Messaging</a>
       <a href="/reviews.html" class="nav-link">Reviews</a>
       <a href="/team.html" class="nav-link">Team</a>
@@ -292,10 +292,10 @@
   <div id="pageContent" style="display:none;">
     <div class="page-header">
       <div class="page-header-left">
-        <h1>Clients</h1>
-        <span class="count-badge" id="clientCount">0 clients</span>
+        <h1>Pet Parents</h1>
+        <span class="count-badge" id="clientCount">0 pet parents</span>
       </div>
-      <button class="btn-primary" onclick="openAddModal()">+ Add Client</button>
+      <button class="btn-primary" onclick="openAddModal()">+ Add Pet Parent</button>
     </div>
 
     <div class="error-msg" id="pageError"></div>
@@ -312,7 +312,7 @@
           </tr>
         </thead>
         <tbody id="clientsTableBody">
-          <tr><td colspan="5"><div class="empty-state">No clients yet. Add your first client above.</div></td></tr>
+          <tr><td colspan="5"><div class="empty-state">No pet parents yet. Add your first pet parent above.</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -322,7 +322,7 @@
 <!-- Add / Edit Client Modal -->
 <div class="modal-overlay" id="clientModal">
   <div class="modal">
-    <h2 id="modalTitle">Add Client</h2>
+    <h2 id="modalTitle">Add Pet Parent</h2>
     <div class="error-msg" id="modalError"></div>
     <input type="hidden" id="clientId">
     <div class="form-row">
@@ -349,7 +349,7 @@
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeClientModal()">Cancel</button>
-      <button class="btn-primary" id="saveClientBtn" onclick="saveClient()">Save Client</button>
+      <button class="btn-primary" id="saveClientBtn" onclick="saveClient()">Save Pet Parent</button>
     </div>
   </div>
 </div>
@@ -475,7 +475,7 @@
     const tbody = document.getElementById('clientsTableBody');
     document.getElementById('clientCount').textContent = `${clients.length} client${clients.length !== 1 ? 's' : ''}`;
     if (!clients.length) {
-      tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No clients yet. Add your first client above.</div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No pet parents yet. Add your first pet parent above.</div></td></tr>';
       return;
     }
     tbody.innerHTML = clients.map(c => {
@@ -507,27 +507,27 @@
 
   // ── CLIENT MODAL ──
   function openAddModal() {
-    document.getElementById('modalTitle').textContent = 'Add Client';
+    document.getElementById('modalTitle').textContent = 'Add Pet Parent';
     document.getElementById('clientId').value = '';
     document.getElementById('firstName').value = '';
     document.getElementById('lastName').value = '';
     document.getElementById('phone').value = '';
     document.getElementById('email').value = '';
     document.getElementById('notes').value = '';
-    document.getElementById('saveClientBtn').textContent = 'Save Client';
+    document.getElementById('saveClientBtn').textContent = 'Save Pet Parent';
     document.getElementById('modalError').style.display = 'none';
     document.getElementById('clientModal').classList.add('open');
   }
 
   function openEditModal(client) {
-    document.getElementById('modalTitle').textContent = 'Edit Client';
+    document.getElementById('modalTitle').textContent = 'Edit Pet Parent';
     document.getElementById('clientId').value = client.id;
     document.getElementById('firstName').value = client.first_name || '';
     document.getElementById('lastName').value = client.last_name || '';
     document.getElementById('phone').value = client.phone || '';
     document.getElementById('email').value = client.email || '';
     document.getElementById('notes').value = client.notes || '';
-    document.getElementById('saveClientBtn').textContent = 'Update Client';
+    document.getElementById('saveClientBtn').textContent = 'Update Pet Parent';
     document.getElementById('modalError').style.display = 'none';
     document.getElementById('clientModal').classList.add('open');
   }
@@ -570,13 +570,13 @@
       errEl.textContent = err.message;
       errEl.style.display = 'block';
     } finally {
-      saveBtn.textContent = id ? 'Update Client' : 'Save Client';
+      saveBtn.textContent = id ? 'Update Pet Parent' : 'Save Pet Parent';
       saveBtn.disabled = false;
     }
   }
 
   async function deleteClient(id, name) {
-    if (!confirm(`Remove ${name} from your clients? This cannot be undone.`)) return;
+    if (!confirm(`Remove ${name} from your pet parents? This cannot be undone.`)) return;
     try {
       const res = await fetch(`/api/clients/${id}`, { method: 'DELETE', headers: authHeaders });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Delete failed'); }

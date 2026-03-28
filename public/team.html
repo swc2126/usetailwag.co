@@ -157,7 +157,7 @@
     </a>
     <nav class="nav-links">
       <a href="/dashboard.html" class="nav-link">Dashboard</a>
-      <a href="/clients.html" class="nav-link">Clients</a>
+      <a href="/clients.html" class="nav-link">Pet Parents</a>
       <a href="/messaging.html" class="nav-link">Messaging</a>
       <a href="/reviews.html" class="nav-link">Reviews</a>
       <a href="/team.html" class="nav-link active">Team</a>
@@ -213,8 +213,8 @@
     <div class="form-group">
       <label>Role</label>
       <select id="inviteRole">
-        <option value="staff">Staff</option>
-        <option value="admin">Admin</option>
+        <option value="staff">Team Member</option>
+        <option value="admin">Site Manager</option>
       </select>
     </div>
     <div class="modal-actions">
@@ -284,8 +284,8 @@
           <td>
             ${canManage && !isOwner && !isSelf
               ? `<select class="role-select" onchange="changeRole('${m.id}', this.value)">
-                   <option value="staff" ${m.role==='staff'?'selected':''}>Staff</option>
-                   <option value="admin" ${m.role==='admin'?'selected':''}>Admin</option>
+                   <option value="staff" ${m.role==='staff'?'selected':''}>Team Member</option>
+                   <option value="admin" ${m.role==='admin'?'selected':''}>Site Manager</option>
                  </select>`
               : `<span class="role-badge role-${m.role}">${m.role}</span>`
             }

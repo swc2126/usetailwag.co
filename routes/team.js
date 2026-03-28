@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const { supabaseAdmin } = require('../config/supabase');
 const { requireAuth } = require('../middleware/auth');
+const { sendTeamInvite } = require('../utils/email');
 
 // GET /api/team — list team members
 router.get('/', requireAuth, async (req, res) => {
@@ -46,12 +48,16 @@ router.post('/invite', requireAuth, async (req, res) => {
   if (!email) return res.status(400).json({ error: 'email required' });
   const validRole = ['admin', 'staff'].includes(role) ? role : 'staff';
 
-  // Check if user already exists
+  // Check if user already exists in profiles
   const { data: existingProfile } = await supabaseAdmin
     .from('profiles')
     .select('id')
     .eq('email', email)
     .single();
+
+  // Generate a secure invite token (expires in 7 days)
+  const inviteToken = crypto.randomBytes(32).toString('hex');
+  const inviteExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
   const { data, error } = await supabaseAdmin
     .from('team_members')
@@ -61,12 +67,38 @@ router.post('/invite', requireAuth, async (req, res) => {
       role: validRole,
       invited_by: req.user.id,
       invited_email: email,
-      status: existingProfile ? 'active' : 'invited'
+      status: existingProfile ? 'active' : 'invited',
+      invite_token: inviteToken,
+      invite_expires_at: inviteExpiresAt
     })
     .select()
     .single();
+
   if (error) return res.status(500).json({ error: error.message });
-  res.status(201).json(data);
+
+  // Send invite email (unless user already exists)
+  if (!existingProfile) {
+    try {
+      // Fetch inviter's name + daycare name for the email
+      const [inviterRes, daycareRes] = await Promise.all([
+        supabaseAdmin.from('profiles').select('first_name, last_name').eq('id', req.user.id).single(),
+        supabaseAdmin.from('daycares').select('name').eq('id', req.daycareId).single()
+      ]);
+      const inviterName = inviterRes.data
+        ? `${inviterRes.data.first_name || ''} ${inviterRes.data.last_name || ''}`.trim() || req.user.email
+        : req.user.email;
+      const daycareName = daycareRes.data?.name || 'your daycare';
+      const baseUrl = process.env.BASE_URL || 'https://usetailwag-co.onrender.com';
+      const joinUrl = `${baseUrl}/join.html?token=${inviteToken}`;
+
+      await sendTeamInvite({ to: email, inviterName, daycareName, joinUrl });
+    } catch (emailErr) {
+      // Email failure is non-fatal — team member record is already created
+      console.error('Invite email failed:', emailErr.message);
+    }
+  }
+
+  res.status(201).json({ ...data, invite_email_sent: !existingProfile });
 });
 
 // PUT /api/team/:id/role — update team member role
