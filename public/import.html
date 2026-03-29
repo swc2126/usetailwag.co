@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Import Directory — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #0F1410; --green: #1E6B4A; --green-dark: #164D35;
+      --linen: #F5F0E8; --gold: #C4933F; --sage: #A8C5B0; --slate: #2D3748;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
+
+    .dashboard-nav {
+      background: var(--black); padding: 0 32px;
+      display: flex; justify-content: space-between; align-items: center; height: 60px;
+    }
+    .nav-left { display: flex; align-items: center; gap: 32px; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-paw { font-size: 22px; }
+    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link { color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 14px; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
+    .nav-link.active { color: var(--linen); background: rgba(255,255,255,0.1); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+
+    .page-container { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
+    .page-header { margin-bottom: 32px; }
+    .page-header h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 30px; color: var(--black); }
+    .page-header p { font-size: 15px; color: #888; margin-top: 6px; }
+
+    /* STEPS */
+    .steps { display: flex; gap: 0; margin-bottom: 32px; }
+    .step { flex: 1; display: flex; align-items: center; gap: 10px; position: relative; }
+    .step:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 50%; width: 100%; height: 2px; background: #e0dbd2; z-index: 0; transform: translateY(-50%); }
+    .step-num { width: 32px; height: 32px; border-radius: 50%; background: #e0dbd2; color: #999; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 1; transition: all 0.2s; }
+    .step.active .step-num { background: var(--green); color: white; }
+    .step.done .step-num { background: var(--green); color: white; }
+    .step-label { font-size: 12px; font-weight: 600; color: #aaa; white-space: nowrap; }
+    .step.active .step-label { color: var(--black); }
+
+    /* CARDS */
+    .card { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .card h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 18px; color: var(--black); margin-bottom: 6px; }
+    .card p { font-size: 14px; color: #666; line-height: 1.6; }
+
+    /* SYSTEM GUIDE */
+    .system-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+    .system-card { border: 1.5px solid #e0dbd2; border-radius: 10px; padding: 14px; }
+    .system-name { font-size: 13px; font-weight: 700; color: var(--black); margin-bottom: 8px; }
+    .system-steps { font-size: 12px; color: #666; line-height: 1.8; }
+    .system-steps code { background: var(--linen); padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: 11px; }
+
+    /* DROP ZONE */
+    .drop-zone {
+      border: 2.5px dashed #c8c0b4; border-radius: 12px; padding: 48px 24px;
+      text-align: center; cursor: pointer; transition: all 0.2s; margin: 16px 0;
+      background: var(--linen);
+    }
+    .drop-zone:hover, .drop-zone.drag-over { border-color: var(--green); background: #f0f7f3; }
+    .drop-icon { font-size: 40px; margin-bottom: 12px; }
+    .drop-title { font-size: 16px; font-weight: 700; color: var(--black); margin-bottom: 6px; }
+    .drop-sub { font-size: 13px; color: #888; }
+    .drop-zone input[type="file"] { display: none; }
+
+    .or-divider { text-align: center; font-size: 12px; color: #aaa; font-weight: 600; margin: 12px 0; }
+
+    textarea.csv-paste {
+      width: 100%; min-height: 120px; border: 1.5px solid #e0dbd2; border-radius: 10px;
+      padding: 12px; font-family: monospace; font-size: 12px; color: var(--black);
+      resize: vertical; outline: none; background: white;
+    }
+    textarea.csv-paste:focus { border-color: var(--green); }
+
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 9px; cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-primary { background: var(--green); color: white; }
+    .btn-primary:hover { background: var(--green-dark); }
+    .btn-primary:disabled { background: #a8c5b0; cursor: not-allowed; }
+    .btn-outline { background: white; border: 1.5px solid #e0dbd2; color: var(--slate); }
+    .btn-outline:hover { border-color: var(--slate); }
+    .btn-gold { background: var(--gold); color: white; }
+    .btn-gold:hover { background: #b8832f; }
+    .btn-row { display: flex; gap: 10px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+
+    /* PREVIEW TABLE */
+    .preview-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 16px; overflow-x: auto; display: block; }
+    .preview-table th { background: var(--black); color: var(--linen); padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .preview-table td { padding: 8px 12px; border-bottom: 1px solid #f0ede8; white-space: nowrap; }
+    .preview-table tr:last-child td { border-bottom: none; }
+    .preview-table tr:hover td { background: var(--linen); }
+    .cell-empty { color: #ccc; font-style: italic; }
+    .more-rows { font-size: 12px; color: #888; margin-top: 8px; font-style: italic; }
+
+    /* COLUMN MAP */
+    .col-map { margin-top: 16px; }
+    .col-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+    .col-original { background: var(--linen); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-size: 12px; color: #555; min-width: 160px; }
+    .col-arrow { color: #aaa; }
+    .col-mapped { font-weight: 600; color: var(--green); }
+    .col-unmapped { font-weight: 600; color: #aaa; font-style: italic; }
+    .warning-box { background: #fff8e6; border: 1.5px solid #f0c040; border-radius: 10px; padding: 12px 16px; margin: 12px 0; font-size: 13px; color: #7a5c00; }
+
+    /* RESULTS */
+    .result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+    .result-card { border-radius: 12px; padding: 18px; }
+    .result-card.green { background: #d4edda; }
+    .result-card.blue  { background: #e8eef9; }
+    .result-card.yellow { background: #fff3cd; }
+    .result-card.red   { background: #fde8e8; }
+    .result-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 800; color: var(--black); }
+    .result-label { font-size: 12px; font-weight: 600; color: #555; margin-top: 4px; }
+    .error-list { font-size: 12px; color: #b91c1c; margin-top: 12px; line-height: 1.8; }
+
+    /* HIDDEN SECTIONS */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    @media (max-width: 640px) {
+      .system-grid { grid-template-columns: 1fr; }
+      .steps { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="/dashboard.html" class="logo">
+      <span class="logo-paw">🐾</span>
+      <span class="logo-text">TailWag</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/clients.html" class="nav-link active">Directory</a>
+      <a href="/messaging.html" class="nav-link">Messaging</a>
+      <a href="/schedule.html" class="nav-link">Schedule</a>
+      <a href="/reviews.html" class="nav-link">Reviews</a>
+      <a href="/team.html" class="nav-link">Team</a>
+      <a href="/admin-report.html" class="nav-link">Report</a>
+      <a href="/settings.html" class="nav-link">Settings</a>
+    </nav>
+  </div>
+  <div class="nav-right"><div id="navUserWidget"></div></div>
+</nav>
+
+<div class="page-container">
+
+  <div class="page-header">
+    <h1>Import Directory</h1>
+    <p>Bulk import pet parents and dogs from a spreadsheet or your existing management system.</p>
+  </div>
+
+  <!-- STEPS INDICATOR -->
+  <div class="steps">
+    <div class="step active" id="step1ind"><div class="step-num">1</div><div class="step-label">Prepare file</div></div>
+    <div class="step" id="step2ind"><div class="step-num">2</div><div class="step-label">Upload & preview</div></div>
+    <div class="step" id="step3ind"><div class="step-num">3</div><div class="step-label">Import</div></div>
+  </div>
+
+  <!-- ── STEP 1: PREPARE ────────────────────────────────────────────────── -->
+  <div class="section active" id="step1">
+    <div class="card">
+      <h2>Step 1 — Prepare your file</h2>
+      <p>Download the TailWag template, or export from your existing system and follow the guide below. Any CSV with owner and dog columns will work — column names don't have to match exactly.</p>
+
+      <div class="btn-row" style="margin-top:20px;">
+        <a href="/tailwag_import_template.csv" download class="btn btn-gold">⬇ Download Template</a>
+        <span style="font-size:13px;color:#888;">Open in Excel, Numbers, or Google Sheets → fill it in → save as CSV</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Exporting from your current system</h2>
+      <div class="system-grid">
+        <div class="system-card">
+          <div class="system-name">🐾 Gingr</div>
+          <div class="system-steps">
+            Reports → <code>Client List</code><br>
+            Include: Owner name, phone, email, pet name, breed, age<br>
+            Export as CSV → rename columns to match template
+          </div>
+        </div>
+        <div class="system-card">
+          <div class="system-name">📋 PetExec</div>
+          <div class="system-steps">
+            Reports → <code>Client/Pet Report</code><br>
+            Select all columns → Export<br>
+            Rename headers as needed
+          </div>
+        </div>
+        <div class="system-card">
+          <div class="system-name">📑 Spreadsheet / Paper</div>
+          <div class="system-steps">
+            Open the template<br>
+            Type in each pet parent + dog<br>
+            One row per dog (repeat owner info)
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:12px;font-size:13px;color:#888;">
+        💡 <strong>Column names are flexible</strong> — TailWag recognizes "First Name," "fname," "client_first," "Owner First," etc. as the same field. One row per dog; repeat the owner's info on each row if they have multiple dogs.
+      </p>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goToStep2()">My file is ready →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: UPLOAD & PREVIEW ──────────────────────────────────────── -->
+  <div class="section" id="step2">
+    <div class="card">
+      <h2>Step 2 — Upload your CSV</h2>
+
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+        <input type="file" id="fileInput" accept=".csv,text/csv" onchange="onFileSelect(event)">
+        <div class="drop-icon">📂</div>
+        <div class="drop-title" id="dropTitle">Drop your CSV here or click to browse</div>
+        <div class="drop-sub" id="dropSub">Supports .csv files from any source</div>
+      </div>
+
+      <div class="or-divider">— or paste CSV text directly —</div>
+      <textarea class="csv-paste" id="csvPaste" placeholder="Paste your CSV content here…" oninput="onPasteInput()"></textarea>
+
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="goToStep1()">← Back</button>
+        <button class="btn btn-primary" id="previewBtn" onclick="doPreview()" disabled>Preview Import →</button>
+      </div>
+    </div>
+
+    <!-- PREVIEW RESULTS -->
+    <div id="previewResults" style="display:none;">
+      <div class="card">
+        <h2>Column mapping</h2>
+        <p>TailWag detected these column mappings. Unmapped columns are ignored.</p>
+        <div class="col-map" id="colMap"></div>
+        <div id="warningBox"></div>
+      </div>
+
+      <div class="card">
+        <h2>Preview <span id="previewCountLabel" style="font-weight:400;color:#888;"></span></h2>
+        <div style="overflow-x:auto;">
+          <table class="preview-table" id="previewTable"></table>
+        </div>
+        <div class="more-rows" id="moreRows"></div>
+
+        <div class="btn-row">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="skipDupes" checked>
+            Skip pet parents already in the Directory (matched by phone number)
+          </label>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-outline" onclick="goToStep2()">← Change file</button>
+          <button class="btn btn-primary" onclick="doImport()">Import Now →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: DONE ───────────────────────────────────────────────────── -->
+  <div class="section" id="step3">
+    <div class="card" style="text-align:center;padding:48px;">
+      <div style="font-size:52px;margin-bottom:16px;" id="doneIcon">✅</div>
+      <h2 id="doneTitle" style="font-size:24px;margin-bottom:8px;">Import Complete!</h2>
+      <p id="doneMsg" style="margin-bottom:28px;"></p>
+      <div class="result-grid" id="resultGrid" style="text-align:left;"></div>
+      <div class="error-list" id="errorList"></div>
+      <div class="btn-row" style="justify-content:center;margin-top:24px;">
+        <a href="/clients.html" class="btn btn-primary">View Directory →</a>
+        <button class="btn btn-outline" onclick="startOver()">Import Another File</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-container -->
+
+<script>
+  let csvText = '';
+  let previewData = null;
+
+  function getSession() { try { return JSON.parse(localStorage.getItem('tailwag_session')); } catch { return null; } }
+  function authHeaders() {
+    const s = getSession();
+    return s?.access_token ? { 'Authorization': 'Bearer ' + s.access_token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  }
+
+  const session = getSession();
+  if (!session?.access_token) window.location.href = '/login.html';
+
+  // ── Step nav ───────────────────────────────────────────────────────────
+  function showStep(n) {
+    [1,2,3].forEach(i => {
+      document.getElementById('step'+i).classList.toggle('active', i === n);
+      const ind = document.getElementById('step'+i+'ind');
+      if (ind) {
+        ind.classList.toggle('active', i === n);
+        ind.classList.toggle('done', i < n);
+      }
+    });
+  }
+  function goToStep1() { showStep(1); }
+  function goToStep2() { showStep(2); csvText = ''; document.getElementById('csvPaste').value = ''; document.getElementById('fileInput').value = ''; document.getElementById('previewResults').style.display = 'none'; document.getElementById('previewBtn').disabled = true; updateDropZone('Drop your CSV here or click to browse', 'Supports .csv files from any source'); }
+  function startOver() { goToStep1(); }
+
+  // ── File handling ──────────────────────────────────────────────────────
+  function updateDropZone(title, sub) {
+    document.getElementById('dropTitle').textContent = title;
+    document.getElementById('dropSub').textContent = sub;
+  }
+  function onDragOver(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
+  function onDragLeave() { document.getElementById('dropZone').classList.remove('drag-over'); }
+  function onDrop(e) {
+    e.preventDefault();
+    document.getElementById('dropZone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) readFile(file);
+  }
+  function onFileSelect(e) { if (e.target.files[0]) readFile(e.target.files[0]); }
+  function readFile(file) {
+    if (!file.name.endsWith('.csv') && file.type !== 'text/csv') {
+      alert('Please upload a .csv file.'); return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      csvText = e.target.result;
+      document.getElementById('csvPaste').value = '';
+      updateDropZone('✓ ' + file.name, `${(file.size/1024).toFixed(1)} KB loaded`);
+      document.getElementById('previewBtn').disabled = false;
+    };
+    reader.readAsText(file);
+  }
+  function onPasteInput() {
+    csvText = document.getElementById('csvPaste').value;
+    document.getElementById('previewBtn').disabled = !csvText.trim();
+    if (csvText.trim()) updateDropZone('Drop your CSV here or click to browse', 'Using pasted text above');
+  }
+
+  // ── Preview ────────────────────────────────────────────────────────────
+  async function doPreview() {
+    const btn = document.getElementById('previewBtn');
+    btn.disabled = true; btn.textContent = 'Analyzing…';
+    try {
+      const res = await fetch('/api/import/preview', {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ csv: csvText })
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error || 'Error parsing CSV'); btn.disabled = false; btn.textContent = 'Preview Import →'; return; }
+      previewData = data;
+      renderPreview(data);
+      document.getElementById('previewResults').style.display = 'block';
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+    btn.disabled = false; btn.textContent = 'Preview Import →';
+  }
+
+  const FIELD_LABELS = {
+    owner_first: 'Owner First Name', owner_last: 'Owner Last Name',
+    owner_phone: 'Phone', owner_email: 'Email',
+    dog_name: 'Dog Name', dog_breed: 'Breed', dog_age: 'Age',
+    dog_weight: 'Weight', dog_sex: 'Sex', dog_color: 'Color',
+    dog_notes: 'Notes', dog_meds: 'Medications'
+  };
+
+  function renderPreview(data) {
+    // Column map
+    const mapEl = document.getElementById('colMap');
+    mapEl.innerHTML = data.headers.map((h, i) => {
+      const mapped = data.mapped_headers[i];
+      return `<div class="col-row">
+        <span class="col-original">${h}</span>
+        <span class="col-arrow">→</span>
+        <span class="${mapped ? 'col-mapped' : 'col-unmapped'}">${mapped ? (FIELD_LABELS[mapped] || mapped) : 'ignored'}</span>
+      </div>`;
+    }).join('');
+
+    // Warnings
+    const warnEl = document.getElementById('warningBox');
+    if (data.warnings.length) {
+      warnEl.innerHTML = `<div class="warning-box">⚠️ ${data.warnings.join(' · ')}</div>`;
+    } else {
+      warnEl.innerHTML = '';
+    }
+
+    // Preview table
+    document.getElementById('previewCountLabel').textContent = `(${data.total_rows} rows)`;
+    const activeCols = data.mapped_headers.filter(Boolean);
+    const table = document.getElementById('previewTable');
+    const headers = activeCols.map(f => FIELD_LABELS[f] || f);
+    table.innerHTML = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+      <tbody>${data.preview.map(row =>
+        `<tr>${activeCols.map(f => `<td>${row[f] ? row[f] : '<span class="cell-empty">—</span>'}</td>`).join('')}</tr>`
+      ).join('')}</tbody>`;
+
+    document.getElementById('moreRows').textContent = data.total_rows > 5
+      ? `Showing 5 of ${data.total_rows} rows` : '';
+  }
+
+  // ── Import ─────────────────────────────────────────────────────────────
+  async function doImport() {
+    const skipDupes = document.getElementById('skipDupes').checked;
+    const res = await fetch('/api/import/clients', {
+      method: 'POST', headers: authHeaders(),
+      body: JSON.stringify({ csv: csvText, skip_duplicates: skipDupes })
+    });
+    const data = await res.json();
+    showStep(3);
+
+    const grid = document.getElementById('resultGrid');
+    grid.innerHTML = `
+      <div class="result-card green"><div class="result-num">${data.clients_created}</div><div class="result-label">Pet Parents Added</div></div>
+      <div class="result-card blue"><div class="result-num">${data.dogs_created}</div><div class="result-label">Dogs Added</div></div>
+      <div class="result-card yellow"><div class="result-num">${data.clients_skipped + data.dogs_skipped}</div><div class="result-label">Duplicates Skipped</div></div>
+      <div class="result-card ${data.errors.length ? 'red' : 'green'}"><div class="result-num">${data.errors.length}</div><div class="result-label">Errors</div></div>`;
+
+    document.getElementById('doneMsg').textContent =
+      `${data.clients_created} pet parent${data.clients_created !== 1 ? 's' : ''} and ${data.dogs_created} dog${data.dogs_created !== 1 ? 's' : ''} imported successfully.`;
+
+    if (data.errors.length) {
+      document.getElementById('doneIcon').textContent = '⚠️';
+      document.getElementById('doneTitle').textContent = 'Import Complete with Warnings';
+      document.getElementById('errorList').innerHTML = '<strong>Rows with errors:</strong><br>' + data.errors.join('<br>');
+    }
+  }
+</script>
+<script src="/js/nav-user.js"></script>
+</body>
+</html>

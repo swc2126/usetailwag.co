@@ -1,0 +1,6 @@
+owner_first_name,owner_last_name,owner_phone,owner_email,dog_name,breed,age,weight_lbs,medications,notes
+Sarah,Chen,2145550001,sarah@example.com,Biscuit,Labrador Retriever,4,72,,Loves fetch
+Sarah,Chen,2145550001,sarah@example.com,Noodle,Poodle Mix,2,18,,Shy at first
+Mike,Johnson,2145550002,mike@example.com,Max,Golden Retriever,3,65,Apoquel 16mg daily,
+Amanda,Williams,9725550003,amanda@example.com,Luna,French Bulldog,1,22,,No dogs near gate
+Tom,Rivera,2145550004,,Pretzel,Dachshund,5,14,Phenobarbital 30mg,Senior dog - gentle play only
