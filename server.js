@@ -61,6 +61,7 @@ app.use('/api/ceo', require('./routes/ceo'));
 app.use('/api/admin-report', require('./routes/admin-report'));
 app.use('/api/appointments', require('./routes/appointments'));
 app.use('/api/import', require('./routes/import'));
+app.use('/api/newsletter', require('./routes/newsletter'));
 
 // Serve index.html for root
 app.get('/', (req, res) => {
