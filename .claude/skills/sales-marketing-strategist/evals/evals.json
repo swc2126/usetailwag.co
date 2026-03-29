@@ -1,0 +1,20 @@
+{
+  "skill_name": "sales-marketing-strategist",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "I'm about to visit a daycare this week for a walk-in demo. Help me prepare — what should I say, what should I bring, how do I handle objections?",
+      "expected_output": "A concrete demo prep guide with talking points, materials checklist, and objection-handling scripts specific to daycare owners"
+    },
+    {
+      "id": 1,
+      "prompt": "What's my go-to-market plan? I need to figure out how to get my first 10 customers.",
+      "expected_output": "A phased GTM plan grounded in what a solo pre-launch founder can execute, with specific action steps and timelines"
+    },
+    {
+      "id": 2,
+      "prompt": "Write me a cold outreach email I can send to daycare owners I find on Google.",
+      "expected_output": "A ready-to-send email in TailWag's brand voice — warm, specific, concrete ROI, no corporate jargon"
+    }
+  ]
+}

@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "sales-marketing-strategist", "runs": [{"id": "demo-prep-with_skill", "prompt": "I'm about to visit a daycare this week for a walk-in demo. Help me prepare \u2014 what should I say, what should I bring, how do I handle objections?", "eval_id": 0, "outputs": [{"name": "response.md", "type": "text", "content": "# Daycare Walk-In Demo Preparation Guide\n\n## The Strategy\n\nA walk-in demo is your strongest weapon right now. You're not sending an email that disappears into a crowded inbox \u2014 you're showing up in person, showing respect for their time, and letting them see TailWag work with their actual business. This is the kind of personal touch that independent daycare owners value and remember.\n\nThe goal isn't to close a deal in 15 minutes. It's to:\n1. **Show them a moment of clarity** \u2014 what it would feel like if they didn't have to manually text 40 pet parents every day\n2. **Plant a seed** \u2014 \"I see your potential and I'm building something specifically for daycares like yours\"\n3. **Build permission for follow-up** \u2014 Leave them with a reason to talk to you again\n\nThe daycare owner is busy, probably skeptical of software pitches, and certainly doesn't have time for a long conversation. So your job is to be fast, friendly, respectful of their time, and show up as a genuine peer who understands their world \u2014 not a salesperson.\n\n---\n\n## What to Bring\n\nBring less than you think you need. Physical items should either demonstrate immediate value or make you memorable. Here's what works:\n\n### Essential\n1. **Your phone or tablet with the TailWag demo pre-loaded**\n   - Have the app ready to go (no log-in, no loading screens, no fumbling)\n   - Pre-populate it with *their daycare's name* and 3\u20134 dogs from their Instagram (use their real dog names)\n   - Have sample report cards pre-written and ready to show\n   - Test the WiFi at the daycare before you demo (or use a hotspot)\n\n2. **A one-page leave-behind** (physical paper)\n   - Headline: \"How [DaycareName] Could Generate 12 More 5-Star Reviews This Month\"\n   - Three sections: the problem (silent leavers, manual texting), the solution (what TailWag does), the ROI (dollar amount based on their specific review count)\n   - Include your phone number, email, and a link to a simple calendar for a follow-up call\n   - Make it beautiful \u2014 not corporate, but professional. Use TailWag brand colors, clean typography, one high-quality dog photo\n   - Print it on cardstock, not regular paper\n\n3. **A very short script** (written on a card for you to reference)\n   - Bullet points only, not full sentences\n   - For moments where your mind goes blank under pressure\n   - See \"The Demo Script\" section below\n\n### Optional but Nice\n- A small treat for the dogs (if the owner seems open to it) \u2014 shows you're a real dog person\n- A handwritten note on the back of your one-pager (\"Summer from TailWag \u2014 great meeting you! Here's that report card example I showed you\")\n- A voice memo link or Loom video you can text them after the visit (5\u201310 seconds showing their daycare name + a sample report card)\n\n### What NOT to Bring\n- Printed decks or long documents\n- Multiple devices\n- Anything that requires them to sign or commit on the spot\n- Business cards with a lengthy service description\n\n---\n\n## The Demo Script (What to Say)\n\n### First 30 Seconds: The Opener\nYou have one job here: get permission to show them something and prove you're not a typical software salesperson.\n\n**What you say:**\n\"Hey [Owner Name], thanks so much for a minute \u2014 I know you're busy. I'm Summer, I built TailWag. I was looking at your Google reviews and something jumped out at me. You've got mostly 5-star reviews, but you're at [X reviews]. I bet you've got at least [2X] clients who had an amazing experience and never left a review. Does that feel about right?\"\n\n*Listen. Let them agree or add context.*\n\n\"Yeah, most daycares I talk to have that same gap. So I built something that automatically sends personalized report cards to pet parents at pickup time, plus reminder texts that cut no-shows. And here's the thing \u2014 it actually works because it's built for daycares, not just a generic texting tool. I have a 30-second demo if you want to see it?\"\n\n**Why this works:**\n- You led with insight about *their specific business*, not a pitch\n- You showed you did homework (looked at their reviews)\n- You acknowledged the gap they didn't even know they had (silent leavers)\n- You asked permission before launching into a demo\n- You set expectations (30 seconds, not 15 minutes)\n\n### The 30-Second Demo\nThis is where you show magic. The goal is for them to think: \"Wait, this is already made for my daycare?\"\n\n**What you do:**\n1. Pull out your phone and show them the dashboard with their daycare's name at the top\n2. Show one sample report card with a dog's name from their Instagram \u2014 something like:\n   > \"Hey Sarah! Daisy had the BEST day at TailWag. She played hard with the crew all morning, crushed it on a long walk, and passed out around 2pm like she owned the place. Can't wait to see her tomorrow! \ud83d\udc3e\"\n3. Say: \"This goes out automatically at pickup time. No typing, no copy-pasting. The AI writes it personalized to what actually happened that day.\"\n4. Swipe to the reminder screen and show: \"And this reminder goes out 24 hours before their appointment \u2014 cuts no-shows by about 30% on average.\"\n5. Swipe to the review request: \"Then, when things are going great, this asks for a review at exactly the right moment.\"\n\n**Don't say:**\n- Feature details (\"It uses natural language processing\u2026\")\n- Price\n- Technical jargon\n- Anything about setup or integration\n\n**Do say:**\n- \"Takes 5 minutes to set up\"\n- \"Runs in the background\"\n- \"You're already doing this work \u2014 we just automate it\"\n\n### The Close (60 Seconds)\nYou've shown them something valuable. Now make it easy to say yes to a next step.\n\n**What you say:**\n\"I'm launching TailWag in the next few weeks with early customers here in DFW. I'd love to get you in as a beta user \u2014 which means you get it free for the first month, and I get your feedback on what actually matters to daycare owners. No commitment. What would work better \u2014 a 15-minute call this week to talk through how it would work, or do you want to try it live for a day?\"\n\n**Why this works:**\n- You're offering value (free month)\n- You're asking for permission, not pushing\n- You gave two options (both move forward)\n- You're specific about next steps (15-min call, or trial day)\n- You're not trying to close the deal in the room\n\n---\n\n## How to Handle Objections\n\nDaycare owners will raise these. Here's how to handle each one with grace and without sounding defensive.\n\n### Objection 1: \"My clients are already happy.\"\n\n**What you hear:** They don't see the problem because they can't see the clients who quietly left.\n\n**What you say:**\n\"I hear that, and honestly, it usually means you're doing a great job. But here's what I found when I talked to [other local daycare owner's name] \u2014 she felt the same way. Then we looked at her Google reviews. She had 150+ clients in the past three years, but only 20 reviews. That meant 130 happy people who never took 30 seconds to leave a review. One review averages 3 more clients a month for daycares like yours. So there's probably $5k\u2013$10k of revenue sitting on the table \u2014 not because your clients aren't happy, but because asking is hard to remember.\"\n\n**Why this works:**\n- You validate their instinct (they ARE doing well)\n- You show data, not opinion\n- You reference a peer, not just theory\n- You translate the problem into dollars\n\n### Objection 2: \"I don't need another software tool.\"\n\n**What you hear:** They're already overwhelmed by systems. They don't want to learn something new or add another login.\n\n**What you say:**\n\"Totally fair \u2014 you've probably already got a booking system, maybe a POS, maybe a CRM. I'm not asking you to learn something new or add another password to remember. TailWag *replaces* work you're already doing. Right now, you're either texting clients manually or you're *not* doing it because there's no time. TailWag runs in the background \u2014 you literally don't think about it. Does that make sense?\"\n\n**Why this works:**\n- You acknowledge their real pain (tool fatigue)\n- You reframe it as replacing work, not adding work\n- You emphasize simplicity\n- You ask a soft closing question\n\n### Objection 3: \"I can just text them myself.\"\n\n**What you hear:** They don't think they need help. (They're wrong, but they don't know it yet.)\n\n**What you say:**\n\"You absolutely can. Most daycare owners tell me that too \u2014 and then I ask them this: 'Last week, how many of your 40 clients got a personalized text about their dog's day?' [Wait for answer \u2014 it's usually 'a few' or 'none.'] That's the reality, right? Not because you don't want to, but because by the end of the day, you're tired, you've got cleanup, the next client is arriving. The intent is there, but time isn't. TailWag is basically you, but you don't get tired. It sends every single day, personalized, so your clients feel seen.\"\n\n**Why this works:**\n- You don't argue \u2014 you ask them a question that proves the point\n- You show empathy for the real constraint (time, not will)\n- You reframe TailWag as an extension of them, not a replacement\n- You tie it back to client relationship value\n\n### Objection 4: \"How much does it cost?\"\n\n**What you say (at this stage):**\n\"Great question \u2014 I'm still figuring out exact pricing, but I'm thinking $99\u2013$199 a month depending on the number of clients. For context, if you get even *one* no-show prevented per month, or one extra Google review, it pays for itself. For you, with [their client count], it's almost certainly covering itself in recovered revenue in the first few weeks. I'll send you pricing as soon it's locked. Does that ballpark feel reasonable?\"\n\n**Why this works:**\n- You're honest (still figuring it out \u2014 they'll respect that as a founder)\n- You give a range, not a hard number (you have flexibility)\n- You lead with ROI, not cost\n- You make a soft assumption (it'll pay for itself) that they won't argue with\n\n**If they push back:** \"I know it's an investment. Here's what I'm thinking for early customers like you \u2014 free first month, so you can see the actual impact before you commit to anything. Fair?\"\n\n### Objection 5: \"I'd have to ask [partner/manager/etc.]\"\n\n**What you say:**\n\"Of course. Here's what I'll do \u2014 I'll send you a quick one-pager with the basics and maybe a 2-minute video showing how it works. You can show them that, and if they have questions, just have them reach out to me directly. Sound good? What email should I send it to?\"\n\n**Why this works:**\n- You make it easy for them to advocate for you\n- You offer to take the next step (no passive \"let me know\")\n- You're ready to answer questions from the decision-maker\n- You get their email in the process\n\n---\n\n## Before You Walk In: The Checklist\n\n- [ ] Research their Google reviews, Instagram, Facebook \u2014 know their vibe and their dog roster\n- [ ] Pre-load your demo with their daycare name and 3\u20134 dogs from their photos (use real dog names)\n- [ ] Write 2\u20133 sample report cards for their specific dogs and save them as screenshots\n- [ ] Test the demo on your phone/tablet \u2014 no lag, no loading errors\n- [ ] Print 3 copies of your one-pager (one for them, one backup, one for you to reference)\n- [ ] Have your script card in your pocket\n- [ ] Plan your opening \u2014 how will you get 30 seconds of their time? (First thing in the morning? Quiet moment mid-day? After pickup rush?)\n- [ ] Charge your phone and have a backup charger\n- [ ] Set a calendar reminder the next morning to send your follow-up\n\n---\n\n## Right After the Demo: The Follow-Up (Same Day or Next Morning)\n\nSend them:\n1. **A text message** (get their number during the visit, or ask for it at the end):\n   > \"Hey [Owner Name], thanks again for a few minutes this morning! Here's that one-pager I mentioned. Excited to show you what TailWag can do for [DaycareName]. Let me know if you have questions. \u2014 Summer\"\n   > [Attach the one-pager or a link]\n\n2. **An email with:**\n   - Subject: \"Quick follow-up: TailWag demo for [DaycareName]\"\n   - One sentence: \"Thanks again for your time. Here's a custom report card example for your daycare \u2014 this is what you'd send to parents automatically each day.\"\n   - Screenshot or PDF of the sample report card\n   - A 2\u20133 sentence close: \"I'm bringing TailWag to DFW daycares in April. I'd love to get you in as a beta customer \u2014 free first month. When's good for a quick 15-min call to talk through how it works?\"\n   - Calendar link (Calendly or similar) with 2\u20133 time slots for the next 3 days\n\n3. **A custom Loom or voice memo** (optional, but memorable):\n   - 30\u201360 seconds showing their daycare name + the sample report card you demoed\n   - \"Hey [Owner Name], just wanted to drop this here so you could see again how the report card would look for [DaycareName]. Looking forward to talking more. \u2014 Summer\"\n   - Send as a text or embed in the email\n\n---\n\n## What Success Looks Like\n\nAfter your walk-in demo, you've succeeded if:\n\n\u2705 You get 15 minutes of their focused attention (even if it feels shorter)\n\u2705 They see a report card with their daycare name and actual dogs from their life\n\u2705 They say something like \"Oh, I see \u2014 that's something my clients would love\" or \"Yeah, people are always asking how their dogs did\"\n\u2705 They take your one-pager and don't immediately throw it away\n\u2705 They give you their phone number or email without you having to ask twice\n\u2705 They say yes (or \"maybe\") to a follow-up call\n\u2705 They mention you to someone else they know (you'll hear this in a future conversation)\n\nYou've *over-succeeded* if:\n- They ask about pricing unprompted\n- They ask when they can start using it\n- They mention specific pain points (no-shows, quiet leavers, manual texting) that TailWag solves\n- They ask you to come back and demo to their team\n\n---\n\n## A Few Mindset Reminders\n\n**You're not selling software. You're solving a specific problem for a specific person.**\nThe daycare owner doesn't care about your tech stack or your vision \u2014 they care about whether you understand their day and whether TailWag makes it easier. Lead with empathy and data, not features.\n\n**This person doesn't know you yet.**\nFirst impressions matter. Show up on time, be friendly, remember their name, ask about their dogs. You're building a relationship, not just trying to land a customer. The sale happens in the follow-up anyway.\n\n**You have permission to take up space.**\nYou built something for daycares. You're local. You care enough to show up in person. That's rare and valuable. Don't apologize for pitching \u2014 just do it respectfully and make it worth their time.\n\n**If they're not interested, it's not about you.**\nSome daycares aren't ready. Some have a different tech setup. Some are too small. That's fine. Leave them better off than when you arrived (they got a useful one-pager, you were friendly, no hard feelings), and move on to the next one. Your job is to find the daycares who are hungry for this, not to convince everyone.\n\n---\n\n## Next Steps After the Call\n\nIf they say yes to a follow-up call:\n1. Send a calendar invite the same day with a clear agenda: \"Let's spend 15 minutes talking through how TailWag would work for your specific setup \u2014 no pressure, just exploring if it's a fit.\"\n2. Before the call, look up any recent reviews or social media posts \u2014 reference something specific\n3. On the call, focus on their needs, not your product. Listen more than you talk.\n4. Offer a trial: \"How about we set you up for free for a week? You'll see actual report cards going to your clients, you can test it, and then we'll jump on a quick call to see if it makes sense.\"\n\nYou've got this. Go show them what you built.\n"}], "grading": null}, {"id": "demo-prep-without_skill", "prompt": "I'm about to visit a daycare this week for a walk-in demo. Help me prepare \u2014 what should I say, what should I bring, how do I handle objections?", "eval_id": 0, "outputs": [{"name": "response.md", "type": "text", "content": "# TailWag Daycare Walk-In Demo Preparation Guide\n\n## Pre-Demo Checklist (What to Bring)\n\n### Physical Materials\n- **Business cards** (20-30 cards) \u2014 Include your name, title (Founder), phone, email, and website/landing page\n- **One-page leave-behind** \u2014 Simple 1-sheet PDF or printed material with:\n  - TailWag logo and tagline\n  - 3-4 key benefits (time savings, parent engagement, Google reviews)\n  - Your contact info and next steps\n- **Phone/tablet with demo loaded** \u2014 Have the SMS flow queued up or screenshots ready to show the report card and reminder examples\n- **Backup: Screenshots/PDFs** \u2014 In case Wi-Fi is unavailable\n- **Notebook and pen** \u2014 For capturing their pain points and follow-up notes\n\n### Digital Preparation\n- Have TailWag landing page open on your phone (in case they want to see online)\n- Screenshot examples of personalized report cards and reminder messages\n- Pre-write 2-3 sample messages you can show (customize them on-the-fly if you get feedback)\n\n---\n\n## The Opening: What to Say (First 2 Minutes)\n\n### Confidence Opener\n\"Hi, I'm Summer, founder of TailWag. We just launched an AI-powered platform that helps daycares automate personalized daily report cards and appointment reminders via SMS. I noticed [specific detail about their daycare] and thought you might appreciate a quick 10-minute demo. Do you have a moment?\"\n\n### Why This Works\n- **Specific credential**: \"founder\" shows ownership and expertise\n- **Clear value prop**: Solves two major pain points (time + parent communication)\n- **Respectful**: Asks permission and sets time expectation (10 min, not vague)\n- **Personalized touch**: Reference something about their operation (class size, setup, reviews, etc.)\n\n### Backup Opening (If They're Busy)\n\"I'll be super quick \u2014 I just want to show you how TailWag saves daycare managers 2-3 hours per week on report cards. Can I grab 5 minutes of your time?\"\n\n---\n\n## The Demo: Keep It Simple (5 Minutes Max)\n\n### Demo Flow\n1. **Set context** (30 sec)\n   - \"Here's what happens: Your staff takes quick notes during the day on what each kid did\u2014playtime, meals, activities.\"\n   - \"TailWag pulls those notes and generates a personalized report card for parents\u2014no copy-paste, all automated.\"\n\n2. **Show the magic** (2 min)\n   - Show a sample report card via SMS or screenshot\n   - Example: \"Here's what a parent gets: 'Harper had a great day at TailWag! \ud83d\udc3e She played fetch with Buddy, napped for 45 min, and had a snack at 2pm. See you tomorrow!' \u2014 All AI-generated, takes 10 seconds instead of 10 minutes.\"\n\n3. **The bonus feature** (1.5 min)\n   - Show appointment reminders: \"And TailWag auto-sends pickup reminders so parents never miss a time.\"\n   - Mention review requests: \"You can also trigger automatic Google review requests at the right moment\u2014parents are happiest right after pickup.\"\n\n4. **Close the demo loop** (30 sec)\n   - \"That's the core. Questions?\"\n\n### What NOT to Do\n- Don't overwhelm with features (stick to report cards, reminders, and reviews)\n- Don't get too technical about the AI (they don't care how it works, only that it works)\n- Don't overstay your welcome\u2014if they say \"that's cool but I'm busy,\" respect it\n\n---\n\n## Handling Common Objections\n\n### Objection #1: \"We already do this fine / don't need it\"\n**Your response:**\n\"I hear that. Most daycares I talk to are managing it\u2014but usually the manager is spending 2-3 hours a week on reports. With TailWag, that's automated. Have you ever had days where you just can't get the reports out in time, or the quality varies between staff?\"\n\n**Follow-up if they say yes:**\n\"That's exactly what TailWag solves. One staff member takes quick notes, the AI does the rest. No consistency issues, no time crunch.\"\n\n---\n\n### Objection #2: \"How much does it cost?\"\n**Your response (be honest, don't dodge):**\n\"We're still finalizing pricing based on feedback from early partners, but we're targeting $X per month for daycares your size [DON'T COMMIT TO A NUMBER unless you have one ready]. The ROI is huge though\u2014if you're saving 10+ hours per month on admin work, it pays for itself immediately.\"\n\n**Better approach:** Ask them first:\n\"What's your budget range for something like this, or have you looked at solutions before?\" (This helps you gauge what they might pay.)\n\n---\n\n### Objection #3: \"Will parents actually use SMS? They prefer the app / portal.\"\n**Your response:**\n\"SMS is actually the highest engagement channel\u2014no app download, no password to remember, shows up immediately. Parents love it because it's frictionless. Some daycares also send the same report via email if they want, but SMS is where the engagement happens.\"\n\n---\n\n### Objection #4: \"What about privacy / data security?\"\n**Your response (confident but honest):**\n\"Great question. We follow CCPA/GDPR best practices, all data is encrypted in transit and at rest, and we're SOC 2 compliant [ONLY SAY THIS IF TRUE]. We don't sell or share parent data\u2014ever. Happy to send you our full data privacy doc.\"\n\n**If you don't have full security certs yet:**\n\"We're building security as a top priority and are working toward SOC 2 compliance. I can connect you with our security documentation and we can discuss this in more detail.\"\n\n---\n\n### Objection #5: \"We're happy with [competitor/current solution]\"\n**Your response:**\n\"Totally understand. If you're happy with what you have, great. But if you ever want to explore options or get a second opinion, I'd love to show you how TailWag can save you time. Can I leave you my card?\"\n\n**Don't trash-talk competitors.** Just differentiate:\n\"We focus on personalization\u2014each pup gets their own unique report, which parents love. Plus we handle reminders and reviews in one platform, so it's less bouncing around between tools.\"\n\n---\n\n## The Close: How to End the Conversation\n\n### If They're Interested\n\"Perfect! Here's what I'd suggest: Let's set up a 20-minute call where I can walk your team through a full setup and answer any questions. When works best for you\u2014Thursday or Friday?\"\n\n**Capture their info:**\n- Name, title, phone, email\n- Number of dogs / staff\n- Current system they use\n- Timeline for making a decision\n\n---\n\n### If They're Not Interested (Yet)\n\"No worries! I'll leave you my card. If you ever want to explore this, just reach out. We're growing fast, and I'd love to work with you guys.\"\n\n**Always leave a card.** They might think about it later or refer a friend.\n\n---\n\n### If They're Hesitant but Intrigued\n\"I totally get it\u2014this is new, and you want to make sure it fits your workflow. How about this: I can send you a 2-minute video walkthrough, or we can do a quick call with your team to make sure it works for you. What sounds better?\"\n\n---\n\n## Energy & Mindset Going In\n\n### Key Reminders\n- **You're the expert.** You've built this product. Own it.\n- **Listen more than you talk.** Ask about their biggest pain point first, then position TailWag as the solution.\n- **This is a conversation, not a pitch.** Be genuine, be friendly, be yourself.\n- **Rejection is feedback, not failure.** Every \"no\" gets you closer to a \"yes.\"\n- **Follow up within 24 hours.** Send a thank-you message, recap what you discussed, and include the one-page leave-behind.\n\n---\n\n## Post-Demo Follow-Up (Critical!)\n\n### Same Day\n- Send a thank-you text or email: \"Thanks for taking the time to chat with me today. Here's that one-pager I mentioned + my contact info. Looking forward to working together!\"\n\n### 48 Hours Later\n- If they seemed interested but didn't commit: \"Hi [name], following up on our chat. Would love to schedule that demo call with your team. Let me know if Thursday 2pm or Friday 10am works better.\"\n\n### 1 Week Later\n- If no response: One final touch: \"Just checking in\u2014still think TailWag could be a fit for you guys. Happy to answer any lingering questions!\"\n\n---\n\n## Sample Talking Points (Quick Reference)\n\n### The Problem\n- Managers spend 2-3 hours/week writing report cards by hand\n- Inconsistent quality and messaging\n- Parents miss appointment reminders\n- Low Google review generation (hurts local SEO)\n\n### The Solution (TailWag)\n- AI-powered personalized report cards (1-minute turnaround vs. 10 minutes)\n- Automated appointment reminders (reduce no-shows)\n- Google review requests at optimal moments (more 5-star reviews)\n- One platform = less context-switching\n\n### The Win\n- Saves time (manager can focus on the dogs, not admin)\n- Better parent communication (daily engagement, no generic messages)\n- Grows reputation (more Google reviews, better local visibility)\n\n---\n\n## Final Thoughts\n\nYou're solving a real problem for a real audience. Walk in with confidence, listen to their pain points, show them the solution, and make it easy for them to take the next step. The best demos don't feel like demos\u2014they feel like a helpful conversation from someone who understands their business.\n\nGood luck! \ud83d\udc3e\n"}], "grading": null}, {"id": "first-10-customers-with_skill", "prompt": "What's my go-to-market plan? I need to figure out how to get my first 10 customers.", "eval_id": 1, "outputs": [{"name": "response.md", "type": "text", "content": "# TailWag Go-to-Market Plan: First 10 Customers\n\n**Date:** March 27, 2026\n**Stage:** Pre-launch, validating product-market fit\n**Goal:** Acquire 10 paying customers in the DFW area within 60 days\n**Founder:** Summer (solo, non-technical, sales/product-focused, Irving TX)\n\n---\n\n## Executive Summary\n\nYou're not running a campaign \u2014 you're having 40 conversations with daycare owners to find 10 who need what you're building. Success looks like:\n\n- **Month 1:** 15 face-to-face meetings, 5 trial signups, 2 paying customers\n- **Month 2:** 15 more meetings, 5 more trials, 8 total paying customers\n- **By day 60:** 10 customers paying $X/month, each with a 48-hour onboarding story you can use as social proof\n\nThis plan is built around your geographic advantage and your willingness to do direct, high-touch sales. Every tactic here is something *you* can execute alone in a week.\n\n---\n\n## The Strategy: Why This Approach Works for You Right Now\n\n### 1. **Hyperlocal, High-Touch > Spray-and-Pray**\n\nYou live in Irving. Target daycares live within 15 miles of you. That's not a weakness \u2014 that's your unfair advantage over every SaaS company emailing from San Francisco.\n\nYour first 10 customers aren't going to come from a landing page or Facebook ads. They're going to come from:\n- You walking into a daycare and talking to the owner\n- You being referred by another daycare owner who's already using TailWag\n- You becoming visible in the local daycare ecosystem (Facebook groups, meetups, word-of-mouth)\n\n**Principle:** Direct sales in 2026 mean using your real relationships and physical presence more, not less.\n\n### 2. **Lead with Insight, Not Pitch**\n\nEvery daycare owner you talk to has the same problem: they want more Google reviews and happier clients, but they're drowning in the day-to-day. They get pitched by software vendors all the time. The pitch is invisible to them.\n\nInstead, lead with something valuable:\n- A one-page audit of their Google review strategy vs. their top 3 local competitors\n- A quick analysis of how many \"silent leavers\" they might have (based on their review count vs. estimated client base)\n- A simple ROI calculator: \"If you prevented just 2 no-shows a month, you'd save $X\"\n\nThis does two things: (1) it proves you understand their world, and (2) it puts TailWag in context as a *solution* to a real problem you just identified.\n\n### 3. **Demo in Their World, Not Yours**\n\nWhen you do show them TailWag, don't just show them the interface. Show them what it would look like *in their daycare*. Use their name, reference a dog you saw on their Instagram, show what a personalized report card would look like for *their* clients.\n\nThe goal: they should think \"wait, this already feels like mine.\"\n\n### 4. **Build Momentum Through Proof**\n\nYour first customer is hard. Your second is easier because you have a story. By the time you're closing customer 8, you'll have:\n- A real testimonial from a daycare owner they might know or respect\n- Before/after numbers (Google reviews gained, no-shows prevented, etc.)\n- A case study you can leave behind\n\nEach customer makes the next one easier. This is why it's critical to *close* that first customer quickly and make their onboarding spectacular.\n\n---\n\n## The Action Plan: What to Do This Week (and Beyond)\n\n### **PHASE 1: BUILD YOUR TARGET LIST (Days 1\u20135)**\n\n**Goal:** Create a list of 40 target daycares in the DFW area ranked by fit.\n\n#### 1.1: Google Map Search for Prospects\n\n*How to do it:*\n\n1. Open Google Maps and search: \"dog daycare near Irving, TX\"\n2. Set radius to 15 miles (you want to be able to visit in person)\n3. Screenshot or export the list (click each one, note: business name, address, phone, Google rating, review count, website/social)\n\n*Why it matters:* Google gives you your initial pool. You're looking for daycares with:\n- 3\u20134.5 stars (not perfect \u2014 this suggests they have the right instinct but room to grow)\n- 10\u201350 reviews (small enough to be independent, established enough to have an audience)\n- 2\u201315 employees (big enough to be busy, small enough that the owner is still hands-on)\n\n*What success looks like:* 30\u201350 daycares, organized in a spreadsheet\n\n---\n\n#### 1.2: Audit Their Online Presence\n\n*How to do it:*\n\nFor each daycare on your list, spend 2 minutes on:\n- Their Google Business Profile (rating, review count, when reviews last came in)\n- Their Instagram or Facebook (how often they post, engagement rate, what they're showing)\n- Their website or booking platform (does it exist? is it from 2015?)\n\n*Why it matters:* This tells you their pain. A daycare with amazing Instagram but only 12 Google reviews is a perfect fit \u2014 they're good at creating content but missing the channel that actually converts. A daycare with no reviews and no social presence is struggling on multiple fronts.\n\n*What success looks like:* For each daycare, a 1\u20132 sentence note: \"Strong Instagram, weak Google presence. Good fit.\" This becomes your targeting rubric.\n\n---\n\n#### 1.3: Rank Your List\n\n*How to do it:*\n\nScore each daycare 1\u201310 on fit:\n- **Google review gap** (have they won the review game or is it a big opportunity?) \u2014 4 points\n- **Social media presence** (are they already thinking about marketing?) \u2014 3 points\n- **Team size** (are they likely to feel the pain of manual texts?) \u2014 2 points\n- **Geographic proximity** (can you visit this week?) \u2014 1 point\n\nYour top 20 are targets for phase 1. These are the daycares most likely to say yes because they already feel the pain.\n\n*What success looks like:* A ranked spreadsheet of your top 20 targets. Top 3 are your \"dream closes\" for this week.\n\n---\n\n### **PHASE 2: RESEARCH & PERSONALIZE (Days 3\u20137)**\n\n**Goal:** Know each of your top 10 targets well enough to reference something specific when you reach out.\n\n#### 2.1: Dig Into Their Story\n\n*How to do it:*\n\nFor your top 10 targets, spend 15 minutes each:\n- Read their Google reviews (what do clients praise? what are common complaints?)\n- Scroll their Instagram/Facebook to the end (when did they start? what does their content look like over time?)\n- Look for their owner's name and any personal details (where are they from? how long have they been in business?)\n\n*Why it matters:* This is how you personalize. Instead of a generic cold email, you can write: \"I saw your review from Sarah Johnson last month about how her golden retriever has a 'new best friend' at your place \u2014 that's the kind of client experience that deserves five reviews, not one.\"\n\n*What success looks like:* A 3\u20134 sentence snapshot for each target daycare. The first sentence references something specific you found.\n\n---\n\n#### 2.2: Create Your \"Insight Lead\" For Each Target\n\n*How to do it:*\n\nFor your top 5, draft a simple one-page \"audit\" or \"benchmark\" you'll give them. It should:\n- Compare their Google review metrics (rating, count, recent activity) to 2\u20133 nearby competitors\n- Estimate their \"review rate\" (reviews per month) and project where they could be\n- Include one concrete insight: \"You're getting 4x fewer Google reviews than [Competitor], despite similar online presence. Here's one lever that could change that.\"\n\n*Format:* Simple, professional, TailWag-branded. Looks like you spent 20 minutes on it (not an hour), but it's clearly thoughtful.\n\nYou're not selling here \u2014 you're helping them see their own problem clearly.\n\n*What success looks like:* 5 one-pagers ready to hand to people or email. Each is personalized to that specific daycare.\n\n---\n\n### **PHASE 3: FIRST CONTACT (Days 8\u201314)**\n\n**Goal:** Get 15 conversations scheduled. You're aiming for a 30% conversion rate on outreach (5 meetings per 15 tries).\n\n#### 3.1: Choose Your Outreach Channel\n\n*What works best for daycare owners:*\n\n**In-person visits (preferred, 60% conversion):**\n- Show up in person during slow hours (11:30am\u20132pm)\n- Bring your one-pager and be genuinely curious about their business\n- \"Hi, I'm Summer. I noticed your daycare online and wanted to meet you \u2014 I'm helping daycare owners with something that might help your review strategy. Do you have 10 minutes?\"\n- If they don't have time: \"No problem at all. Could I leave this with you and swing by next Tuesday?\" (See section 3.3 on the handoff.)\n\n**Phone calls (secondary, 35% conversion):**\n- Call, don't email first. Call is faster and gives them less time to put you on the backlog.\n- Script: \"Hi [name], this is Summer with TailWag. I'm not trying to sell you anything \u2014 I've been looking at how independent daycares are doing on Google reviews, and I put together a quick one-pager for [your daycare name] that I thought you'd find interesting. Can I send it your way or would it be easier if I swung by?\"\n- If they say yes to the one-pager: \"Great. I'll email it now. Could I follow up Thursday?\" (See section 3.3 on follow-up.)\n\n**Facebook/email (tertiary, 20% conversion):**\n- Message them on Facebook or email if you can find their business email. Keep it short and value-first.\n- Example: \"Hi [name] \u2014 I put together a quick breakdown of how [your daycare] is doing on Google reviews vs. nearby competitors. Thought you might find it interesting. It's one page. https://[link to your one-pager]\"\n- Tone: helpful stranger, not sales pitch.\n\n*Why this order:* In-person is harder for you but works best. Phone is middle ground. Email/Facebook is easiest but has the lowest conversion. Do as much in-person as you can this week (aim for 3\u20135 visits), phone for the rest.\n\n*What success looks like:* 15 attempts, 5\u20138 conversations booked\n\n---\n\n#### 3.2: The One-Pager Handoff\n\n*How to do it:*\n\nIf you visit in person and they don't have 10 minutes:\n1. \"No worries at all. I put this together for you \u2014 [hand over the one-pager] \u2014 it's just a quick look at your review strategy. Could I swing back by Thursday at 12:30pm to get your thoughts?\"\n2. Or: \"Do you have 30 seconds? I'll read it to you.\" (Read the three most important insights aloud in under a minute.)\n3. Get their phone number. Text them the same one-pager that afternoon: \"Hey [name] \u2014 great meeting you. Here's that one-pager I mentioned. Looking forward to chatting Thursday.\"\n\n*Why it matters:* You're making a specific commitment to come back. That commitment turns you from a random visitor into someone they're expecting. Much higher close rate.\n\n---\n\n#### 3.3: The Follow-Up Sequence\n\n*Timeline for each contact:*\n\n**Day 0 (initial contact):** In-person meeting or phone call. If no meeting, they get your one-pager.\n\n**Day 1 (next day):** Text or email them. \"Great talking with you yesterday. I'm really interested in how you're thinking about reviews. Could we grab 15 minutes this week?\" Include your calendar link (Calendly) so they can just book.\n\n**Day 3:** If they haven't booked, send one piece of value: a link to a recent article about how Google reviews impact booking rates, or a stat: \"Did you know 72% of people check Google reviews before booking? I pulled your competitor's data \u2014 they're getting a new review every 3 days. Curious what your pace looks like.\"\n\n**Day 7:** Gentle close. \"I put together something I think could help your Google strategy. Could we jump on a quick call Friday?\" If they say no, move them to your \"maybe later\" list and reach out again in 30 days.\n\n*What success looks like:* 5 meetings booked for week 2. You're talking to 5 daycare owners who are curious about what you're building.\n\n---\n\n### **PHASE 4: DEMO & TRIAL (Days 15\u201335)**\n\n**Goal:** 5 trial signups. You're aiming to convert 50% of your conversations into trials.\n\n#### 4.1: The Meeting Agenda (15 minutes)\n\n*Why you're here:* Not to sell. To understand their world and show them what TailWag could do for *them*.\n\n*What you do:*\n\n1. **Ask before you show (first 5 min)**\n   - \"Walk me through your week. How many texts are you sending to clients? How long does it take?\"\n   - \"When was the last time you got a Google review? Do you ask for them?\"\n   - \"What's the biggest pain point in your day right now?\"\n\n   *Goal:* You want to hear them say something like \"I wish I had time to text clients after every drop-off\" or \"We never get reviews.\" This is your landing pad for the demo.\n\n2. **Show their world (next 8 min)**\n   - Pull up TailWag. Use *their daycare name*. Show what a personalized report card would look like for *their clients*.\n   - Reference something specific: \"I saw on your Instagram you posted about Bella the golden retriever last week. Imagine the mom gets a text at 5pm that says 'Bella had an amazing day \u2014 she made three new friends at group play and nailed her manners training. See you tomorrow!' That's what this does.\"\n   - Show the review request. Show the appointment reminder.\n   - **Don't oversell.** Keep it simple. One daycare owner said recently: \"I just want to know my dog is happy and when to pick them up.\"\n\n3. **Remove objections (final 2 min)**\n   - \"It's literally five minutes to set up. I can walk you through it.\"\n   - \"You only start paying when you're happy with the first week. And it pays for itself in one prevented no-show.\"\n   - **Ask for the trial.** \"Would it make sense to try this for a week? You'd see what real report cards look like for your clients.\"\n\n*What success looks like:* They say yes to a trial. You get their permission to set up an account and send their first report card Friday morning.\n\n---\n\n#### 4.2: The Trial Setup\n\n*How to do it:*\n\n1. **Same day** (while you're still there or that evening): Set up their account, pull in their business details, and preview the first message\n2. **Next morning:** Send their first report card to a test client. Frame it: \"Your first report card just went out. Can you show me the client's reaction?\"\n3. **Day 3:** Check in. \"How are people responding?\" Collect any feedback.\n4. **Day 7:** Close conversation. \"What would it take for you to become a customer?\"\n\n*What success looks like:* Trial going live Friday, feedback by Monday, close conversation by Friday of week 2.\n\n---\n\n#### 4.3: The Close\n\n*By day 7 of the trial, you know whether they're going to buy or not.* If they are:\n\n- **Offer a trial period with a safety net:** \"First month is $X, but if you don't see results after 30 days, I'll refund you.\"\n- **Or offer a \"pay for what you get\" model:** \"We keep the lights on for a week. Once you see your first report cards going out and getting responses, you pay $X/month.\"\n- **Make onboarding irresistible:** \"I'm going to stay on the phone with you for 20 minutes on day 1 to make sure everything works. You won't be figuring this out alone.\"\n\n*What success looks like:* Customer 1 pays. Now you have a story.\n\n---\n\n### **PHASE 5: BUILD MOMENTUM (Days 35\u201360)**\n\n**Goal:** 8 total paying customers by day 60.\n\n#### 5.1: Turn Your First Customer Into Social Proof\n\nAs soon as customer 1 is live (day 3\u20135):\n\n1. **Get a testimonial:** \"Can I grab a quick voice memo of you walking me through what changed in your first week?\" (Video or voice memo is more powerful than written.)\n2. **Collect metrics:** How many report cards sent? How many reviews generated? How many no-shows prevented?\n3. **Create a one-page case study:** \"How [Daycare Name] generated 8 new 5-star reviews in 30 days and prevented $4K in no-shows\"\n\nYou're going to use this relentlessly in the next phase.\n\n---\n\n#### 5.2: Referral Loop\n\nAs soon as you have a paying customer:\n\n1. **Ask for introductions:** \"Do you know any other daycare owners in the DFW area who struggle with reviews or no-shows? Could I mention that you're using TailWag?\"\n2. **Offer a referral bonus:** \"If you refer someone who becomes a customer, I'll give you a free month or a month at 50% off.\" (You can afford this.)\n3. **Make the intro easy:** \"I'll send you an email you can forward, or I can set up a call with you both.\"\n\nReferrals from a happy customer convert at 60\u201370%. They're gold.\n\n---\n\n#### 5.3: Tighten Your Funnel\n\nBy day 35, you've run 15 conversations. You know what works and what doesn't. Analyze:\n\n- Which daycares converted? What did they have in common?\n- Which objections came up most? How did you handle them?\n- What part of your pitch landed hardest?\n\nBy week 6, you're running a tighter version of week 1. You've eliminated weak targets and sharpened your message.\n\n---\n\n#### 5.4: Secondary Outreach Channels (Week 5+)\n\nOnce you have 2\u20133 customers, you can add these without diluting your direct sales efforts:\n\n1. **Local Facebook groups** \u2014 Post value, not pitches. \"Hey, I've been researching Google review strategies for daycares. Happy to share what I found.\" When people ask, you have customers to reference.\n\n2. **Local chamber of commerce or pet industry meetups** \u2014 Attend, meet people, hand out your case study. You're not selling \u2014 you're networking with the 5 people who might know a daycare owner.\n\n3. **Dog trainer/groomer referral partnerships** \u2014 Visit trainers and groomers nearby. \"If your clients ask about daycare recommendations, I know a few great places. Could I leave some info with you?\" (Reciprocal: if they get referred as a trainer, you're happy to mention them.)\n\n4. **Nextdoor** \u2014 Post in the Nextdoor neighborhood app. Local, trusted audience. A simple post: \"I'm helping local dog daycares get more Google reviews. Curious if other dog parents notice daycares without reviews?\" Opens conversations.\n\nNone of these replace direct sales. But they reinforce it and create serendipitous conversations.\n\n---\n\n## Messaging: What to Say and How to Say It\n\n### The One-Liner (When You Have 10 Seconds)\n\n\"I help dog daycares turn happy clients into Google reviews and cut no-shows. Basically, automated texts that do what you're probably doing manually \u2014 but actually get sent.\"\n\n### The Elevator Pitch (30 Seconds)\n\n\"You know how you want to text clients at pickup and tell them how their dog's day went, but you never have time? TailWag does that automatically \u2014 personalized to each dog, timed to land in their inbox at exactly the right moment. Plus, it asks for reviews and sends appointment reminders. Takes five minutes to set up.\"\n\n### The Problem-First Opener (For Cold Meetings)\n\n\"I've been looking at Google reviews for independent daycares in the DFW area, and I noticed something: most daycares have amazing experiences but barely any reviews to show for it. Parents pick based on reviews. You're probably losing clients who never even check you out. I put together a one-pager showing where you're at vs. nearby daycares. Thought you'd find it interesting.\"\n\n### The Demo Close\n\n\"Here's what I'd love to do: let me set up an account for [Daycare Name] and send one real report card to a client tomorrow morning. You'll see exactly what your clients are getting. Then we can talk about what happens next. Fair?\"\n\n### The Objection Handlers\n\n**\"I don't have time for another tool.\"**\n\"I get it. But you're already thinking about these clients \u2014 you're just doing it in your head. This just gets the thoughts out of your head and to the parents. Saves you time because you're not stressing about it.\"\n\n**\"My clients are already happy.\"**\n\"They probably are. But here's the thing: happy clients who don't leave reviews are invisible to new parents. And the ones who drift away? They usually don't say anything \u2014 they just book somewhere else. TailWag fixes the silent ones.\"\n\n**\"How much does it cost?\"**\n\"$[X] a month. But here's how we'd do it: try it for a week. You'll see your first report cards landing. Then we talk pricing. If it's not working, you're done. No contract, no hassle. One prevented no-show pays for the whole month.\"\n\n**\"I'll think about it.\"**\n\"That's fair. What's the best way for me to follow up? Email? Text? Let me send you the one-pager and we can touch base Thursday. Does that work?\"\n\n---\n\n## Success Metrics: How You'll Know It's Working\n\n**Week 2:** 5 first meetings booked\n**Week 3:** 2 trials live\n**Week 4:** 1 paying customer\n**Week 5:** 2 paying customers\n**Week 6:** 1 referral conversation happening\n**Week 7:** 3 paying customers\n**Week 8:** 5 paying customers (through mix of direct sales + referrals)\n\n**By Day 60:** 10 paying customers, 20+ daycares in your pipeline, clear sense of what's working\n\n---\n\n## Avoiding the Big Mistakes\n\n1. **Trying to scale too early.** Don't build a landing page or Facebook ad campaign before you've closed 5 customers. You don't know your pitch yet. Direct sales first, scaling later.\n\n2. **Not closing fast enough.** The gap between \"interested\" and \"paying\" is where most deals die. Get them to a trial in a meeting. Get them paying in a week. Don't let momentum die.\n\n3. **Pitching features instead of outcomes.** They don't care that your AI is \"advanced.\" They care that they'll get more Google reviews and prevent no-shows. Lead with outcomes.\n\n4. **Not following up consistently.** Most sales in B2B happen in the follow-up. You're going to feel like you're bothering people. You're not. You're the third person to ask \u2014 the other two were your competitors.\n\n5. **Trying to appeal to every daycare.** You're not. Your first 10 customers are going to be a specific profile: probably owners who already care about their online presence, who are actively trying to grow, who've gotten a bad review and want to fix it. Find them. Ignore the ones who say \"no.\" There are plenty of fish.\n\n---\n\n## Your Launch Week (Right Now)\n\n**Monday:** Build your target list (40 daycares). Rank them.\n**Tuesday:** Audit top 10. Take screenshots of their Google profiles and Instagram.\n**Wednesday:** Create your first one-pager for your top 5 targets. Make it look beautiful.\n**Thursday:** Call or visit your top 3. Goal: 1 meeting booked.\n**Friday:** First in-person meeting. Show them TailWag. Aim to close a trial.\n\nYou're not going to get all of this perfect. You're going to learn as you go. That's the point.\n\n---\n\n## The Bottom Line\n\nYou don't need a marketing campaign. You need conversations.\n\nStart this week with 3 in-person visits. Make each one count. Learn what resonates. By the time you've had 15 conversations, you'll know exactly how to pitch this. By conversation 25, closing will feel natural.\n\nYour unfair advantage is that you live in Irving. Use it. Be the founder who shows up. Be the person who knows their name, their dog's name, and what they're struggling with. That's how you get from zero to 10 customers.\n\nLet's go.\n"}], "grading": null}, {"id": "first-10-customers-without_skill", "prompt": "What's my go-to-market plan? I need to figure out how to get my first 10 customers.", "eval_id": 1, "outputs": [{"name": "response.md", "type": "text", "content": "# TailWag Go-to-Market Plan: First 10 Customers\n\n## Executive Summary\nYour path to the first 10 customers should focus on **high-touch, personal outreach** to local and regional dog daycares in the Irving, TX area and beyond. At this stage, you're validating product-market fit and gathering testimonials\u2014not scaling. Target boutique daycares ($500K-$5M revenue) that already send some communication to owners but lack automation.\n\n---\n\n## Phase 1: Foundation (Weeks 1-2)\n\n### 1.1 Define Your Ideal Customer Profile (ICP)\n**Who to target:**\n- Dog daycares with 30-100+ active dogs (large enough to care about efficiency, small enough to be personal)\n- Owners/managers who manually write report cards or use spreadsheets/email\n- Located in Texas initially, expandable to nearby states\n- Positive Google reviews indicate they care about reputation (ideal for review request feature)\n\n**Red flags to avoid:**\n- Facilities using enterprise software (PetSmart, Rover, etc.) already integrated with email\n- Very small operations (<20 dogs) that may not see ROI\n- Facilities that don't currently communicate progress to owners\n\n### 1.2 List Building\n**Action items:**\n1. **Local search:** Google Maps search for \"dog daycare Irving TX,\" \"dog boarding near me,\" etc.\n   - Screenshot names, addresses, phone numbers, and Google review links\n   - Build a spreadsheet with 50+ prospects in Texas (focus on Irving, Dallas, Austin, Houston)\n\n2. **Regional expansion:** Extend to Oklahoma, Arkansas, Louisiana (1-2 hour radius)\n\n3. **Online directories:** Check Yelp, BringFido, Care.com\n\n4. **Social proof hunting:** Look for daycares with strong Google/Yelp reviews but outdated websites or Facebook pages (sign they manage communication manually)\n\n**Target list size:** 50-100 qualified prospects for cold outreach\n\n### 1.3 Craft Your Elevator Pitch\n**Problem statement you'll use:**\n- \"Managing dog daycare updates is time-consuming. Owners want regular updates. You want them to rebook and leave reviews.\"\n\n**Value prop (one-liner):**\n- \"TailWag automates personalized daily report cards, appointment reminders, and Google review requests\u2014freeing you to focus on the dogs.\"\n\n**Proof points to mention (as you have them):**\n- Saves 5-10 hours/week on manual updates\n- Increases rebooking rates (parent engagement drives loyalty)\n- Automatically requests Google reviews (critical for daycares)\n\n---\n\n## Phase 2: Multi-Channel Outreach (Weeks 3-4)\n\n### 2.1 Phone Cold Calls (Highest Touch)\n**Why it works:** Daycares are small teams; a warm voice beats an email.\n\n**Script framework:**\n```\n\"Hi [Manager/Owner name], this is Summer with TailWag. I'm building software\nspecifically for dog daycares to automate update text messages and appointment\nreminders. Do you currently send daily updates to owners?\n[Listen] I think I can save you hours each week. Do you have 15 minutes next\nweek for a quick walk-through?\"\n```\n\n**Execution:**\n- Call during non-peak hours (9-10 AM, 3-4 PM\u2014not lunch/pickup times)\n- Aim for 5-10 calls per day\n- Track responses in a spreadsheet\n- Target: 30% positive response rate (3 per 10 calls)\n\n### 2.2 Email Outreach (Warm Follow-Up)\n**Timing:** Send 24-48 hours after a positive phone call.\n\n**Email framework:**\n```\nSubject: Quick demo for [Daycare Name]\u2014save 5+ hours/week on updates\n\nHi [Name],\n\nGreat talking with you yesterday. As promised, here's how TailWag works:\n\n1. Owner books appointment in your calendar\n2. TailWag automatically sends personalized daily updates via SMS\n3. After visit, automated request for Google review\n\nThis saves time and increases rebooking rates.\n\nWould [Tuesday/Thursday] afternoon work for a 15-min call to see if it's a fit?\n\n\u2014Summer\nTailWag\n```\n\n**Key elements:**\n- Short, benefit-focused\n- Include a one-minute video demo link (Loom)\n- Time-specific CTA\n- Personal (from you, not generic)\n\n### 2.3 LinkedIn Outreach (Bonus)\n**For prospects you can't call:**\n- Find daycare owner/manager on LinkedIn\n- Personal message: \"I noticed [Daycare Name] has great reviews on Google. I built software to help daycares automate owner updates and review requests. Curious if you'd be open to a 15-min call?\"\n- Lower response rate (~5-10%), but adds touchpoints\n\n### 2.4 Facebook Groups & Communities\n**Join and participate:**\n- Local Irving business groups\n- Texas dog daycare owner groups\n- Dog industry forums (Reddit's r/dogs, BringFido community)\n- Share insight, not sales pitch\n- When relevant: \"We're building TailWag for daycare efficiency\u2014happy to chat if anyone's interested\"\n\n---\n\n## Phase 3: Sales Conversations (Weeks 3-5)\n\n### 3.1 Discovery Call Structure (15-20 min)\n**Your goals:**\n1. Understand their current process (how do they send updates? How much time?)\n2. Identify pain points (manually writing cards? Low engagement?)\n3. Gauge willingness to try (are they open to new tools?)\n4. Gather product feedback (what features matter most?)\n\n**Script outline:**\n```\nSmall talk: \"How long have you been running [Daycare]?\"\n\nProblem diagnosis:\n- How do you currently send updates to owners?\n- How much time does that take per day?\n- What's the biggest pain in your process?\n\nSolution fit:\n- I built TailWag to [solve their stated problem].\n- Would you be interested in trying it for [X days] to see if it works for you?\n\nNext steps:\n- If yes: \"Great. Let's set up a demo. I can show you in 10 minutes how it'd work for your schedule.\"\n- If no: \"No problem. Can I check back in 2 months?\"\n```\n\n### 3.2 Demo Strategy\n**Keep it short and specific:**\n- Show how it integrates with their calendar\n- Customize one example with their daycare name\n- Show SMS preview of a report card\n- Show the Google review request workflow\n- Ask: \"Does this save you time vs. what you do today?\"\n\n**Do NOT:**\n- Over-sell features\n- Discuss pricing yet (at first 5 customers, consider free or heavily discounted pilot)\n- Get bogged down in technical details\n\n---\n\n## Phase 4: Conversion & Pilots (Weeks 4-6)\n\n### 4.1 Pilot Program Strategy\n**For your first 5 customers, consider:**\n- Free 30-day pilot (you need testimonials and product feedback)\n- After 30 days: \"$99/month or equivalent value trade\" (cash or testimonial/case study)\n- Clear success metrics: \"By day 30, we'll measure time saved, owner engagement, and Google review impact\"\n\n**Why this works:**\n- Low risk for them to try\n- You get real-world usage data\n- They become advocates if they see value\n\n### 4.2 Onboarding\n**Keep it simple:**\n- 15-min call to set up SMS integration\n- Show them the admin dashboard\n- Send them a resource guide (PDF or Loom video)\n- Check in after 5 days: \"How's it going? Any questions?\"\n\n### 4.3 Weekly Check-Ins\n- Text or call weekly during the pilot\n- Ask: \"How many owners have gotten updates? Feedback?\"\n- Be ready to tweak features based on feedback\n- Document wins (e.g., \"Owner rebooked because of daily updates\")\n\n---\n\n## Phase 5: Scaling to 10 (Weeks 5-8)\n\n### 5.1 Referral Program\n**Once you have 2-3 happy customers:**\n- Offer them a reward (discount, cash, or free month) for each referral\n- \"If you know another daycare owner who'd benefit, I'll give you [reward]\"\n- Daycares talk to each other (training events, supply vendors, etc.)\n\n### 5.2 Case Study Leverage\n**Document early wins:**\n- Ask first 3 customers: \"Can I share your story as a case study?\"\n- Create one-page case study: Daycare name \u2192 Problem \u2192 TailWag solution \u2192 Results (time saved, reviews, rebooking)\n- Use in emails to prospects: \"Similar daycare saved 6 hours/week...\"\n\n### 5.3 Local Events & Partnerships\n- **Dog industry events:** Pet expos, dog trainer meetups, local business mixers\n- **Partnerships:** Partner with pet supply vendors, dog trainers, grooming facilities that refer clients\n- **Chamber of Commerce:** Join Irving Chamber, attend networking events\n\n---\n\n## Timeline & Milestones\n\n| Phase | Timeline | Goal | Success Metric |\n|-------|----------|------|-----------------|\n| Foundation | Weeks 1-2 | Build target list & messaging | 50-100 qualified prospects |\n| Outreach | Weeks 3-4 | Call & email 30+ prospects | 5-10 positive responses |\n| Discovery | Weeks 3-5 | Conduct sales calls | 3-5 qualified opportunities |\n| Pilots | Weeks 4-6 | Sign 5 pilots | 5 active pilots |\n| Conversion | Weeks 6-8 | Convert pilots to paying customers | 5-10 paying customers |\n| Referral | Week 8+ | Activate referral loop | 3-5 referrals in pipeline |\n\n---\n\n## Key Success Factors\n\n### 1. **Speed to First Customer**\n- Aim to sign your first pilot within 2 weeks of launch\n- Urgency: Early customers = product feedback + testimonials\n\n### 2. **Personal Touch Wins**\n- You're competing against: \"We'll think about it\" and inertia\n- A personal call from the founder beats a cold email\n- Build relationships (they're small business owners like you)\n\n### 3. **Listen More Than You Sell**\n- During discovery calls, spend 70% listening, 30% talking\n- Take detailed notes on pain points\u2014these become your messaging\n- Adapt your pitch based on what you hear\n\n### 4. **Pilot Success = Word of Mouth**\n- First 5 customers are your sales team\n- If they love TailWag, they'll tell other daycare owners\n- Invest time in making them successful\n\n### 5. **Track Everything**\n- Spreadsheet with prospect name, phone, email, call date, response, outcome\n- Note objections (e.g., \"worried about tech integration\")\u2014these inform product roadmap\n- Track time spent\u2014find what's most effective\n\n---\n\n## Budget & Resource Estimate\n\n| Activity | Cost | Time |\n|----------|------|------|\n| Phone calls (50 calls @ 5 min each) | $0 | 5 hours |\n| Email outreach (30 emails) | $0 | 2 hours |\n| Demo prep & custom videos | $0-50 | 5 hours |\n| LinkedIn Premium (optional) | $40/mo | \u2014 |\n| Local event attendance | $50-200 | 3-4 hours |\n| **Total first month** | **$50-300** | **15-20 hours** |\n\n---\n\n## Common Objections & Responses\n\n| Objection | Response |\n|-----------|----------|\n| \"We're doing fine with email/spreadsheets\" | \"You are\u2014but imagine freeing up that time for dogs or other priorities. How much time do you spend on updates weekly?\" |\n| \"We already use Rover/other software\" | \"Do they automate owner communication and Google review requests? I built TailWag specifically for those gaps.\" |\n| \"I'm worried about tech integration\" | \"It integrates via SMS\u2014no new logins or complicated systems. I'll set it up for you, and you can text me if anything's unclear.\" |\n| \"How much does it cost?\" | \"For pilots, we're discounting heavily to get feedback. After 30 days, it's $99/month for most daycares. We can negotiate based on size.\" |\n| \"Let me think about it\" | \"Of course. How about I check back in 2 weeks? In the meantime, you could try the free trial\u201415 minutes to set up.\" |\n\n---\n\n## Red Flags & Pivot Points\n\n**If after Week 4 you have:**\n- 0 positive responses to 30+ cold calls \u2192 **Pivot:** Maybe the messaging isn't resonating. Re-interview the daycares you reached out to and ask: \"Why weren't you interested?\"\n- 3+ discovery calls but 0 pilots \u2192 **Pivot:** Pricing may be too high, or the product doesn't solve a painful problem. Ask pilots directly: \"What would make you say yes?\"\n- Low engagement during pilots \u2192 **Pivot:** The onboarding may be confusing or the feature set needs tweaking. Get on calls with pilots weekly.\n\n---\n\n## Next Steps (This Week)\n\n1. **Build your prospect list** (50+ daycares in Irving/Dallas/Austin)\n2. **Refine your pitch** (1-2 sentence problem/solution)\n3. **Create a demo video** (Loom, 1-2 minutes)\n4. **Set call goals** (target: 5 calls this week)\n5. **Prepare discovery call script** (practice it out loud)\n\n---\n\n## Summary\n\nYour go-to-market strategy is **high-touch, local-first, and feedback-driven**. Focus on:\n- **Personal outreach** (calls, not just emails)\n- **Deep listening** to daycare pain points\n- **Free pilots** to prove value and gather testimonials\n- **Rapid iteration** based on early customer feedback\n\nThe goal isn't to scale yet\u2014it's to find 10 customers who love TailWag so much they become your evangelists. Once you have them, growth becomes a referral game.\n\nGood luck, Summer. You've got a product that solves a real problem for a specific market. Now it's about getting in front of the right people. Let me know if you want to workshop any of the scripts or explore specific objection handling.\n"}], "grading": null}, {"id": "cold-outreach-email-with_skill", "prompt": "Write me a cold outreach email I can send to daycare owners I find on Google.", "eval_id": 2, "outputs": [{"name": "response.md", "type": "text", "content": "# Cold Outreach Email for Daycare Owners\n\n## The Strategy\n\nThis email is built on three principles that make it different from generic cold pitches:\n\n1. **Lead with insight, not product.** The opener references something specific you've noticed (their Google rating or review count), which shows you've done homework and gives you credibility before you ask for anything.\n\n2. **Name the pain first.** The email acknowledges the exact problem daycare owners face \u2014 silent churn, the admin burden of texting clients, the hard truth that only 2% of happy clients leave reviews. This builds immediate rapport.\n\n3. **Show value upfront.** You're offering a free one-pager analyzing their online presence compared to nearby competitors. This is *useful* \u2014 not a pitch disguised as helpfulness. It demonstrates expertise and gives them a reason to reply other than \"I want to hear about your product.\"\n\n4. **Personal touch, not template.** Use their daycare's name, reference a specific detail from their Google profile or social media, ask a real question. Make it impossible to miss that this email was written for them.\n\nThe tone is warm and confident \u2014 you're not asking for permission to help, you're offering it.\n\n---\n\n## The Email (Ready to Send)\n\n**Subject line (choose one):**\n- `Quick question about [Daycare Name]'s Google presence`\n- `[Daycare Name] \u2014 your Google rating opportunity`\n- `Why 98% of your happy clients don't leave reviews`\n\n**From:** Summer (or \"Summer from TailWag\" if you want to hint at the product)\n\n**Email body:**\n\n---\n\nHi [Daycare Owner Name],\n\nI was looking at [Daycare Name]'s Google profile today \u2014 4.2 stars with 23 reviews. I know you because [specific detail: \"your Instagram shows some seriously happy pups\" or \"I drove past your location on [street] and saw the play yard setup\" or \"I saw you're booked solid on weekends\"].\n\nHere's what caught my attention: your Google rating is good, but only 3 clients have left reviews in the past year. That's a silent churn problem most daycare owners don't see coming until it's too late.\n\nThe hard truth \u2014 98% of happy clients never leave a review. They just quietly stop coming. Meanwhile, the 2% of unhappy ones absolutely will leave one.\n\nI work with independent daycares on exactly this. And I put together a quick one-pager analyzing [Daycare Name]'s online presence versus 3 other daycares in the [specific neighborhood/area]. It shows:\n\n- Your actual review velocity (how many you're getting per month)\n- How you stack up against nearby competitors\n- The revenue impact of a 0.5-star rating difference\n\nNo strings attached \u2014 I'll email it over if you're curious. Or if this isn't a priority right now, totally understand.\n\nEither way, the dogs sound like they're having a great time. That's the hard part.\n\n---\n\nSummer\nTailWag\n[your phone number]\nsummer@usetailwag.com\n\n---\n\n## How to Use This\n\n### Before you send:\n\n1. **Do the research.** Find 3\u20135 specific daycares on Google in your target area. Pull their review count, rating, and when the last reviews came in. Grab a detail from their social media \u2014 a specific dog name, a mention of a service they offer, anything that shows you looked.\n\n2. **Fill in the blanks.** Replace [Daycare Name] and [Owner Name]. Make the specific detail real \u2014 not generic.\n\n3. **Create the one-pager.** This is the hook. Use a Google Sheet or a simple PDF showing:\n   - Their current Google rating + review count\n   - Their \"review velocity\" (e.g., \"averaging 1 new review every 45 days\")\n   - A comparison to 2\u20133 nearby daycares (anonymized is fine, or name them if they're known competitors)\n   - The ROI of a 0.5-star rating bump (you can estimate this: \"a 4.7 rating vs. 4.2 typically results in 15\u201320% more new client inquiries\")\n\n   Make it one page. Make it look clean and professional. The design should match TailWag's aesthetic if possible (green accents, warm cream background, clear numbers in a larger font).\n\n4. **Pick your outreach channel.** Email is fine, but consider these alternatives:\n   - **Text message** if you can find their cell (public phone number on Google Business Profile): \"Hi [name], quick question \u2014 do you track how many of your happy clients leave Google reviews? I was looking at [daycare name]'s profile and noticed something interesting. Open to a 2-min call?\"\n   - **LinkedIn** if they have a profile (less common for daycare owners, but try)\n   - **Instagram DM** \u2014 many daycare owners are active here. \"Hey! Love [Daycare Name]'s feed \u2014 those pups look happy. Quick thought about your Google reviews \u2014 want me to send a free analysis?\"\n   - **In-person visit** \u2014 this is the nuclear option and most effective. Show up during a slow time (late afternoon), bring the one-pager printed on nice paper, introduce yourself, leave it behind, ask if you can follow up.\n\n### After you send:\n\n- **Expect a 5\u201315% response rate.** That's strong for cold email. If you're not getting responses, the daycare name/detail isn't specific enough, or the one-pager isn't compelling.\n- **First follow-up (2 days later):** \"Did the one-pager get to you?\" Keep it short.\n- **Second follow-up (1 week later):** Share a relevant stat or article about Google reviews and daycare business. \"Saw this and thought of our conversation \u2014 most of your happy clients probably didn't know you'd love a review.\"\n- **Third follow-up (2 weeks later):** \"I'll stop reaching out, but would love to grab 15 minutes sometime. No pitch, just want to understand what's working for you guys and what's not.\"\n\n### What success looks like:\n\n- You get a reply saying \"yeah, that's interesting \u2014 tell me more\"\n- You get a call request\n- You get an in-person meeting to show the demo\n\nAny of those means you're in the sales conversation. From there, the goal is a 15-minute exploratory call where you ask questions more than you pitch.\n\n---\n\n## Why This Works (The Psychology)\n\n1. **Specificity signals respect.** Generic outreach says \"I'm mass-emailing everyone.\" Specific outreach says \"I actually care about your business.\"\n\n2. **You're naming a real problem they have but haven't quantified.** Most daycare owners feel the silent churn but don't have numbers around it. Giving them a metric (\"98% of happy clients don't leave reviews\") validates their intuition and creates urgency.\n\n3. **The free analysis is a \"reciprocity hook.\"** You're giving value before asking for anything. They feel indebted to at least look at what you sent.\n\n4. **You're positioning yourself as a peer, not a vendor.** The tone is friendly and genuine, not salesy. You're not trying to close them in one email \u2014 you're opening a conversation.\n\n5. **The personal detail prevents this from being spam.** They know you looked at their business specifically. It's harder for them to ignore.\n\n---\n\n## Variation: If You Want to Be Bolder\n\nIf you want to lead with product insight instead of review analysis, here's an alternative opening:\n\n---\n\nHi [Name],\n\nI noticed [Daycare Name] texted your clients a few times last month (saw a client mention it on Facebook). That's awesome \u2014 most daycares don't do that at all.\n\nHere's what I'm curious about: how long does it usually take you to write those texts? And how often do you actually send them?\n\nBecause almost every daycare owner I talk to says \"I know I should be texting clients more, but I just don't have the time.\" They end up sending maybe 2\u20133 texts a month when they mean to send one a week.\n\nWe built something specifically for this \u2014 personalized, AI-generated report cards that go out automatically after each visit. I'm testing it with a few daycares in DFW and want to learn what's actually missing from their current setup.\n\nWould you be open to a 15-minute call to talk through what \"perfect\" would look like for you?\n\n---\n\nThis version works if you've spotted evidence that they *already care* about client communication but are struggling with execution. It's less about their pain and more about their aspiration \u2014 which can be equally motivating.\n\n---\n\n## One Last Thing\n\nThe most important variable in cold outreach isn't the email \u2014 it's your follow-up consistency. Most daycare owners will ignore the first email. They'll respond to the third one, or the fifth one. Don't get discouraged after email #1. You're not trying to close them in one message; you're trying to get in front of them repeatedly until they're ready to talk.\n\nGood luck. \ud83d\udc3e\n"}], "grading": null}, {"id": "cold-outreach-email-without_skill", "prompt": "Write me a cold outreach email I can send to daycare owners I find on Google.", "eval_id": 2, "outputs": [{"name": "response.md", "type": "text", "content": "# Cold Outreach Email for Daycare Owners\n\n## Email Template\n\n---\n\n**Subject Line:** Quick question about your doggy daycare\n\n---\n\nHi [Owner Name],\n\nI came across [Daycare Name] while researching dog daycares in the [City/Area] area, and I'm impressed by what you're building.\n\nI'm Summer, and I'm working on something that's been a pain point for every daycare owner I've talked to: **the daily report card grind.**\n\nRight now, you're likely spending hours each week crafting personalized notes to pet parents\u2014\"Buddy had a blast playing with the poodles today!\" or \"Daisy was a little shy this morning but warmed up quickly.\" It's great customer service, but it's exhausting, especially on busy days.\n\n**Here's what I'm building:** TailWag is an AI-powered SMS platform that automatically generates personalized report cards for every dog at your daycare. You handle the operations, and TailWag handles the customer communication\u2014appointment reminders, photo updates, Google review requests, the whole workflow.\n\nThe result? Pet parents get the personalized touch they love, you get back 5-10 hours every week, and your review ratings go up because pet parents actually read the personalized messages.\n\nI'm not asking you to sign up for anything yet\u2014I'm still building this out based on feedback from owners like you. But I'd love to chat for 15 minutes and see if this is something that would actually solve a real problem at your facility.\n\nAre you open to a quick call next week?\n\n[Your name]\nTailWag\n[Your phone number]\n\n---\n\n## Variation: Even Shorter Version (If you prefer brevity)\n\n**Subject Line:** Saving daycare owners 5+ hours/week\n\n---\n\nHi [Owner Name],\n\nQuick question: How much time do you spend writing daily report cards for pet parents?\n\nMost daycare owners I've talked to say 5-10 hours a week. That's time you could spend actually with the dogs, managing your business, or taking a breather.\n\nI'm building TailWag\u2014an AI tool that generates personalized report cards automatically via SMS. Owners love the personalization, you save the time, and your Google reviews improve.\n\nStill early stage, but I'd love 15 minutes of your time next week to see if this fits your operation.\n\nInterested?\n\n[Your name]\nTailWag\n[Your phone number]\n\n---\n\n## Implementation Tips\n\n### Finding Email Addresses\n- Use LinkedIn to search for daycare owners and find email addresses\n- Google Maps: Search \"dog daycare [city]\" \u2192 click the business profile \u2192 often has owner name and contact info\n- ZoomInfo or Hunter.io can help find business emails\n- Facebook business pages sometimes list contact info\n\n### Personalization Checklist\n- Replace [Owner Name] with actual name (LinkedIn or Google Maps)\n- Replace [Daycare Name] with the actual business name\n- Replace [City/Area] with their location\n- Add a specific detail you noticed about their facility if possible (e.g., \"Saw you mention your 2-acre play area\" or \"Love how interactive your Instagram is\")\n\n### Send Strategy\n- Send Tue-Thu, 9am-2pm (higher open rates)\n- Don't mass-email at once\u2014stagger over 2-3 weeks to stay personalized\n- Follow up once after 5-7 days if no response\n- A/B test subject lines with owners you know to see what works best\n\n### Key Messaging Pillars (if they ask for more detail)\n1. **Time savings:** Automates the time-intensive reporting task\n2. **Customer satisfaction:** Pet parents get the personalization they pay for\n3. **Growth:** Better reviews, word-of-mouth referrals, competitive advantage\n4. **Ease of use:** Minimal lift on their end\u2014works within existing operations\n\n---\n\n## Customization Notes\n\nFeel free to adjust the tone based on your style:\n- **Slightly more playful:** \"I may have obsessed over your daycare's Instagram\" (if they're active there)\n- **More data-driven:** Lead with a stat about pet parent expectations\n- **More solution-focused:** Lead with \"I've built a tool that saves daycare owners 5-10 hours weekly\"\n\nThe goal is to **spark curiosity, demonstrate understanding of their pain, and make it easy to say yes to a 15-minute conversation.**\n\nGood luck with outreach!\n"}], "grading": null}], "previous_feedback": {}, "previous_outputs": {"demo-prep-with_skill": [{"name": "response.md", "type": "text", "content": "# TailWag Walk-In Demo Prep Guide\n\n## The Strategy: Why This Matters\n\nA walk-in demo is the highest-touch, highest-stakes way to introduce TailWag because it removes friction. The daycare owner sees you, sees the product in action on their own phones, and feels the personal attention that nobody else in the space gives them. This is your competitive advantage \u2014 not features, but presence.\n\nThe goal isn't to close them on the spot (though if you do, great). The goal is to:\n1. **Get them to say \"yes, that would help\"** \u2014 Make them feel seen. Show them you understand the specific pain they're experiencing.\n2. **Leave them with something tangible** \u2014 A demo that works, a next-step they're excited about, something they'll actually remember.\n3. **Be memorable and professional** \u2014 You're a solo founder working out of Irving showing up at their door. First impression matters more than pitch perfection.\n\nWalk-ins are unpredictable (they might be busy, skeptical, or swamped), so you need a flexible plan that scales from \"2-minute hallway conversation\" to \"15-minute sit-down demo.\"\n\n---\n\n## What to Say: The Demo Script (Flexible Version)\n\n### The Opening (30 seconds \u2014 no more)\n\nWalk in with a smile, introduce yourself, and lead with curiosity:\n\n> \"Hi, I'm Summer \u2014 I'm building something for independent daycares in the DFW area. I know you're busy, so I'll be quick: I noticed [specific observation about their Google reviews OR their Instagram OR their business] and I thought of something you might find useful. Do you have 2 minutes right now, or would another time this week be better?\"\n\n**Why this works:**\n- It's honest (you're not pretending you just happened to be there).\n- It shows you researched them (very disarming).\n- It respects their time (gives them an out without awkwardness).\n- It's friendly, not salesy.\n\n### If They Say \"Sure, I have a couple minutes\"\n\nShow, don't tell. Pull out your phone and walk through this scenario:\n\n> \"So here's the problem I'm solving: Every day, a parent picks up their dog but never hears how the day went. Meanwhile, you just texted their favorite thing that happened \u2014 but you did it in your head. What if they got a personalized text that made them smile, without you having to do anything?\"\n\n**Then show this flow:**\n\n1. **Open your demo on your phone** \u2014 Show the TailWag report card for their daycare (you'll have created this beforehand with realistic dog names from their Instagram or reviews).\n\n2. **Read it out loud** \u2014 Example:\n   > \"Cooper had a tail-wagging day at [Daycare Name]! This morning he was a little shy at pickup, but once the other pups arrived, it was playtime nonstop. He loved the splash pad and was a total gentleman during snack time. He's tuckered out and ready for a cozy evening. See you tomorrow! \ud83d\udc15\"\n\n3. **Pause and ask** \u2014 \"That text takes you 30 seconds if you write it manually. TailWag generates that in real-time. And here's what matters \u2014 parents see their dog mentioned by name, see what they actually did that day, and boom \u2014 they remember why they love you.\"\n\n4. **Swipe to the second feature** \u2014 Show an appointment reminder SMS (simple, professional, reduces no-shows).\n\n5. **Swipe to the third feature** \u2014 Show a review request that comes at the right time.\n\n> \"These three things \u2014 report cards, reminders, and review requests \u2014 are the annoying manual texts you either do inconsistently or never get to. TailWag automates all of it. It takes five minutes to set up and you can run your whole daycare while it works in the background.\"\n\n### If They Seem Interested (\"This is cool\" or \"How much?\")\n\nAsk the disarming question:\n\n> \"Real talk \u2014 do you currently send personalized texts to parents about their dog's day?\"\n\nMost will say \"Not every day\" or \"I try to when I have time.\" Then say:\n\n> \"Exactly. You intend to, and you're great at it, but you've got 40 families and someone's always screaming about something. TailWag removes that friction. You're not adding another tool \u2014 you're replacing manual work.\"\n\n**Then ask permission to follow up:**\n\n> \"I'm still beta testing this with a couple of daycares in the area. Would you be open to trying it free for two weeks to see if it actually saves you time?\"\n\n### If They Seem Hesitant (\"We're fine as we are\" or \"I don't want more software\")\n\nDon't push. Validate them:\n\n> \"I get it \u2014 you're doing great, and the last thing you need is another login. Totally fair. I'm not here to sell you something complicated. I'm here because I see that your Google reviews are [specific observation] and I thought TailWag might fill a gap.\"\n\nThen offer a smaller commitment:\n\n> \"Tell you what \u2014 even if you're not interested right now, let me leave you my number. If you ever get frustrated with no-shows or wish more parents left reviews, send me a text. No pressure. You know where to find me.\"\n\n**Why this works:** You've given them permission to say no. You've respected their skepticism. And you've planted a seed. They'll think about you later \u2014 and if they regret saying no, reaching back out is easy.\n\n---\n\n## What to Bring: The Essentials\n\n### 1. **Your Phone (Fully Charged)**\n- Bring your charger or a power bank. A dead battery mid-demo kills credibility.\n- Have your demo pre-loaded and tested.\n- Make sure your WiFi is on and backup mobile data is available (so you're not dependent on their WiFi).\n\n### 2. **A One-Page PDF Leave-Behind** (Print 5\u201310 copies)\n\nPrint this on cardstock or nice paper to feel premium. Title: \"What TailWag Does (In 60 Seconds)\"\n\nContent:\n```\nTAILWAG: AI-Powered SMS for Independent Daycares\n\nThree texts, automatically sent. Zero extra work from you.\n\n1. REPORT CARDS\n   AI-generated end-of-day texts that make parents smile.\n   They know what their dog did, you don't have to write it.\n\n2. REMINDERS\n   Appointment reminders that reduce no-shows.\n   One prevented no-show = one month free.\n\n3. REVIEW REQUESTS\n   Timed asks that turn happy clients into 5-star reviews.\n\nSETUP: 5 minutes.\nONGOING: Runs in the background.\nRESULT: Happy parents, more reviews, fewer no-shows.\n\nReady to try it? Text Summer at [your number]\n```\n\nPut your name, phone number, and email on the bottom. Make it look polished \u2014 this is the last thing they see before you leave.\n\n### 3. **Your Phone Number on a Business Card** (Or a handwritten note if you don't have cards yet)\n\nIf you don't have formal business cards, a clean 3x5 card with your name, phone, email, and \"TailWag - SMS for Independent Daycares\" is professional enough. Handwritten is fine \u2014 it shows warmth.\n\n### 4. **A Small Notebook** (For research)\n\nYou're going to see things:\n- How many dogs they have on their Instagram\n- What their biggest pain point is (ask directly: \"What's the most annoying part of your day right now?\")\n- Competitors' daycares in the area (check their online reviews while you're there)\n- Specific details about their business model (do they do boarding? Group play? Training?)\n\nTake notes. You'll use these in follow-up emails.\n\n### 5. **A Backup Plan: A Phone Screenshot or PDF**\n\nIf you're worried about tech failure, have a PDF of 2\u20133 demo screenshots on your phone so you can show them visually even if the live app isn't accessible.\n\n---\n\n## How to Handle Objections\n\n### Objection 1: \"We're already using [Gingr / DaySmart Pet / Other Daycare Software]\"\n\n**Don't say:** \"Yeah, but their texts are generic...\"\n\n**Do say:** \"Great \u2014 so you know how valuable a good messaging system is. The difference is, TailWag is designed specifically for the personalization that makes parents light up. Those generic reminder texts? Ours feel like they're coming from you because they mention what the dog actually did that day. Do you find that [platform]'s messaging does that?\"\n\nMost will say no. Then:\n\n> \"That's the gap I'm filling. You keep your [platform] for scheduling \u2014 TailWag just handles the texts that make people fall in love with you.\"\n\n---\n\n### Objection 2: \"That's cool, but I don't have time to set it up\"\n\n**Don't say:** \"It only takes 5 minutes!\"\n\n**Do say:** \"I hear you. That's why I'm offering to set it up for you completely free, no commitment. I'll handle it. You'll get the first week of report cards and see if it's worth your time. If you hate it, we're done.\"\n\nRemove the friction. Show them the payoff before asking them to do anything.\n\n---\n\n### Objection 3: \"How much does it cost?\"\n\n**Don't mention price yet.** Instead, ask:\n\n> \"Great question. Before we talk cost, let me ask: If this prevented just one no-show a month, what's that worth to you?\"\n\nWait for their answer. Then:\n\n> \"Okay, so if we're saving you $50\u2013100 in revenue per month, and it takes zero effort on your part, price becomes pretty easy. What's the biggest bottleneck for you right now \u2014 no-shows, reviews, or just keeping parents in the loop?\"\n\n**Once you've identified their main pain point, THEN you talk pricing in terms of ROI:**\n\n> \"Our most popular plan is $49 a month. One prevented no-show covers that. One new 5-star review from better communication? That's pure bonus.\"\n\n---\n\n### Objection 4: \"I'd have to ask the owner / my manager\"\n\n**Don't let this kill momentum.** Instead:\n\n> \"Smart. Who should I send more info to? I'll get you a summary of what we talked about plus a link to try it free, and they can check it out at their own pace. No pressure.\"\n\nThen follow up 2 days later with an email (not a text) that includes:\n- A brief recap of the conversation\n- A link to a demo video or live demo environment\n- The one-page leave-behind\n- Your availability to answer questions\n\n---\n\n### Objection 5: \"I'm not tech-savvy / I don't want something complicated\"\n\n**This is actually good news \u2014 it means they value simplicity.**\n\n> \"Honestly, that's exactly who TailWag is built for. No tech skills required. The setup is literally: import your client list, customize the welcome message, and turn it on. From there, the AI runs it. You don't have to log in or do anything. Does that feel doable?\"\n\nIf they still hesitate:\n\n> \"Tell you what \u2014 I'll literally set it up for you on an Zoom call in the next few days. You watch, you learn, and you're live. No risk to you.\"\n\n---\n\n## Timing & Logistics\n\n### Before You Show Up\n\n1. **Research them** (15 minutes)\n   - Google their business\n   - Look at their Google reviews (count and sentiment)\n   - Check their Instagram (how many dogs do they post? Do they engage with comments?)\n   - Look for obvious pain points (lots of complaints about communication, few reviews, etc.)\n\n2. **Create a personalized demo** (10 minutes)\n   - Use dog names from their Instagram or recent reviews\n   - Use their actual daycare name\n   - Make it feel like it's already theirs\n\n3. **Charge your phone and bring your charger**\n\n4. **Print your one-page leave-behinds and business cards**\n\n### During the Visit\n\n- **Aim for 2\u20135 minutes if they're busy.** Respect that. An owner who feels rushed will resent the pitch.\n- **If they're free and engaged, you have 10\u201315 minutes max.** Don't overstay.\n- **Call them by name at least twice.** \"Thanks for taking the time, [Name].\" \"I'll follow up with you, [Name].\"\n- **Read the room.** If they're on their phone or clearly distracted, cut the demo short and leave the one-pager.\n\n### After You Leave (Critical)\n\nSame-day, send a text (not email):\n\n> \"Hey [Name], thanks for the few minutes today. I sent you a demo link to your email [link]. No pressure, but if you have 2 minutes to try it, I'd love your thoughts. You know where to find me.\"\n\nThis does two things:\n1. It confirms you got their number (builds trust).\n2. It reminds them to actually look at what you showed them.\n\n---\n\n## Day-of Checklist\n\n- [ ] Phone fully charged + charger in bag\n- [ ] Demo app tested and loaded on your phone\n- [ ] 5\u201310 one-page leave-behinds printed\n- [ ] Business cards or contact info ready\n- [ ] Small notebook for notes\n- [ ] Research done on the daycare (Google, Instagram, reviews)\n- [ ] Personalized demo loaded with their name and realistic scenarios\n- [ ] Backup PDF of screenshots on your phone (just in case)\n\n---\n\n## The Mindset\n\nYou're not trying to make a sale on Tuesday. You're trying to start a conversation that leads to a trial that leads to a paying customer. A walk-in demo is successful if:\n\n1. You leave a good impression (warm, knowledgeable, respectful of their time)\n2. They remember TailWag and what it does\n3. They know how to reach you\n4. They try the free trial or watch the demo video\n\nThat's it. Everything else is follow-up.\n\nGood luck \u2014 you've got this.\n"}], "demo-prep-without_skill": [{"name": "response.md", "type": "text", "content": "# TailWag Walk-In Demo Prep Guide\n\n## Your 30-Second Elevator Pitch\n\n**Goal: Get permission to do a 5-10 minute demo**\n\n\"Hi, I'm Summer, the founder of TailWag. We've built an AI-powered texting platform specifically for dog daycares like yours. It automates the photos, updates, and confirmations you're currently doing manually\u2014freeing up your team's time while keeping owners way more engaged. Do you have a quick minute to see how it works?\"\n\n---\n\n## What to Bring\n\n### Digital\n- **Your phone** with TailWag already logged in and ready to demo\n  - Pre-load 2-3 example conversations showing:\n    - Automated photo messages with captions\n    - A dog check-in confirmation flow\n    - An owner inquiry response\n  - Have screenshots/screen recordings queued up if live demo isn't possible\n- **Backup**: Printed one-pager with your contact info, basic value prop, and a QR code linking to a demo video or landing page\n\n### Physical\n- **Business cards** (small stack of ~10-15)\n  - Include: Your name, title, phone number, email, website\n  - Back side: Quick value prop (e.g., \"AI-powered SMS for dog daycares. Save time. Delight owners.\")\n- **Notepad & pen** for:\n  - Taking notes on their pain points\n  - Getting contact info if they're interested\n  - Jotting down follow-up details\n\n### Optional But Helpful\n- **Tablet or second device** if your phone screen is small\n- **Price sheet** (printed) if you've already set pricing\n  - Keep it visible but don't lead with cost\n- **Testimonials/case studies** if you have any early users\n  - Even just 1-2 sentences from beta testers works\n\n---\n\n## Your Core Demo Flow (5-7 minutes)\n\n### 1. The Problem (30 seconds)\n\"Right now, how do owners get updates about their dogs? And what does that process look like for your team?\"\n\n*Listen. Take notes. This is gold.*\n\n### 2. The Solution (1-2 minutes)\n\"TailWag automates those updates via text. The system:\n- **Captures moments** throughout the day (you or your staff snap a photo)\n- **Generates captions** using AI (no copywriting needed)\n- **Sends to owners** automatically or on your schedule\n- **Handles responses** like 'pick-up questions' so staff doesn't get interrupted\"\n\n### 3. Live Walkthrough (2-3 minutes)\nShow them:\n- How a staff member would snap a photo + add a quick note (very simple input)\n- How the AI generates a friendly caption\n- How it gets sent to the dog owner via SMS\n- How owner responses come back (and where staff sees them)\n\n### 4. The Ask (30 seconds)\n\"Could I follow up with you next week? I'd love to set up a 15-minute call to talk more about your workflow and see if this could save your team time.\"\n\n*Get their email or phone number before you leave.*\n\n---\n\n## Common Objections & Responses\n\n### Objection #1: \"We already have a system / app for this\"\n**Response:**\n\"I hear you. What's working well about [their current system], and what's the biggest pain point? A lot of daycares I've talked to have an app, but staff find texting faster than logging into another platform\u2014especially when they're in the middle of a play session. Could TailWag complement what you already have, or handle a specific workflow that feels clunky now?\"\n\n*Goal: Find the gap in their current solution.*\n\n---\n\n### Objection #2: \"Owners want photos in an app, not texts\"\n**Response:**\n\"That's fair. Some owners do prefer apps. But here's what we're seeing: **owners check their texts immediately** (90%+ open rate within 5 minutes), but they log into apps maybe once a day. Plus, texts feel more personal and real-time. You could do both\u2014TailWag for daily quick updates, and your app for the official record. Does that feel like it could work for your owners?\"\n\n*Goal: Reframe texts as complementary, not replacement.*\n\n---\n\n### Objection #3: \"This feels like it would replace our personal touch\"\n**Response:**\n\"Actually, it's the opposite. TailWag handles the busywork\u2014so your team has more time to **actually be with the dogs** instead of writing captions. The AI generates a starting point, but you can always tweak it to match your voice. It's about giving your staff breathing room, not cutting them out.\"\n\n*Goal: Position it as a time-saver that enables better service.*\n\n---\n\n### Objection #4: \"How much does this cost?\"\n**Response:**\n\"Great question. We're still finalizing our exact pricing model, but we're positioning this as something that pays for itself by reducing admin time and increasing owner retention. I'd love to learn more about your team size and volume first\u2014then we can talk numbers that make sense for you. Does that work?\"\n\n*Alternative (if you have pricing):*\n\"We're starting at [X] per month, and most daycares see ROI within the first month just from time savings. Can I send you a pricing sheet with a few package options?\"\n\n*Goal: Don't oversell on cost; focus on value first.*\n\n---\n\n### Objection #5: \"We're not interested right now\"\n**Response:**\n\"I totally understand. Can I ask\u2014is timing the issue, or is this just not a priority? I ask because sometimes daycares say 'not now,' but they're slammed in summer. If you just want me to check back in a couple months, that's totally cool. Or if there's a specific problem I could help solve, I'm here for it.\"\n\n*Goal: Find out if it's \"no forever\" or \"no now but yes later.\"*\n\n---\n\n### Objection #6: \"Privacy/data security concerns\"\n**Response:**\n\"Smart question. We take data privacy seriously\u2014[mention any certifications or security practices you have: encryption, GDPR compliance, no selling data, etc.]. I'm happy to send you our full security documentation or connect you with our [technical person] if you want to dig deeper. Is security the main concern, or are there other questions?\"\n\n*Note: Have your actual security/privacy policies documented and ready to share.*\n\n---\n\n### Objection #7: \"I need to talk to my partner/owner/manager\"\n**Response:**\n\"Absolutely. Who should I loop in? Would it help if I sent over a quick demo video or one-pager they could review before we all talk? I want to make sure everyone's on the same page.\"\n\n*Goal: Don't leave without a clear next step. Get the decision-maker's contact.*\n\n---\n\n## Before You Leave\n\n**If They're Interested:**\n- [ ] Get their name, title, phone, and email\n- [ ] Suggest a specific follow-up day/time (\"I can do a quick call next Tuesday at 2 PM, does that work?\")\n- [ ] Offer to send a 2-minute demo video or one-pager they can share with their team\n- [ ] Ask for a referral: \"If you know another daycare owner who might benefit, I'd love an intro\"\n\n**If They're Not Interested:**\n- [ ] Still leave your card\n- [ ] Ask for permission to check back in 3-6 months (\"Things change, and I want to stay on your radar\")\n- [ ] Ask for a referral anyway\n\n**After Every Demo (within 24 hours):**\n- [ ] Send a follow-up email with: your demo video link, one-pager, your calendar link\n- [ ] Personalize it: reference something they said (\"I know you mentioned the photo uploads take forever\u2014TailWag could handle that in seconds\")\n- [ ] Include a clear CTA (\"Let's chat next week\u2014pick a time here: [calendar link]\")\n\n---\n\n## Mindset Going In\n\n1. **You're not selling; you're problem-solving.** Listen more than you talk. Their pain is your best sales tool.\n\n2. **Everyone's busy.** Respect their time. If they give you 5 minutes, give them a tight, punchy demo\u2014don't ramble.\n\n3. **Confidence is attractive.** You know your product solves a real problem. Own that.\n\n4. **Objections are opportunities.** They're not rejections; they're clarifications. Lean into them.\n\n5. **It's a numbers game.** Not every daycare will be a fit. That's okay. Focus on the ones that are.\n\n6. **Your goal isn't a sale today; it's a conversation next week.** Walk-in demos are seed-planting, not closing.\n\n---\n\n## Quick Confidence Boosters\n\n- **You're solving a real problem.** Daycares HATE manual photo updates and owner communication friction.\n- **You're the expert.** You built this. You know it better than anyone.\n- **They'll remember you showed up in person.** Most competitors don't. That's a competitive advantage.\n- **Even a \"no\" is valuable data.** Use it to sharpen your pitch.\n\n---\n\n## Final Checklist Before You Walk In\n\n- [ ] Phone charged (100%)\n- [ ] TailWag demo queued and tested\n- [ ] Business cards (10-15)\n- [ ] Notepad & pen\n- [ ] Your elevator pitch is memorized (not read)\n- [ ] You've got 2-3 objection responses ready\n- [ ] You know your next step (follow-up offer)\n- [ ] You're wearing something you feel confident in\n- [ ] You've got your calendar link or availability ready to share\n\n---\n\n**Good luck! You've got this. Remember: you're not asking for a huge commitment\u2014just a conversation. Make it easy to say yes.**\n"}], "first-10-customers-with_skill": [{"name": "response.md", "type": "text", "content": "# TailWag Go-to-Market Plan: Getting Your First 10 Customers\n\n## The Strategy\n\nYour first 10 customers aren't a sales problem \u2014 they're a research problem. You're not scaling yet. You're proving that daycare owners actually want what you're building, understanding what makes them say yes, and getting testimonials you can use to get customer 11.\n\nThat means every conversation you have before launch is *gold*. You're not trying to hit a number; you're trying to have five to ten conversations with daycare owners who get what TailWag solves and are willing to try it.\n\nHere's the philosophy:\n- **Go hyperlocal.** Irving/DFW is your backyard. Use that. Visit daycares in person. Call the ones that look promising. You'll learn more in 30 minutes of face time than in 30 emails.\n- **Start with warm.** You're pre-launch. Every first conversation should be because someone you know referred you, or because you did homework on their specific situation. Cold is a last resort.\n- **Lead with value, not features.** Don't pitch TailWag yet. Ask questions. Find the pain. *Then* show how TailWag solves it.\n- **Make it easy to say yes.** Offer a free trial, a setup on your dime, a money-back guarantee. Remove every reason to say no.\n\nThe goal: Get 3-4 early adopters running TailWag by the end of April. They become your proof points for customer 5-10.\n\n---\n\n## The Action Plan\n\n### Phase 1: Build Your Prospect List & Do Homework (Week 1)\n\n**Step 1: List all daycares in Irving and the immediate DFW area.**\n- Use Google Maps. Search \"dog daycare Irving TX,\" \"doggie daycare Dallas,\" \"pet boarding near me.\"\n- Create a spreadsheet with: business name, address, phone, Google rating, number of reviews, website URL, Instagram handle (if they have one).\n- Aim for 40-50 prospects. You're looking for:\n  - Daycares with **low review counts** (under 20 reviews). These owners are hungry for ways to get more visibility.\n  - Daycares with **4.5-star ratings** (not 5 stars). They have room to grow and room to improve.\n  - Daycares that post on **Instagram regularly**. They're social-savvy enough to get TailWag's value, visual enough to love the report cards.\n  - **Independently owned** daycares (not franchises \u2014 they're slower to buy). Look for single-location operations.\n\n**Step 2: Research each prospect.**\n- Spend 5 minutes per daycare. Read their Google reviews. Do they mention slow communication? Dogs not hearing about their day? Reviews that aren't getting traction? These are your pain points.\n- Check their website. Are they basic? Are they updated? This tells you their tech comfort level.\n- Look at their Instagram. Do they post daily? Weekly? This tells you how engaged they are with marketing.\n- Note: Any mention of problems like \"wish I heard more updates,\" \"communication could be better,\" or \"hard to know what happened to my dog\" = hot prospect. Highlight these.\n\n**Deliverable:** A spreadsheet named `irving-daycare-prospects.csv` with columns for Name, Phone, Google Rating, Review Count, Pain Signals, Warm Intro Opportunity (do you know anyone who knows them?), and Priority (1-3).\n\n---\n\n### Phase 2: Warm Intros & Initial Outreach (Week 1-2)\n\n**Step 3: Find warm introduction paths.**\n- Do you know anyone who owns a daycare, has a dog in daycare, or knows a daycare owner? Start there. A text like *\"Hey, I'm building something for dog daycares. Do you know anyone at [Daycare Name] I could talk to?\"* opens doors.\n- Check your personal network: veterinarians, dog trainers, groomers, pet supply store owners. They're all adjacent to your market and often know daycare owners.\n- Join Facebook groups: Search for \"doggie daycare owners DFW\" and \"pet business owners Texas.\" Spend one week just reading and learning. When you see someone complaining about communication or reviews, that's a prospect AND a teaching moment.\n- Cold option: If there's no warm intro, that's fine. You'll call directly (see Step 4).\n\n**Step 4: Make your first calls.**\n- Script (keep it conversational):\n  > *Hi [Owner Name], this is Summer [Last Name] calling from a company called TailWag. I'm reaching out to a few daycares in the area because I'm building something I think could help you. Do you have five minutes?*\n  >\n  > [If yes:] *Great. I noticed on Google that you have [X reviews/low review count/great ratings] and I know from working with other daycares that getting more updates and reviews from clients is a constant challenge. I'm testing a tool that automates personalized report cards and review requests. It's free for the first month, and it takes about 5 minutes to set up. Would you be open to a quick conversation about how it works?*\n\n- Don't pitch. Ask questions:\n  - *\"How do you currently tell pet parents about their dog's day?\"*\n  - *\"How many Google reviews would you like to get this quarter?\"*\n  - *\"What's the biggest pain point with managing client communication?\"*\n  - *\"If you could automate one thing about your day, what would it be?\"*\n\n- Success = you get a *\"Yeah, I'm curious\"* or a *\"Let's set up a time to talk more.\"* You're not looking for a yes to buy yet. You're looking for curiosity.\n\n**Deliverable:** A call log with notes on each conversation. Track: what they said about their pain, whether they're a fit, whether they want a demo, next steps.\n\n---\n\n### Phase 3: Demo & Trial Setup (Week 2-3)\n\n**Step 5: Prep a killer demo.**\n- Use their actual daycare name and real dogs from their Instagram if possible.\n- Show three things:\n  1. **The report card.** Make it personal. Reference something specific to their business (e.g., a dog they posted about, a seasonal thing like spring zoomies).\n  2. **The impact.** Show how a message from TailWag gets 40+ characters of personality and care in their customer's hands, every single day.\n  3. **The result.** \"This is what it looks like when you get five more reviews in a month. Here's the ROI: each review gets you one call, each call gets you $100-150 in recurring revenue.\"\n\n- Demo format: You can do this over Zoom, or in person at their daycare (even better \u2014 you get to see their operation and they feel the personal touch).\n\n**Step 6: Offer a trial.**\n- Frame: *\"I want to set this up for free. You don't pay anything for the first month. At the end of the month, if you're getting value \u2014 more reviews, happier clients, fewer no-shows \u2014 let's talk about making it permanent. If you're not seeing value, no hard feelings.\"*\n- Make setup stupid easy. You set it up for them. They just give you:\n  - Their business name (you probably already have it)\n  - Opening/closing times\n  - Dog names (you can pull these from Instagram)\n  - Client phone numbers (they have this in their booking system)\n\n- Don't make them do work. You do the work. That's the sell.\n\n**Step 7: First report card goes out same day.**\n- This is critical. Show them real-time. The first text goes out to a real client that evening or the next morning.\n- Have them show you when a client responds. That's the moment they *get it*. The client gets a smile, the daycare owner gets proof, and TailWag is already working.\n\n**Deliverable:** A demo screen recording or deck they can reference. A trial onboarding checklist so you don't miss anything.\n\n---\n\n### Phase 4: Follow-Up Sequence (Week 3-4)\n\n**Step 8: Build a follow-up sequence for trials.**\n\n- **Day 1:** Send a thank-you. *\"Thanks for being willing to try TailWag. Your first report cards go out tonight. I'll check in with you in a few days to see how clients are responding.\"*\n- **Day 3-4:** Quick check-in. *\"How are things going? Any feedback from clients on the report cards yet?\"* Listen. Adjust if needed.\n- **Day 7:** Value add. Share something useful. An article about review generation in the pet industry, or a stat like *\"Daycares that send daily updates see 40% fewer no-shows.\"* Keep it brief.\n- **Day 10:** Gentle close. *\"You're a week in. Have the report cards been hitting the mark? What would it take for you to keep TailWag running after this month?\"* Get their objection. Fix it.\n- **Day 14:** Final ask. *\"I'd love to have you as one of our first customers. Here's what I'm thinking: [pricing], and I'll handle your setup completely. Let's chat about making this real.\"*\n\n**Step 9: Track results weekly.**\n- Pull their metrics: How many texts went out? How many got responses? How many reviews came in? How many no-shows decreased?\n- Use these numbers in your close and in your next pitch. *\"Hey, I wanted to show you \u2014 in two weeks, your clients responded to 34 personalized report cards and you got 4 new reviews. That's worth $400-600 in new revenue just from increased bookings.\"*\n\n**Deliverable:** A CRM or simple spreadsheet tracking: prospect name, trial start date, texts sent, responses, reviews generated, whether they've converted to paid, next action.\n\n---\n\n### Phase 5: Scale to 10 (Week 4+)\n\n**Step 10: Use your early wins to get numbers 6-10.**\n- By end of April, you should have 3-4 trials running. At least one should be seeing real results.\n- Use that customer's permission to reference them with prospects 6-10. *\"Hey, I'm talking to [Daycare Name] right now and they've gotten 5 new reviews in three weeks. Would you want to see how this is working for them?\"*\n- Ask for testimonials from your early customers. A 20-second video of them saying *\"TailWag is saving me time and getting my clients talking about us\"* is worth more than your best pitch.\n- Repeat the process: warm intro \u2192 call \u2192 demo \u2192 trial \u2192 follow-up \u2192 close.\n\n**The asks get easier.** By customer 6, you know exactly what works. By customer 10, you're repeating a playbook.\n\n**Deliverable:** A case study or one-pager with your first customer's results. Use it as your selling tool.\n\n---\n\n## Timeline at a Glance\n\n| Week | What You're Doing | Success Metrics |\n|------|-------------------|-----------------|\n| 1 | Build prospect list (40-50), start research, begin warm intro calls | 10 calls completed, 5-7 interested |\n| 2 | Run 5 more calls, schedule demos for interested prospects | 4 demos booked, 2-3 trials started |\n| 3 | First trials running, daily follow-up, adjust based on early feedback | 1st report card results in, early traction visible |\n| 4 | Close trial customers, start second wave of outreach with proof | 3-4 paying customers secured, testimonials captured |\n| Week 5+ | Rinse and repeat for customers 5-10 | 10 paying customers by end of May |\n\n---\n\n## What This Is NOT\n\n- This is not a content marketing strategy. You're not blogging or posting on social yet.\n- This is not a paid ads strategy. You're not buying Google Ads or Facebook ads.\n- This is not a webinar or demo call series. You're talking to one person at a time.\n- This is not passive. You're doing the work yourself \u2014 calling, demoing, following up.\n\n**That's the point.** You need to talk to enough daycare owners to know if you're solving a real problem. This plan gets you there in 30 days, using your time, not your budget.\n\n---\n\n## One More Thing\n\n**You're going to hear \"no\" a lot.** Some owners will say they don't need another tool. Some will say they can't afford it. Some will go silent. That's normal.\n\nBut when you find the one who lights up \u2014 who gets it instantly, who sees the report card and smiles, who asks when they can start paying \u2014 *that's* the signal. That's the person you'll use to convince the next nine.\n\nGood luck. You've got this.\n"}], "first-10-customers-without_skill": [{"name": "response.md", "type": "text", "content": "# TailWag Go-to-Market Plan: Acquiring Your First 10 Customers\n\n## Executive Summary\n\nYou're launching an AI-powered SMS platform solving a real pain point for dog daycares: automating communication with pet owners. Your first 10 customers will come from direct, relationship-based outreach targeting daycares in the DFW metroplex and surrounding regions where you can provide white-glove onboarding.\n\n**Timeline:** 6-8 weeks from launch to first 10 customers\n**Target segment:** Independent dog daycares (20-100 dogs/day)\n**Primary channel:** Direct outreach + warm introductions\n**Success metric:** Signed contracts with initial 10 customers\n\n---\n\n## Phase 1: Pre-Launch Preparation (Weeks 1-2)\n\n### 1.1 Build Your Core Assets\n\n**Sales Demo Package**\n- Your three demo modules (report cards, reminders, review requests) are your MVP sales tool\n- Create a 5-minute screen recording showing each feature in action\n- Prepare a sample report card showing a real daycare's dog (fictional) with personalized personality-driven messaging\n- Record yourself giving a live 15-minute walkthrough that prospects can watch before meetings\n\n**One-Pager / Pitch Deck**\n- Create a simple one-page PDF: Problem (owner/staff communication gaps) \u2192 Solution (TailWag automation) \u2192 Results (time saved, reviews generated, owner satisfaction)\n- Pricing options for different daycare sizes (by number of dogs or SMS volume)\n- Suggested ROI calculator showing hours saved per week\n\n**Email Template Library**\n- Cold outreach template for daycares you don't know\n- Warm introduction follow-up for referral contacts\n- Demo request confirmation email\n- Post-demo follow-up with custom pricing\n- Trial offer email\n\n**Local Branding**\n- TailWag's existing brand guidelines are solid\u2014lean on them\n- Create a \"TailWag for Daycares\" landing page if you have a website\n- Prepare Instagram/Facebook assets showing the software in action (if you have social channels)\n\n### 1.2 Identify Your Core Prospect List\n\n**Who to target (first 10):**\n- Independent dog daycares in DFW (Dallas-Ft. Worth metroplex): ~150+ daycares\n- Filter by: 20+ dogs/day capacity, engaged social media presence (high review requests), no existing automated SMS platform\n- Geographic priority: Irving, Dallas, Plano, Arlington, Fort Worth (where you have local credibility)\n\n**How to build the list:**\n1. Google search: \"dog daycare near [city]\", \"doggie daycare near [city]\"\n2. Check Google Maps for daycares with 50+ reviews (indicates volume, engaged customer base)\n3. Cross-check their websites for current communication approach (if basic/manual, they're good prospects)\n4. Use LinkedIn to find owners/managers at target daycares\n5. Check Yelp, BarkBox, Rover for additional prospects\n\n**Target at least 100 prospects to reach 10 customers** (typical 10% conversion for first-time enterprise product).\n\n---\n\n## Phase 2: Outreach Strategy (Weeks 3-5)\n\n### 2.1 Multi-Channel Outreach\n\n**Channel 1: Warm Introductions (40% of pipeline)**\n- Ask everyone you know: friends, family, LinkedIn connections if they know anyone at a dog daycare\n- Attend local DFW business networking events (Chamber of Commerce, entrepreneur meetups)\n- Ask existing TailWag employees/advisors for introductions\n- Referrals have 5-7x higher conversion rates than cold outreach\n\n**Channel 2: Direct Cold Email (30% of pipeline)**\n- Target decision-maker (owner or operations manager) by name on LinkedIn\n- Subject line examples:\n  - \"Quick question: How do you handle appointment reminders at [Daycare Name]?\"\n  - \"[Daycare Name] + SMS = More Google Reviews? (2-min question)\"\n  - \"Helping DFW daycares save 5-10 hours/week on customer comms\"\n- Email body:\n  - Personalize with specific detail about their daycare (recent review you read, mention their facility)\n  - 2-3 sentences max identifying the problem\n  - One sentence CTAssistant: \"Can I show you a 5-minute demo this week?\"\n  - Link to your demo video (so they see value before the call)\n- Send 10-15 cold emails per week, tracking responses\n\n**Channel 3: Phone/LinkedIn Direct Messages (20% of pipeline)**\n- After email sits for 3 days with no response, try LinkedIn DM or phone call\n- Keep script simple: \"Hi [Name], I sent you an email about TailWag last Thursday. It's a tool that automates SMS to dog owners. Do you have 15 minutes this week to see it in action?\"\n- Daycares are used to answering phones\u2014don't be shy\n\n**Channel 4: Community Leverage (10% of pipeline)**\n- Join local DFW pet/startup Slack communities and Facebook groups\n- Share a short testimonial (once you get your first 2-3 customers): \"We helped [Daycare] generate 12 Google reviews in their first month\"\n- Don't hard-sell\u2014answer questions, offer help, build credibility\n\n### 2.2 Outreach Sequence\n\n**Week 3:**\n- Send 15 cold emails to top prospects\n- Make 5 warm introduction requests\n- Post on 2-3 relevant Facebook/community groups\n\n**Week 4:**\n- Follow up on cold emails (LinkedIn DM or call)\n- Schedule demos from Week 3 responses\n- Send 15 more new cold emails\n- Attend 1 local networking event\n\n**Week 5:**\n- Close first demo meetings\n- Continue follow-ups\n- Adjust messaging based on early objections\n\n---\n\n## Phase 3: Sales & Onboarding (Weeks 6-8)\n\n### 3.1 The Demo Call\n\n**Pre-demo:**\n- Send calendar invite + link to your 5-minute demo video\n- Have them test your demo with their own dog names (if possible) or use their actual dogs\n- Ask them to write down 2 dogs they'd like to see report cards for\n\n**During demo (15-20 min):**\n1. **Problem validation** (3 min): \"Walk me through how you currently send appointment reminders/follow-ups to owners\"\n2. **Show report card generation** (5 min): Generate a real report card for a dog they mentioned, live\n3. **Show reminders + review requests** (5 min): Demonstrate the other two features\n4. **Pricing & ROI** (3 min): \"We bill per SMS sent. Most daycares your size run $X-Y per month. That replaces about 5-10 hours of manual work\"\n5. **Next steps** (2 min): \"I'd love to get you set up with a 2-week trial. We'll onboard your dogs and staff, send your first batch of messages together, and you'll see the impact\"\n\n**Objection handling:**\n- \"We're fine with email/WhatsApp\": Anchor to SMS open rates (98%+ vs 20% email)\n- \"Can you integrate with our POS system?\": \"We can do manual dog uploads for now; integrations come later as you grow\"\n- \"What if owners don't respond?\" \"That's the point\u2014you're automating reminders so owners DON'T have to call back\"\n- \"Will this work with our staff workflow?\" \"We'll customize the templates to match your brand voice and send times that fit your operations\"\n\n### 3.2 Pricing & Offer Structure\n\n**Recommended first 10 customer pricing:**\n- Freemium or free trial: 2 weeks free for first 10 customers (builds social proof and case studies)\n- Introductory pricing: $99-199/month (based on dog volume: e.g., $99 for <100 dogs/month, $199 for <300 dogs/month)\n- Volume pricing hint: \"After your trial, this scales from $99 to $299/month as your volume grows\"\n\n**Why low entry price for first 10:**\n- You need case studies, testimonials, and metrics to close the next 100\n- Early customers become your best salespeople (word-of-mouth in tight daycare community)\n- Churn risk is low if they're delighted with results\n\n### 3.3 Onboarding Playbook for First 10 Customers\n\n**Week 1 of customer relationship:**\n- Schedule a 30-min onboarding call\n- Upload their dogs, owner phone numbers, and staff contact info\n- Customize message templates to match their brand voice\n- Set up first batch of messages to send tomorrow\n\n**Week 2:**\n- Monitor first day of message sends together (live call)\n- Collect feedback on message quality and timing\n- Adjust templates based on feedback\n- Show them the first metrics: delivery rate, open rate, response rate\n\n**Weeks 3-4:**\n- Monitor review requests sent and new Google/Yelp reviews generated\n- Calculate ROI: \"You sent 45 review requests this month and got 8 new reviews\u2014that's an 18% review generation rate. Those reviews bring in ~$X in new revenue based on typical pet owner booking patterns\"\n- Schedule monthly success check-ins\n- Ask for a testimonial and permission to use them as a case study\n\n### 3.4 Closing & Contracts\n\n**Trial to paid conversion:**\n- After 2-week trial, send a summary email: \"Here's what TailWag generated for you\"\n- Include metrics: messages sent, opens, responses, new reviews\n- Propose 3-month paid plan: \"Let's continue at [price] per month\"\n- Make signing simple: one-page service agreement + stripe link to start billing\n\n**Target conversion:** 70% of trial starts \u2192 paid customers = 10 trials needed for ~7 paid customers\n**Buffer:** Aim for 15 trial starts to land 10 paid customers by week 8\n\n---\n\n## Phase 4: Building Momentum (Post-Launch)\n\n### 4.1 Case Studies & Testimonials\n\n**For each of your first 3 paying customers, collect:**\n- Written testimonial (2-3 sentences on the impact)\n- Permission to use their dog photos and daycare name in marketing\n- Metrics: hours saved, new reviews generated, owner satisfaction improvement\n- A 5-minute video testimonial (optional but powerful)\n\n**Use these immediately:**\n- Add to your landing page\n- Reference in cold emails to similar-sized daycares\n- Share in local DFW business groups and on social media\n\n### 4.2 Referral Program\n\n**Once you hit customer #5, launch a referral program:**\n- Offer $200-300 credit (or cash) for each qualified referral that converts\n- Ask existing customers to refer a friend at another daycare\n- Daycares talk to each other at industry events\u2014leverage this\n\n### 4.3 Metrics to Track Daily\n\n- Emails sent / response rate\n- Demo scheduled (from emails)\n- Demo conversion to trial\n- Trial conversion to paid\n- Customer acquisition cost (total outreach cost \u00f7 new customers)\n- Monthly recurring revenue (MRR)\n\n---\n\n## Success Markers & Contingencies\n\n### Success looks like:\n- Week 4: 5-8 demos scheduled\n- Week 5: 2-3 customers in trial\n- Week 7: 5-6 customers in trial\n- Week 8: 8-10 customers paying (at least 6-month commitments)\n\n### If you're behind:\n- Increase outreach volume (send 20+ emails/week instead of 10-15)\n- Add more warm intro requests (get friends/advisors to make 2-3 calls each)\n- Lower trial barrier: offer 4-week free trial instead of 2-week\n- Increase trial-to-paid conversion by adding more onboarding calls (1-2 per week per customer)\n- Add a \"founder discount\": \"Sign before April 30 and lock in 40% off for your first year\" (creates urgency)\n\n---\n\n## Quick Start Checklist\n\n**This week:**\n- [ ] Create your 5-minute demo video\n- [ ] Draft your cold email template and one-pager\n- [ ] Build a list of 100+ DFW daycare prospects\n- [ ] Make 5 warm introduction asks\n\n**Next week:**\n- [ ] Send first batch of 15 cold emails\n- [ ] Book first demo call\n- [ ] Attend 1 networking event\n- [ ] Create pricing page for website\n\n**By week 4:**\n- [ ] Have 5-8 demos scheduled\n- [ ] Close first 2 trial customers\n- [ ] Refine pitch based on early objections\n\n---\n\n## The Bottom Line\n\nYour first 10 customers will come from **persistence + personalization**, not marketing magic. You're pre-launch, so spend 70% of your time on direct outreach (emails, calls, warm intros) and 30% on building assets and refining pitch. Every conversation teaches you something new about what daycares actually need.\n\nFocus on **speed of learning** over volume in the first 3 weeks: take every demo, listen hard, and adjust. By week 4, you'll have market clarity\u2014then scale the channel that's working fastest.\n\nGood luck, Summer. The DFW daycare community needs TailWag.\n"}], "cold-outreach-email-with_skill": [{"name": "response.md", "type": "text", "content": "# Cold Outreach Email for Daycare Owners\n\n## The Strategy\n\nCold email to daycare owners you find on Google is a solid play \u2014 you're reaching people actively running a business, and email gets past the gatekeeper (usually just the daycare's general inbox). But generic \"check out our platform\" emails bounce off. What works here is **specificity and proof**, not pitch.\n\nYour email needs to:\n1. **Show you did research** \u2014 mention something specific about their daycare (their Google rating, review count, or a detail from their photos/posts)\n2. **Lead with their problem, not your solution** \u2014 acknowledge the gap between happy clients and actual reviews\n3. **Make it about them, not you** \u2014 don't lead with TailWag; lead with the result\n4. **Lower the friction to say yes** \u2014 offer a quick call or a free 10-minute demo, not a sales presentation\n\nThe goal isn't to close in the email \u2014 it's to get a \"let me see how this works\" conversation. That conversation is where you learn what matters to them and they see the magic.\n\n---\n\n## The Email\n\n**Subject line options** (pick one or test both):\n- `Quick question about your Google reviews \u2014 [Daycare Name]`\n- `12 new 5-star reviews in 30 days \u2014 worth 5 min?`\n- `[Daycare Name] \u2014 we might be able to add $400-500/month to your business`\n\n---\n\n**Email body:**\n\nHi [Owner Name],\n\nI just spent 10 minutes looking through [Daycare Name]'s Google reviews and Instagram, and two things jumped out at me:\n\n1. You have tons of happy clients (your last review said \"Best daycare in [area]!\")\n2. But you're probably only capturing reviews from 1 in 20 of them\n\nThat gap is costing you. Clients shop by reviews. Most daycares miss 60\u201370% of 5-star reviews they could be getting.\n\nI'm building something specifically for independent daycares to fix this \u2014 it's an SMS platform that sends a personalized text to each client at pickup (a quick report card about their dog's day), and at the right moment, asks them to leave a review if they loved it. Setup is 5 minutes, and it runs in the background.\n\nHere's what I'm seeing with early users: one daycare got 12 new reviews in the first month. Another recovered 3 no-shows in week one (that's $180/week right there).\n\nI'm not going to pitch you on a call \u2014 but if you're open to it, I'd love to show you exactly how it would work for [Daycare Name] in 10 minutes. No obligation, just a quick look.\n\nDoes Wednesday or Thursday work for a quick call?\n\nThanks,\nSummer\n[Your phone number]\nTailWag \u2014 SMS that sells for daycares\n[Website or demo link if you have one]\n\n---\n\n## How to Use This\n\n### Before You Send\n1. **Personalize the research section** \u2014 don't just mention reviews; pick one or two specific things you actually noticed. If they have 47 reviews and a 4.8 rating, say that. If their Instagram shows a fun team or a cute dog story, reference it. People smell generic from a mile away.\n\n2. **Find the right email address** \u2014 Google the daycare name + \"email\" or check their website footer. Failing that, try the format `firstname@daycarename.com` or `owner@daycarename.com`. If it bounces, you have a reason to call or visit instead.\n\n3. **Adjust the dollar numbers if needed** \u2014 $400\u2013500/month is based on typical no-show recovery + review-driven bookings for a small daycare. If you've talked to daycare owners and learned their numbers are different, change it. Specificity beats round numbers.\n\n### Success Metrics\n- **Open rate**: 20\u201330% is decent for cold email. Personalization helps.\n- **Reply rate**: Aim for 5\u201310%. If you're getting 0/10, the subject line or first sentence isn't working \u2014 try a different angle.\n- **Meeting rate**: Of replies, 50%+ should say yes to a quick call. If not, you're being too sales-y or the email is too long.\n\n### Follow-Up Sequence (if no reply)\n- **Day 3**: Short follow-up \u2014 \"Hey, wanted to make sure this landed. Would Wed/Thu still work?\"\n- **Day 7**: Add value \u2014 share a relevant stat or article about review generation for daycares\n- **Day 10**: Soft close \u2014 \"I'm only reaching out to 20 daycares in DFW this quarter. This is my last nudge \u2014 let me know if you want to see the demo.\"\n- **After day 10**: Stop. Move to the next prospect.\n\n### Alternative: Phone Call Opener\nIf you find a phone number, calling first can work better than email \u2014 especially if you have a hook: \"I was just looking at your Google reviews and noticed [specific thing], thought you might want to see something in 10 minutes.\" But email scales better if you have 50 daycares to reach.\n\n---\n\n## One More Thing\n\nThis email works because it's not a pitch \u2014 it's a conversation starter. The real sale happens when they see their daycare name in the demo and realize they can automate something they've been thinking about but dreading. Keep that in mind on the call.\n\nGo get 'em.\n"}], "cold-outreach-email-without_skill": [{"name": "response.md", "type": "text", "content": "# Cold Outreach Email for Daycare Owners\n\n## Subject Line Option 1\nSubject: Quick question about your daycare operations\n\n## Subject Line Option 2\nSubject: How [Daycare Name] could save time on client updates\n\n---\n\n## Email Body\n\nHi [Owner/Manager Name],\n\nI came across [Daycare Name] while researching dog daycares in the [City/Area] area, and I was impressed by your setup.\n\nI'm reaching out because I'm working on something that might save you time\u2014it's an SMS platform built specifically for dog daycares to send photo updates and care summaries to dog parents automatically.\n\nA lot of daycare owners tell us that sending individual updates throughout the day is time-consuming, especially when they're managing multiple dogs. We're building TailWag to handle that in minutes instead of hours.\n\nI'm still in early stages, and I'm talking to a few daycare owners in Texas to understand what would actually be helpful. Would you have 15 minutes for a quick call or email chat about how you currently handle owner updates?\n\nNo pressure either way\u2014I just want to make sure we're building something that actually solves a real problem for you.\n\nThanks for considering,\nSummer\nTailWag\nIrving, TX\n\n---\n\n## Email Variants & Tips\n\n### Variant A: Location-Specific (More Personal)\nReplace the generic opening with something like:\n\"I came across your daycare on Google and noticed you're in Irving/[nearby area]. Since I'm based here too, I thought I'd reach out...\"\n\n### Variant B: Problem-First (Stronger Hook)\n\"Hi [Name], I've been researching dog daycares in Texas, and I keep hearing the same challenge: owners expect photo updates during the day, but sending them individually eats up your team's time. I'm building a tool to fix that. Would you be open to a quick chat about how this might work for your business?\"\n\n---\n\n## Pre-Send Checklist\n\n- [ ] Personalize the name and daycare name (not generic \"Hi there\")\n- [ ] Research if they have a website or social media (mention something specific if possible)\n- [ ] Keep the email short (this is 150-180 words\u2014scannable)\n- [ ] Include a clear ask (15-min call or email follow-up)\n- [ ] Make it easy to respond (just a \"yes\" or \"let's chat\")\n- [ ] Send from a professional email address with your name\n- [ ] Consider sending Tuesday-Thursday 9am-12pm (best open rates)\n\n---\n\n## Follow-Up Strategy\n\n**If no response after 5 days:** Send one follow-up email\n\"Hey [Name], just wanted to make sure this reached you. No rush\u2014just thought TailWag might be useful. Let me know if you want to chat.\"\n\n**If they respond interested:** Offer a 15-20 minute call over Zoom or phone\u2014focus on listening to their current workflow before pitching.\n\n---\n\n## Customization Notes for Summer\n\n- Replace [Daycare Name], [Owner/Manager Name], [City/Area] with actual info from your Google search\n- If you find their social media or website, you can reference something specific (\"I saw you post about your new play area\" or \"Your Google reviews mention great owner communication\")\n- Adjust tone if needed\u2014this is friendly but professional; feel free to be warmer if that fits your brand\n- Consider your email signature (include phone number for easy callback)\n"}]}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

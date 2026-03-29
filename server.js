@@ -59,6 +59,7 @@ app.use('/api/shortlinks', require('./routes/shortlinks'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/ceo', require('./routes/ceo'));
 app.use('/api/admin-report', require('./routes/admin-report'));
+app.use('/api/appointments', require('./routes/appointments'));
 
 // Serve index.html for root
 app.get('/', (req, res) => {

@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #0F1410;
+      --green: #1E6B4A;
+      --green-dark: #164D35;
+      --linen: #F5F0E8;
+      --gold: #C4933F;
+      --sage: #A8C5B0;
+      --slate: #2D3748;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
+
+    /* NAV */
+    .dashboard-nav {
+      background: var(--black); padding: 0 32px;
+      display: flex; justify-content: space-between; align-items: center; height: 60px;
+    }
+    .nav-left { display: flex; align-items: center; gap: 32px; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-paw { font-size: 22px; }
+    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link {
+      color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; font-weight: 500;
+      padding: 6px 14px; border-radius: 6px; transition: color 0.2s, background 0.2s;
+    }
+    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
+    .nav-link.active { color: var(--linen); background: rgba(255,255,255,0.1); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+
+    /* PAGE */
+    .page-container { max-width: 1000px; margin: 0 auto; padding: 40px 24px; }
+
+    /* DATE NAV */
+    .date-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      background: white; border-radius: 14px; padding: 18px 24px;
+      margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .date-nav-center { text-align: center; }
+    .date-label {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+      font-size: 22px; color: var(--black);
+    }
+    .date-sub { font-size: 13px; color: #888; margin-top: 2px; }
+    .date-badge {
+      display: inline-block; background: var(--gold); color: white;
+      font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+      margin-left: 8px; vertical-align: middle;
+    }
+    .nav-arrow {
+      background: none; border: 1px solid #e0dbd2; color: var(--slate);
+      width: 38px; height: 38px; border-radius: 8px; font-size: 18px;
+      cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center;
+    }
+    .nav-arrow:hover { background: var(--linen); }
+    .today-btn {
+      background: var(--linen); border: 1px solid #e0dbd2; color: var(--slate);
+      font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 6px;
+      cursor: pointer; font-family: 'Inter', sans-serif; margin-top: 6px;
+      transition: background 0.15s;
+    }
+    .today-btn:hover { background: #ede8df; }
+
+    /* STATS ROW */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;
+    }
+    .stat-card {
+      background: white; border-radius: 12px; padding: 16px 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #999; }
+    .stat-val { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 800; color: var(--black); margin-top: 4px; }
+    .stat-card.confirmed .stat-val { color: var(--green); }
+    .stat-card.cancelled .stat-val { color: #e74c3c; }
+
+    /* ACTION BAR */
+    .action-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+    }
+    .action-bar h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+      font-size: 17px; color: var(--black);
+    }
+    .action-bar-right { display: flex; gap: 10px; align-items: center; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      padding: 9px 18px; border-radius: 9px; cursor: pointer;
+      border: none; transition: all 0.15s;
+    }
+    .btn-primary { background: var(--green); color: white; }
+    .btn-primary:hover { background: var(--green-dark); }
+    .btn-primary:disabled { background: #a8c5b0; cursor: not-allowed; }
+    .btn-outline { background: white; border: 1.5px solid #e0dbd2; color: var(--slate); }
+    .btn-outline:hover { border-color: var(--slate); }
+    .btn-gold { background: var(--gold); color: white; }
+    .btn-gold:hover { background: #b8832f; }
+    .btn-sm { font-size: 12px; padding: 6px 12px; }
+
+    /* APPOINTMENT LIST */
+    .appt-list { display: flex; flex-direction: column; gap: 8px; }
+    .appt-card {
+      background: white; border-radius: 12px; padding: 14px 18px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: box-shadow 0.15s;
+    }
+    .appt-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.09); }
+
+    .status-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .status-dot.pending { background: #f0a500; }
+    .status-dot.confirmed { background: var(--green); }
+    .status-dot.cancelled { background: #e74c3c; }
+    .status-dot.recurring_pending { background: #aaa; }
+
+    .dog-avatar {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--linen); display: flex; align-items: center;
+      justify-content: center; font-size: 20px; flex-shrink: 0;
+    }
+
+    .appt-info { flex: 1; min-width: 0; }
+    .appt-dog { font-size: 15px; font-weight: 700; color: var(--black); }
+    .appt-owner { font-size: 13px; color: #888; margin-top: 1px; }
+    .appt-breed { font-size: 12px; color: #aaa; }
+
+    .appt-badges { display: flex; gap: 6px; align-items: center; margin-left: auto; flex-shrink: 0; }
+    .badge {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px;
+    }
+    .badge-pending { background: #fff3cd; color: #856404; }
+    .badge-confirmed { background: #d4edda; color: #155724; }
+    .badge-cancelled { background: #fde8e8; color: #b91c1c; }
+    .badge-recurring { background: #e8eef9; color: #3b5fc0; }
+    .badge-reminder { background: #f0f0f0; color: #888; font-size: 10px; }
+
+    .appt-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .icon-btn {
+      background: none; border: 1px solid #e0dbd2; border-radius: 7px;
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px; transition: background 0.15s;
+    }
+    .icon-btn:hover { background: var(--linen); }
+    .icon-btn.danger:hover { background: #fde8e8; border-color: #e74c3c; }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      background: white; border-radius: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 18px; font-weight: 700; color: var(--black); margin-bottom: 6px; }
+    .empty-state p { font-size: 14px; color: #888; margin-bottom: 20px; }
+
+    /* SECTION DIVIDER */
+    .section-title {
+      font-size: 11px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #999; margin: 28px 0 12px;
+    }
+
+    /* RECURRING SECTION */
+    .recurring-card {
+      background: white; border-radius: 12px; padding: 14px 18px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 8px;
+    }
+    .days-row { display: flex; gap: 4px; margin-top: 4px; }
+    .day-chip {
+      font-size: 11px; font-weight: 700; padding: 2px 6px;
+      border-radius: 5px; background: var(--linen); color: #666;
+    }
+    .day-chip.active { background: var(--green); color: white; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white; border-radius: 16px; padding: 28px;
+      width: 100%; max-width: 480px; max-height: 80vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+      font-size: 18px; color: var(--black); margin-bottom: 18px;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 12px; font-weight: 700; color: #666; margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
+    .form-control {
+      width: 100%; padding: 10px 12px; border: 1.5px solid #e0dbd2;
+      border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px;
+      color: var(--black); background: white; outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-control:focus { border-color: var(--green); }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+    .day-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+    .day-toggle {
+      width: 42px; height: 42px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      border: 1.5px solid #e0dbd2; background: white; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #888; transition: all 0.15s; font-family: 'Inter', sans-serif;
+    }
+    .day-toggle.selected { background: var(--green); border-color: var(--green); color: white; }
+
+    /* SEARCH */
+    .search-box {
+      width: 100%; padding: 10px 14px; border: 1.5px solid #e0dbd2;
+      border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px;
+      margin-bottom: 14px; outline: none;
+    }
+    .search-box:focus { border-color: var(--green); }
+
+    .client-option {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border-radius: 8px; cursor: pointer; transition: background 0.1s;
+      border: 1.5px solid transparent;
+    }
+    .client-option:hover { background: var(--linen); }
+    .client-option.selected { background: #e8f4ee; border-color: var(--green); }
+    .client-option-name { font-size: 14px; font-weight: 600; color: var(--black); }
+    .client-option-dogs { font-size: 12px; color: #888; }
+    .client-list { max-height: 240px; overflow-y: auto; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      background: var(--black); color: var(--linen);
+      padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
+      opacity: 0; transform: translateY(10px); transition: all 0.25s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: var(--green); }
+    .toast.error { background: #e74c3c; }
+
+    @media (max-width: 640px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .nav-links { display: none; }
+      .date-label { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="/dashboard.html" class="logo">
+      <span class="logo-paw">🐾</span>
+      <span class="logo-text">TailWag</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/clients.html" class="nav-link">Directory</a>
+      <a href="/messaging.html" class="nav-link">Messaging</a>
+      <a href="/schedule.html" class="nav-link active">Schedule</a>
+      <a href="/reviews.html" class="nav-link">Reviews</a>
+      <a href="/team.html" class="nav-link">Team</a>
+      <a href="/admin-report.html" class="nav-link">Report</a>
+      <a href="/settings.html" class="nav-link">Settings</a>
+    </nav>
+  </div>
+  <div class="nav-right">
+    <div id="navUserWidget"></div>
+  </div>
+</nav>
+
+<div class="page-container">
+
+  <!-- DATE NAVIGATION -->
+  <div class="date-nav">
+    <button class="nav-arrow" onclick="shiftDate(-1)">&#8592;</button>
+    <div class="date-nav-center">
+      <div class="date-label" id="dateLabel">—</div>
+      <div class="date-sub" id="dateSub"></div>
+      <button class="today-btn" onclick="goToTomorrow()">Jump to Tomorrow</button>
+    </div>
+    <button class="nav-arrow" onclick="shiftDate(1)">&#8594;</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Scheduled</div>
+      <div class="stat-val" id="statTotal">—</div>
+    </div>
+    <div class="stat-card confirmed">
+      <div class="stat-label">Confirmed ✓</div>
+      <div class="stat-val" id="statConfirmed">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Pending</div>
+      <div class="stat-val" id="statPending">—</div>
+    </div>
+    <div class="stat-card cancelled">
+      <div class="stat-label">Cancelled</div>
+      <div class="stat-val" id="statCancelled">—</div>
+    </div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div class="action-bar">
+    <h2 id="apptListTitle">Today's Dogs</h2>
+    <div class="action-bar-right">
+      <button class="btn btn-outline btn-sm" onclick="openSummaryModal()">📋 Morning Summary</button>
+      <button class="btn btn-gold btn-sm" id="sendRemindersBtn" onclick="sendReminders()">
+        📨 Send Reminders
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Dog</button>
+    </div>
+  </div>
+
+  <!-- APPOINTMENT LIST -->
+  <div id="apptList" class="appt-list">
+    <div class="empty-state">
+      <div class="empty-icon">📅</div>
+      <h3>Loading schedule…</h3>
+      <p>Fetching appointments</p>
+    </div>
+  </div>
+
+  <!-- RECURRING SECTION -->
+  <div class="section-title">Recurring Schedules</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+    <p style="font-size:13px;color:#888;">Dogs on a regular weekly schedule — automatically added to their scheduled days.</p>
+    <button class="btn btn-outline btn-sm" onclick="openRecurringModal()">+ Add Recurring</button>
+  </div>
+  <div id="recurringList">
+    <p style="font-size:13px;color:#aaa;padding:12px 0;">Loading…</p>
+  </div>
+
+</div><!-- /page-container -->
+
+<!-- ADD APPOINTMENT MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h3>Add Dog to Schedule</h3>
+    <input type="text" class="search-box" id="clientSearch" placeholder="Search pet parent or dog name…" oninput="filterClients()">
+    <div class="client-list" id="clientList">
+      <p style="font-size:13px;color:#aaa;">Loading clients…</p>
+    </div>
+    <div id="dogSelectRow" style="display:none;margin-top:12px;">
+      <div class="form-label">Select Dog</div>
+      <select class="form-control" id="dogSelect"></select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-primary" id="addApptBtn" onclick="confirmAddAppointment()">Add to Schedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECURRING MODAL -->
+<div class="modal-overlay" id="recurringModal">
+  <div class="modal">
+    <h3>Add Recurring Schedule</h3>
+    <div class="form-group">
+      <label class="form-label">Pet Parent</label>
+      <input type="text" class="search-box" id="recurClientSearch" placeholder="Search…" oninput="filterRecurClients()" style="margin-bottom:8px;">
+      <div class="client-list" id="recurClientList" style="max-height:160px;"></div>
+    </div>
+    <div id="recurDogRow" style="display:none;" class="form-group">
+      <label class="form-label">Dog</label>
+      <select class="form-control" id="recurDogSelect"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Days of Week</label>
+      <div class="day-picker" id="dayPicker">
+        <button class="day-toggle" data-dow="0" onclick="toggleDay(this)">Su</button>
+        <button class="day-toggle" data-dow="1" onclick="toggleDay(this)">Mo</button>
+        <button class="day-toggle" data-dow="2" onclick="toggleDay(this)">Tu</button>
+        <button class="day-toggle" data-dow="3" onclick="toggleDay(this)">We</button>
+        <button class="day-toggle" data-dow="4" onclick="toggleDay(this)">Th</button>
+        <button class="day-toggle" data-dow="5" onclick="toggleDay(this)">Fr</button>
+        <button class="day-toggle" data-dow="6" onclick="toggleDay(this)">Sa</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeRecurringModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRecurring()">Save Schedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- MORNING SUMMARY MODAL -->
+<div class="modal-overlay" id="summaryModal">
+  <div class="modal">
+    <h3>Send Morning Summary</h3>
+    <p style="font-size:14px;color:#666;margin-bottom:16px;">Send a confirmation count summary to the site manager's phone.</p>
+    <div class="form-group">
+      <label class="form-label">Manager's Phone Number</label>
+      <input type="tel" class="form-control" id="managerPhone" placeholder="+1 (555) 000-0000">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeSummaryModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="sendMorningSummary()">Send Summary</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  let currentDate = getTomorrow();
+  let allClients = [];
+  let selectedClientId = null;
+  let selectedDogId = null;
+  let recurSelectedClientId = null;
+  let recurSelectedDogId = null;
+  let selectedDays = [];
+  let currentAppointments = [];
+
+  // ── Date helpers ───────────────────────────────────────────────────────────
+  function getTomorrow() {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  }
+
+  function formatDisplayDate(dateStr) {
+    const d = new Date(dateStr + 'T12:00:00');
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = getTomorrow();
+    if (dateStr === today) return { label: d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }), badge: 'Today' };
+    if (dateStr === tomorrow) return { label: d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }), badge: 'Tomorrow' };
+    return { label: d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }), badge: null };
+  }
+
+  function shiftDate(delta) {
+    const d = new Date(currentDate + 'T12:00:00');
+    d.setDate(d.getDate() + delta);
+    currentDate = d.toISOString().split('T')[0];
+    updateDateDisplay();
+    loadSchedule();
+  }
+
+  function goToTomorrow() {
+    currentDate = getTomorrow();
+    updateDateDisplay();
+    loadSchedule();
+  }
+
+  function updateDateDisplay() {
+    const { label, badge } = formatDisplayDate(currentDate);
+    document.getElementById('dateLabel').innerHTML = label + (badge ? `<span class="date-badge">${badge}</span>` : '');
+    const d = new Date(currentDate + 'T12:00:00');
+    document.getElementById('dateSub').textContent = d.toLocaleDateString('en-US', { year: 'numeric' });
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('apptListTitle').textContent =
+      currentDate === today ? "Today's Dogs" :
+      currentDate === getTomorrow() ? "Tomorrow's Dogs" : "Dogs Scheduled";
+  }
+
+  // ── Auth ───────────────────────────────────────────────────────────────────
+  function getSession() {
+    try { return JSON.parse(localStorage.getItem('tailwag_session')); } catch { return null; }
+  }
+  function authHeaders() {
+    const s = getSession();
+    return s?.access_token ? { 'Authorization': 'Bearer ' + s.access_token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  }
+
+  // ── Load schedule ──────────────────────────────────────────────────────────
+  async function loadSchedule() {
+    try {
+      const res = await fetch('/api/appointments?date=' + currentDate, { headers: authHeaders() });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      currentAppointments = data.appointments || [];
+      renderAppointments(currentAppointments);
+      updateStats(currentAppointments);
+    } catch (err) {
+      document.getElementById('apptList').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Error loading schedule</h3><p>${err.message}</p></div>`;
+    }
+  }
+
+  function updateStats(appts) {
+    const confirmed = appts.filter(a => a.status === 'confirmed').length;
+    const cancelled = appts.filter(a => a.status === 'cancelled').length;
+    const pending = appts.filter(a => ['pending', 'recurring_pending'].includes(a.status)).length;
+    document.getElementById('statTotal').textContent = appts.length;
+    document.getElementById('statConfirmed').textContent = confirmed;
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('statCancelled').textContent = cancelled;
+  }
+
+  function renderAppointments(appts) {
+    const el = document.getElementById('apptList');
+    if (!appts.length) {
+      el.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🐶</div>
+          <h3>No dogs scheduled yet</h3>
+          <p>Add dogs from the Directory, or set up recurring schedules below.</p>
+          <button class="btn btn-primary" onclick="openAddModal()">+ Add Dog</button>
+        </div>`;
+      return;
+    }
+
+    // Sort: confirmed first, then pending, then cancelled
+    const order = { confirmed: 0, pending: 1, recurring_pending: 2, cancelled: 3 };
+    const sorted = [...appts].sort((a, b) => (order[a.status] ?? 9) - (order[b.status] ?? 9));
+
+    el.innerHTML = sorted.map(appt => {
+      const dogName = appt.dogs?.name || '—';
+      const breed = appt.dogs?.breed || '';
+      const ownerName = appt.clients ? `${appt.clients.first_name} ${appt.clients.last_name}` : '—';
+      const statusBadge = {
+        confirmed: '<span class="badge badge-confirmed">✓ Confirmed</span>',
+        pending: '<span class="badge badge-pending">Pending</span>',
+        cancelled: '<span class="badge badge-cancelled">Cancelled</span>',
+        recurring_pending: '<span class="badge badge-recurring">Recurring</span>'
+      }[appt.status] || '';
+      const reminderBadge = appt.reminder_sent_at ? '<span class="badge badge-reminder">Reminded</span>' : '';
+      const isRecurring = appt.is_recurring;
+
+      const deleteBtn = appt.id
+        ? `<button class="icon-btn danger" title="Remove" onclick="removeAppointment('${appt.id}')">✕</button>`
+        : `<button class="icon-btn" title="Add to this date" onclick="confirmRecurring('${appt.client_id}', '${appt.dog_id || ''}', '${appt.recurring_schedule_id || ''}')">＋</button>`;
+
+      const confirmBtn = (appt.status === 'pending' || appt.status === 'recurring_pending') && appt.id
+        ? `<button class="icon-btn" title="Mark confirmed" onclick="markStatus('${appt.id}', 'confirmed')">✓</button>`
+        : '';
+      const cancelBtn = appt.status === 'confirmed' && appt.id
+        ? `<button class="icon-btn danger" title="Mark cancelled" onclick="markStatus('${appt.id}', 'cancelled')">✕</button>`
+        : '';
+
+      return `
+        <div class="appt-card" id="appt-${appt.id || appt.client_id}">
+          <div class="status-dot ${appt.status}"></div>
+          <div class="dog-avatar">🐕</div>
+          <div class="appt-info">
+            <div class="appt-dog">${dogName}${isRecurring ? ' <span style="font-size:11px;color:#3b5fc0;">↻</span>' : ''}</div>
+            <div class="appt-owner">${ownerName}</div>
+            ${breed ? `<div class="appt-breed">${breed}</div>` : ''}
+          </div>
+          <div class="appt-badges">${statusBadge}${reminderBadge}</div>
+          <div class="appt-actions">
+            ${confirmBtn}${cancelBtn}${deleteBtn}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Recurring section ──────────────────────────────────────────────────────
+  async function loadRecurring() {
+    try {
+      const res = await fetch('/api/appointments/recurring', { headers: authHeaders() });
+      const data = await res.json();
+      renderRecurring(data);
+    } catch {
+      document.getElementById('recurringList').innerHTML = '<p style="font-size:13px;color:#aaa;">Unable to load.</p>';
+    }
+  }
+
+  const DAY_NAMES = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+  function renderRecurring(schedules) {
+    const el = document.getElementById('recurringList');
+    if (!schedules.length) {
+      el.innerHTML = '<p style="font-size:13px;color:#aaa;padding:12px 0;">No recurring schedules yet. Add one above.</p>';
+      return;
+    }
+    el.innerHTML = schedules.map(s => {
+      const dogName = s.dogs?.name || '(all dogs)';
+      const owner = s.clients ? `${s.clients.first_name} ${s.clients.last_name}` : '—';
+      const dayChips = DAY_NAMES.map((d, i) =>
+        `<span class="day-chip ${s.days_of_week.includes(i) ? 'active' : ''}">${d}</span>`
+      ).join('');
+      return `
+        <div class="recurring-card">
+          <div class="dog-avatar">🐕</div>
+          <div class="appt-info">
+            <div class="appt-dog">${dogName}</div>
+            <div class="appt-owner">${owner}</div>
+            <div class="days-row">${dayChips}</div>
+          </div>
+          <button class="icon-btn danger" onclick="deleteRecurring('${s.id}')">✕</button>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Actions ────────────────────────────────────────────────────────────────
+  async function removeAppointment(id) {
+    const res = await fetch('/api/appointments/' + id, { method: 'DELETE', headers: authHeaders() });
+    if (res.ok) { showToast('Removed from schedule'); loadSchedule(); }
+    else showToast('Error removing appointment', 'error');
+  }
+
+  async function markStatus(id, status) {
+    const res = await fetch('/api/appointments/' + id + '/status', {
+      method: 'PATCH', headers: authHeaders(), body: JSON.stringify({ status })
+    });
+    if (res.ok) { showToast(status === 'confirmed' ? '✓ Confirmed!' : 'Marked cancelled'); loadSchedule(); }
+    else showToast('Error updating', 'error');
+  }
+
+  async function confirmRecurring(clientId, dogId, recurId) {
+    const res = await fetch('/api/appointments', {
+      method: 'POST', headers: authHeaders(),
+      body: JSON.stringify({ client_id: clientId, dog_id: dogId || null, appointment_date: currentDate })
+    });
+    if (res.ok) { showToast('Added to schedule'); loadSchedule(); }
+    else showToast('Error adding appointment', 'error');
+  }
+
+  async function sendReminders() {
+    const btn = document.getElementById('sendRemindersBtn');
+    btn.disabled = true;
+    btn.textContent = '📨 Sending…';
+    const res = await fetch('/api/appointments/send-reminders', {
+      method: 'POST', headers: authHeaders(),
+      body: JSON.stringify({ date: currentDate })
+    });
+    const data = await res.json();
+    btn.disabled = false;
+    btn.textContent = '📨 Send Reminders';
+    if (res.ok) {
+      showToast(data.sent > 0 ? `✓ Sent ${data.sent} reminder${data.sent !== 1 ? 's' : ''}` : data.message, 'success');
+      loadSchedule();
+    } else {
+      showToast(data.error || 'Error sending reminders', 'error');
+    }
+  }
+
+  async function deleteRecurring(id) {
+    const res = await fetch('/api/appointments/recurring/' + id, { method: 'DELETE', headers: authHeaders() });
+    if (res.ok) { showToast('Recurring schedule removed'); loadRecurring(); loadSchedule(); }
+    else showToast('Error deleting', 'error');
+  }
+
+  async function sendMorningSummary() {
+    const phone = document.getElementById('managerPhone').value.trim();
+    if (!phone) { showToast('Phone number required', 'error'); return; }
+    const res = await fetch('/api/appointments/morning-summary', {
+      method: 'POST', headers: authHeaders(),
+      body: JSON.stringify({ date: currentDate, manager_phone: phone })
+    });
+    const data = await res.json();
+    closeSummaryModal();
+    if (res.ok) showToast('✓ Summary sent!', 'success');
+    else showToast(data.error || 'Error', 'error');
+  }
+
+  // ── Add modal ──────────────────────────────────────────────────────────────
+  function openAddModal() {
+    selectedClientId = null; selectedDogId = null;
+    document.getElementById('clientSearch').value = '';
+    document.getElementById('dogSelectRow').style.display = 'none';
+    renderClientOptions(allClients);
+    document.getElementById('addModal').classList.add('open');
+  }
+  function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+
+  function filterClients() {
+    const q = document.getElementById('clientSearch').value.toLowerCase();
+    const filtered = allClients.filter(c =>
+      `${c.first_name} ${c.last_name}`.toLowerCase().includes(q) ||
+      (c.dogs || []).some(d => d.name.toLowerCase().includes(q))
+    );
+    renderClientOptions(filtered);
+  }
+
+  function renderClientOptions(clients) {
+    const el = document.getElementById('clientList');
+    if (!clients.length) { el.innerHTML = '<p style="font-size:13px;color:#aaa;padding:8px;">No clients found.</p>'; return; }
+    el.innerHTML = clients.map(c => `
+      <div class="client-option ${selectedClientId === c.id ? 'selected' : ''}"
+           onclick="selectClient('${c.id}', ${JSON.stringify((c.dogs || []).map(d => ({id: d.id, name: d.name}))).replace(/"/g, '&quot;')})">
+        <div>
+          <div class="client-option-name">${c.first_name} ${c.last_name}</div>
+          <div class="client-option-dogs">${(c.dogs || []).map(d => d.name).join(', ') || 'No dogs on file'}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function selectClient(clientId, dogs) {
+    selectedClientId = clientId;
+    selectedDogId = null;
+    document.querySelectorAll('.client-option').forEach(el => el.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    const dogRow = document.getElementById('dogSelectRow');
+    const dogSel = document.getElementById('dogSelect');
+    if (dogs.length > 1) {
+      dogSel.innerHTML = dogs.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+      dogRow.style.display = 'block';
+      selectedDogId = dogs[0].id;
+      dogSel.onchange = () => { selectedDogId = dogSel.value; };
+    } else if (dogs.length === 1) {
+      selectedDogId = dogs[0].id;
+      dogRow.style.display = 'none';
+    } else {
+      dogRow.style.display = 'none';
+    }
+  }
+
+  async function confirmAddAppointment() {
+    if (!selectedClientId) { showToast('Select a pet parent first', 'error'); return; }
+    const res = await fetch('/api/appointments', {
+      method: 'POST', headers: authHeaders(),
+      body: JSON.stringify({ client_id: selectedClientId, dog_id: selectedDogId, appointment_date: currentDate })
+    });
+    if (res.ok) {
+      closeAddModal();
+      showToast('Added to schedule');
+      loadSchedule();
+    } else {
+      const d = await res.json();
+      showToast(d.error || 'Error adding', 'error');
+    }
+  }
+
+  // ── Recurring modal ────────────────────────────────────────────────────────
+  function openRecurringModal() {
+    recurSelectedClientId = null; recurSelectedDogId = null; selectedDays = [];
+    document.getElementById('recurClientSearch').value = '';
+    document.getElementById('recurDogRow').style.display = 'none';
+    document.querySelectorAll('.day-toggle').forEach(b => b.classList.remove('selected'));
+    renderRecurClientOptions(allClients);
+    document.getElementById('recurringModal').classList.add('open');
+  }
+  function closeRecurringModal() { document.getElementById('recurringModal').classList.remove('open'); }
+
+  function filterRecurClients() {
+    const q = document.getElementById('recurClientSearch').value.toLowerCase();
+    const filtered = allClients.filter(c => `${c.first_name} ${c.last_name}`.toLowerCase().includes(q));
+    renderRecurClientOptions(filtered);
+  }
+
+  function renderRecurClientOptions(clients) {
+    const el = document.getElementById('recurClientList');
+    el.innerHTML = clients.map(c => `
+      <div class="client-option ${recurSelectedClientId === c.id ? 'selected' : ''}"
+           onclick="selectRecurClient('${c.id}', ${JSON.stringify((c.dogs || []).map(d => ({id: d.id, name: d.name}))).replace(/"/g, '&quot;')})">
+        <div>
+          <div class="client-option-name">${c.first_name} ${c.last_name}</div>
+          <div class="client-option-dogs">${(c.dogs || []).map(d => d.name).join(', ') || 'No dogs'}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function selectRecurClient(clientId, dogs) {
+    recurSelectedClientId = clientId;
+    recurSelectedDogId = null;
+    document.querySelectorAll('#recurClientList .client-option').forEach(el => el.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    const dogRow = document.getElementById('recurDogRow');
+    const dogSel = document.getElementById('recurDogSelect');
+    if (dogs.length > 0) {
+      dogSel.innerHTML = `<option value="">All dogs</option>` + dogs.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+      dogRow.style.display = 'block';
+      dogSel.onchange = () => { recurSelectedDogId = dogSel.value || null; };
+    } else {
+      dogRow.style.display = 'none';
+    }
+  }
+
+  function toggleDay(btn) {
+    const dow = parseInt(btn.dataset.dow);
+    if (selectedDays.includes(dow)) {
+      selectedDays = selectedDays.filter(d => d !== dow);
+      btn.classList.remove('selected');
+    } else {
+      selectedDays.push(dow);
+      btn.classList.add('selected');
+    }
+  }
+
+  async function saveRecurring() {
+    if (!recurSelectedClientId) { showToast('Select a pet parent', 'error'); return; }
+    if (!selectedDays.length) { showToast('Select at least one day', 'error'); return; }
+    const res = await fetch('/api/appointments/recurring', {
+      method: 'POST', headers: authHeaders(),
+      body: JSON.stringify({ client_id: recurSelectedClientId, dog_id: recurSelectedDogId, days_of_week: selectedDays })
+    });
+    if (res.ok) {
+      closeRecurringModal();
+      showToast('Recurring schedule saved', 'success');
+      loadRecurring();
+      loadSchedule();
+    } else {
+      const d = await res.json();
+      showToast(d.error || 'Error saving', 'error');
+    }
+  }
+
+  // ── Summary modal ──────────────────────────────────────────────────────────
+  function openSummaryModal() {
+    // Pre-fill from profile if available
+    try {
+      const nav = JSON.parse(localStorage.getItem('tailwag_nav_user'));
+      if (nav?.phone) document.getElementById('managerPhone').value = nav.phone;
+    } catch {}
+    document.getElementById('summaryModal').classList.add('open');
+  }
+  function closeSummaryModal() { document.getElementById('summaryModal').classList.remove('open'); }
+
+  // ── Clients ────────────────────────────────────────────────────────────────
+  async function loadClients() {
+    try {
+      const res = await fetch('/api/clients', { headers: authHeaders() });
+      allClients = await res.json();
+    } catch {}
+  }
+
+  // ── Toast ──────────────────────────────────────────────────────────────────
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => { t.className = 'toast'; }, 3000);
+  }
+
+  // Close modals on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+  });
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  const session = getSession();
+  if (!session?.access_token) { window.location.href = '/login.html'; }
+
+  async function init() {
+    updateDateDisplay();
+    await Promise.all([loadClients(), loadSchedule(), loadRecurring()]);
+  }
+
+  init();
+</script>
+<script src="/js/nav-user.js"></script>
+</body>
+</html>
