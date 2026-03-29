@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { supabaseAdmin } = require('../utils/supabase');
+const { supabaseAdmin } = require('../config/supabase');
 const { sendEmail } = require('../utils/email');
 
 // POST /api/newsletter/subscribe
