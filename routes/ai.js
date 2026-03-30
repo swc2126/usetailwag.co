@@ -29,7 +29,7 @@ Rules:
 - Match the dog's energy in word choice (use the notes to infer energy level)
 - Use the owner's first name ONCE, naturally woven in — never at the start
 - End with at most ONE casual emoji, only if it feels natural
-- STRICT LIMIT: message must be 155 characters or fewer — count carefully before responding
+- STRICT LIMIT: message must be 160 characters or fewer — count carefully before responding
 - Sound like a real person wrote it, not a template
 - Be specific to the notes provided — no generic openers
 
@@ -42,11 +42,7 @@ Write ONLY the SMS message text. No quotes, no explanation.`;
       messages: [{ role: 'user', content: prompt }]
     });
 
-    let text = message.content[0].text.trim();
-    // Hard cap safety net — trim to last complete word under 160
-    if (text.length > 160) {
-      text = text.substring(0, 160).replace(/\s+\S*$/, '').trim();
-    }
+    const text = message.content[0].text.trim();
     res.json({ message: text, chars: text.length });
   } catch (err) {
     console.error('AI error:', err.message);
@@ -91,7 +87,7 @@ RULES (all are mandatory):
 6. The review ask should feel warm and earned — something like "if you have a moment" or "it would mean a lot" — never pushy or transactional
 7. Do NOT include any URL or link — the link will be added automatically
 ${google_link ? `8. Ask them to leave a Google review (link will be appended automatically)` : `8. Ask them to search for ${daycare_name || 'the daycare'} on Google to leave a review`}
-9. STRICT LIMIT: message text must be ${textBudget} characters or fewer — count carefully
+9. STRICT LIMIT: total message (including link if present) must be 175 characters or fewer — count carefully
 10. At most one emoji — only if it genuinely fits. No forced emoji.
 11. Sound like a real, warm human wrote it — not a bot, not marketing copy
 
@@ -105,16 +101,8 @@ Write ONLY the message text (no link). No quotes. No explanation. No labels.`;
     });
 
     let text = message.content[0].text.trim();
-    // Hard cap on AI text before appending link
-    if (text.length > textBudget) {
-      text = text.substring(0, textBudget).replace(/\s+\S*$/, '').trim();
-    }
     // Append link server-side
     if (google_link) text = `${text} ${google_link}`;
-    // Final hard cap safety net
-    if (text.length > 160) {
-      text = text.substring(0, 160).replace(/\s+\S*$/, '').trim();
-    }
     res.json({ message: text, chars: text.length });
   } catch (err) {
     console.error('AI review-request error:', err.message);
