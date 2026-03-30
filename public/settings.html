@@ -400,10 +400,8 @@
       const ownerEmail = session.user?.email || meData?.user?.email || '';
       document.getElementById('accountEmail').textContent = ownerEmail || '—';
 
-      // Sentiment config (owner/admin only)
-      if (['owner', 'admin'].includes(meData?.role)) {
-        await loadSentimentConfig(ownerEmail);
-      }
+      // Sentiment config — always attempt, API enforces access
+      await loadSentimentConfig(ownerEmail);
 
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('pageContent').style.display = 'block';
@@ -517,10 +515,9 @@
   async function loadSentimentConfig(ownerEmail) {
     try {
       const res = await fetch('/api/sentiment/config', { headers: authHeaders });
-      if (!res.ok) return;
+      if (!res.ok) return; // 403 for staff — card stays hidden
       const cfg = await res.json();
 
-      // Show the card (only for owner/admin — checked by nav-user role)
       document.getElementById('sentimentCard').style.display = 'block';
 
       if (cfg.enabled) {
