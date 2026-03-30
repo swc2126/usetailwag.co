@@ -275,6 +275,13 @@ router.get('/usage', requireAuth, async (req, res) => {
   res.json({ usage, limit, plan, remaining: limit - usage });
 });
 
+// GET /api/sms/number — return assigned Twilio number for this daycare
+router.get('/number', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+  const number = await getTwilioNumber(req.daycareId);
+  res.json({ phone_number: number || null });
+});
+
 // POST /api/sms/status — Twilio status callback (no auth — Twilio posts here)
 router.post('/status', express.urlencoded({ extended: false }), async (req, res) => {
   const { MessageSid, MessageStatus } = req.body;
