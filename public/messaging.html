@@ -971,6 +971,9 @@
       const date = new Date(m.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
       const status = m.status || 'queued';
       const preview = (m.body || '').length > 60 ? m.body.substring(0, 60) + '…' : (m.body || '');
+      const photoThumb = m.media_url
+        ? `<img src="${m.media_url}" alt="photo" style="height:36px;width:36px;object-fit:cover;border-radius:5px;vertical-align:middle;margin-right:6px;border:1px solid rgba(255,255,255,0.1);">`
+        : '';
       return `
         <tr>
           <td style="white-space:nowrap;color:#999">${date}</td>
@@ -978,7 +981,7 @@
             <div style="font-weight:600">${escHtml(clientName)}</div>
             <div style="font-size:11px;color:#bbb">${escHtml(m.recipient_phone || '')}</div>
           </td>
-          <td><div class="msg-preview">${escHtml(preview)}</div></td>
+          <td><div class="msg-preview">${photoThumb}${escHtml(preview)}</div></td>
           <td><span class="status-badge status-${status}">${status}</span></td>
         </tr>`;
     }).join('');
