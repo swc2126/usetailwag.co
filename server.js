@@ -8,9 +8,8 @@ const PORT = process.env.PORT || 3000;
 // Stripe webhook needs raw body — must be registered before express.json()
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
-// Twilio callbacks use urlencoded
+// Twilio status callback uses urlencoded
 app.use('/api/sms/status', express.urlencoded({ extended: false }));
-app.use('/api/sentiment/incoming', express.urlencoded({ extended: false }));
 
 // Parse JSON bodies
 app.use(express.json());

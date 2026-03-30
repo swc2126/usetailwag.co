@@ -64,7 +64,7 @@ async function getTwilioNumber(daycareId) {
 router.post('/send', requireAuth, async (req, res) => {
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
 
-  const { client_id, recipient_phone, body, media_url, media_type, schedule_followup, dog_name, owner_first_name } = req.body;
+  const { client_id, recipient_phone, body, media_url, media_type, staff_notes, dog_name, owner_first_name } = req.body;
   if (!recipient_phone || !body) return res.status(400).json({ error: 'recipient_phone and body required' });
 
   const plan = await getDaycarePlan(req.daycareId);
@@ -120,42 +120,67 @@ router.post('/send', requireAuth, async (req, res) => {
 
   if (logError) console.error('Message log error:', logError.message);
 
-  // Schedule sentiment follow-up if requested and sentiment is enabled for this daycare
-  if (schedule_followup && status === 'sent' && client_id) {
-    try {
-      const { data: sentCfg } = await supabaseAdmin
-        .from('sentiment_config')
-        .select('enabled, review_delay_hours, followup_message')
-        .eq('daycare_id', req.daycareId)
-        .single();
+  // Run sentiment scoring on staff notes if provided (fire and forget — non-blocking)
+  if (staff_notes && status === 'sent' && client_id) {
+    setImmediate(async () => {
+      try {
+        const { supabaseAdmin: sb } = require('../config/supabase');
+        const sentimentRoute = require('./sentiment');
+        // Call the score logic directly by importing shared helper
+        const Anthropic = require('@anthropic-ai/sdk');
+        const { sendEmail } = require('../utils/email');
+        const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-      if (sentCfg?.enabled) {
-        const delayHours = sentCfg.review_delay_hours || 2;
-        const sendAt = new Date(Date.now() + delayHours * 60 * 60 * 1000).toISOString();
+        const { data: config } = await sb.from('sentiment_config').select('*').eq('daycare_id', req.daycareId).single();
+        if (!config?.enabled) return;
 
-        // Build follow-up message
-        const daycareName = (await supabaseAdmin.from('daycares').select('name').eq('id', req.daycareId).single()).data?.name || 'us';
-        const defaultMsg = dog_name
-          ? `How was ${dog_name}'s visit today${owner_first_name ? `, ${owner_first_name}` : ''}? We'd love to hear your thoughts 🐾`
-          : `How was your visit today? Your feedback means a lot to us 🐾`;
-        const followupBody = sentCfg.followup_message
-          ? sentCfg.followup_message.replace('{dog}', dog_name || 'your dog').replace('{owner}', owner_first_name || 'there').replace('{daycare}', daycareName)
-          : defaultMsg;
+        let sentiment = 'neutral';
+        try {
+          const aiRes = await anthropic.messages.create({
+            model: 'claude-haiku-4-5', max_tokens: 10,
+            messages: [{ role: 'user', content: `A dog daycare staff member wrote these notes about a dog's visit:\n\n"${staff_notes}"\n\nRate the overall visit sentiment as one word. Respond with only: happy, neutral, or unhappy` }]
+          });
+          const raw = aiRes.content[0].text.trim().toLowerCase();
+          if (['happy', 'neutral', 'unhappy'].includes(raw)) sentiment = raw;
+        } catch {
+          const l = staff_notes.toLowerCase();
+          if (/great|amazing|loved|perfect|fantastic|excellent|wonderful|thrived|enjoyed/.test(l)) sentiment = 'happy';
+          else if (/incident|hurt|injured|sick|upset|refused|struggle|difficult|concern|worried|off today/.test(l)) sentiment = 'unhappy';
+        }
 
-        await supabaseAdmin.from('pending_followups').insert({
-          daycare_id: req.daycareId,
-          client_id,
-          dog_name: dog_name || null,
-          owner_first_name: owner_first_name || null,
-          recipient_phone,
-          message_id: logged?.id || null,
-          followup_body: followupBody,
-          send_at: sendAt
-        });
+        const threshold = config.sentiment_threshold || 'unhappy_only';
+        const shouldNotify = sentiment === 'unhappy' || (sentiment === 'neutral' && threshold === 'neutral_and_unhappy');
+
+        if (shouldNotify && config.notification_email) {
+          const { data: dc } = await sb.from('daycares').select('name').eq('id', req.daycareId).single();
+          const label = sentiment === 'unhappy' ? '⚠️ Concern flagged' : '📋 Visit noted';
+          await sendEmail({
+            to: config.notification_email,
+            subject: `TailWag: ${label} — ${dog_name || 'dog'}'s visit today`,
+            html: `<div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#f5f0e8;"><div style="background:#0F1410;border-radius:12px;padding:24px;margin-bottom:20px;"><div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:#F5F0E8;">TailWag</div><div style="font-size:13px;color:#A8C5B0;margin-top:4px;">Visit Flag — ${dc?.name || 'Your Daycare'}</div></div><div style="background:#fff;border-radius:12px;padding:24px;border-left:4px solid ${sentiment === 'unhappy' ? '#e74c3c' : '#C4933F'};"><div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:${sentiment === 'unhappy' ? '#e74c3c' : '#C4933F'};margin-bottom:12px;">${label}</div><div style="font-size:15px;font-weight:600;color:#0F1410;margin-bottom:12px;">Today's notes for ${owner_first_name ? owner_first_name + "'s " : ''}${dog_name || 'dog'}:</div><div style="background:#f8f5f0;border-radius:8px;padding:16px;font-size:15px;color:#333;font-style:italic;">"${staff_notes}"</div><p style="font-size:13px;color:#888;margin-top:16px;">A review request was <strong>not sent</strong> for this visit.</p></div></div>`,
+            text: `TailWag Visit Flag\n\nNotes for ${dog_name || 'dog'}: "${staff_notes}"\n\nSentiment: ${sentiment}\nReview request was NOT sent.`
+          });
+        }
+
+        if (sentiment === 'happy' && config.auto_send_review && recipient_phone) {
+          const { data: dc } = await sb.from('daycares').select('name, google_link').eq('id', req.daycareId).single();
+          if (dc?.google_link) {
+            const delayHours = config.review_delay_hours || 2;
+            const sendAt = new Date(Date.now() + delayHours * 60 * 60 * 1000).toISOString();
+            const reviewBody = owner_first_name
+              ? `So glad ${dog_name || 'your dog'} had a great day, ${owner_first_name}! A quick Google review would mean the world to us 🐾 ${dc.google_link}`
+              : `So glad ${dog_name || 'your dog'} had a great day! A quick Google review would mean the world to us 🐾 ${dc.google_link}`;
+            await sb.from('pending_followups').insert({
+              daycare_id: req.daycareId, client_id,
+              dog_name: dog_name || null, owner_first_name: owner_first_name || null,
+              recipient_phone, followup_body: reviewBody, send_at: sendAt
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Sentiment scoring error:', err.message);
       }
-    } catch (followupErr) {
-      console.error('Follow-up scheduling error:', followupErr.message);
-    }
+    });
   }
 
   if (status === 'failed') return res.status(502).json({ error: 'Message failed to send via Twilio.' });

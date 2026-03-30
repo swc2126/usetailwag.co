@@ -252,7 +252,7 @@
     <!-- Sentiment & Reviews Card -->
     <div class="settings-card" id="sentimentCard" style="display:none;">
       <h2>Sentiment &amp; Review Routing</h2>
-      <p style="font-size:13px;color:#888;margin-bottom:20px;line-height:1.6;">After sending a report card, TailWag can automatically follow up to gauge how the visit went. Happy clients get directed to leave a Google review. Neutral or unhappy clients route privately to you first.</p>
+      <p style="font-size:13px;color:#888;margin-bottom:20px;line-height:1.6;">When a report card is sent, TailWag reads the staff notes and scores the visit. Positive visits automatically trigger a review request after a set delay. Notes that suggest a concern are flagged to you privately — no review request is sent.</p>
 
       <!-- Enable toggle -->
       <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f0ede8;">
@@ -314,13 +314,9 @@
           </label>
         </div>
 
-        <!-- Custom follow-up message -->
-        <div style="padding:16px 0;">
-          <label style="font-size:13px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Custom follow-up message <span style="font-weight:400;text-transform:none;font-size:12px;">(optional)</span></label>
-          <textarea id="followupMessage" rows="3" placeholder="How was {dog}'s visit today, {owner}? We'd love to hear your thoughts 🐾"
-            style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;outline:none;resize:vertical;transition:border-color 0.2s;"
-            onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'"></textarea>
-          <p style="font-size:12px;color:#aaa;margin-top:6px;">Use <code style="background:#f0ede8;padding:1px 5px;border-radius:3px;">{dog}</code>, <code style="background:#f0ede8;padding:1px 5px;border-radius:3px;">{owner}</code>, <code style="background:#f0ede8;padding:1px 5px;border-radius:3px;">{daycare}</code> as placeholders. Leave blank to use the default.</p>
+        <!-- Delay label update -->
+        <div style="padding:8px 0 0;">
+          <p style="font-size:12px;color:#aaa;line-height:1.6;">Review requests are sent automatically after the delay — only for visits that score as positive. Staff notes that flag a concern are emailed to you and no review request is sent.</p>
         </div>
       </div>
 
@@ -562,8 +558,7 @@
       auto_send_review: document.getElementById('autoSendReview').checked,
       review_delay_hours: parseInt(document.querySelector('input[name="delayHours"]:checked')?.value || 2),
       sentiment_threshold: document.querySelector('input[name="sentimentThreshold"]:checked')?.value || 'unhappy_only',
-      notification_email: document.getElementById('notificationEmail').value.trim(),
-      followup_message: document.getElementById('followupMessage').value.trim()
+      notification_email: document.getElementById('notificationEmail').value.trim()
     };
 
     const res = await fetch('/api/sentiment/config', {
