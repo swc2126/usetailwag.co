@@ -405,7 +405,7 @@
           </div>
 
           <!-- Section 4: Photo attachment (Growth/Pro only) -->
-          <div class="compose-card" id="photoAttachCard" style="display:none;border:1.5px dashed rgba(196,147,63,0.35);background:rgba(196,147,63,0.04);">
+          <div class="compose-card" id="photoAttachCard" style="border:1.5px dashed rgba(196,147,63,0.35);background:rgba(196,147,63,0.04);">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
               <label style="font-size:12px;font-weight:700;color:#C4933F;text-transform:uppercase;letter-spacing:0.06em;">📷 Add Today's Photo</label>
               <span style="font-size:11px;color:var(--text-muted);">Sends with the report card</span>
@@ -540,10 +540,17 @@
       bar.style.width = pct + '%';
       bar.className = 'usage-bar-fill' + (pct >= 90 ? ' danger' : pct >= 75 ? ' warning' : '');
 
-      // Show photo attach for Growth/Pro plans
-      if (['growth', 'pro'].includes(usage.plan)) {
-        const card = document.getElementById('photoAttachCard');
-        if (card) card.style.display = 'block';
+      // Show photo attach card for all plans — API enforces upgrade at send time
+      const photoCard = document.getElementById('photoAttachCard');
+      if (photoCard) {
+        photoCard.style.display = 'block';
+        if (!['growth', 'pro'].includes(usage.plan)) {
+          // Starter: show card but indicate upgrade needed
+          const upgradeNote = document.createElement('p');
+          upgradeNote.style.cssText = 'font-size:11px;color:var(--text-muted);margin-top:8px;text-align:center;';
+          upgradeNote.textContent = 'Photo sending available on Growth & Pro plans.';
+          photoCard.appendChild(upgradeNote);
+        }
       }
 
       renderClientList(allClients);
