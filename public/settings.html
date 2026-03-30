@@ -345,29 +345,27 @@
       // Plan badge
       const planBadge = document.getElementById('planBadge');
       const planName = usage.plan || 'starter';
-      planBadge.textContent = planName.charAt(0).toUpperCase() + planName.slice(1);
-      planBadge.className = `plan-badge plan-${planName}`;
+      if (planBadge) {
+        planBadge.textContent = planName.charAt(0).toUpperCase() + planName.slice(1);
+        planBadge.className = `plan-badge plan-${planName}`;
+      }
 
-      document.getElementById('planStatus').textContent = meData?.subscription?.status === 'active' ? 'Active' : 'No active subscription';
+      const planStatusEl = document.getElementById('planStatus');
+      if (planStatusEl) planStatusEl.textContent = meData?.subscription?.status === 'active' ? 'Active' : 'No active subscription';
 
       // Renewal date
       const periodEnd = meData?.subscription?.current_period_end;
-      document.getElementById('planRenewal').textContent = periodEnd
+      const planRenewalEl = document.getElementById('planRenewal');
+      if (planRenewalEl) planRenewalEl.textContent = periodEnd
         ? new Date(periodEnd * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
         : '—';
-
-      // Usage bar
-      const pct = usage.limit > 0 ? Math.min(100, Math.round((usage.usage / usage.limit) * 100)) : 0;
-      document.getElementById('usageText').textContent = `${usage.usage} / ${usage.limit}`;
-      const bar = document.getElementById('usageBar');
-      bar.style.width = pct + '%';
-      bar.className = 'usage-bar-fill' + (pct >= 90 ? ' danger' : pct >= 75 ? ' warning' : '');
 
       // TailWag number
       await loadTwilioNumber();
 
       // Daycare info
       if (meData?.daycare) {
+        document.getElementById('daycareName').textContent = meData.daycare.name || '—';
         document.getElementById('daycareCity').textContent = meData.daycare.city || '—';
         document.getElementById('daycareState').textContent = meData.daycare.state || '—';
         if (meData.daycare.google_link) {
@@ -480,7 +478,7 @@
       if (threshRadio) threshRadio.checked = true;
 
       document.getElementById('notificationEmail').value = cfg.notification_email || ownerEmail || '';
-      document.getElementById('followupMessage').value = cfg.followup_message || '';
+      // followup_message field removed — sentiment config only controls routing
     } catch (err) {
       console.error('Sentiment config load error:', err.message);
     }

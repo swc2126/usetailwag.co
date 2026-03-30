@@ -292,7 +292,6 @@
       <a href="/schedule.html" class="nav-link">Schedule</a>
       <a href="/reviews.html" class="nav-link">Reviews</a>
       <a href="/team.html" class="nav-link">Team</a>
-      <a href="/admin-report.html" class="nav-link">Report</a>
       <a href="/settings.html" class="nav-link">Settings</a>
     </nav>
   </div>
@@ -467,6 +466,12 @@
 </div>
 
 <script>
+  // Global error handler — logs exact file/line to console for debugging
+  window.onerror = function(msg, src, line, col) {
+    console.error('[TailWag] Uncaught error:', msg, '\n  at', src + ':' + line + ':' + col);
+    return false;
+  };
+
   const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
   if (!session || !session.access_token) window.location.href = '/login.html';
 
@@ -521,13 +526,6 @@
           googleLink = statsData.daycare.google_link || '';
         }
       }
-
-      // Update usage bar
-      const pct = usage.limit > 0 ? Math.min(100, Math.round((usage.usage / usage.limit) * 100)) : 0;
-      document.getElementById('usageCount').textContent = `${usage.usage} / ${usage.limit} messages`;
-      const bar = document.getElementById('usageBar');
-      bar.style.width = pct + '%';
-      bar.className = 'usage-bar-fill' + (pct >= 90 ? ' danger' : pct >= 75 ? ' warning' : '');
 
       // Show photo attach card for all plans — API enforces upgrade at send time
       const photoCard = document.getElementById('photoAttachCard');
@@ -633,13 +631,13 @@
 
     // Reset
     aiGeneratedBase = null;
-    document.getElementById('staffNotes').value = '';
-    document.getElementById('greatDayToggle').checked = false;
-    document.getElementById('toggleSubtext').textContent = 'Toggle on to append a Google review request';
-    document.getElementById('toggleSubtext').className = 'toggle-subtext';
-    document.getElementById('sendResult').style.display = 'none';
-    document.getElementById('generateBtn').textContent = '✨ Generate Report Card';
-    document.getElementById('generateError').style.display = 'none';
+    const _notes = document.getElementById('staffNotes');     if (_notes) _notes.value = '';
+    const _toggle = document.getElementById('greatDayToggle'); if (_toggle) _toggle.checked = false;
+    const _subtext = document.getElementById('toggleSubtext');
+    if (_subtext) { _subtext.textContent = 'Toggle on to append a Google review request'; _subtext.className = 'toggle-subtext'; }
+    const _result = document.getElementById('sendResult');    if (_result) _result.style.display = 'none';
+    const _genBtn = document.getElementById('generateBtn');   if (_genBtn) _genBtn.textContent = '✨ Generate Report Card';
+    const _genErr = document.getElementById('generateError'); if (_genErr) _genErr.style.display = 'none';
 
     await populateTemplate();
     updateSendLabel();
@@ -707,19 +705,22 @@
   }
 
   function updateSendLabel() {
-    const template = document.getElementById('templateSelect').value;
-    document.getElementById('sendBtn').textContent = SEND_LABELS[template] || 'Send Message 📱';
+    const template = document.getElementById('templateSelect')?.value;
+    const btn = document.getElementById('sendBtn');
+    if (btn) btn.textContent = SEND_LABELS[template] || 'Send Message 📱';
   }
 
   async function onGreatDayToggle() {
-    const on = document.getElementById('greatDayToggle').checked;
+    const on = document.getElementById('greatDayToggle')?.checked;
     const subtextEl = document.getElementById('toggleSubtext');
-    if (on) {
-      subtextEl.textContent = 'A review request link will be included in the message';
-      subtextEl.className = 'toggle-subtext on';
-    } else {
-      subtextEl.textContent = 'Toggle on to append a Google review request';
-      subtextEl.className = 'toggle-subtext';
+    if (subtextEl) {
+      if (on) {
+        subtextEl.textContent = 'A review request link will be included in the message';
+        subtextEl.className = 'toggle-subtext on';
+      } else {
+        subtextEl.textContent = 'Toggle on to append a Google review request';
+        subtextEl.className = 'toggle-subtext';
+      }
     }
     const template = document.getElementById('templateSelect').value;
     if (template === 'report_card') {
@@ -750,11 +751,13 @@
   }
 
   function updateCharCount() {
-    const body = document.getElementById('msgBody').value;
-    const len = body.length;
+    const bodyEl = document.getElementById('msgBody');
+    const len = bodyEl ? bodyEl.value.length : 0;
     const el = document.getElementById('charCount');
-    el.textContent = `${len} / 160`;
-    el.className = 'char-count' + (len > 160 ? ' over' : len > 140 ? ' warning' : '');
+    if (el) {
+      el.textContent = `${len} / 160`;
+      el.className = 'char-count' + (len > 160 ? ' over' : len > 140 ? ' warning' : '');
+    }
   }
 
   function updateGenerateBtn() {
@@ -817,9 +820,10 @@
   }
 
   function openPreviewModal() {
-    const body = document.getElementById('msgBody').value || '(empty message)';
-    document.getElementById('previewBubbleText').textContent = body;
-    document.getElementById('previewModal').classList.add('open');
+    const body = document.getElementById('msgBody')?.value || '(empty message)';
+    const bubble = document.getElementById('previewBubbleText');
+    if (bubble) bubble.textContent = body;
+    document.getElementById('previewModal')?.classList.add('open');
   }
 
   function closePreviewModal() {
@@ -877,7 +881,7 @@
     const session = JSON.parse(localStorage.getItem('tailwag_session') || '{}');
     const res = await fetch('/api/sms/upload-media', {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + session.token },
+      headers: { 'Authorization': 'Bearer ' + session.access_token },
       body: formData
     });
     const data = await res.json();
@@ -887,8 +891,9 @@
   }
 
   async function sendMessage() {
-    const body = document.getElementById('msgBody').value.trim();
+    const body = document.getElementById('msgBody')?.value.trim() || '';
     const resultEl = document.getElementById('sendResult');
+    if (!resultEl) { console.error('[TailWag] sendResult element not found'); return; }
     resultEl.style.display = 'none';
 
     if (!selectedClient) {
@@ -961,14 +966,7 @@
         fetch('/api/sms/usage', { headers: authHeaders })
       ]);
       if (histRes.ok) renderHistory(await histRes.json());
-      if (usRes.ok) {
-        const usage = await usRes.json();
-        const pct = usage.limit > 0 ? Math.min(100, Math.round((usage.usage / usage.limit) * 100)) : 0;
-        document.getElementById('usageCount').textContent = `${usage.usage} / ${usage.limit} messages`;
-        const bar = document.getElementById('usageBar');
-        bar.style.width = pct + '%';
-        bar.className = 'usage-bar-fill' + (pct >= 90 ? ' danger' : pct >= 75 ? ' warning' : '');
-      }
+      // usage bar removed — no update needed
 
     } catch (err) {
       resultEl.textContent = err.message;
