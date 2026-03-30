@@ -64,7 +64,7 @@ async function getTwilioNumber(daycareId) {
 router.post('/send', requireAuth, async (req, res) => {
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
 
-  const { client_id, recipient_phone, body, media_url, media_type } = req.body;
+  const { client_id, recipient_phone, body, media_url, media_type, schedule_followup, dog_name, owner_first_name } = req.body;
   if (!recipient_phone || !body) return res.status(400).json({ error: 'recipient_phone and body required' });
 
   const plan = await getDaycarePlan(req.daycareId);
@@ -119,6 +119,44 @@ router.post('/send', requireAuth, async (req, res) => {
     .single();
 
   if (logError) console.error('Message log error:', logError.message);
+
+  // Schedule sentiment follow-up if requested and sentiment is enabled for this daycare
+  if (schedule_followup && status === 'sent' && client_id) {
+    try {
+      const { data: sentCfg } = await supabaseAdmin
+        .from('sentiment_config')
+        .select('enabled, review_delay_hours, followup_message')
+        .eq('daycare_id', req.daycareId)
+        .single();
+
+      if (sentCfg?.enabled) {
+        const delayHours = sentCfg.review_delay_hours || 2;
+        const sendAt = new Date(Date.now() + delayHours * 60 * 60 * 1000).toISOString();
+
+        // Build follow-up message
+        const daycareName = (await supabaseAdmin.from('daycares').select('name').eq('id', req.daycareId).single()).data?.name || 'us';
+        const defaultMsg = dog_name
+          ? `How was ${dog_name}'s visit today${owner_first_name ? `, ${owner_first_name}` : ''}? We'd love to hear your thoughts 🐾`
+          : `How was your visit today? Your feedback means a lot to us 🐾`;
+        const followupBody = sentCfg.followup_message
+          ? sentCfg.followup_message.replace('{dog}', dog_name || 'your dog').replace('{owner}', owner_first_name || 'there').replace('{daycare}', daycareName)
+          : defaultMsg;
+
+        await supabaseAdmin.from('pending_followups').insert({
+          daycare_id: req.daycareId,
+          client_id,
+          dog_name: dog_name || null,
+          owner_first_name: owner_first_name || null,
+          recipient_phone,
+          message_id: logged?.id || null,
+          followup_body: followupBody,
+          send_at: sendAt
+        });
+      }
+    } catch (followupErr) {
+      console.error('Follow-up scheduling error:', followupErr.message);
+    }
+  }
 
   if (status === 'failed') return res.status(502).json({ error: 'Message failed to send via Twilio.' });
   res.json({ success: true, message: logged, usage: usage + 1, limit });

@@ -8,8 +8,9 @@ const PORT = process.env.PORT || 3000;
 // Stripe webhook needs raw body — must be registered before express.json()
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
-// Twilio status callback uses urlencoded
+// Twilio callbacks use urlencoded
 app.use('/api/sms/status', express.urlencoded({ extended: false }));
+app.use('/api/sentiment/incoming', express.urlencoded({ extended: false }));
 
 // Parse JSON bodies
 app.use(express.json());
@@ -62,6 +63,7 @@ app.use('/api/admin-report', require('./routes/admin-report'));
 app.use('/api/appointments', require('./routes/appointments'));
 app.use('/api/import', require('./routes/import'));
 app.use('/api/newsletter', require('./routes/newsletter'));
+app.use('/api/sentiment', require('./routes/sentiment'));
 
 // Serve index.html for root
 app.get('/', (req, res) => {
@@ -75,4 +77,55 @@ app.get('/health', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`TailWag server running on port ${PORT}`);
+});
+
+// ─── CRON: Send pending sentiment follow-ups every 10 minutes ───────────────
+const cron = require('node-cron');
+const twilio = require('twilio');
+const { supabaseAdmin } = require('./config/supabase');
+
+cron.schedule('*/10 * * * *', async () => {
+  try {
+    const { data: pending } = await supabaseAdmin
+      .from('pending_followups')
+      .select('*, twilio_config:daycares(twilio_config(phone_number))')
+      .eq('sent', false)
+      .lte('send_at', new Date().toISOString())
+      .limit(50);
+
+    if (!pending?.length) return;
+
+    const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+    for (const followup of pending) {
+      try {
+        // Get the TailWag number for this daycare
+        const { data: twilioConfig } = await supabaseAdmin
+          .from('twilio_config')
+          .select('phone_number')
+          .eq('daycare_id', followup.daycare_id)
+          .eq('status', 'active')
+          .single();
+
+        if (!twilioConfig?.phone_number) continue;
+
+        await twilioClient.messages.create({
+          from: twilioConfig.phone_number,
+          to: followup.recipient_phone,
+          body: followup.followup_body
+        });
+
+        await supabaseAdmin
+          .from('pending_followups')
+          .update({ sent: true, sent_at: new Date().toISOString() })
+          .eq('id', followup.id);
+
+        console.log(`✅ Sent follow-up to ${followup.recipient_phone}`);
+      } catch (err) {
+        console.error(`Follow-up send error for ${followup.recipient_phone}:`, err.message);
+      }
+    }
+  } catch (err) {
+    console.error('Cron follow-up error:', err.message);
+  }
 });

@@ -115,6 +115,22 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Sentiment toggle switch */
+    #sentimentToggle, #autoReviewToggle { transition: background 0.2s; }
+    #sentimentToggle.on, #autoReviewToggle.on { background: var(--green); }
+    #sentimentToggle.on::before, #autoReviewToggle.on::before { transform: translateX(20px); }
+    #sentimentToggle::before, #autoReviewToggle::before {
+      content: ''; position: absolute; height: 18px; width: 18px;
+      left: 3px; bottom: 3px; background: white; border-radius: 50%;
+      transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .delay-option {
+      display: flex; align-items: center; gap: 6px; font-size: 14px; color: #333; cursor: pointer;
+      padding: 8px 16px; border: 1px solid #ddd; border-radius: 8px; transition: border-color 0.15s, background 0.15s;
+    }
+    .delay-option:has(input:checked) { border-color: var(--green); background: #f0fff4; color: var(--green); font-weight: 600; }
+    .delay-option input { accent-color: var(--green); }
+
     @media (max-width: 640px) {
       .dashboard-nav { padding: 0 16px; }
       .nav-links { display: none; }
@@ -233,6 +249,87 @@
       </div>
     </div>
 
+    <!-- Sentiment & Reviews Card -->
+    <div class="settings-card" id="sentimentCard" style="display:none;">
+      <h2>Sentiment &amp; Review Routing</h2>
+      <p style="font-size:13px;color:#888;margin-bottom:20px;line-height:1.6;">After sending a report card, TailWag can automatically follow up to gauge how the visit went. Happy clients get directed to leave a Google review. Neutral or unhappy clients route privately to you first.</p>
+
+      <!-- Enable toggle -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f0ede8;">
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#0F1410;">Enable sentiment follow-up</div>
+          <div style="font-size:12px;color:#aaa;margin-top:2px;">Automatically send a follow-up message after each report card</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;">
+          <input type="checkbox" id="sentimentEnabled" style="opacity:0;width:0;height:0;">
+          <span id="sentimentToggle" onclick="toggleSentiment()" style="position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:24px;transition:0.2s;"></span>
+        </label>
+      </div>
+
+      <div id="sentimentOptions">
+        <!-- Delay -->
+        <div style="padding:16px 0;border-bottom:1px solid #f0ede8;">
+          <label style="font-size:13px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:10px;">Follow-up delay after report card</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <label class="delay-option"><input type="radio" name="delayHours" value="1"> 1 hour</label>
+            <label class="delay-option"><input type="radio" name="delayHours" value="2" checked> 2 hours</label>
+            <label class="delay-option"><input type="radio" name="delayHours" value="3"> 3 hours</label>
+            <label class="delay-option"><input type="radio" name="delayHours" value="4"> 4 hours</label>
+          </div>
+        </div>
+
+        <!-- Threshold -->
+        <div style="padding:16px 0;border-bottom:1px solid #f0ede8;">
+          <label style="font-size:13px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:10px;">Email me when a client responds</label>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <label style="display:flex;align-items:center;gap:10px;font-size:14px;color:#333;cursor:pointer;">
+              <input type="radio" name="sentimentThreshold" value="unhappy_only" style="accent-color:#1E6B4A;">
+              <span><strong>Unhappy only</strong> — only alert me for clearly negative responses</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;font-size:14px;color:#333;cursor:pointer;">
+              <input type="radio" name="sentimentThreshold" value="neutral_and_unhappy" style="accent-color:#1E6B4A;">
+              <span><strong>Neutral &amp; Unhappy</strong> — alert me for anything less than enthusiastic</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Notification email -->
+        <div style="padding:16px 0;border-bottom:1px solid #f0ede8;">
+          <label style="font-size:13px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;">Send alerts to this email</label>
+          <input type="email" id="notificationEmail" placeholder="owner@yourdaycare.com"
+            style="width:100%;max-width:380px;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'">
+          <p style="font-size:12px;color:#aaa;margin-top:6px;">Defaults to your account email if left blank.</p>
+        </div>
+
+        <!-- Auto-send review link -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f0ede8;">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#0F1410;">Auto-send Google review link to happy clients</div>
+            <div style="font-size:12px;color:#aaa;margin-top:2px;">When a client responds positively, automatically send them your review link</div>
+          </div>
+          <label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;">
+            <input type="checkbox" id="autoSendReview" style="opacity:0;width:0;height:0;">
+            <span id="autoReviewToggle" onclick="toggleAutoReview()" style="position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:24px;transition:0.2s;"></span>
+          </label>
+        </div>
+
+        <!-- Custom follow-up message -->
+        <div style="padding:16px 0;">
+          <label style="font-size:13px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Custom follow-up message <span style="font-weight:400;text-transform:none;font-size:12px;">(optional)</span></label>
+          <textarea id="followupMessage" rows="3" placeholder="How was {dog}'s visit today, {owner}? We'd love to hear your thoughts 🐾"
+            style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;outline:none;resize:vertical;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'"></textarea>
+          <p style="font-size:12px;color:#aaa;margin-top:6px;">Use <code style="background:#f0ede8;padding:1px 5px;border-radius:3px;">{dog}</code>, <code style="background:#f0ede8;padding:1px 5px;border-radius:3px;">{owner}</code>, <code style="background:#f0ede8;padding:1px 5px;border-radius:3px;">{daycare}</code> as placeholders. Leave blank to use the default.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:4px;display:flex;align-items:center;gap:12px;">
+        <button class="btn-primary" onclick="saveSentimentConfig()" id="saveSentimentBtn">Save Settings</button>
+        <div id="sentimentMsg" style="font-size:13px;display:none;"></div>
+      </div>
+    </div>
+
     <!-- Account Card -->
     <div class="settings-card">
       <h2>Account</h2>
@@ -304,7 +401,13 @@
       }
 
       // Account
-      document.getElementById('accountEmail').textContent = session.user?.email || meData?.user?.email || '—';
+      const ownerEmail = session.user?.email || meData?.user?.email || '';
+      document.getElementById('accountEmail').textContent = ownerEmail || '—';
+
+      // Sentiment config (owner/admin only)
+      if (['owner', 'admin'].includes(meData?.role)) {
+        await loadSentimentConfig(ownerEmail);
+      }
 
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('pageContent').style.display = 'block';
@@ -400,6 +503,85 @@
     localStorage.removeItem('tailwag_session');
     localStorage.removeItem('tailwag_user');
     window.location.href = '/';
+  }
+
+  // ── Sentiment config ──────────────────────────────────────────
+  function toggleSentiment() {
+    const cb = document.getElementById('sentimentEnabled');
+    cb.checked = !cb.checked;
+    document.getElementById('sentimentToggle').classList.toggle('on', cb.checked);
+  }
+
+  function toggleAutoReview() {
+    const cb = document.getElementById('autoSendReview');
+    cb.checked = !cb.checked;
+    document.getElementById('autoReviewToggle').classList.toggle('on', cb.checked);
+  }
+
+  async function loadSentimentConfig(ownerEmail) {
+    try {
+      const res = await fetch('/api/sentiment/config', { headers: authHeaders });
+      if (!res.ok) return;
+      const cfg = await res.json();
+
+      // Show the card (only for owner/admin — checked by nav-user role)
+      document.getElementById('sentimentCard').style.display = 'block';
+
+      if (cfg.enabled) {
+        document.getElementById('sentimentEnabled').checked = true;
+        document.getElementById('sentimentToggle').classList.add('on');
+      }
+      if (cfg.auto_send_review !== false) {
+        document.getElementById('autoSendReview').checked = true;
+        document.getElementById('autoReviewToggle').classList.add('on');
+      }
+      const delay = cfg.review_delay_hours || 2;
+      const delayRadio = document.querySelector(`input[name="delayHours"][value="${delay}"]`);
+      if (delayRadio) delayRadio.checked = true;
+
+      const threshold = cfg.sentiment_threshold || 'unhappy_only';
+      const threshRadio = document.querySelector(`input[name="sentimentThreshold"][value="${threshold}"]`);
+      if (threshRadio) threshRadio.checked = true;
+
+      document.getElementById('notificationEmail').value = cfg.notification_email || ownerEmail || '';
+      document.getElementById('followupMessage').value = cfg.followup_message || '';
+    } catch (err) {
+      console.error('Sentiment config load error:', err.message);
+    }
+  }
+
+  async function saveSentimentConfig() {
+    const btn = document.getElementById('saveSentimentBtn');
+    const msg = document.getElementById('sentimentMsg');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    msg.style.display = 'none';
+
+    const payload = {
+      enabled: document.getElementById('sentimentEnabled').checked,
+      auto_send_review: document.getElementById('autoSendReview').checked,
+      review_delay_hours: parseInt(document.querySelector('input[name="delayHours"]:checked')?.value || 2),
+      sentiment_threshold: document.querySelector('input[name="sentimentThreshold"]:checked')?.value || 'unhappy_only',
+      notification_email: document.getElementById('notificationEmail').value.trim(),
+      followup_message: document.getElementById('followupMessage').value.trim()
+    };
+
+    const res = await fetch('/api/sentiment/config', {
+      method: 'PUT', headers: authHeaders, body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    btn.disabled = false;
+    btn.textContent = 'Save Settings';
+    msg.style.display = 'block';
+
+    if (res.ok) {
+      msg.textContent = '✅ Sentiment settings saved.';
+      msg.style.color = '#1E6B4A';
+    } else {
+      msg.textContent = '❌ ' + (data.error || 'Failed to save.');
+      msg.style.color = '#e53e3e';
+    }
   }
 
   loadSettings();
