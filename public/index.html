@@ -504,8 +504,9 @@
             margin: 0 auto;
         }
 
-        .feature-section.dark {
+        .feature-section-dark-wrap {
             background-color: var(--black);
+            width: 100%;
         }
 
         .feature-section.light {
@@ -525,7 +526,7 @@
             margin-bottom: 24px;
         }
 
-        .feature-section.dark .feature-text h2 {
+        .feature-section-dark-wrap .feature-text h2 {
             color: var(--linen);
         }
 
@@ -542,7 +543,7 @@
             color: var(--slate);
         }
 
-        .feature-section.dark .feature-bullets li {
+        .feature-section-dark-wrap .feature-bullets li {
             color: var(--sage);
         }
 
@@ -1552,31 +1553,33 @@
         </div>
     </section>
 
-    <section class="feature-section dark right-text fade-in-up">
-        <div class="feature-phone">
-            <div class="feature-phone-screen">
-                <div class="fp-status-bar"><span>9:41</span><span>●●●</span></div>
-                <div class="fp-contact-bar">
-                    <div class="fp-contact-name">Paws & Play Daycare</div>
-                    <div class="fp-contact-sub">text message</div>
-                </div>
-                <div class="fp-messages">
-                    <div class="fp-time">Today 7:52 PM</div>
-                    <div class="fp-bubble received">Hi Jamie! Reminder: Mochi is scheduled at Paws & Play tomorrow, Wednesday at 8:00 AM. Reply YES to confirm or NO to cancel.</div>
-                    <div class="fp-bubble sent">YES</div>
-                    <div class="fp-bubble received">You're confirmed! See you then 🐾</div>
+    <div class="feature-section-dark-wrap fade-in-up">
+        <section class="feature-section right-text">
+            <div class="feature-phone">
+                <div class="feature-phone-screen">
+                    <div class="fp-status-bar"><span>9:41</span><span>●●●</span></div>
+                    <div class="fp-contact-bar">
+                        <div class="fp-contact-name">Paws & Play Daycare</div>
+                        <div class="fp-contact-sub">text message</div>
+                    </div>
+                    <div class="fp-messages">
+                        <div class="fp-time">Today 7:52 PM</div>
+                        <div class="fp-bubble received">Hi Jamie! Reminder: Mochi is scheduled at Paws & Play tomorrow, Wednesday at 8:00 AM. Reply YES to confirm or NO to cancel.</div>
+                        <div class="fp-bubble sent">YES</div>
+                        <div class="fp-bubble received">You're confirmed! See you then 🐾</div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="feature-text">
-            <h2>Fewer no-shows. More revenue. Zero effort.</h2>
-            <ul class="feature-bullets">
-                <li>Automated YES/NO confirmation 24hrs before</li>
-                <li>No-shows flagged to owner before the slot is lost</li>
-                <li>Works alongside Gingr, PetExec, or any system you already use</li>
-            </ul>
-        </div>
-    </section>
+            <div class="feature-text">
+                <h2>Fewer no-shows. More revenue. Zero effort.</h2>
+                <ul class="feature-bullets">
+                    <li>Automated YES/NO confirmation 24hrs before</li>
+                    <li>No-shows flagged to owner before the slot is lost</li>
+                    <li>Works alongside Gingr, PetExec, or any system you already use</li>
+                </ul>
+            </div>
+        </section>
+    </div>
 
     <section class="feature-section light fade-in-up">
         <div class="feature-text">
