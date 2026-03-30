@@ -405,19 +405,19 @@
           </div>
 
           <!-- Section 4: Photo attachment (Growth/Pro only) -->
-          <div class="compose-card" id="photoAttachCard" style="display:none;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-              <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Attach Photo (MMS)</label>
-              <span style="font-size:11px;color:var(--text-muted);">5MB max · JPG, PNG, GIF</span>
+          <div class="compose-card" id="photoAttachCard" style="display:none;border:1.5px dashed rgba(196,147,63,0.35);background:rgba(196,147,63,0.04);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <label style="font-size:12px;font-weight:700;color:#C4933F;text-transform:uppercase;letter-spacing:0.06em;">📷 Add Today's Photo</label>
+              <span style="font-size:11px;color:var(--text-muted);">Sends with the report card</span>
             </div>
-            <input type="file" id="photoFileInput" accept="image/*" style="display:none;" onchange="handlePhotoSelected(this)">
+            <input type="file" id="photoFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoSelected(this)">
             <div id="photoPreviewArea" style="display:none;margin-bottom:10px;position:relative;">
-              <img id="photoPreview" style="max-height:120px;border-radius:8px;border:1px solid var(--border-light);display:block;" alt="Photo preview">
-              <button onclick="clearPhoto()" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
-              <div id="photoUploadStatus" style="font-size:12px;color:var(--text-muted);margin-top:4px;"></div>
+              <img id="photoPreview" style="max-height:160px;width:100%;object-fit:cover;border-radius:8px;border:1px solid rgba(196,147,63,0.3);display:block;" alt="Photo preview">
+              <button onclick="clearPhoto()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.65);color:white;border:none;border-radius:50%;width:24px;height:24px;font-size:14px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
+              <div id="photoUploadStatus" style="font-size:12px;color:#C4933F;margin-top:6px;font-weight:600;"></div>
             </div>
-            <button class="btn-outline" style="width:100%;font-size:13px;" onclick="document.getElementById('photoFileInput').click()">
-              📷 Attach Photo
+            <button class="btn-outline" style="width:100%;font-size:13px;border-color:rgba(196,147,63,0.4);color:#C4933F;" onclick="document.getElementById('photoFileInput').click()">
+              📷 Take or Choose Photo
             </button>
           </div>
 
@@ -833,14 +833,33 @@
   // ── Photo attachment helpers ──────────────────────────────────────────────
   let pendingMediaUrl = null;
 
+  // Compress image to max 1200px wide, 0.82 quality before upload
+  function compressImage(file) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const MAX = 1200;
+        let w = img.width, h = img.height;
+        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => resolve(new File([blob], file.name, { type: 'image/jpeg' })), 'image/jpeg', 0.82);
+      };
+      img.src = url;
+    });
+  }
+
   function handlePhotoSelected(input) {
     const file = input.files[0];
     if (!file) return;
     const preview = document.getElementById('photoPreview');
     preview.src = URL.createObjectURL(file);
     document.getElementById('photoPreviewArea').style.display = 'block';
-    document.getElementById('photoUploadStatus').textContent = 'Ready to send with message';
-    pendingMediaUrl = null; // will upload on send
+    document.getElementById('photoUploadStatus').textContent = '✓ Ready to send with report card';
+    pendingMediaUrl = null; // will compress + upload on send
   }
 
   function clearPhoto() {
@@ -854,9 +873,11 @@
   async function uploadPendingPhoto() {
     const input = document.getElementById('photoFileInput');
     if (!input.files[0]) return null;
+    document.getElementById('photoUploadStatus').textContent = 'Compressing…';
+    const compressed = await compressImage(input.files[0]);
     document.getElementById('photoUploadStatus').textContent = 'Uploading…';
     const formData = new FormData();
-    formData.append('file', input.files[0]);
+    formData.append('file', compressed);
     const session = JSON.parse(localStorage.getItem('tailwag_session') || '{}');
     const res = await fetch('/api/sms/upload-media', {
       method: 'POST',
