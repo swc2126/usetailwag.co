@@ -936,13 +936,19 @@
     }
 
     try {
+      const isReportCard = document.getElementById('templateSelect').value === 'report_card';
       const res = await fetch('/api/sms/send', {
         method: 'POST', headers: authHeaders,
         body: JSON.stringify({
           client_id: selectedClient.id,
           recipient_phone: selectedClient.phone,
           body,
-          ...(mediaUrl && { media_url: mediaUrl, media_type: 'image' })
+          ...(mediaUrl && { media_url: mediaUrl, media_type: 'image' }),
+          ...(isReportCard && {
+            staff_notes: document.getElementById('staffNotes').value.trim(),
+            dog_name: selectedDog?.name || selectedClient?.dogs?.[0]?.name || '',
+            owner_first_name: selectedClient?.first_name || ''
+          })
         })
       });
       const data = await res.json();
