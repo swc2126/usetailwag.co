@@ -29,7 +29,7 @@ Rules:
 - Match the dog's energy in word choice (use the notes to infer energy level)
 - Use the owner's first name ONCE, naturally woven in — never at the start
 - End with at most ONE casual emoji, only if it feels natural
-- Keep the message between 175-200 characters total
+- STRICT LIMIT: message must be 155 characters or fewer — count carefully before responding
 - Sound like a real person wrote it, not a template
 - Be specific to the notes provided — no generic openers
 
@@ -42,7 +42,11 @@ Write ONLY the SMS message text. No quotes, no explanation.`;
       messages: [{ role: 'user', content: prompt }]
     });
 
-    const text = message.content[0].text.trim();
+    let text = message.content[0].text.trim();
+    // Hard cap safety net — trim to last complete word under 160
+    if (text.length > 160) {
+      text = text.substring(0, 160).replace(/\s+\S*$/, '').trim();
+    }
     res.json({ message: text, chars: text.length });
   } catch (err) {
     console.error('AI error:', err.message);
@@ -67,13 +71,16 @@ router.post('/review-request', requireAuth, async (req, res) => {
     dog_notes                && `Staff notes: ${dog_notes}`
   ].filter(Boolean).join('\n');
 
+  // Link appended server-side so AI stays under 120 chars (leaving room for the link)
+  const linkBudget = google_link ? google_link.length + 1 : 0; // +1 for space
+  const textBudget = 155 - linkBudget;
+
   const prompt = `You write highly personalized review request SMS messages for dog daycares. Each message should feel like it came from someone who genuinely knows and loves this specific dog — not a template.
 
 PET PARENT FIRST NAME: ${owner_first_name}
 DOG NAME: ${dog_name}
 ${dogDetails}
 DAYCARE NAME: ${daycare_name || 'our daycare'}
-${google_link ? `REVIEW LINK: ${google_link}` : '(no link — ask them to search for the daycare on Google)'}
 
 RULES (all are mandatory):
 1. Do NOT open with "Hi", "Hey", "Hello", or any greeting word
@@ -82,21 +89,32 @@ RULES (all are mandatory):
 4. Use ${dog_name}'s name at least once, naturally
 5. Use ${owner_first_name}'s name exactly once, woven in mid-message or near the end — never first word
 6. The review ask should feel warm and earned — something like "if you have a moment" or "it would mean a lot" — never pushy or transactional
-${google_link ? `7. Include the review link naturally in the message flow` : `7. Ask them to search for ${daycare_name || 'the daycare'} on Google to leave a review`}
-8. Total message: 160–230 characters${google_link ? ' (including the link)' : ''}
-9. At most one emoji — only if it genuinely fits. No forced emoji.
-10. Sound like a real, warm human wrote it — not a bot, not marketing copy
+7. Do NOT include any URL or link — the link will be added automatically
+${google_link ? `8. Ask them to leave a Google review (link will be appended automatically)` : `8. Ask them to search for ${daycare_name || 'the daycare'} on Google to leave a review`}
+9. STRICT LIMIT: message text must be ${textBudget} characters or fewer — count carefully
+10. At most one emoji — only if it genuinely fits. No forced emoji.
+11. Sound like a real, warm human wrote it — not a bot, not marketing copy
 
-Write ONLY the final SMS text. No quotes. No explanation. No labels.`;
+Write ONLY the message text (no link). No quotes. No explanation. No labels.`;
 
   try {
     const message = await anthropic.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 400,
+      max_tokens: 300,
       messages: [{ role: 'user', content: prompt }]
     });
 
-    const text = message.content[0].text.trim();
+    let text = message.content[0].text.trim();
+    // Hard cap on AI text before appending link
+    if (text.length > textBudget) {
+      text = text.substring(0, textBudget).replace(/\s+\S*$/, '').trim();
+    }
+    // Append link server-side
+    if (google_link) text = `${text} ${google_link}`;
+    // Final hard cap safety net
+    if (text.length > 160) {
+      text = text.substring(0, 160).replace(/\s+\S*$/, '').trim();
+    }
     res.json({ message: text, chars: text.length });
   } catch (err) {
     console.error('AI review-request error:', err.message);
