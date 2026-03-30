@@ -1,8 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const twilio = require('twilio');
+const multer = require('multer');
 const { supabaseAdmin } = require('../config/supabase');
 const { requireAuth } = require('../middleware/auth');
+
+// Multer: store in memory for Supabase upload (5MB max, images only)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files are allowed'), false);
+    }
+    cb(null, true);
+  }
+});
 
 const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
@@ -209,6 +222,43 @@ router.post('/status', express.urlencoded({ extended: false }), async (req, res)
       .eq('twilio_sid', MessageSid);
   }
   res.sendStatus(200);
+});
+
+// POST /api/sms/upload-media — upload image to Supabase Storage, return public URL
+// Used to get a mediaUrl before calling /send or /bulk
+router.post('/upload-media', requireAuth, upload.single('file'), async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+
+  // MMS only for Growth/Pro
+  const plan = await getDaycarePlan(req.daycareId);
+  if (!MMS_PLANS.includes(plan)) {
+    return res.status(403).json({ error: 'Image messaging requires Growth or Pro plan.' });
+  }
+
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+
+  const ext = req.file.mimetype.split('/')[1] || 'jpg';
+  const filename = `${req.daycareId}/${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await supabaseAdmin
+    .storage
+    .from('message-media')
+    .upload(filename, req.file.buffer, {
+      contentType: req.file.mimetype,
+      upsert: false
+    });
+
+  if (uploadError) {
+    console.error('Storage upload error:', uploadError.message);
+    return res.status(500).json({ error: 'Upload failed: ' + uploadError.message });
+  }
+
+  const { data: urlData } = supabaseAdmin
+    .storage
+    .from('message-media')
+    .getPublicUrl(filename);
+
+  res.json({ url: urlData.publicUrl, filename });
 });
 
 // POST /api/sms/provision — provision a Twilio number for a daycare

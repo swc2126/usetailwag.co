@@ -404,7 +404,24 @@
             </div>
           </div>
 
-          <!-- Section 4: Char count + Send -->
+          <!-- Section 4: Photo attachment (Growth/Pro only) -->
+          <div class="compose-card" id="photoAttachCard" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <label style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Attach Photo (MMS)</label>
+              <span style="font-size:11px;color:var(--text-muted);">5MB max · JPG, PNG, GIF</span>
+            </div>
+            <input type="file" id="photoFileInput" accept="image/*" style="display:none;" onchange="handlePhotoSelected(this)">
+            <div id="photoPreviewArea" style="display:none;margin-bottom:10px;position:relative;">
+              <img id="photoPreview" style="max-height:120px;border-radius:8px;border:1px solid var(--border-light);display:block;" alt="Photo preview">
+              <button onclick="clearPhoto()" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
+              <div id="photoUploadStatus" style="font-size:12px;color:var(--text-muted);margin-top:4px;"></div>
+            </div>
+            <button class="btn-outline" style="width:100%;font-size:13px;" onclick="document.getElementById('photoFileInput').click()">
+              📷 Attach Photo
+            </button>
+          </div>
+
+          <!-- Section 5: Char count + Send -->
           <div class="compose-card">
             <div class="send-row">
               <span class="char-count" id="charCount">0 / 160</span>
@@ -522,6 +539,12 @@
       const bar = document.getElementById('usageBar');
       bar.style.width = pct + '%';
       bar.className = 'usage-bar-fill' + (pct >= 90 ? ' danger' : pct >= 75 ? ' warning' : '');
+
+      // Show photo attach for Growth/Pro plans
+      if (['growth', 'pro'].includes(usage.plan)) {
+        const card = document.getElementById('photoAttachCard');
+        if (card) card.style.display = 'block';
+      }
 
       renderClientList(allClients);
       renderHistory(history);
@@ -807,6 +830,45 @@
     document.getElementById('previewModal').classList.remove('open');
   }
 
+  // ── Photo attachment helpers ──────────────────────────────────────────────
+  let pendingMediaUrl = null;
+
+  function handlePhotoSelected(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const preview = document.getElementById('photoPreview');
+    preview.src = URL.createObjectURL(file);
+    document.getElementById('photoPreviewArea').style.display = 'block';
+    document.getElementById('photoUploadStatus').textContent = 'Ready to send with message';
+    pendingMediaUrl = null; // will upload on send
+  }
+
+  function clearPhoto() {
+    document.getElementById('photoFileInput').value = '';
+    document.getElementById('photoPreviewArea').style.display = 'none';
+    document.getElementById('photoPreview').src = '';
+    document.getElementById('photoUploadStatus').textContent = '';
+    pendingMediaUrl = null;
+  }
+
+  async function uploadPendingPhoto() {
+    const input = document.getElementById('photoFileInput');
+    if (!input.files[0]) return null;
+    document.getElementById('photoUploadStatus').textContent = 'Uploading…';
+    const formData = new FormData();
+    formData.append('file', input.files[0]);
+    const session = JSON.parse(localStorage.getItem('tailwag_session') || '{}');
+    const res = await fetch('/api/sms/upload-media', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + session.token },
+      body: formData
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    document.getElementById('photoUploadStatus').textContent = '✓ Uploaded';
+    return data.url;
+  }
+
   async function sendMessage() {
     const body = document.getElementById('msgBody').value.trim();
     const resultEl = document.getElementById('sendResult');
@@ -829,13 +891,30 @@
     const origLabel = sendBtn.textContent;
     sendBtn.textContent = 'Sending...'; sendBtn.disabled = true;
 
+    // Upload photo if one is attached
+    let mediaUrl = null;
+    const photoInput = document.getElementById('photoFileInput');
+    if (photoInput && photoInput.files[0]) {
+      try {
+        sendBtn.textContent = 'Uploading photo…';
+        mediaUrl = await uploadPendingPhoto();
+      } catch (uploadErr) {
+        resultEl.textContent = 'Photo upload failed: ' + uploadErr.message;
+        resultEl.className = 'send-result error'; resultEl.style.display = 'block';
+        sendBtn.textContent = origLabel; sendBtn.disabled = false;
+        return;
+      }
+      sendBtn.textContent = 'Sending...';
+    }
+
     try {
       const res = await fetch('/api/sms/send', {
         method: 'POST', headers: authHeaders,
         body: JSON.stringify({
           client_id: selectedClient.id,
           recipient_phone: selectedClient.phone,
-          body
+          body,
+          ...(mediaUrl && { media_url: mediaUrl, media_type: 'image' })
         })
       });
       const data = await res.json();
@@ -845,6 +924,7 @@
       sendBtn.classList.add('sent');
       resultEl.textContent = `Sent! Usage: ${data.usage} / ${data.limit}`;
       resultEl.className = 'send-result success'; resultEl.style.display = 'block';
+      clearPhoto();
 
       setTimeout(() => {
         sendBtn.textContent = origLabel;
