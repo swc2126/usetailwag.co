@@ -27,3 +27,6 @@ node_modules/
 # IDE
 .vscode/
 .idea/
+
+# Demo app (separate git repo — keep local, don't track in main project)
+demo/report-card-generator/
