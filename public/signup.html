@@ -477,6 +477,96 @@
       white-space: nowrap;
     }
 
+    .plan-features {
+      font-size: 11px;
+      color: rgba(245, 240, 232, 0.4);
+      line-height: 1.5;
+      margin-top: 5px;
+    }
+
+    /* ── FOUNDER'S CIRCLE ─────────────────────────────── */
+    .fc-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 22px 0 14px;
+      font-size: 11px;
+      color: rgba(245, 240, 232, 0.3);
+      text-align: center;
+    }
+
+    .fc-divider::before, .fc-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    .fc-intro {
+      font-size: 12px;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+
+    .fc-plans {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .fc-plan {
+      border-color: rgba(196, 147, 63, 0.25) !important;
+      padding: 14px 12px 12px;
+    }
+
+    .fc-plan:hover {
+      border-color: var(--gold) !important;
+      background: rgba(196, 147, 63, 0.06) !important;
+    }
+
+    .fc-plan.selected {
+      border-color: var(--gold) !important;
+      background: rgba(196, 147, 63, 0.1) !important;
+    }
+
+    .fc-badge {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.3px;
+      margin-bottom: 6px;
+    }
+
+    .fc-bullets {
+      margin-top: 10px;
+      text-align: left;
+    }
+
+    .fc-bullet {
+      font-size: 11px;
+      color: rgba(245, 240, 232, 0.55);
+      line-height: 1.6;
+    }
+
+    .fc-highlight {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .fc-plan-total {
+      font-size: 10px;
+      color: var(--gold);
+      margin-top: 8px;
+      opacity: 0.7;
+    }
+
+    .billing-toggle.fc-active {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
     /* ── ORDER SUMMARY ────────────────────────────────────── */
     .order-summary {
       background: rgba(255, 255, 255, 0.03);
@@ -996,7 +1086,7 @@
             <!-- ── PLAN & BILLING ── -->
             <div class="section-divider">Choose Your Plan</div>
 
-            <div class="billing-toggle">
+            <div class="billing-toggle" id="billingToggleWrap">
               <button type="button" class="billing-btn active" onclick="setBilling('quarterly')">Quarterly</button>
               <button type="button" class="billing-btn" onclick="setBilling('annual')">Annual <span class="save-tag">Save 10%</span></button>
             </div>
@@ -1004,22 +1094,63 @@
             <div class="plan-options" id="planOptions">
               <div class="plan-option" data-plan="starter" onclick="selectPlan(this, 'starter')">
                 <div class="plan-name">Starter</div>
-                <div class="plan-price" data-quarterly="$189" data-annual="$170">$189<span>/mo</span></div>
-                <div class="plan-desc">Up to 25 dogs</div>
-                <div class="plan-total" data-quarterly="$567 / quarter" data-annual="$2,040 / year"></div>
+                <div class="plan-price">$99<span>/mo</span></div>
+                <div class="plan-desc">Up to 30 dogs/day</div>
+                <div class="plan-features">AI report cards · Appointment reminders · Basic analytics</div>
+                <div class="plan-total"></div>
               </div>
               <div class="plan-option selected" data-plan="growth" onclick="selectPlan(this, 'growth')">
                 <div class="popular-badge">Most Popular</div>
                 <div class="plan-name">Growth</div>
-                <div class="plan-price" data-quarterly="$249" data-annual="$224">$249<span>/mo</span></div>
-                <div class="plan-desc">Up to 60 dogs</div>
-                <div class="plan-total" data-quarterly="$747 / quarter" data-annual="$2,688 / year"></div>
+                <div class="plan-price">$179<span>/mo</span></div>
+                <div class="plan-desc">Unlimited dogs</div>
+                <div class="plan-features">Unlimited AI report cards · Reminders · Google review requests · Performance dashboard · Priority support</div>
+                <div class="plan-total"></div>
               </div>
-              <div class="plan-option" data-plan="pro" onclick="selectPlan(this, 'pro')">
-                <div class="plan-name">Pro</div>
-                <div class="plan-price" data-quarterly="$329" data-annual="$296">$329<span>/mo</span></div>
-                <div class="plan-desc">60+ dogs</div>
-                <div class="plan-total" data-quarterly="$987 / quarter" data-annual="$3,552 / year"></div>
+              <div class="plan-option" data-plan="partner" onclick="selectPlan(this, 'partner')">
+                <div class="plan-name">Partner</div>
+                <div class="plan-price">$249<span>/mo</span></div>
+                <div class="plan-desc">Multi-location</div>
+                <div class="plan-features">Everything in Growth + multi-location, custom branding, dedicated onboarding, quarterly strategy reviews</div>
+                <div class="plan-total"></div>
+              </div>
+            </div>
+
+            <!-- ── FOUNDER'S CIRCLE ── -->
+            <div class="fc-divider">
+              <span>— or join as a Founding Member —</span>
+            </div>
+
+            <div class="fc-intro">
+              Lock in a founding rate before general availability. These spots are limited.
+            </div>
+
+            <div class="fc-plans" id="fcPlans">
+              <div class="plan-option fc-plan" data-plan="fc_essentials" onclick="selectPlan(this, 'fc_essentials')">
+                <div class="fc-badge">🏅 Founder's Circle</div>
+                <div class="plan-name">Essentials</div>
+                <div class="plan-price">$109<span>/mo</span></div>
+                <div class="fc-bullets">
+                  <div class="fc-bullet">✓ Personalized report cards after every visit</div>
+                  <div class="fc-bullet">✓ Easy-setup appointment reminders</div>
+                  <div class="fc-bullet">✓ Photos included in messages</div>
+                  <div class="fc-bullet">✓ Up to 5 user accounts</div>
+                  <div class="fc-bullet">✓ Full setup support</div>
+                </div>
+                <div class="plan-total fc-plan-total">Billed monthly</div>
+              </div>
+              <div class="plan-option fc-plan" data-plan="fc_strategic" onclick="selectPlan(this, 'fc_strategic')">
+                <div class="fc-badge">⭐ Founder's Circle</div>
+                <div class="plan-name">Strategic Partner</div>
+                <div class="plan-price">$159<span>/mo</span></div>
+                <div class="fc-bullets">
+                  <div class="fc-bullet">✓ Everything in Essentials, plus:</div>
+                  <div class="fc-bullet">✓ Up to 10 user accounts</div>
+                  <div class="fc-bullet">✓ Automated Google review requests</div>
+                  <div class="fc-bullet">✓ Opportunities for custom solutions</div>
+                  <div class="fc-bullet fc-highlight">✓ Founding rate locked in for 18 months</div>
+                </div>
+                <div class="plan-total fc-plan-total">Billed monthly</div>
               </div>
             </div>
 
@@ -1150,21 +1281,27 @@
   <script>
     // ── Pricing data ──
     const pricing = {
-      starter:  { monthly: 189, name: 'Starter' },
-      growth:   { monthly: 249, name: 'Growth' },
-      pro:      { monthly: 329, name: 'Pro' }
+      starter:       { monthly: 99,  name: 'Starter',              fcPlan: false },
+      growth:        { monthly: 179, name: 'Growth',               fcPlan: false },
+      partner:       { monthly: 249, name: 'Partner',              fcPlan: false },
+      fc_essentials: { monthly: 109, name: "Founder's Essentials", fcPlan: true  },
+      fc_strategic:  { monthly: 159, name: 'Strategic Partner',    fcPlan: true  }
     };
 
     let currentPlan = 'growth';
     let currentBilling = 'quarterly';
 
+    function isFC(plan) { return pricing[plan]?.fcPlan === true; }
+
     function getTotal(plan, billing) {
       const base = pricing[plan].monthly;
+      if (isFC(plan)) return base; // FC plans are always monthly
       if (billing === 'quarterly') return base * 3;
       return Math.round(base * 12 * 0.9);
     }
 
     function getSavings(plan) {
+      if (isFC(plan)) return 0;
       const base = pricing[plan].monthly;
       return Math.round(base * 12 * 0.1);
     }
@@ -1174,19 +1311,22 @@
     }
 
     function updatePriceDisplay() {
-      document.querySelectorAll('.plan-option').forEach(opt => {
+      // Only update price totals for standard plans (FC plans show fixed price)
+      document.querySelectorAll('#planOptions .plan-option').forEach(opt => {
         const plan = opt.dataset.plan;
         const priceEl = opt.querySelector('.plan-price');
         const totalEl = opt.querySelector('.plan-total');
+        if (!priceEl || !pricing[plan]) return;
         const monthlyPrice = currentBilling === 'quarterly'
           ? pricing[plan].monthly
           : Math.round(pricing[plan].monthly * 0.9);
         priceEl.innerHTML = `$${monthlyPrice}<span>/mo</span>`;
-
-        if (currentBilling === 'quarterly') {
-          totalEl.textContent = `$${(pricing[plan].monthly * 3).toLocaleString()} / quarter`;
-        } else {
-          totalEl.textContent = `$${Math.round(pricing[plan].monthly * 12 * 0.9).toLocaleString()} / year`;
+        if (totalEl) {
+          if (currentBilling === 'quarterly') {
+            totalEl.textContent = `$${(pricing[plan].monthly * 3).toLocaleString()} / quarter`;
+          } else {
+            totalEl.textContent = `$${Math.round(pricing[plan].monthly * 12 * 0.9).toLocaleString()} / year`;
+          }
         }
       });
 
@@ -1195,23 +1335,33 @@
       const total = planTotal + (addReport ? 150 : 0);
 
       document.getElementById('summaryPlan').textContent = pricing[currentPlan].name;
-      document.getElementById('summaryBilling').textContent = currentBilling === 'quarterly' ? 'Quarterly' : 'Annual';
-      document.getElementById('summaryTotal').textContent = formatCurrency(total);
 
       const savingsRow = document.getElementById('savingsRow');
-      if (currentBilling === 'annual') {
-        savingsRow.style.display = 'flex';
-        document.getElementById('summarySavings').textContent = '-' + formatCurrency(getSavings(currentPlan));
-      } else {
+      const reportRow = document.getElementById('reportRow');
+
+      if (isFC(currentPlan)) {
+        document.getElementById('summaryBilling').textContent = 'Monthly';
         savingsRow.style.display = 'none';
+        document.getElementById('btnMainText').textContent = `Get started — ${formatCurrency(total)}/mo`;
+        document.getElementById('btnSubText').textContent = `${pricing[currentPlan].name}, billed monthly`;
+        // Dim billing toggle — not applicable for FC plans
+        document.getElementById('billingToggleWrap').classList.add('fc-active');
+      } else {
+        const billingLabel = currentBilling === 'quarterly' ? 'billed quarterly' : 'billed annually';
+        document.getElementById('summaryBilling').textContent = currentBilling === 'quarterly' ? 'Quarterly' : 'Annual';
+        document.getElementById('btnMainText').textContent = `Get started — ${formatCurrency(total)}`;
+        document.getElementById('btnSubText').textContent = `${pricing[currentPlan].name} plan, ${billingLabel}`;
+        document.getElementById('billingToggleWrap').classList.remove('fc-active');
+        if (currentBilling === 'annual') {
+          savingsRow.style.display = 'flex';
+          document.getElementById('summarySavings').textContent = '-' + formatCurrency(getSavings(currentPlan));
+        } else {
+          savingsRow.style.display = 'none';
+        }
       }
 
-      const reportRow = document.getElementById('reportRow');
-      reportRow.style.display = addReport ? 'flex' : 'none';
-
-      const billingLabel = currentBilling === 'quarterly' ? 'billed quarterly' : 'billed annually';
-      document.getElementById('btnMainText').textContent = `Get started — ${formatCurrency(total)}`;
-      document.getElementById('btnSubText').textContent = `${pricing[currentPlan].name} plan, ${billingLabel}`;
+      document.getElementById('summaryTotal').textContent = formatCurrency(total);
+      if (reportRow) reportRow.style.display = addReport ? 'flex' : 'none';
     }
 
     function setBilling(billing) {
@@ -1227,6 +1377,11 @@
       document.querySelectorAll('.plan-option').forEach(opt => opt.classList.remove('selected'));
       el.classList.add('selected');
       document.getElementById('selectedPlan').value = plan;
+      if (isFC(plan)) {
+        document.getElementById('selectedBilling').value = 'monthly';
+      } else {
+        document.getElementById('selectedBilling').value = currentBilling;
+      }
       updatePriceDisplay();
     }
 
