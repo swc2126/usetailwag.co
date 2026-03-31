@@ -370,7 +370,7 @@
       </div>
       <div class="form-group">
         <label>Phone *</label>
-        <input type="tel" id="ar_phone" placeholder="+1 555-000-0000" autocomplete="off">
+        <input type="tel" id="ar_phone" placeholder="(555) 000-0000" autocomplete="off" maxlength="14" oninput="formatPhoneInput(this)">
       </div>
       <div class="form-group">
         <label>Email</label>
@@ -428,7 +428,7 @@
       </div>
       <div class="form-group">
         <label>Phone *</label>
-        <input type="tel" id="ar_phone2" placeholder="+1 555-000-0000" autocomplete="off">
+        <input type="tel" id="ar_phone2" placeholder="(555) 000-0000" autocomplete="off" maxlength="14" oninput="formatPhoneInput(this)">
       </div>
       <div class="form-group">
         <label>Email</label>
@@ -462,7 +462,7 @@
     </div>
     <div class="form-group">
       <label>Phone *</label>
-      <input type="tel" id="phone" placeholder="+1 555-000-0000">
+      <input type="tel" id="phone" placeholder="(555) 000-0000" maxlength="14" oninput="formatPhoneInput(this)">
     </div>
     <div class="form-group">
       <label>Email</label>
@@ -717,6 +717,26 @@
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  // Strips non-digits, validates 10 US digits, returns E.164 (+1XXXXXXXXXX) or null
+  function normalizePhone(raw) {
+    let digits = raw.replace(/\D/g, '');
+    if (digits.startsWith('1') && digits.length === 11) digits = digits.slice(1);
+    if (digits.length !== 10) return null;
+    return '+1' + digits;
+  }
+
+  // Auto-formats a phone input as (555) 000-0000 while typing
+  function formatPhoneInput(el) {
+    let digits = el.value.replace(/\D/g, '');
+    if (digits.startsWith('1')) digits = digits.slice(1);
+    digits = digits.slice(0, 10);
+    let formatted = '';
+    if (digits.length > 6)      formatted = `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+    else if (digits.length > 3) formatted = `(${digits.slice(0,3)}) ${digits.slice(3)}`;
+    else if (digits.length > 0) formatted = `(${digits}`;
+    el.value = formatted;
+  }
+
   // ── ADD RECORD MODAL (two-step) ──
   let _addStartMode = 'owner'; // 'owner' | 'dog'
   let _addStep = 1;
@@ -794,6 +814,12 @@
           errEl.style.display = 'block';
           return;
         }
+        if (!normalizePhone(ph)) {
+          errEl.textContent = 'Please enter a valid 10-digit US phone number.';
+          errEl.style.display = 'block';
+          document.getElementById('ar_phone').focus();
+          return;
+        }
       } else {
         const dn = document.getElementById('ar_dogName1').value.trim();
         if (!dn) {
@@ -822,6 +848,12 @@
           errEl.style.display = 'block';
           return;
         }
+        if (!normalizePhone(ph)) {
+          errEl.textContent = 'Please enter a valid 10-digit US phone number.';
+          errEl.style.display = 'block';
+          document.getElementById('ar_phone2').focus();
+          return;
+        }
       }
       saveAddRecord();
     }
@@ -840,7 +872,7 @@
         ownerData = {
           first_name: document.getElementById('ar_firstName').value.trim(),
           last_name:  document.getElementById('ar_lastName').value.trim(),
-          phone:      document.getElementById('ar_phone').value.trim(),
+          phone:      normalizePhone(document.getElementById('ar_phone').value.trim()),
           email:      document.getElementById('ar_email').value.trim() || null
         };
         dogData = {
@@ -852,7 +884,7 @@
         ownerData = {
           first_name: document.getElementById('ar_firstName2').value.trim(),
           last_name:  document.getElementById('ar_lastName2').value.trim(),
-          phone:      document.getElementById('ar_phone2').value.trim(),
+          phone:      normalizePhone(document.getElementById('ar_phone2').value.trim()),
           email:      document.getElementById('ar_email2').value.trim() || null
         };
         dogData = {
@@ -900,7 +932,11 @@
     document.getElementById('clientId').value = client.id;
     document.getElementById('firstName').value = client.first_name || '';
     document.getElementById('lastName').value = client.last_name || '';
-    document.getElementById('phone').value = client.phone || '';
+    // Pre-format stored E.164 number as (555) 000-0000 for display
+    const rawPhone = (client.phone || '').replace(/\D/g,'').replace(/^1/,'').slice(0,10);
+    document.getElementById('phone').value = rawPhone.length === 10
+      ? `(${rawPhone.slice(0,3)}) ${rawPhone.slice(3,6)}-${rawPhone.slice(6)}`
+      : client.phone || '';
     document.getElementById('email').value = client.email || '';
     document.getElementById('notes').value = client.notes || '';
     document.getElementById('saveClientBtn').textContent = 'Update Pet Parent';
@@ -926,6 +962,13 @@
       errEl.style.display = 'block';
       return;
     }
+    const cleanPhone = normalizePhone(phone);
+    if (!cleanPhone) {
+      errEl.textContent = 'Please enter a valid 10-digit US phone number.';
+      errEl.style.display = 'block';
+      document.getElementById('phone').focus();
+      return;
+    }
 
     const saveBtn = document.getElementById('saveClientBtn');
     saveBtn.textContent = 'Saving...';
@@ -935,7 +978,7 @@
       const res = await fetch(`/api/clients/${id}`, {
         method: 'PUT',
         headers: authHeaders,
-        body: JSON.stringify({ first_name, last_name, phone, email, notes })
+        body: JSON.stringify({ first_name, last_name, phone: cleanPhone, email, notes })
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to save'); }
       closeClientModal();

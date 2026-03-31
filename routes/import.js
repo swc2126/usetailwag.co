@@ -4,11 +4,13 @@ const { supabaseAdmin } = require('../config/supabase');
 const { requireAuth } = require('../middleware/auth');
 
 // Simple CSV parser — handles quoted fields with commas inside
+// Lines starting with ## are treated as comments and skipped (used in the template for instructions)
 function parseCSV(text) {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   const rows = [];
   for (const line of lines) {
     if (!line.trim()) continue;
+    if (line.trim().startsWith('##')) continue; // skip template instruction comments
     const cols = [];
     let cur = '', inQuote = false;
     for (let i = 0; i < line.length; i++) {

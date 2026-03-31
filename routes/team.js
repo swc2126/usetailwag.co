@@ -46,7 +46,12 @@ router.post('/invite', requireAuth, async (req, res) => {
   if (!['owner', 'admin'].includes(req.userRole)) return res.status(403).json({ error: 'Insufficient permissions' });
   const { email, role } = req.body;
   if (!email) return res.status(400).json({ error: 'email required' });
-  const validRole = ['admin', 'staff'].includes(role) ? role : 'staff';
+
+  // Admins can only invite staff — only owners can create admins
+  let validRole = ['admin', 'staff'].includes(role) ? role : 'staff';
+  if (req.userRole === 'admin' && validRole === 'admin') {
+    return res.status(403).json({ error: 'Site Managers can only be provisioned by the account owner.' });
+  }
 
   // Check if user already exists in profiles
   const { data: existingProfile } = await supabaseAdmin
@@ -106,6 +111,11 @@ router.put('/:id/role', requireAuth, async (req, res) => {
   if (!['owner', 'admin'].includes(req.userRole)) return res.status(403).json({ error: 'Insufficient permissions' });
   const { role } = req.body;
   if (!['admin', 'staff'].includes(role)) return res.status(400).json({ error: 'Invalid role' });
+
+  // Admins cannot promote anyone to admin
+  if (req.userRole === 'admin' && role === 'admin') {
+    return res.status(403).json({ error: 'Only the account owner can assign Site Manager role.' });
+  }
   const { data, error } = await supabaseAdmin
     .from('team_members')
     .update({ role })

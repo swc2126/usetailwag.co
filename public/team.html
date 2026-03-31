@@ -39,11 +39,13 @@
     .logout-btn:hover { border-color: var(--linen); }
 
     .page-container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+    .page-header { margin-bottom: 28px; }
     .page-header h1 {
       font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
       font-size: 30px; color: var(--black); letter-spacing: -0.5px;
     }
+    .page-header p { font-size: 15px; color: #888; margin-top: 4px; }
+
     .btn-primary {
       background: var(--green); color: var(--linen); border: none; padding: 10px 22px;
       border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
@@ -52,7 +54,7 @@
     .btn-primary:hover { background: var(--green-dark); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
+    .table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 28px; }
     table { width: 100%; border-collapse: collapse; }
     thead { background: var(--black); }
     thead th { padding: 14px 20px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--sage); }
@@ -109,37 +111,45 @@
       border-radius: 8px; padding: 12px 16px; font-size: 13px; margin-bottom: 16px; display: none;
     }
 
-    /* Modal */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
-      z-index: 100; align-items: center; justify-content: center;
+    /* Add Team Member card */
+    .add-member-card {
+      background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      padding: 28px 32px;
     }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: #fff; border-radius: 14px; padding: 32px; width: 100%;
-      max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    .add-member-card h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 18px; color: var(--black); margin-bottom: 6px;
     }
-    .modal h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--black); margin-bottom: 24px; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--slate); margin-bottom: 6px; }
-    .form-group input, .form-group select {
+    .add-member-card .card-desc {
+      font-size: 13px; color: #888; margin-bottom: 24px; line-height: 1.5;
+    }
+    .invite-form { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+    .invite-form .form-group { flex: 1; min-width: 200px; margin-bottom: 0; }
+    .invite-form .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--slate); margin-bottom: 6px; }
+    .invite-form .form-group input,
+    .invite-form .form-group select {
       width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px;
       font-family: 'Inter', sans-serif; font-size: 14px; color: var(--slate);
       transition: border-color 0.2s; outline: none; background: #fff;
     }
-    .form-group input:focus, .form-group select:focus { border-color: var(--green); }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
-    .btn-secondary {
-      background: none; border: 1px solid #ddd; color: var(--slate);
-      padding: 9px 20px; border-radius: 8px; font-family: 'Inter', sans-serif;
-      font-size: 14px; font-weight: 600; cursor: pointer;
+    .invite-form .form-group input:focus,
+    .invite-form .form-group select:focus { border-color: var(--green); }
+    .invite-form-error {
+      width: 100%; background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7;
+      border-radius: 8px; padding: 10px 14px; font-size: 13px; display: none; margin-top: 4px;
     }
-    .btn-secondary:hover { border-color: #999; }
+    .admin-notice {
+      background: rgba(196,147,63,0.08); border: 1px solid rgba(196,147,63,0.25);
+      border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #7a5a1e;
+      margin-top: 16px; display: none; line-height: 1.5;
+    }
 
     @media (max-width: 640px) {
       .dashboard-nav { padding: 0 16px; }
       .nav-links { display: none; }
       .page-container { padding: 24px 16px; }
+      .add-member-card { padding: 20px; }
+      .invite-form { flex-direction: column; }
     }
   </style>
 </head>
@@ -169,20 +179,30 @@
 </nav>
 
 <div class="page-container">
+
+  <!-- Loading state -->
   <div id="loadingState" style="text-align:center;padding:80px 20px;">
     <div class="loading-spinner"></div>
     <p style="color:#999;font-size:14px;">Loading team...</p>
   </div>
 
+  <!-- Error state (load failure) -->
+  <div id="loadErrorState" style="display:none;text-align:center;padding:80px 20px;">
+    <p style="color:#e53e3e;font-size:15px;margin-bottom:16px;" id="loadErrorMsg">Failed to load team.</p>
+    <button class="btn-primary" onclick="loadTeam()">Try Again</button>
+  </div>
+
+  <!-- Page content -->
   <div id="pageContent" style="display:none;">
     <div class="page-header">
       <h1>Team</h1>
-      <button class="btn-primary" id="inviteBtn" onclick="openInviteModal()" style="display:none;">+ Invite Member</button>
+      <p>Manage who has access to your TailWag account.</p>
     </div>
 
     <div class="error-msg" id="pageError"></div>
     <div class="success-msg" id="pageSuccess"></div>
 
+    <!-- Team table -->
     <div class="table-card">
       <table>
         <thead>
@@ -198,70 +218,104 @@
         </tbody>
       </table>
     </div>
-  </div>
-</div>
 
-<!-- Invite Modal -->
-<div class="modal-overlay" id="inviteModal">
-  <div class="modal">
-    <h2>Invite Team Member</h2>
-    <div class="error-msg" id="inviteError"></div>
-    <div class="form-group">
-      <label>Email Address *</label>
-      <input type="email" id="inviteEmail" placeholder="colleague@example.com">
+    <!-- Add Team Member card — visible to admin/owner only -->
+    <div class="add-member-card" id="addMemberCard" style="display:none;">
+      <h2>Add Team Member</h2>
+      <p class="card-desc" id="addMemberDesc">Send an invite email to add a new staff member to your account.</p>
+
+      <div class="invite-form">
+        <div class="form-group" style="flex:2;">
+          <label>Email Address *</label>
+          <input type="email" id="inviteEmail" placeholder="colleague@example.com" autocomplete="off">
+        </div>
+        <!-- Role selector — only shown to owner -->
+        <div class="form-group" id="roleFieldWrap" style="display:none;">
+          <label>Role</label>
+          <select id="inviteRole">
+            <option value="staff">Team Member</option>
+            <option value="admin">Site Manager</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn-primary" id="inviteSubmitBtn" onclick="submitInvite()" style="white-space:nowrap;">Send Invite</button>
+        </div>
+      </div>
+
+      <div class="invite-form-error" id="inviteError"></div>
+
+      <!-- Notice shown to admin (not owner) -->
+      <div class="admin-notice" id="adminNotice">
+        <strong>Need to add a Site Manager?</strong> Contact TailWag support and we'll provision the additional admin access for you.
+      </div>
     </div>
-    <div class="form-group">
-      <label>Role</label>
-      <select id="inviteRole">
-        <option value="staff">Team Member</option>
-        <option value="admin">Site Manager</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeInviteModal()">Cancel</button>
-      <button class="btn-primary" id="inviteSubmitBtn" onclick="submitInvite()">Send Invite</button>
-    </div>
+
   </div>
 </div>
 
 <script>
   const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
-  if (!session || !session.access_token) window.location.href = '/login.html';
+  if (!session?.access_token) window.location.href = '/login.html';
 
   const authHeaders = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` };
   let currentRole = null;
+  let currentUserId = session?.user?.id || null;
 
   function escHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  function showLoadError(msg) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('loadErrorMsg').textContent = msg || 'Failed to load team. Please try again.';
+    document.getElementById('loadErrorState').style.display = 'block';
+  }
+
   async function loadTeam() {
+    // Reset states
+    document.getElementById('loadingState').style.display = 'block';
+    document.getElementById('loadingState').innerHTML = '<div class="loading-spinner"></div><p style="color:#999;font-size:14px;">Loading team...</p>';
+    document.getElementById('loadErrorState').style.display = 'none';
+    document.getElementById('pageContent').style.display = 'none';
+
     try {
+      // Fetch team and current user info in parallel, with individual error handling
       const [teamRes, meRes] = await Promise.all([
         fetch('/api/team', { headers: authHeaders }),
         fetch('/api/auth/me', { headers: authHeaders })
       ]);
-      if (teamRes.status === 401) { localStorage.removeItem('tailwag_session'); window.location.href = '/login.html'; return; }
-      if (!teamRes.ok) { const e = await teamRes.json(); throw new Error(e.error || 'Failed to load team'); }
-      const members = await teamRes.json();
 
-      // Get role from /api/auth/me (handles owner fallback correctly)
-      if (meRes.ok) {
-        const meData = await meRes.json();
-        currentRole = meData.role || null;
+      // Auth failure — redirect to login
+      if (teamRes.status === 401 || meRes.status === 401) {
+        localStorage.removeItem('tailwag_session');
+        window.location.href = '/login.html';
+        return;
       }
 
-      // Show invite button for site managers (owner/admin)
-      if (['owner', 'admin'].includes(currentRole)) {
-        document.getElementById('inviteBtn').style.display = '';
+      if (!teamRes.ok) {
+        const e = await teamRes.json().catch(() => ({}));
+        throw new Error(e.error || `Server error (${teamRes.status})`);
+      }
+
+      const members = await teamRes.json();
+
+      // Get role — non-fatal if this fails
+      if (meRes.ok) {
+        const meData = await meRes.json().catch(() => ({}));
+        currentRole = meData.role || null;
+        // Prefer user id from /me response for accuracy
+        if (meData.user?.id) currentUserId = meData.user.id;
       }
 
       renderTeam(members);
+      renderAddMemberCard();
+
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('pageContent').style.display = 'block';
+
     } catch (err) {
-      document.getElementById('loadingState').innerHTML = `<p style="color:#e53e3e">${err.message}</p>`;
+      showLoadError(err.message || 'Failed to load team. Please try again.');
     }
   }
 
@@ -271,13 +325,40 @@
       tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">No team members yet.</div></td></tr>';
       return;
     }
+
+    const isOwner   = currentRole === 'owner';
     const canManage = ['owner', 'admin'].includes(currentRole);
+
     tbody.innerHTML = members.map(m => {
-      const profile = m.profiles || {};
-      const displayName = profile.first_name ? `${profile.first_name} ${profile.last_name || ''}`.trim() : (m.invited_email || '—');
+      const profile     = m.profiles || {};
+      const displayName = profile.first_name
+        ? `${profile.first_name} ${profile.last_name || ''}`.trim()
+        : (m.invited_email || '—');
       const displayEmail = profile.email || m.invited_email || '—';
-      const isOwner = m.role === 'owner';
-      const isSelf = m.user_id === session.user?.id;
+      const isRowOwner   = m.role === 'owner';
+      const isSelf       = m.user_id && m.user_id === currentUserId;
+
+      // Role cell:
+      // - Owner can change any non-owner, non-self member's role (staff ↔ admin)
+      // - Admin can change non-owner, non-self members but ONLY to staff (can't assign admin)
+      // - Otherwise: show badge
+      let roleCell;
+      if (canManage && !isRowOwner && !isSelf) {
+        if (isOwner) {
+          roleCell = `<select class="role-select" onchange="changeRole('${m.id}', this.value)">
+                        <option value="staff" ${m.role==='staff'?'selected':''}>Team Member</option>
+                        <option value="admin" ${m.role==='admin'?'selected':''}>Site Manager</option>
+                      </select>`;
+        } else {
+          // Admin: can only view/set staff role — no admin promotion
+          roleCell = `<select class="role-select" onchange="changeRole('${m.id}', this.value)">
+                        <option value="staff" ${m.role==='staff'?'selected':''}>Team Member</option>
+                        ${m.role==='admin' ? '<option value="admin" selected disabled>Site Manager</option>' : ''}
+                      </select>`;
+        }
+      } else {
+        roleCell = `<span class="role-badge role-${m.role}">${m.role === 'admin' ? 'Site Manager' : m.role === 'owner' ? 'Owner' : 'Team Member'}</span>`;
+      }
 
       return `
         <tr>
@@ -285,18 +366,10 @@
             <div style="font-weight:600">${escHtml(displayName)}</div>
             <div style="font-size:12px;color:#999;margin-top:2px">${escHtml(displayEmail)}</div>
           </td>
-          <td>
-            ${canManage && !isOwner && !isSelf
-              ? `<select class="role-select" onchange="changeRole('${m.id}', this.value)">
-                   <option value="staff" ${m.role==='staff'?'selected':''}>Team Member</option>
-                   <option value="admin" ${m.role==='admin'?'selected':''}>Site Manager</option>
-                 </select>`
-              : `<span class="role-badge role-${m.role}">${m.role}</span>`
-            }
-          </td>
+          <td>${roleCell}</td>
           <td><span class="status-badge status-${m.status}">${m.status}</span></td>
           <td>
-            ${canManage && !isOwner && !isSelf
+            ${canManage && !isRowOwner && !isSelf
               ? `<button class="action-btn remove-btn" onclick="removeMember('${m.id}', '${escHtml(displayName)}')">Remove</button>`
               : '<span style="color:#ccc;font-size:13px;">—</span>'
             }
@@ -306,71 +379,113 @@
     }).join('');
   }
 
+  function renderAddMemberCard() {
+    const card = document.getElementById('addMemberCard');
+    if (!['owner', 'admin'].includes(currentRole)) {
+      card.style.display = 'none';
+      return;
+    }
+    card.style.display = 'block';
+
+    if (currentRole === 'owner') {
+      // Owner: show role dropdown, no notice
+      document.getElementById('roleFieldWrap').style.display = 'block';
+      document.getElementById('adminNotice').style.display = 'none';
+      document.getElementById('addMemberDesc').textContent = 'Send an invite email to add a new team member or site manager.';
+    } else {
+      // Admin: no role dropdown (always staff), show notice about adding another admin
+      document.getElementById('roleFieldWrap').style.display = 'none';
+      document.getElementById('adminNotice').style.display = 'block';
+      document.getElementById('addMemberDesc').textContent = 'Send an invite email to add a new team member to your account.';
+    }
+  }
+
   async function changeRole(memberId, newRole) {
+    // Client-side guard: admin cannot assign admin role
+    if (currentRole === 'admin' && newRole === 'admin') {
+      showError('Site Managers can only be added by the account owner. Contact TailWag support.');
+      await loadTeam(); // re-render to reset the dropdown
+      return;
+    }
     try {
       const res = await fetch(`/api/team/${memberId}/role`, {
         method: 'PUT', headers: authHeaders, body: JSON.stringify({ role: newRole })
       });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to update role'); }
-      showSuccess('Role updated successfully.');
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Failed to update role'); }
+      showSuccess('Role updated.');
       await loadTeam();
     } catch (err) { showError(err.message); }
   }
 
   async function removeMember(id, name) {
-    if (!confirm(`Remove ${name} from your team?`)) return;
+    if (!confirm(`Remove ${name} from your team? They will lose access immediately.`)) return;
     try {
       const res = await fetch(`/api/team/${id}`, { method: 'DELETE', headers: authHeaders });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to remove member'); }
-      showSuccess('Team member removed.');
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Failed to remove member'); }
+      showSuccess(`${name} has been removed.`);
       await loadTeam();
     } catch (err) { showError(err.message); }
   }
 
-  function openInviteModal() {
-    document.getElementById('inviteEmail').value = '';
-    document.getElementById('inviteRole').value = 'staff';
-    document.getElementById('inviteError').style.display = 'none';
-    document.getElementById('inviteModal').classList.add('open');
-  }
-
-  function closeInviteModal() {
-    document.getElementById('inviteModal').classList.remove('open');
-  }
-
   async function submitInvite() {
-    const email = document.getElementById('inviteEmail').value.trim();
-    const role = document.getElementById('inviteRole').value;
-    const errEl = document.getElementById('inviteError');
-    if (!email) { errEl.textContent = 'Email is required.'; errEl.style.display = 'block'; return; }
+    const email  = (document.getElementById('inviteEmail').value || '').trim();
+    const roleEl = document.getElementById('inviteRole');
+    // Admin always sends staff; owner uses dropdown value
+    const role   = (currentRole === 'owner' && roleEl) ? roleEl.value : 'staff';
+    const errEl  = document.getElementById('inviteError');
+
+    errEl.style.display = 'none';
+
+    if (!email) {
+      errEl.textContent = 'Email address is required.';
+      errEl.style.display = 'block';
+      document.getElementById('inviteEmail').focus();
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errEl.textContent = 'Please enter a valid email address.';
+      errEl.style.display = 'block';
+      document.getElementById('inviteEmail').focus();
+      return;
+    }
 
     const btn = document.getElementById('inviteSubmitBtn');
-    btn.textContent = 'Sending...'; btn.disabled = true;
+    btn.textContent = 'Sending…'; btn.disabled = true;
 
     try {
       const res = await fetch('/api/team/invite', {
         method: 'POST', headers: authHeaders, body: JSON.stringify({ email, role })
       });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Invite failed'); }
-      closeInviteModal();
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        throw new Error(e.error || 'Invite failed. Please try again.');
+      }
+      document.getElementById('inviteEmail').value = '';
+      if (roleEl) roleEl.value = 'staff';
       showSuccess(`Invite sent to ${email}.`);
       await loadTeam();
     } catch (err) {
-      errEl.textContent = err.message; errEl.style.display = 'block';
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
     } finally {
       btn.textContent = 'Send Invite'; btn.disabled = false;
     }
   }
 
+  // Allow Enter key in email field to submit
+  document.getElementById('inviteEmail').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') submitInvite();
+  });
+
   function showError(msg) {
     const el = document.getElementById('pageError');
     el.textContent = msg; el.style.display = 'block';
-    setTimeout(() => { el.style.display = 'none'; }, 4000);
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
   }
   function showSuccess(msg) {
     const el = document.getElementById('pageSuccess');
     el.textContent = msg; el.style.display = 'block';
-    setTimeout(() => { el.style.display = 'none'; }, 3000);
+    setTimeout(() => { el.style.display = 'none'; }, 3500);
   }
 
   function handleLogout() {
@@ -378,10 +493,6 @@
     localStorage.removeItem('tailwag_user');
     window.location.href = '/';
   }
-
-  document.getElementById('inviteModal').addEventListener('click', function(e) {
-    if (e.target === this) closeInviteModal();
-  });
 
   loadTeam();
 </script>

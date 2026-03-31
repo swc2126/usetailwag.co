@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TailWag — Competitive Intelligence & Strategic Positioning</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --forest: #0F1410;
+  --green: #1E6B4A;
+  --linen: #F5F0E8;
+  --gold: #C4933F;
+  --sage: #A8C5B0;
+  --slate: #2D3748;
+  --white: #FFFFFF;
+  --soft-gray: #F5F5F5;
+  --green15: rgba(30,107,74,0.15);
+  --green10: rgba(30,107,74,0.1);
+  --deep-forest: #0A0E0A;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; color: var(--slate); background: var(--white); }
+.dark { background: var(--forest); color: var(--linen); }
+.dark p, .dark li { color: rgba(245,240,232,0.85); }
+.light { background: var(--linen); color: var(--slate); }
+.section { padding: 60px 40px; max-width: 1100px; margin: 0 auto; }
+.full-bleed { padding: 60px 0; }
+.full-bleed .section { padding: 0 40px; }
+h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', sans-serif; }
+h1 { font-size: 48px; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 16px; }
+h2 { font-size: 36px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 24px; }
+h3 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+h4 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+p { font-size: 16px; line-height: 1.7; margin-bottom: 14px; }
+.kicker {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 10px;
+}
+.dark .kicker { color: var(--sage); }
+.gold { color: var(--gold); }
+.green { color: var(--green); }
+
+/* Hero */
+.hero { background: var(--forest); padding: 80px 40px 60px; text-align: center; }
+.hero h1 { color: var(--linen); font-size: 52px; max-width: 800px; margin: 0 auto 16px; }
+.hero .subtitle { color: rgba(245,240,232,0.78); font-size: 18px; max-width: 650px; margin: 0 auto 30px; line-height: 1.6; }
+.hero .date { color: var(--sage); font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+.logo-bar { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 30px; }
+.logo-bar svg { flex-shrink: 0; }
+.logo-bar span { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 22px; color: var(--linen); }
+
+/* Cards */
+.card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 28px;
+  border-left: 4px solid var(--green);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  margin-bottom: 20px;
+}
+.dark .card {
+  background: var(--deep-forest);
+  border-left-color: var(--green);
+}
+.dark .card h3, .dark .card h4 { color: var(--linen); }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+.card-gold { border-left-color: var(--gold); }
+
+/* Competitor Table */
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 14px;
+}
+.comp-table th {
+  background: var(--green);
+  color: var(--white);
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+.comp-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e8e3db;
+  vertical-align: top;
+  line-height: 1.5;
+}
+.comp-table tr:nth-child(even) { background: var(--soft-gray); }
+.comp-table .highlight { background: rgba(30,107,74,0.08); font-weight: 600; }
+.comp-table .tailwag-row { background: rgba(30,107,74,0.12); font-weight: 600; }
+.comp-table .tailwag-row td { color: var(--green); }
+
+/* Tags */
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin: 2px 3px;
+}
+.tag-green { background: rgba(30,107,74,0.15); color: var(--green); }
+.tag-gold { background: rgba(196,147,63,0.15); color: var(--gold); }
+.tag-red { background: rgba(200,50,50,0.12); color: #b33; }
+.tag-gray { background: rgba(45,55,72,0.1); color: var(--slate); }
+
+/* Stat blocks */
+.stat-row {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin: 28px 0;
+}
+.stat-block {
+  background: var(--green15);
+  border-radius: 10px;
+  padding: 20px 24px;
+  border-left: 3px solid var(--green);
+  flex: 1;
+  min-width: 200px;
+}
+.stat-number {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 4px;
+}
+.stat-desc { font-size: 14px; color: rgba(245,240,232,0.7); }
+
+/* Roadmap */
+.roadmap-phase {
+  position: relative;
+  padding-left: 36px;
+  margin-bottom: 32px;
+}
+.roadmap-phase::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 0;
+  bottom: -32px;
+  width: 2px;
+  background: var(--green);
+}
+.roadmap-phase:last-child::before { display: none; }
+.roadmap-dot {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 3px solid var(--forest);
+}
+.roadmap-phase.gold .roadmap-dot { background: var(--gold); }
+
+/* Price comparison visual */
+.price-bar-container { margin: 20px 0; }
+.price-bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.price-bar-label {
+  width: 160px;
+  font-weight: 600;
+  flex-shrink: 0;
+  color: var(--linen);
+}
+.price-bar-track {
+  flex: 1;
+  height: 28px;
+  background: rgba(30,107,74,0.08);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.price-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--white);
+}
+.price-bar-fill.green-fill { background: var(--green); }
+.price-bar-fill.gold-fill { background: var(--gold); }
+.price-bar-fill.slate-fill { background: var(--slate); }
+.price-bar-fill.tailwag-fill { background: var(--green); }
+
+/* Verdict box */
+.verdict {
+  background: var(--forest);
+  border-radius: 14px;
+  padding: 36px;
+  margin: 32px 0;
+  border-left: 5px solid var(--gold);
+}
+.verdict h3 { color: var(--gold); margin-bottom: 14px; }
+.verdict p { color: rgba(245,240,232,0.85); }
+
+/* Green space */
+.greenspace {
+  background: rgba(30,107,74,0.06);
+  border: 2px dashed var(--green);
+  border-radius: 12px;
+  padding: 28px;
+  margin: 20px 0;
+}
+.greenspace h4 { color: var(--green); }
+
+/* Lists */
+ul { margin: 8px 0 16px 20px; }
+li { margin-bottom: 6px; line-height: 1.6; font-size: 15px; }
+.dark li { color: rgba(245,240,232,0.82); }
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 0;
+}
+.divider svg { opacity: 0.5; }
+
+/* Footer */
+.footer {
+  background: var(--forest);
+  text-align: center;
+  padding: 30px;
+  font-size: 13px;
+  color: var(--sage);
+}
+
+/* Citations */
+sup.cite {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gold);
+  cursor: help;
+  margin-left: 1px;
+}
+sup.cite a { color: var(--gold); text-decoration: none; }
+sup.cite a:hover { text-decoration: underline; }
+.sources-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 13px;
+}
+.sources-table th {
+  background: var(--green);
+  color: var(--white);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+}
+.sources-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e8e3db;
+  vertical-align: top;
+  line-height: 1.5;
+}
+.sources-table tr:nth-child(even) { background: var(--soft-gray); }
+.sources-table a { color: var(--green); text-decoration: none; word-break: break-all; }
+.sources-table a:hover { text-decoration: underline; }
+
+/* Market share bars */
+.share-bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.share-bar-label {
+  width: 170px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.share-bar-track {
+  flex: 1;
+  height: 24px;
+  background: rgba(30,107,74,0.08);
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
+}
+.share-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--white);
+}
+.share-bar-count {
+  margin-left: 10px;
+  font-size: 12px;
+  color: var(--sage);
+  white-space: nowrap;
+}
+
+/* Print */
+@media print {
+  .section { padding: 30px 20px; }
+  .hero { padding: 40px 20px 30px; }
+  .full-bleed { padding: 30px 0; }
+  body { font-size: 12px; }
+  h1 { font-size: 36px; }
+  h2 { font-size: 28px; }
+}
+@media (max-width: 768px) {
+  .hero h1 { font-size: 36px; }
+  h2 { font-size: 28px; }
+  .stat-row { flex-direction: column; }
+  .card-grid { grid-template-columns: 1fr; }
+  .section { padding: 40px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="logo-bar">
+    <svg width="32" height="32" viewBox="0 0 56 56" fill="none"><rect width="56" height="56" fill="#1E6B4A" rx="9"/><path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/><circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/></svg>
+    <span>TailWag</span>
+  </div>
+  <div class="kicker" style="color: var(--sage);">COMPETITIVE INTELLIGENCE</div>
+  <h1>Market Landscape, Green Space &amp; Strategic Positioning</h1>
+  <p class="subtitle">A deep analysis of every platform competing for the attention of independent dog daycare owners — and exactly where TailWag wins.</p>
+  <div class="date">March 30, 2026 &nbsp;•&nbsp; Confidential — Internal Strategy</div>
+</div>
+
+<!-- MARKET OVERVIEW -->
+<div class="dark full-bleed">
+  <div class="section">
+    <div class="kicker">THE MARKET</div>
+    <h2>Market Snapshot</h2>
+    <p>The U.S. pet daycare market is valued at <strong style="color:var(--gold);">$1.87 billion</strong> in 2025, growing at 8.78% CAGR to $2.85B by 2030.<sup class="cite"><a href="#src1">[1]</a></sup> Day boarding represents roughly 67% of the market.<sup class="cite"><a href="#src1">[1]</a></sup> 71% of U.S. households own pets — 51% own dogs.<sup class="cite"><a href="#src2">[2]</a></sup></p>
+    <p>The pet daycare <em>software</em> market is a separate $1B+ space growing 8–12.5% CAGR<sup class="cite"><a href="#src3">[3]</a></sup> — but it's wildly fragmented with no vendor commanding more than mid-single-digit market share.<sup class="cite"><a href="#src4">[4]</a></sup> An estimated <strong style="color:var(--gold);">30–50% of independent daycares still operate with no software at all</strong> — using binders, spreadsheets, and Google Docs.<sup class="cite"><a href="#src5">[5]</a></sup></p>
+
+    <div class="stat-row">
+      <div class="stat-block">
+        <div class="stat-label">Market Size (2025)</div>
+        <div class="stat-number">$1.87B</div>
+        <div class="stat-desc">U.S. pet daycare services</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">Growth Rate</div>
+        <div class="stat-number">8.78%</div>
+        <div class="stat-desc">CAGR through 2030</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">No Software</div>
+        <div class="stat-number">~40%</div>
+        <div class="stat-desc">Independents still manual</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">SMS Open Rate</div>
+        <div class="stat-number">98%</div>
+        <div class="stat-desc">vs. ~20% for email <sup class="cite"><a href="#src6">[6]</a></sup></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PET PARENT EXPECTATIONS -->
+<div class="light full-bleed">
+  <div class="section">
+    <div class="kicker">PET PARENT EXPECTATIONS</div>
+    <h2>What Today's Pet Parents Demand</h2>
+    <p>Pet parents in 2026 expect the same digital transparency from their daycare that they get from food delivery and ride-share apps. The gap between expectation and reality is <strong>massive</strong> — and it's where TailWag lives.</p>
+    <div class="card-grid">
+      <div class="card">
+        <h4><span class="gold">87%</span> want useful reminders<sup class="cite"><a href="#src7">[7]</a></sup></h4>
+        <p>For appointments, vaccinations, and scheduling — yet 42% say they don't receive automated reminders for essential care.</p>
+      </div>
+      <div class="card">
+        <h4><span class="gold">77%</span> prefer text over phone<sup class="cite"><a href="#src7">[7]</a></sup></h4>
+        <p>Pet parents want text/chat communication — they don't want to call. SMS is the native channel for this buyer.</p>
+      </div>
+      <div class="card">
+        <h4><span class="gold">83%</span> want health record access<sup class="cite"><a href="#src7">[7]</a></sup></h4>
+        <p>Digital transparency isn't optional anymore. Parents expect to see their pet's info, activity, and visit history.</p>
+      </div>
+      <div class="card card-gold">
+        <h4><span style="color:#b33;">31–40%</span> will switch providers<sup class="cite"><a href="#src7">[7]</a></sup></h4>
+        <p>If the digital experience is poor. Under-35 pet parents are especially willing to leave for a better-communicating daycare.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPETITOR LANDSCAPE -->
+<div class="dark full-bleed">
+  <div class="section">
+    <div class="kicker">COMPETITOR LANDSCAPE</div>
+    <h2>Two Categories of Competition</h2>
+    <p>TailWag competes with two very different types of platforms. Understanding the distinction is critical to positioning.</p>
+
+    <div class="card-grid" style="margin-top:28px;">
+      <div class="card">
+        <div class="tag tag-green">Category 1</div>
+        <h3 style="margin-top:10px;">Pet Daycare Management Platforms</h3>
+        <p>Full-stack operations software for scheduling, booking, payments, and client management. Messaging is a feature buried inside a bigger system.</p>
+        <p style="margin-bottom:0;"><strong>Players:</strong> Gingr, PetExec, DaySmart Pet, ProPet, Pawfinity, Time To Pet, Paw Partner, Revelation Pets</p>
+      </div>
+      <div class="card">
+        <div class="tag tag-gold">Category 2</div>
+        <h3 style="margin-top:10px;">Generic Business SMS / Reputation Tools</h3>
+        <p>Horizontal platforms that serve every industry — restaurants, dental, auto repair. Not built for pet care. Expensive and overcomplicated for a 10-person daycare.</p>
+        <p style="margin-bottom:0;"><strong>Players:</strong> Podium, Birdeye, Weave, Broadly</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAILED COMPETITOR COMPARISON -->
+<div class="light full-bleed">
+  <div class="section">
+    <div class="kicker">HEAD-TO-HEAD</div>
+    <h2>Pet Daycare Platforms — Pricing & Communication Features</h2>
+    <p>These are the platforms Summer will hear about most often in daycare lobbies. Here's what each actually offers for client communication — the exact space TailWag plays in.</p>
+
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Platform</th>
+          <th>Base Price</th>
+          <th>SMS Capability</th>
+          <th>Report Cards</th>
+          <th>Review Gen</th>
+          <th>AI Features</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Gingr</strong><sup class="cite"><a href="#src8">[8]</a></sup></td>
+          <td>$145/mo<br><span style="font-size:12px;color:#888;">(Play plan)</span></td>
+          <td>2-way SMS is a <strong>paid add-on</strong>. Automated reminders included. Marketing SMS extra.</td>
+          <td>Staff snap photos + log notes. Sent via SMS/email/print. Manual creation.</td>
+          <td>Via Broadly integration (add-on). Free tier: 25 Google requests/mo.</td>
+          <td><span class="tag tag-red">None</span></td>
+        </tr>
+        <tr>
+          <td><strong>PetExec</strong><sup class="cite"><a href="#src9">[9]</a></sup><br><span style="font-size:11px;color:#b33;">⚠ No new customers</span></td>
+          <td>Quote-based<br><span style="font-size:12px;color:#888;">(est. $100-150+)</span></td>
+          <td>Pet Snaps texting add-on <strong>$19.99/mo</strong>. 2-way SMS, photo sharing.</td>
+          <td>Custom report cards with photos. Email/print. Basic template.</td>
+          <td>Via Birdeye integration (add-on). Not native.</td>
+          <td><span class="tag tag-red">None</span></td>
+        </tr>
+        <tr>
+          <td><strong>DaySmart Pet</strong><sup class="cite"><a href="#src10">[10]</a></sup></td>
+          <td>$29–$249/mo<br><span style="font-size:12px;color:#888;">(4 tiers)</span></td>
+          <td>500 SMS/mo at $29. 2-way texting only in Premier ($129+). Marketing SMS in Premier+.</td>
+          <td>Visit notes/comments per pet. Basic — not rich cards. Manual.</td>
+          <td>Automated requests (Premier+ only). Posts to Google/Yelp/FB. AI keyword assist.</td>
+          <td><span class="tag tag-gray">Basic</span><br>AI website builder, AI review keywords</td>
+        </tr>
+        <tr>
+          <td><strong>ProPet</strong><sup class="cite"><a href="#src11">[11]</a></sup></td>
+          <td>~$50/mo</td>
+          <td>Basic messaging. Limited SMS features.</td>
+          <td>Report cards + pet photography features. Better than most.</td>
+          <td>Not integrated.</td>
+          <td><span class="tag tag-red">None</span></td>
+        </tr>
+        <tr>
+          <td><strong>Pawfinity</strong><sup class="cite"><a href="#src12">[12]</a></sup></td>
+          <td>~$50/mo</td>
+          <td>SMS messaging + email marketing included.</td>
+          <td>Basic visit notes.</td>
+          <td>Not integrated.</td>
+          <td><span class="tag tag-red">None</span></td>
+        </tr>
+        <tr>
+          <td><strong>Time To Pet</strong></td>
+          <td>Variable</td>
+          <td>In-app messaging, real-time updates.</td>
+          <td>Visit tracking + updates. Solid for pet sitters.</td>
+          <td>Limited.</td>
+          <td><span class="tag tag-red">None</span></td>
+        </tr>
+        <tr>
+          <td><strong>Paw Partner</strong><sup class="cite"><a href="#src13">[13]</a></sup></td>
+          <td>$39.99/mo</td>
+          <td>One-click photo sharing with manager approval. Newer platform.</td>
+          <td>Photo-first updates. Built by daycare operators.</td>
+          <td>Not integrated.</td>
+          <td><span class="tag tag-red">None</span></td>
+        </tr>
+        <tr class="tailwag-row">
+          <td><strong>TailWag</strong></td>
+          <td>$159–$249/mo<br><span style="font-size:12px;">(see rec below)</span></td>
+          <td><strong>SMS-first. AI-personalized texts. Automated daily. 2-way.</strong></td>
+          <td><strong>AI-generated personalized report cards — automated, daily, per dog.</strong></td>
+          <td><strong>Automated. Well-timed. Built in. No add-on.</strong></td>
+          <td><span class="tag tag-green">Core</span><br><strong>AI writes every message. Not a feature — it's the product.</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- GENERIC SMS PLATFORMS -->
+<div class="dark full-bleed">
+  <div class="section">
+    <div class="kicker">GENERIC SMS / REPUTATION PLATFORMS</div>
+    <h2>The Horizontal Players — Overbuilt and Overpriced</h2>
+    <p>These are the big names Summer might hear from a business consultant or marketing agency. They're powerful — but they're built for car dealerships and dental offices, not dog daycares.</p>
+
+    <table class="comp-table" style="color: var(--linen);">
+      <thead>
+        <tr>
+          <th>Platform</th>
+          <th>Price</th>
+          <th>What It Does</th>
+          <th>Pet-Specific?</th>
+          <th>Why Daycares Struggle</th>
+        </tr>
+      </thead>
+      <tbody style="color: var(--slate);">
+        <tr>
+          <td><strong>Podium</strong><sup class="cite"><a href="#src14">[14]</a></sup></td>
+          <td>$399–599/mo<br><span style="font-size:12px;color:#888;">+ add-ons push $500-800</span></td>
+          <td>Unified inbox, review management, AI employee "Jerry" for lead engagement, payment links, webchat.</td>
+          <td><span class="tag tag-red">No</span></td>
+          <td>Way too expensive. Built for multi-location service businesses. AI is lead-gen focused, not relationship/retention focused. No report cards. No daycare workflow.</td>
+        </tr>
+        <tr>
+          <td><strong>Birdeye</strong><sup class="cite"><a href="#src15">[15]</a></sup></td>
+          <td>$299–449/mo<br><span style="font-size:12px;color:#888;">+ forced 12-mo contract</span></td>
+          <td>Review generation, social media, listings, webchat, surveys, chatbots. AI review responses.</td>
+          <td><span class="tag tag-red">No</span></td>
+          <td>Predatory contracts (12-mo, 90-day cancellation notice, auto-renewal). "Innovation fee" surprise charges. Overkill for a single-location daycare. No pet communication features.</td>
+        </tr>
+        <tr>
+          <td><strong>Weave</strong><sup class="cite"><a href="#src16">[16]</a></sup></td>
+          <td>$249–349/mo<br><span style="font-size:12px;color:#888;">+ $750 setup fee</span></td>
+          <td>VoIP phones, 2-way SMS (1,500/mo), reminders, automated reviews. Healthcare-focused.</td>
+          <td><span class="tag tag-gray">Vet only</span><br><span style="font-size:12px;">Integrates with IDEXX, DVMAX — vet PMS systems</span></td>
+          <td>Built for dental/vet offices with PMS integrations. $750 setup. 1,500 SMS cap. No report cards, no daycare workflow, no personalization.</td>
+        </tr>
+        <tr>
+          <td><strong>Broadly</strong><sup class="cite"><a href="#src17">[17]</a></sup></td>
+          <td>Custom pricing<br><span style="font-size:12px;color:#888;">(partners with Gingr)</span></td>
+          <td>Customer communication automation, review requests, follow-up sequences.</td>
+          <td><span class="tag tag-gray">Via Gingr</span></td>
+          <td>Only available to daycares through Gingr integration. Limited standalone value. Not SMS-first.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="verdict">
+      <h3>The Pricing Gap Is Your Opportunity</h3>
+      <p>Generic platforms charge $249–$800/month and force long contracts — for tools that know nothing about dogs, daycares, or pet parents. Pet-specific platforms charge $50–$155/month but treat messaging as an afterthought (add-on, limited, manual). <strong style="color:var(--gold);">Nobody is delivering AI-powered, automated, personalized pet parent communication at a price an independent daycare can afford — except TailWag.</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- MARKET SHARE -->
+<div class="light full-bleed">
+  <div class="section">
+    <div class="kicker">MARKET SHARE</div>
+    <h2>Who Owns What — Customer Counts &amp; Market Position</h2>
+    <p>The pet daycare software market is <strong>highly fragmented</strong> — no single vendor commands more than mid-single-digit share.<sup class="cite"><a href="#src4">[4]</a></sup> Togetherwork's recent acquisition spree (PetExec + Gingr + Revelation Pets) is the most aggressive consolidation play, but even combined they serve only ~9,000 facilities out of an estimated 160,000+ U.S. grooming and boarding businesses.</p>
+
+    <h3 style="margin-top:28px;">Estimated Customer Counts (Verified 2025–2026)</h3>
+
+    <div style="margin:24px 0;">
+      <div class="share-bar-row">
+        <div class="share-bar-label">MoeGo</div>
+        <div class="share-bar-track"><div class="share-bar-fill" style="width:100%;background:var(--slate);">10,000+</div></div>
+        <div class="share-bar-count">grooming-focused<sup class="cite"><a href="#src18">[18]</a></sup></div>
+      </div>
+      <div class="share-bar-row">
+        <div class="share-bar-label">PetExec <span style="color:#b33;font-size:11px;">⚠ closed</span></div>
+        <div class="share-bar-track"><div class="share-bar-fill" style="width:70%;background:var(--slate);">7,000+</div></div>
+        <div class="share-bar-count">no new signups<sup class="cite"><a href="#src9">[9]</a></sup></div>
+      </div>
+      <div class="share-bar-row">
+        <div class="share-bar-label">DaySmart Pet</div>
+        <div class="share-bar-track"><div class="share-bar-fill" style="width:50%;background:var(--slate);">5,000+</div></div>
+        <div class="share-bar-count"><sup class="cite"><a href="#src10">[10]</a></sup></div>
+      </div>
+      <div class="share-bar-row">
+        <div class="share-bar-label">Kennel Connection</div>
+        <div class="share-bar-track"><div class="share-bar-fill" style="width:50%;background:var(--slate);">5,000+</div></div>
+        <div class="share-bar-count">legacy/desktop<sup class="cite"><a href="#src19">[19]</a></sup></div>
+      </div>
+      <div class="share-bar-row">
+        <div class="share-bar-label">Time To Pet</div>
+        <div class="share-bar-track"><div class="share-bar-fill" style="width:40%;background:var(--slate);">4,000+</div></div>
+        <div class="share-bar-count">pet sitting focus<sup class="cite"><a href="#src20">[20]</a></sup></div>
+      </div>
+      <div class="share-bar-row">
+        <div class="share-bar-label">Groomer.io</div>
+        <div class="share-bar-track"><div class="share-bar-fill" style="width:30%;background:var(--slate);">3,000+</div></div>
+        <div class="share-bar-count">grooming only<sup class="cite"><a href="#src21">[21]</a></sup></div>
+      </div>
+      <div class="share-bar-row">
+        <div class="share-bar-label">Gingr</div>
+        <div class="share-bar-track"><div class="share-bar-fill" style="width:20%;background:var(--green);">~2,100</div></div>
+        <div class="share-bar-count"><sup class="cite"><a href="#src22">[22]</a></sup></div>
+      </div>
+      <div class="share-bar-row">
+        <div class="share-bar-label">ProPet / Pawfinity / Paw Partner</div>
+        <div class="share-bar-track"><div class="share-bar-fill" style="width:10%;background:var(--sage);">undisclosed</div></div>
+        <div class="share-bar-count"></div>
+      </div>
+    </div>
+
+    <div class="card card-gold">
+      <h4 style="color:var(--gold);">The Consolidation Story You Should Know</h4>
+      <p><strong>Togetherwork</strong> now owns PetExec, Gingr, and Revelation Pets — giving them the largest combined footprint (~9,000 facilities). But they're forcing PetExec users onto Gingr with a punitive 1% payment processing fee<sup class="cite"><a href="#src9">[9]</a></sup>, creating a wave of frustrated daycare owners actively looking for alternatives. That migration pain is a direct sales opportunity for TailWag — these owners are already primed to listen to something new.</p>
+    </div>
+
+    <div class="card">
+      <h4>What "Fragmented" Means for TailWag</h4>
+      <p>No platform has more than ~6% of the market. This means there's no incumbent gorilla to unseat. Daycare owners aren't locked into ecosystems the way businesses are with Salesforce or HubSpot. Switching costs are low, loyalty is thin, and the door is wide open for a focused challenger that does one thing better than everyone else.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING VISUAL -->
+<div class="dark full-bleed">
+  <div class="section">
+    <div class="kicker" style="color:var(--sage);">PRICING LANDSCAPE</div>
+    <h2 style="color:var(--linen);">Where Everyone Sits on Price</h2>
+    <p style="color:rgba(245,240,232,0.85);">This shows what each platform actually costs when you add SMS and review features (what TailWag bundles natively).</p>
+
+    <div class="price-bar-container">
+      <div class="price-bar-row">
+        <div class="price-bar-label">DaySmart Basic</div>
+        <div class="price-bar-track"><div class="price-bar-fill slate-fill" style="width:7%;">$29</div></div>
+      </div>
+      <div class="price-bar-row">
+        <div class="price-bar-label">Paw Partner</div>
+        <div class="price-bar-track"><div class="price-bar-fill slate-fill" style="width:10%;">$40</div></div>
+      </div>
+      <div class="price-bar-row">
+        <div class="price-bar-label">ProPet</div>
+        <div class="price-bar-track"><div class="price-bar-fill slate-fill" style="width:12.5%;">$50</div></div>
+      </div>
+      <div class="price-bar-row">
+        <div class="price-bar-label">Pawfinity</div>
+        <div class="price-bar-track"><div class="price-bar-fill slate-fill" style="width:12.5%;">$50</div></div>
+      </div>
+      <div class="price-bar-row">
+        <div class="price-bar-label">DaySmart + SMS</div>
+        <div class="price-bar-track"><div class="price-bar-fill slate-fill" style="width:32%;">$129</div></div>
+      </div>
+      <div class="price-bar-row">
+        <div class="price-bar-label">Gingr + SMS</div>
+        <div class="price-bar-track"><div class="price-bar-fill slate-fill" style="width:40%;">$165+</div></div>
+      </div>
+      <div class="price-bar-row">
+        <div class="price-bar-label" style="color:var(--gold);font-weight:800;">TailWag</div>
+        <div class="price-bar-track"><div class="price-bar-fill tailwag-fill" style="width:40%;background:var(--green);">$159–$249</div></div>
+      </div>
+      <div class="price-bar-row">
+        <div class="price-bar-label">Weave</div>
+        <div class="price-bar-track"><div class="price-bar-fill slate-fill" style="width:62%;">$249 + $750 setup</div></div>
+      </div>
+      <div class="price-bar-row">
+        <div class="price-bar-label">Birdeye</div>
+        <div class="price-bar-track"><div class="price-bar-fill slate-fill" style="width:75%;">$299–449 + 12mo lock</div></div>
+      </div>
+      <div class="price-bar-row">
+        <div class="price-bar-label">Podium</div>
+        <div class="price-bar-track"><div class="price-bar-fill slate-fill" style="width:100%;">$399–800</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GREEN SPACE -->
+<div class="dark full-bleed">
+  <div class="section">
+    <div class="kicker">GREEN SPACE</div>
+    <h2>The Gaps Nobody Is Filling</h2>
+    <p>After scouting every competitor, here's where the market is wide open for TailWag.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="tag tag-green">Gap 1</div>
+        <h4 style="margin-top:10px;">AI-Personalized Communication</h4>
+        <p>Every platform either sends generic template texts or requires manual writing. <strong>Nobody uses AI to generate personalized, per-dog, per-visit messages automatically.</strong> This is TailWag's entire product — and it doesn't exist anywhere else.</p>
+      </div>
+      <div class="card">
+        <div class="tag tag-green">Gap 2</div>
+        <h4 style="margin-top:10px;">SMS as Core, Not Add-On</h4>
+        <p>Gingr charges extra for 2-way SMS. PetExec charges $19.99/mo. DaySmart limits you to 500 texts at the base tier. SMS is an afterthought on every platform. TailWag is SMS-first — it's the whole point.</p>
+      </div>
+      <div class="card">
+        <div class="tag tag-green">Gap 3</div>
+        <h4 style="margin-top:10px;">Integrated Review Generation</h4>
+        <p>Every pet platform outsources reviews to Broadly or Birdeye (add-on cost, separate dashboard). TailWag builds timed review requests natively into the SMS flow — no third-party tool, no extra cost.</p>
+      </div>
+      <div class="card">
+        <div class="tag tag-green">Gap 4</div>
+        <h4 style="margin-top:10px;">The "No Software" Market</h4>
+        <p>~40% of independent daycares use no software at all. Full management platforms are intimidating and expensive. TailWag's "do one thing brilliantly" approach is the perfect first step — low friction, immediate ROI, no migration headache.</p>
+      </div>
+      <div class="card">
+        <div class="tag tag-green">Gap 5</div>
+        <h4 style="margin-top:10px;">Affordable Communication Layer</h4>
+        <p>Daycares on Gingr or PetExec who want better communication are stuck paying for Broadly or Birdeye on top of their management platform. TailWag can sit alongside their existing system as a communication upgrade — at a fraction of the cost of Podium.</p>
+      </div>
+      <div class="card">
+        <div class="tag tag-green">Gap 6</div>
+        <h4 style="margin-top:10px;">Report Cards That Write Themselves</h4>
+        <p>Gingr, PetExec, ProPet all require staff to manually write report cards. With 20–80 dogs per day, that means most daycares just... don't do it. TailWag's AI automates what everyone wishes they could do but can't sustain manually.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STRATEGIC RECOMMENDATIONS -->
+<div class="light full-bleed">
+  <div class="section">
+    <div class="kicker">RECOMMENDATION 1</div>
+    <h2>Pricing Strategy</h2>
+
+    <div class="card card-gold" style="margin-bottom:32px;">
+      <h3><span class="gold">Recommended Tier Structure</span></h3>
+      <p style="margin-bottom:20px;">Based on competitor pricing, the green space, and the value TailWag delivers, here's the pricing that maximizes adoption while protecting margins:</p>
+
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Price</th>
+            <th>Includes</th>
+            <th>Who It's For</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Starter</strong></td>
+            <td><span class="gold" style="font-size:20px;font-weight:700;">$99/mo</span></td>
+            <td>AI report cards (up to 30 dogs/day), automated appointment reminders, basic analytics</td>
+            <td>Small daycares dipping a toe in. Beats Gingr's SMS add-on cost. Gets them hooked on report cards.</td>
+          </tr>
+          <tr class="highlight">
+            <td><strong>Growth</strong><br><span class="tag tag-green">Most Popular</span></td>
+            <td><span class="gold" style="font-size:20px;font-weight:700;">$179/mo</span></td>
+            <td>Unlimited AI report cards, appointment reminders, Google review requests, monthly performance dashboard, priority support</td>
+            <td>The sweet spot. Full TailWag experience. Undercuts Podium/Birdeye by 50–75% while delivering more relevant value.</td>
+          </tr>
+          <tr>
+            <td><strong>Partner</strong></td>
+            <td><span class="gold" style="font-size:20px;font-weight:700;">$249/mo</span></td>
+            <td>Everything in Growth + multi-location support, custom report card branding, dedicated onboarding, quarterly strategy review with Summer</td>
+            <td>Serious operators with 2+ locations or 50+ dogs/day. The white-glove tier.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Why This Structure Works</h3>
+    <ul>
+      <li><strong>$99 Starter</strong> creates an entry point below Gingr's base ($145) and DaySmart Premier ($129). It captures the "I just want better communication" buyer who doesn't need a full management platform. Cost to serve is low (~$20/client in variable costs), so margins hold.</li>
+      <li><strong>$179 Growth</strong> is the anchor — it's where 60–70% of clients should land. It's <em>half</em> the price of Birdeye's cheapest plan ($299) and a <em>third</em> of Podium ($399) — while being purpose-built for daycares. The comparison kills in a sales conversation.</li>
+      <li><strong>$249 Partner</strong> matches your current Standard pricing but adds enough premium value (multi-location, custom branding, quarterly strategy call) to justify it. This tier also creates an upgrade path.</li>
+      <li><strong>Founders Circle pricing ($159/$109)</strong> stays as-is for early adopters — it's a loyalty reward that also creates social proof ("I got in early").</li>
+    </ul>
+
+    <div class="verdict" style="background: var(--forest);">
+      <h3>The Pricing Killer Line</h3>
+      <p>"Podium charges $400/month for a tool that sends the same text to every customer. We charge $179/month for a tool that sends a personalized report card about <em>your client's dog, by name, every single day.</em> Which one do you think makes pet parents come back?"</p>
+    </div>
+  </div>
+</div>
+
+<!-- VALUE PROP -->
+<div class="dark full-bleed">
+  <div class="section">
+    <div class="kicker">RECOMMENDATION 2</div>
+    <h2>Unique Value Props — Two Audiences</h2>
+    <p>TailWag's pitch changes depending on whether the daycare has an existing system or nothing at all. Here's the playbook for each.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px;">
+      <div class="card" style="border-left-color: var(--gold);">
+        <div class="tag tag-gold">Audience A</div>
+        <h3 style="margin-top:10px;">Daycares with No System</h3>
+        <p style="font-size:14px;color:var(--sage);margin-bottom:14px;">~40% of the market. Using binders, spreadsheets, memory.</p>
+
+        <h4 style="color:var(--gold);">Lead Message</h4>
+        <p>"You don't need a $150/month management platform to start wowing your clients. TailWag does three things — report cards, reminders, and reviews — and it does them better than anyone. Five-minute setup. Runs in the background. You'll see results in week one."</p>
+
+        <h4 style="color:var(--gold);">Key Angles</h4>
+        <ul>
+          <li><strong>Low friction, high impact</strong> — no migration, no learning curve, no complex onboarding. Plug in and go.</li>
+          <li><strong>The "first step" positioning</strong> — "You don't need to overhaul your whole business. Start with the thing that makes clients stay and reviews grow."</li>
+          <li><strong>Affordability</strong> — $99/mo Starter tier is less than a Gingr subscription, and they get AI-powered communication that Gingr doesn't even offer.</li>
+          <li><strong>ROI in dollars</strong> — "One prevented no-show pays for TailWag. One new 5-star review is worth $200–500 in new business."</li>
+          <li><strong>Do what you can't do manually</strong> — "You mean to text every parent every day. But with 30 dogs, you just can't. TailWag can."</li>
+        </ul>
+
+        <h4 style="color:var(--gold);">Objection Flip</h4>
+        <p><em>"I don't need more software."</em> → "That's exactly why TailWag works — it's not a management platform. It's three automations that run in the background. You'll forget it's there, but your clients won't."</p>
+      </div>
+
+      <div class="card" style="border-left-color: var(--green);">
+        <div class="tag tag-green">Audience B</div>
+        <h3 style="margin-top:10px;">Daycares on Gingr, PetExec, DaySmart, etc.</h3>
+        <p style="font-size:14px;color:var(--sage);margin-bottom:14px;">~60% of digitized daycares. Already paying $50–$155/mo for ops software.</p>
+
+        <h4 style="color:var(--green);">Lead Message</h4>
+        <p>"You've got scheduling and payments handled. But how many personalized texts did you send to pet parents last week? TailWag plugs into what you already have and handles the communication piece that your management platform was never built to do."</p>
+
+        <h4 style="color:var(--green);">Key Angles</h4>
+        <ul>
+          <li><strong>Companion, not replacement</strong> — "Keep Gingr for booking. Add TailWag for the part Gingr can't do — AI-personalized daily report cards."</li>
+          <li><strong>Cheaper than their current add-ons</strong> — Gingr + Broadly + SMS add-on costs $180+. TailWag at $179 replaces both add-ons AND does it better.</li>
+          <li><strong>What their platform can't do</strong> — "Gingr's report cards require staff to write every note. With 40 dogs, how many actually get sent? TailWag sends all 40, every day, personalized, automatically."</li>
+          <li><strong>The AI gap</strong> — Not a single pet daycare platform has AI-generated messaging. "Your current software was built in 2018. TailWag was built in 2026."</li>
+          <li><strong>Review generation without a third party</strong> — "Why pay Broadly $X/month when TailWag sends timed review requests as part of the flow?"</li>
+        </ul>
+
+        <h4 style="color:var(--green);">Objection Flip</h4>
+        <p><em>"I already have Gingr/PetExec."</em> → "Great — that means you've got operations covered. TailWag handles the one thing they don't: making every pet parent feel like their dog got VIP treatment, every single day."</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURE EMPHASIS & ROADMAP -->
+<div class="light full-bleed">
+  <div class="section">
+    <div class="kicker">RECOMMENDATION 3</div>
+    <h2>Feature Emphasis &amp; Roadmap</h2>
+
+    <h3>Features to Emphasize NOW</h3>
+    <p>These are your weapons — the things no competitor can match today. Every pitch, every one-pager, every demo should lead with these:</p>
+
+    <div class="card-grid">
+      <div class="card card-gold">
+        <h4>1. AI-Personalized Report Cards</h4>
+        <p>This is the product. Every other platform requires manual writing or sends generic templates. TailWag generates unique, personalized messages for every dog, every visit. It's the "magic demo" moment — show them a report card with <em>their dog's name</em> and watch their face.</p>
+        <div class="tag tag-gold">Hero Feature</div>
+      </div>
+      <div class="card">
+        <h4>2. Automated Google Review Requests</h4>
+        <p>Timed to land when pet parents are happiest — right after reading a great report card. This is the one-two punch: delight them, then ask for the review. Competitors outsource this to Broadly or Birdeye at extra cost.</p>
+        <div class="tag tag-green">Differentiator</div>
+      </div>
+      <div class="card">
+        <h4>3. No-Show Prevention</h4>
+        <p>Automated reminders are table stakes, but frame it in dollars: "No-shows cost $35–50 each. TailWag's reminders typically reduce them by 30–50%. Do the math on 4 prevented no-shows a month." That's the ROI story.</p>
+        <div class="tag tag-green">ROI Driver</div>
+      </div>
+      <div class="card">
+        <h4>4. Zero Setup Friction</h4>
+        <p>Five minutes. No migration. No integrations needed. No training. This is the anti-Gingr, anti-Podium pitch. "You don't need to change anything about how you run your daycare. Just add TailWag."</p>
+        <div class="tag tag-green">Objection Killer</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:40px;">Feature Roadmap — What to Build and When</h3>
+    <p>Based on competitor gaps, market demand, and what will drive the most revenue at each stage:</p>
+
+    <div style="margin-top:32px;">
+
+      <div class="roadmap-phase">
+        <div class="roadmap-dot"></div>
+        <div class="tag tag-green" style="margin-bottom:6px;">NOW — April/May 2026</div>
+        <h4>Lock In the Core</h4>
+        <p>Ship what you're selling. The three automations (report cards, reminders, review requests) need to work flawlessly before adding anything else. Focus on reliability and onboarding speed.</p>
+        <ul>
+          <li><strong>Onboarding flow</strong> — Self-serve setup that takes under 5 minutes. The #1 complaint about competitors is onboarding complexity.</li>
+          <li><strong>Client dashboard</strong> — Simple view showing texts sent, reviews generated, no-shows prevented. Proof of value that prevents churn.</li>
+          <li><strong>Photo attachment support</strong> — Let staff snap a photo that gets included in the AI report card. Gingr does this manually; TailWag should do it with one tap.</li>
+        </ul>
+      </div>
+
+      <div class="roadmap-phase">
+        <div class="roadmap-dot"></div>
+        <div class="tag tag-gold" style="margin-bottom:6px;">Q3 2026 — July/Aug/Sept</div>
+        <h4>Expand the Communication Layer</h4>
+        <p>Once you have 20–30 clients and know what they love, build the features that increase stickiness and justify the Growth/Partner tiers.</p>
+        <ul>
+          <li><strong>2-way SMS conversations</strong> — Let pet parents reply to report cards and staff respond from a dashboard. PetExec charges $19.99/mo extra for this. Include it in Growth tier.</li>
+          <li><strong>Vaccination/appointment auto-reminders</strong> — "Your pup is due for a Bordetella update" texts. Solves a huge compliance headache. 87% of pet parents want this.</li>
+          <li><strong>Birthday & milestone messages</strong> — "Happy 3rd birthday, Cooper! 🐾" Auto-triggered. Costs nothing to send, builds incredible loyalty. No competitor does this.</li>
+          <li><strong>Monthly performance email to owner</strong> — "This month: 847 report cards sent, 12 new Google reviews, 6 no-shows prevented, est. $2,100 in retained revenue." This is the email that prevents cancellation.</li>
+        </ul>
+      </div>
+
+      <div class="roadmap-phase">
+        <div class="roadmap-dot"></div>
+        <div class="tag tag-gray" style="margin-bottom:6px;">Q4 2026 — Oct/Nov/Dec</div>
+        <h4>Intelligence & Integration</h4>
+        <p>With a growing customer base, add features that make TailWag irreplaceable and open the door to higher-tier pricing.</p>
+        <ul>
+          <li><strong>Gingr / PetExec / DaySmart integrations</strong> — Pull booking and pet data automatically. This removes the "I already have a system" objection entirely. TailWag becomes the communication layer that plugs into whatever they use.</li>
+          <li><strong>Churn detection</strong> — AI flags clients whose visit frequency is declining. Auto-trigger a "We miss [dog name]!" text. This is the "silent leaver" problem solved. No competitor touches this.</li>
+          <li><strong>Review response AI</strong> — Auto-draft responses to Google reviews (owner approves before posting). Podium charges $599/mo for this. Include it in Partner tier.</li>
+          <li><strong>Multi-location dashboard</strong> — For the Partner tier. See all locations in one view. Positions TailWag for scaling with multi-unit operators.</li>
+        </ul>
+      </div>
+
+      <div class="roadmap-phase gold">
+        <div class="roadmap-dot"></div>
+        <div class="tag tag-gold" style="margin-bottom:6px;">2027 — EXPANSION PLAYS</div>
+        <h4>Platform Growth</h4>
+        <p>These are the features that turn TailWag from a communication tool into a growth platform for daycares — and potentially expand into adjacent verticals.</p>
+        <ul>
+          <li><strong>Pet parent mobile app</strong> — Branded to the daycare. Report card history, booking, payments. This is the "Gingr replacement" play.</li>
+          <li><strong>Loyalty & referral program</strong> — "Refer a friend, get a free day" — managed through SMS. Turns pet parents into sales reps.</li>
+          <li><strong>Waitlist management</strong> — AI-managed waitlists that auto-text when a spot opens. Solves a major booking gap.</li>
+          <li><strong>Vertical expansion</strong> — Groomers, boarders, dog walkers, vet clinics. Same AI communication engine, different templates. But don't do this until daycare is locked down.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- COMPETITIVE ADVANTAGES SUMMARY -->
+<div class="dark full-bleed">
+  <div class="section">
+    <div class="kicker">THE UNFAIR ADVANTAGE</div>
+    <h2>Why TailWag Wins — The Summary</h2>
+
+    <div class="card-grid">
+      <div class="card card-gold">
+        <h3 style="color:var(--gold);">vs. Pet Platforms</h3>
+        <p>"They handle scheduling and payments. We handle the relationship. Every text your clients get is personalized, AI-written, and sent automatically. Their platform needs a human to write every message — and with 40 dogs a day, that human gives up by Tuesday."</p>
+      </div>
+      <div class="card card-gold">
+        <h3 style="color:var(--gold);">vs. Generic SMS Tools</h3>
+        <p>"Podium sends the same review request to a dentist and a dog daycare. We know your client's dog's name, what kind of day they had, and the perfect moment to ask for a review. That's not a feature — that's a completely different product. At half the price."</p>
+      </div>
+      <div class="card card-gold">
+        <h3 style="color:var(--gold);">vs. Doing Nothing</h3>
+        <p>"Right now, 30 pet parents picked up their dogs today and heard nothing. Some of them are quietly deciding to try the new place down the street. You won't know until they're gone. TailWag makes every one of them feel seen — automatically, every day."</p>
+      </div>
+    </div>
+
+    <div style="margin-top:40px;text-align:center;">
+      <p style="font-size:20px;color:var(--gold);font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Three automations. Zero competition doing all three with AI. One unfair advantage.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SOURCES APPENDIX -->
+<div class="light full-bleed">
+  <div class="section">
+    <div class="kicker">APPENDIX</div>
+    <h2>Sources &amp; Citations</h2>
+    <p>All statistics, pricing, and market data in this report are sourced from the following. Pricing data was last verified March 2026; market data reflects most recent available reports.</p>
+
+    <table class="sources-table">
+      <thead>
+        <tr>
+          <th style="width:30px;">#</th>
+          <th>Claim</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="src1">
+          <td><strong>1</strong></td>
+          <td>U.S. pet daycare market $1.87B (2025), 8.78% CAGR, 67% day boarding, $2.85B by 2030</td>
+          <td><a href="https://www.grandviewresearch.com/industry-analysis/us-pet-daycare-market-report" target="_blank">Grand View Research — U.S. Pet Daycare Market Report (2025)</a></td>
+        </tr>
+        <tr id="src2">
+          <td><strong>2</strong></td>
+          <td>71% of U.S. households own pets, 51% own dogs (94M households)</td>
+          <td><a href="https://americanpetproducts.org/news/the-american-pet-products-association-appa-releases-2025-state-of-the-industry-report" target="_blank">American Pet Products Association (APPA) — 2025 State of the Industry Report</a></td>
+        </tr>
+        <tr id="src3">
+          <td><strong>3</strong></td>
+          <td>Pet daycare/sitting software market $1.05–1.2B, growing 8–12.5% CAGR</td>
+          <td><a href="https://www.researchandmarkets.com/reports/5980347/pet-sitting-daycare-software-market-report" target="_blank">Research and Markets — Pet Sitting &amp; Daycare Software Market Report (2025)</a>; <a href="https://www.verifiedmarketreports.com/product/pet-daycare-software-market/" target="_blank">Verified Market Reports</a></td>
+        </tr>
+        <tr id="src4">
+          <td><strong>4</strong></td>
+          <td>Market highly fragmented, no single vendor commands more than mid-single-digit share</td>
+          <td><a href="https://www.mordorintelligence.com/industry-reports/pet-daycare-market" target="_blank">Mordor Intelligence — Pet Daycare Market Report (2025)</a></td>
+        </tr>
+        <tr id="src5">
+          <td><strong>5</strong></td>
+          <td>Estimated 30–50% of independent daycares operate with no dedicated software</td>
+          <td>TailWag internal estimate based on industry adoption data. Derived from total U.S. pet boarding/daycare businesses (~160,000) vs. total reported users across all software platforms (~35,000–50,000 combined). <em>Note: No single published source confirms this figure — use as directional.</em></td>
+        </tr>
+        <tr id="src6">
+          <td><strong>6</strong></td>
+          <td>SMS open rate 98% vs. ~20% for email</td>
+          <td><a href="https://www.sender.net/blog/sms-open-rates/" target="_blank">Sender.net — SMS Open Rates (2025)</a>; <a href="https://www.americaneagle.com/insights/blog/post/the-98-percent-open-rate-why-sms-marketing-is-your-secret-weapon" target="_blank">Americaneagle.com</a>. <em>Note: Some analysts cite 90–98% range; 98% is the widely reported upper figure.</em></td>
+        </tr>
+        <tr id="src7">
+          <td><strong>7</strong></td>
+          <td>87% want reminders; 77% prefer text; 83% want digital records; 31–40% will switch providers</td>
+          <td><a href="https://petdesk.com/pet-parent-research-report/" target="_blank">PetDesk — 2025 Pet Parent Research Report</a>; also reported in <a href="https://www.prnewswire.com/news-releases/petdesk-data-how-pet-parents-view-and-value-technology-in-veterinary-care-in-2025-302402920.html" target="_blank">PR Newswire (Jan 2025)</a> and <a href="https://www.veterinarypracticenews.com/pet-parent-research-report/" target="_blank">Veterinary Practice News</a></td>
+        </tr>
+        <tr id="src8">
+          <td><strong>8</strong></td>
+          <td>Gingr: Play plan $145/mo; SMS via Broadly add-on; manual report cards</td>
+          <td><a href="https://www.gingrapp.com/pricing" target="_blank">Gingr Pricing Page</a>; <a href="https://www.g2.com/products/gingr/pricing" target="_blank">G2 — Gingr Pricing</a>; <a href="https://support.gingrapp.com/hc/en-us/articles/27146084826893-Set-Up-Broadly-How-To" target="_blank">Gingr Support — Broadly Setup</a></td>
+        </tr>
+        <tr id="src9">
+          <td><strong>9</strong></td>
+          <td>PetExec: No new customers; acquired by Togetherwork; 1% gateway fee Sept 2025; 7,000+ facilities; redirecting to Gingr</td>
+          <td><a href="https://www.gingrapp.com/petexecinquiries" target="_blank">Gingr — PetExec Inquiries Page</a>; <a href="https://merchantcostconsulting.com/lower-credit-card-processing-fees/petexec-payment-processing-review/" target="_blank">Merchant Cost Consulting — PetExec Review</a>; <a href="https://www.petexec.net/unlimited-texting" target="_blank">PetExec — Unlimited Texting ($19.99/mo)</a></td>
+        </tr>
+        <tr id="src10">
+          <td><strong>10</strong></td>
+          <td>DaySmart Pet: $29–$249/mo (Basic/Deluxe/Premier/Platinum); 5,000+ users; 2-way texting Premier+</td>
+          <td><a href="https://www.capterra.com/p/93413/123Pet-Software/pricing/" target="_blank">Capterra — DaySmart Pet Pricing</a>; <a href="https://www.daysmart.com/pet/features/two-way-texting/" target="_blank">DaySmart Pet — Two-Way Texting</a></td>
+        </tr>
+        <tr id="src11">
+          <td><strong>11</strong></td>
+          <td>ProPet: $49.99/mo base; per-user pricing</td>
+          <td><a href="https://www.propetware.com/pricing-subscriptions/" target="_blank">ProPet Pricing Page</a>; <a href="https://www.getapp.com/industries-software/a/propet/pricing/" target="_blank">GetApp — ProPet Pricing</a></td>
+        </tr>
+        <tr id="src12">
+          <td><strong>12</strong></td>
+          <td>Pawfinity: $50/mo flat rate; SMS pay-as-you-go add-on</td>
+          <td><a href="https://www.pawfinity.com/pricing/" target="_blank">Pawfinity Pricing Page</a>; <a href="https://www.capterra.com/p/142461/Pawfinity/pricing/" target="_blank">Capterra — Pawfinity</a></td>
+        </tr>
+        <tr id="src13">
+          <td><strong>13</strong></td>
+          <td>Paw Partner: $39.99–$99.99/mo depending on tier</td>
+          <td><a href="https://pawpartner.com/pricing" target="_blank">Paw Partner Pricing Page</a>; <a href="https://www.capterra.com/p/203713/Paw-Partner/pricing/" target="_blank">Capterra — Paw Partner</a></td>
+        </tr>
+        <tr id="src14">
+          <td><strong>14</strong></td>
+          <td>Podium: Core $399/mo, Pro $599/mo; actual costs $500–800 with add-ons</td>
+          <td><a href="https://www.g2.com/products/podium/pricing" target="_blank">G2 — Podium Pricing</a>; <a href="https://www.capterra.com/p/164285/Podium/pricing/" target="_blank">Capterra — Podium Pricing</a>; <a href="https://www.socialpilot.co/reviews/blogs/podium-pricing" target="_blank">SocialPilot — Podium Pricing Breakdown</a></td>
+        </tr>
+        <tr id="src15">
+          <td><strong>15</strong></td>
+          <td>Birdeye: Starter $299/mo, Growth $349/mo, Dominate $449/mo; 12-month contracts; 90-day cancellation notice</td>
+          <td><a href="https://birdeye.com/pricing/" target="_blank">Birdeye Pricing Page</a>; <a href="https://birdeye.com/cancellation-policy/" target="_blank">Birdeye Cancellation Policy</a>; <a href="https://www.capterra.com/p/152997/BirdEye/pricing/" target="_blank">Capterra — Birdeye</a></td>
+        </tr>
+        <tr id="src16">
+          <td><strong>16</strong></td>
+          <td>Weave: Pro $249/mo; $750 setup; 1,500 SMS/mo cap; 500 SMS on Essential</td>
+          <td><a href="https://www.getweave.com/pricing/" target="_blank">Weave Pricing Page</a>; <a href="https://www.capterra.com/p/141842/Weave/pricing/" target="_blank">Capterra — Weave Pricing</a>; <a href="https://getvoip.com/reviews/weave/" target="_blank">GetVoIP — Weave Review</a></td>
+        </tr>
+        <tr id="src17">
+          <td><strong>17</strong></td>
+          <td>Broadly: Custom pricing; Gingr preferred partner integration</td>
+          <td><a href="https://broadly.com/pricing/" target="_blank">Broadly Pricing Page</a>; <a href="https://broadly.com/partners/gingr/" target="_blank">Broadly — Gingr Partnership</a></td>
+        </tr>
+        <tr id="src18">
+          <td><strong>18</strong></td>
+          <td>MoeGo: 10,000+ businesses, 11M+ pets served</td>
+          <td><a href="https://www.moego.pet/" target="_blank">MoeGo Official Site</a></td>
+        </tr>
+        <tr id="src19">
+          <td><strong>19</strong></td>
+          <td>Kennel Connection: 5,000+ customers</td>
+          <td><a href="https://kennelconnection.com/about-us/" target="_blank">Kennel Connection — About Us</a></td>
+        </tr>
+        <tr id="src20">
+          <td><strong>20</strong></td>
+          <td>Time To Pet: 4,000+ businesses; pricing $25–$50+/mo</td>
+          <td><a href="https://www.timetopet.com" target="_blank">Time To Pet Official Site</a>; <a href="https://help.timetopet.com/en/articles/11547000-time-to-pet-billing-pricing" target="_blank">Time To Pet — Billing &amp; Pricing</a></td>
+        </tr>
+        <tr id="src21">
+          <td><strong>21</strong></td>
+          <td>Groomer.io: 3,000+ businesses</td>
+          <td><a href="https://get.groomer.io" target="_blank">Groomer.io Official Site</a></td>
+        </tr>
+        <tr id="src22">
+          <td><strong>22</strong></td>
+          <td>Gingr: ~2,059 companies (2025)</td>
+          <td><a href="https://6sense.com/tech/other-vertical-tech/gingr-market-share" target="_blank">6sense — Gingr Market Share Data</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="card" style="margin-top:20px;">
+      <h4>A Note on Data Quality</h4>
+      <p>Pet daycare software is a niche market where most vendors are private companies that don't publish detailed metrics. Customer counts come from official websites, press releases, and review aggregator platforms (Capterra, G2, GetApp). Market share percentages are TailWag estimates based on available data — not published industry figures. Pricing was verified from official pricing pages and multiple third-party review sites; actual costs may vary by location, negotiation, and bundled add-ons. Source [5] is flagged as a directional estimate, not a published statistic.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="logo-bar" style="margin-bottom:10px;">
+    <svg width="20" height="20" viewBox="0 0 56 56" fill="none"><rect width="56" height="56" fill="#1E6B4A" rx="9"/><path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/><circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/></svg>
+    <span style="font-size:16px;">TailWag</span>
+  </div>
+  © 2026 TailWag. Built for dog people by dog people.<br>
+  Confidential — Internal Strategy Document
+</div>
+
+</body>
+</html>

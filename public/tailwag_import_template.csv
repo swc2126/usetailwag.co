@@ -1,6 +1,40 @@
+## ─────────────────────────────────────────────────────────────────────
+## TailWag Import Template  |  usetailwag.co
+## ─────────────────────────────────────────────────────────────────────
+##
+## HOW TO USE THIS FILE
+## ─────────────────────────────────────────────────────────────────────
+##
+## STEP 1 — Fill in your data below the column header row.
+##          These ## instruction lines are ignored on upload
+##          so you do NOT need to delete them.
+##
+## STEP 2 — One row per dog. If an owner has 2 dogs use 2 rows
+##          and repeat their name and phone number on both rows.
+##          Example: Sarah Chen has Biscuit AND Noodle = 2 rows.
+##
+## STEP 3 — Required fields (every row must have these 4 columns):
+##            owner_first_name   = owner first name
+##            owner_last_name    = owner last name
+##            owner_phone        = 10-digit number digits only
+##            dog_name           = dog first name
+##
+## STEP 4 — Phone number format: digits only no dashes or parentheses
+##            CORRECT:   2145550001
+##            INCORRECT: (214) 555-0001  or  214-555-0001  or  +12145550001
+##
+## STEP 5 — Save as CSV before uploading (NOT .xlsx):
+##            Excel:         File > Save As > CSV (Comma delimited) (.csv)
+##            Google Sheets: File > Download > Comma Separated Values (.csv)
+##            Numbers:       File > Export To > CSV
+##
+## ─────────────────────────────────────────────────────────────────────
+## EXAMPLE DATA IS BELOW. Delete it or leave it — TailWag skips rows
+## where the owner phone already exists in your Directory.
+## ─────────────────────────────────────────────────────────────────────
 owner_first_name,owner_last_name,owner_phone,owner_email,dog_name,breed,age,weight_lbs,medications,notes
 Sarah,Chen,2145550001,sarah@example.com,Biscuit,Labrador Retriever,4,72,,Loves fetch
-Sarah,Chen,2145550001,sarah@example.com,Noodle,Poodle Mix,2,18,,Shy at first
+Sarah,Chen,2145550001,sarah@example.com,Noodle,Poodle Mix,2,18,,Shy at first - same owner as above with 2 dogs
 Mike,Johnson,2145550002,mike@example.com,Max,Golden Retriever,3,65,Apoquel 16mg daily,
 Amanda,Williams,9725550003,amanda@example.com,Luna,French Bulldog,1,22,,No dogs near gate
 Tom,Rivera,2145550004,,Pretzel,Dachshund,5,14,Phenobarbital 30mg,Senior dog - gentle play only

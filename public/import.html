@@ -89,11 +89,12 @@
     .btn-row { display: flex; gap: 10px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
 
     /* PREVIEW TABLE */
-    .preview-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 16px; overflow-x: auto; display: block; }
-    .preview-table th { background: var(--black); color: var(--linen); padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .preview-scroll-wrap { max-height: 320px; overflow-y: auto; overflow-x: auto; border-radius: 8px; border: 1px solid #e8e3db; margin-top: 16px; }
+    .preview-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .preview-table thead th { position: sticky; top: 0; z-index: 2; background: var(--black); color: var(--linen); padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
     .preview-table td { padding: 8px 12px; border-bottom: 1px solid #f0ede8; white-space: nowrap; }
     .preview-table tr:last-child td { border-bottom: none; }
-    .preview-table tr:hover td { background: var(--linen); }
+    .preview-table tbody tr:hover td { background: var(--linen); }
     .cell-empty { color: #ccc; font-style: italic; }
     .more-rows { font-size: 12px; color: #888; margin-top: 8px; font-style: italic; }
 
@@ -217,11 +218,14 @@
     <div class="card">
       <h2>Step 2 — Upload your CSV</h2>
 
+      <!-- Upload error banner -->
+      <div id="uploadError" style="display:none;background:#fff5f5;border:1.5px solid #fed7d7;border-radius:10px;padding:14px 18px;margin-bottom:12px;font-size:13px;color:#c53030;line-height:1.6;"></div>
+
       <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
-        <input type="file" id="fileInput" accept=".csv,text/csv" onchange="onFileSelect(event)">
+        <input type="file" id="fileInput" accept=".csv,text/csv,.xlsx,.xls" onchange="onFileSelect(event)">
         <div class="drop-icon">📂</div>
         <div class="drop-title" id="dropTitle">Drop your CSV here or click to browse</div>
-        <div class="drop-sub" id="dropSub">Supports .csv files from any source</div>
+        <div class="drop-sub" id="dropSub">Accepts .csv files · <a href="/tailwag_import_template.csv" download style="color:var(--green);font-weight:600;">Download template</a></div>
       </div>
 
       <div class="or-divider">— or paste CSV text directly —</div>
@@ -244,7 +248,7 @@
 
       <div class="card">
         <h2>Preview <span id="previewCountLabel" style="font-weight:400;color:#888;"></span></h2>
-        <div style="overflow-x:auto;">
+        <div class="preview-scroll-wrap">
           <table class="preview-table" id="previewTable"></table>
         </div>
         <div class="more-rows" id="moreRows"></div>
@@ -293,6 +297,16 @@
   const session = getSession();
   if (!session?.access_token) window.location.href = '/login.html';
 
+  // ── Upload error banner ────────────────────────────────────────────────
+  function showUploadError(html) {
+    const el = document.getElementById('uploadError');
+    el.innerHTML = html;
+    el.style.display = 'block';
+  }
+  function clearUploadError() {
+    document.getElementById('uploadError').style.display = 'none';
+  }
+
   // ── Step nav ───────────────────────────────────────────────────────────
   function showStep(n) {
     [1,2,3].forEach(i => {
@@ -305,13 +319,22 @@
     });
   }
   function goToStep1() { showStep(1); }
-  function goToStep2() { showStep(2); csvText = ''; document.getElementById('csvPaste').value = ''; document.getElementById('fileInput').value = ''; document.getElementById('previewResults').style.display = 'none'; document.getElementById('previewBtn').disabled = true; updateDropZone('Drop your CSV here or click to browse', 'Supports .csv files from any source'); }
+  function goToStep2() {
+    showStep(2);
+    csvText = '';
+    clearUploadError();
+    document.getElementById('csvPaste').value = '';
+    document.getElementById('fileInput').value = '';
+    document.getElementById('previewResults').style.display = 'none';
+    document.getElementById('previewBtn').disabled = true;
+    updateDropZone('Drop your CSV here or click to browse', 'Accepts .csv files · <a href="/tailwag_import_template.csv" download style="color:var(--green);font-weight:600;">Download template</a>');
+  }
   function startOver() { goToStep1(); }
 
   // ── File handling ──────────────────────────────────────────────────────
-  function updateDropZone(title, sub) {
+  function updateDropZone(title, subHtml) {
     document.getElementById('dropTitle').textContent = title;
-    document.getElementById('dropSub').textContent = sub;
+    document.getElementById('dropSub').innerHTML = subHtml;
   }
   function onDragOver(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
   function onDragLeave() { document.getElementById('dropZone').classList.remove('drag-over'); }
@@ -322,27 +345,74 @@
     if (file) readFile(file);
   }
   function onFileSelect(e) { if (e.target.files[0]) readFile(e.target.files[0]); }
+
   function readFile(file) {
-    if (!file.name.endsWith('.csv') && file.type !== 'text/csv') {
-      alert('Please upload a .csv file.'); return;
+    clearUploadError();
+    const name = file.name.toLowerCase();
+
+    // Detect Excel files — common mistake
+    if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
+      showUploadError(
+        '<strong>⚠️ Excel file detected (.xlsx)</strong><br>' +
+        'TailWag requires a CSV file, not an Excel file. Here\'s how to convert:<br>' +
+        '&nbsp;&nbsp;1. Open your file in Excel<br>' +
+        '&nbsp;&nbsp;2. Click <strong>File → Save As</strong><br>' +
+        '&nbsp;&nbsp;3. Choose file type: <strong>CSV (Comma delimited) (.csv)</strong><br>' +
+        '&nbsp;&nbsp;4. Save, then upload the new .csv file here'
+      );
+      document.getElementById('fileInput').value = '';
+      return;
     }
+
+    // Accept .csv or text/csv (some systems use different MIME types)
+    if (!name.endsWith('.csv') && file.type !== 'text/csv' && !file.type.includes('csv')) {
+      showUploadError(
+        '<strong>⚠️ Unsupported file type: ' + file.name + '</strong><br>' +
+        'Please upload a .csv file. If your file is in Excel, Google Sheets, or Numbers, ' +
+        'export it as CSV first. <a href="/tailwag_import_template.csv" download style="color:#c53030;font-weight:600;">Download our template</a> to see the correct format.'
+      );
+      document.getElementById('fileInput').value = '';
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = e => {
       csvText = e.target.result;
+
+      // Quick sanity check — does it look like a valid CSV?
+      const firstRealLine = csvText.split('\n').find(l => l.trim() && !l.trim().startsWith('##')) || '';
+      if (!firstRealLine.includes(',')) {
+        showUploadError(
+          '<strong>⚠️ File doesn\'t look like a CSV</strong><br>' +
+          'The file <strong>' + file.name + '</strong> doesn\'t contain comma-separated columns. ' +
+          'Make sure you saved it as CSV (not as a plain text or Excel file). ' +
+          '<a href="/tailwag_import_template.csv" download style="color:#c53030;font-weight:600;">Download our template</a> to see the correct format.'
+        );
+        csvText = '';
+        document.getElementById('fileInput').value = '';
+        return;
+      }
+
       document.getElementById('csvPaste').value = '';
-      updateDropZone('✓ ' + file.name, `${(file.size/1024).toFixed(1)} KB loaded`);
+      updateDropZone('✓ ' + file.name, (file.size/1024).toFixed(1) + ' KB — ready to preview');
       document.getElementById('previewBtn').disabled = false;
+    };
+    reader.onerror = () => {
+      showUploadError('<strong>⚠️ Could not read file</strong><br>The file could not be opened. Please try again or paste your CSV text in the box below.');
     };
     reader.readAsText(file);
   }
+
   function onPasteInput() {
     csvText = document.getElementById('csvPaste').value;
+    clearUploadError();
     document.getElementById('previewBtn').disabled = !csvText.trim();
-    if (csvText.trim()) updateDropZone('Drop your CSV here or click to browse', 'Using pasted text above');
+    if (csvText.trim()) updateDropZone('Drop your CSV here or click to browse', 'Using pasted text below');
   }
 
   // ── Preview ────────────────────────────────────────────────────────────
   async function doPreview() {
+    clearUploadError();
     const btn = document.getElementById('previewBtn');
     btn.disabled = true; btn.textContent = 'Analyzing…';
     try {
@@ -351,14 +421,46 @@
         body: JSON.stringify({ csv: csvText })
       });
       const data = await res.json();
-      if (!res.ok) { alert(data.error || 'Error parsing CSV'); btn.disabled = false; btn.textContent = 'Preview Import →'; return; }
+      if (!res.ok) {
+        showUploadError(buildPreviewError(data.error || 'Could not parse your file.'));
+        btn.disabled = false; btn.textContent = 'Preview Import →';
+        return;
+      }
+
+      // Check if nothing was mapped at all
+      const mappedCount = (data.mapped_headers || []).filter(Boolean).length;
+      if (mappedCount === 0) {
+        showUploadError(
+          '<strong>⚠️ No columns were recognized</strong><br>' +
+          'TailWag couldn\'t match any of your column headers to known fields. ' +
+          'Your headers were: <code>' + (data.headers || []).join(', ') + '</code><br><br>' +
+          'Expected headers like: <code>owner_first_name, owner_last_name, owner_phone, dog_name</code><br>' +
+          '<a href="/tailwag_import_template.csv" download style="color:#c53030;font-weight:600;">Download the template</a> to see the correct column names.'
+        );
+        btn.disabled = false; btn.textContent = 'Preview Import →';
+        return;
+      }
+
       previewData = data;
       renderPreview(data);
       document.getElementById('previewResults').style.display = 'block';
     } catch (err) {
-      alert('Error: ' + err.message);
+      showUploadError('<strong>⚠️ Connection error</strong><br>Could not reach the server. Please check your connection and try again.');
     }
     btn.disabled = false; btn.textContent = 'Preview Import →';
+  }
+
+  function buildPreviewError(serverMsg) {
+    // Map known server error messages to friendly explanations
+    if (serverMsg.includes('header row') || serverMsg.includes('data row')) {
+      return '<strong>⚠️ File appears empty or has only one row</strong><br>' +
+        'Your CSV needs at least a header row and one row of data. ' +
+        'Make sure you haven\'t uploaded a blank template. ' +
+        '<a href="/tailwag_import_template.csv" download style="color:#c53030;font-weight:600;">Download the template</a> to see the correct format.';
+    }
+    return '<strong>⚠️ Could not read your file</strong><br>' + serverMsg + '<br><br>' +
+      'Common causes: saving as .xlsx instead of .csv, or special characters in the file. ' +
+      '<a href="/tailwag_import_template.csv" download style="color:#c53030;font-weight:600;">Try starting from our template.</a>';
   }
 
   const FIELD_LABELS = {
@@ -381,10 +483,20 @@
       </div>`;
     }).join('');
 
-    // Warnings
+    // Warnings — show as a more prominent block if critical fields are missing
     const warnEl = document.getElementById('warningBox');
     if (data.warnings.length) {
-      warnEl.innerHTML = `<div class="warning-box">⚠️ ${data.warnings.join(' · ')}</div>`;
+      const isCritical = data.warnings.some(w =>
+        w.includes('first name') || w.includes('last name') || w.includes('phone') || w.includes('dog name')
+      );
+      const style = isCritical
+        ? 'background:#fff5f5;border:1.5px solid #fed7d7;border-radius:10px;padding:14px 18px;margin:12px 0;font-size:13px;color:#c53030;line-height:1.8;'
+        : 'background:#fff8e6;border:1.5px solid #f0c040;border-radius:10px;padding:12px 16px;margin:12px 0;font-size:13px;color:#7a5c00;line-height:1.8;';
+      const icon = isCritical ? '❌' : '⚠️';
+      const label = isCritical ? '<strong>Missing required columns:</strong>' : '<strong>Heads up:</strong>';
+      warnEl.innerHTML = `<div style="${style}">${icon} ${label}<br>${data.warnings.map(w => '&nbsp;&nbsp;• ' + w).join('<br>')}<br><br>` +
+        (isCritical ? 'These fields are needed for texting to work. Check that your column headers match the template.' : '') +
+        `</div>`;
     } else {
       warnEl.innerHTML = '';
     }
@@ -400,17 +512,27 @@
       ).join('')}</tbody>`;
 
     document.getElementById('moreRows').textContent = data.total_rows > 5
-      ? `Showing 5 of ${data.total_rows} rows` : '';
+      ? `Showing first 5 of ${data.total_rows} rows — scroll to see more` : '';
   }
 
   // ── Import ─────────────────────────────────────────────────────────────
   async function doImport() {
     const skipDupes = document.getElementById('skipDupes').checked;
-    const res = await fetch('/api/import/clients', {
-      method: 'POST', headers: authHeaders(),
-      body: JSON.stringify({ csv: csvText, skip_duplicates: skipDupes })
-    });
-    const data = await res.json();
+    let res, data;
+    try {
+      res = await fetch('/api/import/clients', {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ csv: csvText, skip_duplicates: skipDupes })
+      });
+      data = await res.json();
+    } catch (err) {
+      showUploadError('<strong>⚠️ Connection error during import</strong><br>Your data was not saved. Please check your connection and try again.');
+      return;
+    }
+    if (!res.ok) {
+      showUploadError('<strong>⚠️ Import failed</strong><br>' + (data?.error || 'An unexpected error occurred. Please try again.'));
+      return;
+    }
     showStep(3);
 
     const grid = document.getElementById('resultGrid');

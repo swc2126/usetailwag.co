@@ -202,8 +202,8 @@
   <div id="pageContent" style="display:none;">
 
     <div class="page-header">
-      <h1>Dashboard</h1>
-      <p id="welcomeText">Welcome back!</p>
+      <h1 id="welcomeHeading">Welcome back!</h1>
+      <p id="welcomeText"></p>
     </div>
 
     <!-- Onboarding checklist (only shown if 0 clients) -->
@@ -302,10 +302,11 @@
 
   async function loadDashboard() {
     try {
-      const [statsRes, usageRes, historyRes] = await Promise.all([
+      const [statsRes, usageRes, historyRes, meRes] = await Promise.all([
         fetch('/api/dashboard/stats', { headers: authHeaders }),
         fetch('/api/sms/usage', { headers: authHeaders }),
-        fetch('/api/sms/history?limit=5', { headers: authHeaders })
+        fetch('/api/sms/history?limit=5', { headers: authHeaders }),
+        fetch('/api/auth/me', { headers: authHeaders })
       ]);
 
       if (statsRes.status === 401 || usageRes.status === 401) {
@@ -314,15 +315,29 @@
         return;
       }
 
-      const stats = statsRes.ok ? await statsRes.json() : { clients: 0, dogs: 0 };
-      const usage = usageRes.ok ? await usageRes.json() : { usage: 0, limit: 500 };
-      const messages = historyRes.ok ? await historyRes.json() : [];
+      const stats    = statsRes.ok    ? await statsRes.json()    : { clients: 0, dogs: 0 };
+      const usage    = usageRes.ok    ? await usageRes.json()    : { usage: 0, limit: 500 };
+      const messages = historyRes.ok  ? await historyRes.json()  : [];
+      const meData   = meRes.ok       ? await meRes.json()       : {};
 
-      // Update daycare name in nav
-      if (stats.daycare && stats.daycare.name) {
+      // Personalized greeting — prefer first name, fall back to daycare name
+      const firstName  = meData.profile?.first_name || '';
+      const daycareName = meData.daycare?.name || stats.daycare?.name || '';
+      const greetName  = firstName || daycareName;
+
+      const hour = new Date().getHours();
+      const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+      const headingEl = document.getElementById('welcomeHeading');
+      const subEl     = document.getElementById('welcomeText');
+
+      if (greetName) {
+        headingEl.textContent = `${timeGreeting}, ${greetName}! 👋`;
+        subEl.textContent = daycareName && firstName ? daycareName : '';
+      } else {
+        headingEl.textContent = `${timeGreeting}! 👋`;
+        subEl.textContent = '';
       }
-      document.getElementById('welcomeText').textContent =
-        (stats.daycare && stats.daycare.name) ? `Overview for ${stats.daycare.name}` : 'Welcome back!';
 
       // Stats
       document.getElementById('statClients').textContent = stats.clients != null ? stats.clients : 0;

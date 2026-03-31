@@ -43,6 +43,60 @@ async function sendReminderSms(fromNumber, toPhone, firstName, dogName, daycareN
 
 // ─── APPOINTMENTS ────────────────────────────────────────────────────────────
 
+// GET /api/appointments/range?start=YYYY-MM-DD&end=YYYY-MM-DD
+// Returns all appointments grouped by date for week/month views
+router.get('/range', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+  const { start, end } = req.query;
+  if (!start || !end) return res.status(400).json({ error: 'start and end required' });
+
+  const { data: appts, error } = await supabaseAdmin
+    .from('appointments')
+    .select('id, appointment_date, status, client_id, dog_id, notes, reminder_sent_at, clients(first_name, last_name), dogs(name, breed)')
+    .eq('daycare_id', req.daycareId)
+    .gte('appointment_date', start)
+    .lte('appointment_date', end);
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  const { data: recurring } = await supabaseAdmin
+    .from('recurring_schedules')
+    .select('client_id, dog_id, days_of_week, clients(first_name, last_name), dogs(name)')
+    .eq('daycare_id', req.daycareId)
+    .eq('active', true);
+
+  // Group explicit appointments by date
+  const grouped = {};
+  (appts || []).forEach(a => {
+    if (!grouped[a.appointment_date]) grouped[a.appointment_date] = [];
+    grouped[a.appointment_date].push(a);
+  });
+
+  // Merge recurring for each date in range
+  const startD = new Date(start + 'T12:00:00');
+  const endD   = new Date(end   + 'T12:00:00');
+  for (let d = new Date(startD); d <= endD; d.setDate(d.getDate() + 1)) {
+    const dateStr = d.toISOString().split('T')[0];
+    const dow     = d.getDay();
+    const matches = (recurring || []).filter(r => r.days_of_week.includes(dow));
+    if (matches.length) {
+      if (!grouped[dateStr]) grouped[dateStr] = [];
+      const existing = new Set(grouped[dateStr].map(a => `${a.client_id}-${a.dog_id}`));
+      matches.forEach(r => {
+        if (!existing.has(`${r.client_id}-${r.dog_id}`)) {
+          grouped[dateStr].push({
+            id: null, appointment_date: dateStr, status: 'recurring_pending',
+            client_id: r.client_id, dog_id: r.dog_id,
+            clients: r.clients, dogs: r.dogs, is_recurring: true
+          });
+        }
+      });
+    }
+  }
+
+  res.json(grouped);
+});
+
 // GET /api/appointments?date=YYYY-MM-DD
 // Returns appointments for a date, merging in recurring schedules
 router.get('/', requireAuth, async (req, res) => {

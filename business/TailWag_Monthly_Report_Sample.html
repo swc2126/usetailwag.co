@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TailWag — Monthly Report</title>
+<!--
+  TailWag Monthly Usage Report — Email Template
+
+  Placeholder tokens (wrapped in {{ }}) are meant to be replaced
+  with real data when generating each client's report.
+
+  Designed for Brevo or any HTML-capable email platform.
+  Uses inline styles + embedded <style> for email client compatibility.
+-->
+<style>
+  body { margin: 0; padding: 0; background: #F5F0E8; font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; color: #2D3748; -webkit-font-smoothing: antialiased; }
+  .wrapper { max-width: 600px; margin: 0 auto; background: #FFFFFF; }
+  .header { background: #0F1410; padding: 32px 40px 28px; }
+  .header-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .header-logo svg { flex-shrink: 0; }
+  .header-logo span { color: #F5F0E8; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .header h1 { color: #F5F0E8; font-size: 26px; font-weight: 800; margin: 0 0 6px; letter-spacing: -0.5px; }
+  .header .subtitle { color: #A8C5B0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; margin: 0; }
+  .header .period { color: rgba(245,240,232,0.7); font-size: 14px; margin: 12px 0 0; }
+  .green-bar { height: 4px; background: #1E6B4A; }
+
+  /* Value delivered hero */
+  .value-hero { background: #0F1410; padding: 28px 40px 32px; text-align: center; border-bottom: 4px solid #1E6B4A; }
+  .value-hero .label { color: #A8C5B0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px; }
+  .value-hero .amount { color: #C4933F; font-size: 48px; font-weight: 700; margin: 0; letter-spacing: -1px; }
+  .value-hero .desc { color: rgba(245,240,232,0.75); font-size: 14px; margin: 8px 0 0; line-height: 1.5; }
+
+  /* Stat grid */
+  .stats { padding: 32px 40px; }
+  .stats h2 { font-size: 18px; font-weight: 700; color: #0F1410; margin: 0 0 20px; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .stat-card { background: #F5F0E8; border-radius: 8px; padding: 20px; border-left: 4px solid #1E6B4A; }
+  .stat-card .stat-number { font-size: 32px; font-weight: 700; color: #1E6B4A; margin: 0; }
+  .stat-card .stat-label { font-size: 12px; font-weight: 600; color: #2D3748; text-transform: uppercase; letter-spacing: 1px; margin: 6px 0 0; }
+  .stat-card .stat-detail { font-size: 13px; color: #2D3748; margin: 4px 0 0; opacity: 0.75; }
+  .stat-card.gold .stat-number { color: #C4933F; }
+
+  /* Report cards section */
+  .section { padding: 28px 40px; }
+  .section-dark { background: #0F1410; }
+  .section h2 { font-size: 18px; font-weight: 700; color: #0F1410; margin: 0 0 16px; }
+  .section-dark h2 { color: #F5F0E8; }
+  .section-dark p { color: rgba(245,240,232,0.78); }
+
+  /* Report card detail */
+  .rc-summary { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .rc-big { font-size: 36px; font-weight: 700; color: #1E6B4A; }
+  .rc-context { text-align: right; font-size: 13px; color: #2D3748; line-height: 1.6; }
+  .rc-bar-wrap { background: #eee; border-radius: 4px; height: 8px; overflow: hidden; margin-bottom: 8px; }
+  .rc-bar { background: #1E6B4A; height: 100%; border-radius: 4px; }
+  .rc-bar-label { font-size: 12px; color: #2D3748; opacity: 0.7; }
+
+  /* Reminders section */
+  .reminder-row { display: flex; gap: 12px; margin-bottom: 12px; }
+  .reminder-stat { flex: 1; background: #F5F0E8; border-radius: 8px; padding: 16px; text-align: center; }
+  .reminder-stat .num { font-size: 28px; font-weight: 700; color: #1E6B4A; }
+  .reminder-stat .lbl { font-size: 11px; font-weight: 600; color: #2D3748; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .reminder-stat.highlight { background: #1E6B4A; }
+  .reminder-stat.highlight .num { color: #FFFFFF; }
+  .reminder-stat.highlight .lbl { color: rgba(255,255,255,0.85); }
+  .savings-callout { background: #F5F0E8; border-left: 4px solid #C4933F; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 16px; }
+  .savings-callout span { font-size: 14px; color: #2D3748; }
+  .savings-callout strong { color: #C4933F; }
+
+  /* Reviews section */
+  .review-hero { display: flex; align-items: center; gap: 20px; margin-bottom: 16px; }
+  .review-rating { font-size: 44px; font-weight: 700; color: #C4933F; line-height: 1; }
+  .review-stars { color: #C4933F; font-size: 18px; letter-spacing: 2px; }
+  .review-detail { font-size: 13px; color: #2D3748; line-height: 1.6; }
+  .review-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .review-cell { text-align: center; padding: 12px; background: #F5F0E8; border-radius: 8px; }
+  .review-cell .num { font-size: 24px; font-weight: 700; color: #1E6B4A; }
+  .review-cell .lbl { font-size: 11px; font-weight: 600; color: #2D3748; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+  /* Client health */
+  .health-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(245,240,232,0.15); }
+  .health-row:last-child { border-bottom: none; }
+  .health-label { color: rgba(245,240,232,0.78); font-size: 14px; }
+  .health-value { color: #F5F0E8; font-size: 14px; font-weight: 600; }
+  .health-value.green { color: #1E6B4A; }
+  .health-value.gold { color: #C4933F; }
+
+  /* Footer */
+  .footer { background: #0F1410; padding: 28px 40px; text-align: center; border-top: 4px solid #1E6B4A; }
+  .footer p { color: rgba(245,240,232,0.6); font-size: 13px; margin: 0 0 4px; line-height: 1.6; }
+  .footer a { color: #1E6B4A; text-decoration: none; }
+  .footer .tagline { color: #A8C5B0; font-size: 12px; font-style: italic; margin-top: 16px; }
+
+  /* Divider */
+  .divider { height: 1px; background: #eee; margin: 0 40px; }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    .header, .stats, .section, .value-hero, .footer { padding-left: 24px; padding-right: 24px; }
+    .stat-grid { grid-template-columns: 1fr; }
+    .review-grid { grid-template-columns: 1fr; }
+    .reminder-row { flex-direction: column; }
+    .value-hero .amount { font-size: 36px; }
+    .rc-summary { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .rc-context { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- ============ HEADER ============ -->
+  <div class="header">
+    <div class="header-logo">
+      <svg width="28" height="28" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="56" height="56" fill="#1E6B4A" rx="9"></rect>
+        <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"></path>
+        <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"></circle>
+      </svg>
+      <span>TailWag</span>
+    </div>
+    <p class="subtitle">MONTHLY REPORT</p>
+    <h1>Cosmic Canine</h1>
+    <p class="period">March 2026 &nbsp;·&nbsp; Strategic Partner — Founders Circle</p>
+  </div>
+
+  <!-- ============ VALUE DELIVERED HERO ============ -->
+  <div class="value-hero">
+    <p class="label">ESTIMATED VALUE DELIVERED THIS MONTH</p>
+    <p class="amount">$1,240</p>
+    <p class="desc">From prevented no-shows, stronger retention, and review growth.</p>
+  </div>
+
+  <!-- ============ AT A GLANCE ============ -->
+  <div class="stats">
+    <h2>At a Glance</h2>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <p class="stat-number">187</p>
+        <p class="stat-label">Report Cards Sent</p>
+        <p class="stat-detail">94% of visits covered</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-number">203</p>
+        <p class="stat-label">Reminders Sent</p>
+        <p class="stat-detail">189 confirmed</p>
+      </div>
+      <div class="stat-card gold">
+        <p class="stat-number">8</p>
+        <p class="stat-label">No-Shows Prevented</p>
+        <p class="stat-detail">≈ $320 saved</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-number">6</p>
+        <p class="stat-label">New Google Reviews</p>
+        <p class="stat-detail">34 requests sent</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ REPORT CARDS ============ -->
+  <div class="section">
+    <h2>Report Cards</h2>
+    <div class="rc-summary">
+      <span class="rc-big">187</span>
+      <div class="rc-context">
+        199 total visits<br>
+        74 unique dogs<br>
+        11 new dogs this month
+      </div>
+    </div>
+    <div class="rc-bar-wrap">
+      <div class="rc-bar" style="width: 94%"></div>
+    </div>
+    <p class="rc-bar-label">94% coverage — 187 of 199 visits got a personalized report card</p>
+    <p style="font-size: 13px; color: #2D3748; margin-top: 16px; line-height: 1.6;">
+      <strong>Most frequent visitor:</strong> Mochi (18 visits)<br>
+      <strong>Opt-out rate:</strong> 0.5% &nbsp;·&nbsp; Pet parents want to hear from you.
+    </p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ REMINDERS & NO-SHOWS ============ -->
+  <div class="section">
+    <h2>Reminders &amp; No-Shows</h2>
+    <div class="reminder-row">
+      <div class="reminder-stat">
+        <p class="num">203</p>
+        <p class="lbl">Reminders Sent</p>
+      </div>
+      <div class="reminder-stat">
+        <p class="num">189</p>
+        <p class="lbl">Confirmed (YES)</p>
+      </div>
+      <div class="reminder-stat highlight">
+        <p class="num">8</p>
+        <p class="lbl">No-Shows Prevented</p>
+      </div>
+    </div>
+    <div class="savings-callout">
+      <span>At $40 per empty slot, that is <strong>$320 back in your pocket</strong> this month.</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ GOOGLE REVIEWS ============ -->
+  <div class="section">
+    <h2>Google Reviews</h2>
+    <div class="review-hero">
+      <div>
+        <p class="review-rating">4.7</p>
+        <p class="review-stars">★★★★★</p>
+      </div>
+      <div class="review-detail">
+        Your Google rating went up from 4.5 this month.<br>
+        89 total reviews on Google.
+      </div>
+    </div>
+    <div class="review-grid">
+      <div class="review-cell">
+        <p class="num">34</p>
+        <p class="lbl">Requests Sent</p>
+      </div>
+      <div class="review-cell">
+        <p class="num">6</p>
+        <p class="lbl">Reviews Received</p>
+      </div>
+      <div class="review-cell">
+        <p class="num">18%</p>
+        <p class="lbl">Conversion Rate</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CLIENT HEALTH ============ -->
+  <div class="section section-dark">
+    <h2>Client Health</h2>
+    <div class="health-row">
+      <span class="health-label">Total active clients</span>
+      <span class="health-value">74</span>
+    </div>
+    <div class="health-row">
+      <span class="health-label">New clients this month</span>
+      <span class="health-value green">+11</span>
+    </div>
+    <div class="health-row">
+      <span class="health-label">Clients who visited 3+ times</span>
+      <span class="health-value">52</span>
+    </div>
+    <div class="health-row">
+      <span class="health-label">Total messages sent</span>
+      <span class="health-value">424</span>
+    </div>
+    <div class="health-row">
+      <span class="health-label">Opt-out rate</span>
+      <span class="health-value gold">0.5%</span>
+    </div>
+  </div>
+
+  <!-- ============ FOOTER ============ -->
+  <div class="footer">
+    <p>Questions about your report? Reply to this email or reach <a href="mailto:summer@usetailwag.com">Summer</a> directly.</p>
+    <p>Manage your account at <a href="https://usetailwag.co">usetailwag.co</a></p>
+    <p class="tagline">Built for dog people by dog people.</p>
+  </div>
+
+</div>
+</body>
+</html>
