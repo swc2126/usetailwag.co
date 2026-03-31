@@ -697,6 +697,123 @@
       color: rgba(245, 240, 232, 0.3);
     }
 
+    /* ── PATH CHOOSER ─────────────────────────────────── */
+    .path-chooser {
+      max-width: 660px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .path-chooser h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 34px;
+      color: var(--linen);
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+
+    .path-chooser > p {
+      font-size: 16px;
+      color: rgba(245, 240, 232, 0.55);
+      margin-bottom: 36px;
+    }
+
+    .path-cards {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .path-card {
+      flex: 1;
+      max-width: 290px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 32px 24px 28px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+
+    .path-card:hover {
+      border-color: var(--green);
+      background: rgba(30, 107, 74, 0.08);
+      transform: translateY(-3px);
+    }
+
+    .path-icon {
+      font-size: 34px;
+      margin-bottom: 16px;
+    }
+
+    .path-card h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--linen);
+      margin-bottom: 8px;
+    }
+
+    .path-card p {
+      font-size: 13px;
+      color: rgba(245, 240, 232, 0.5);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .path-arrow {
+      font-size: 16px;
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .path-login {
+      margin-top: 28px;
+      font-size: 14px;
+      color: rgba(245, 240, 232, 0.5);
+    }
+
+    .path-login a {
+      color: var(--green);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .path-login a:hover { color: var(--sage); }
+
+    /* ── JOIN SECTION ─────────────────────────────────── */
+    .join-section {
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .join-back {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: rgba(245, 240, 232, 0.5);
+      cursor: pointer;
+      margin-bottom: 24px;
+      transition: color 0.2s;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .join-back:hover { color: var(--linen); }
+
+    .join-success {
+      text-align: center;
+      padding: 48px 32px;
+      display: none;
+    }
+
+    .join-success.visible { display: block; }
+
     /* ── RESPONSIVE ───────────────────────────────────────── */
     @media (max-width: 768px) {
       .signup-wrapper {
@@ -709,6 +826,9 @@
       .signup-card { padding: 28px 20px; }
       .plan-options { flex-direction: column; }
       .form-row { flex-direction: column; gap: 0; }
+      .path-cards { flex-direction: column; align-items: center; }
+      .path-card { max-width: 100%; }
+      .path-chooser h1 { font-size: 26px; }
     }
   </style>
 </head>
@@ -729,7 +849,85 @@
 
   <!-- ═══ SIGNUP FORM ═══ -->
   <main class="main">
-    <div class="signup-wrapper">
+
+    <!-- ── PATH CHOOSER (shown first) ── -->
+    <div class="path-chooser" id="pathChooser">
+      <h1>Get started with TailWag 🐾</h1>
+      <p>How would you like to proceed?</p>
+
+      <div class="path-cards">
+        <div class="path-card" onclick="choosePath('new')">
+          <div class="path-icon">🏪</div>
+          <h3>Start a New Account</h3>
+          <p>Set up TailWag for your dog daycare business. Choose a plan and get up and running today.</p>
+          <div class="path-arrow">Get started →</div>
+        </div>
+        <div class="path-card" onclick="choosePath('join')">
+          <div class="path-icon">🤝</div>
+          <h3>Join an Existing Daycare</h3>
+          <p>Your daycare is already on TailWag. Request access and your manager will send you an invite.</p>
+          <div class="path-arrow">Request access →</div>
+        </div>
+      </div>
+
+      <div class="path-login">Already have an account? <a href="login.html">Sign in</a></div>
+    </div>
+
+    <!-- ── JOIN AN EXISTING DAYCARE ── -->
+    <div class="join-section" id="joinSection" style="display:none;">
+      <button class="join-back" onclick="showChooser()">← Back</button>
+
+      <div class="signup-card">
+
+        <!-- Success state -->
+        <div class="join-success" id="joinSuccess">
+          <div class="success-icon">✉️</div>
+          <h2>Request sent!</h2>
+          <p>We've notified the manager at <strong id="joinDaycareName"></strong>. They'll send you an invite link when they're ready to add you.</p>
+          <p style="margin-top: 12px; font-size: 13px; color: rgba(245,240,232,0.5);">Didn't hear back after a few days? Ask your manager to go to <strong>Settings → Team</strong> in TailWag to send an invite directly.</p>
+        </div>
+
+        <!-- Form state -->
+        <div id="joinFormInner">
+          <div class="card-title">Join an existing daycare</div>
+          <div class="card-subtitle">Tell us where you work and we'll send your manager a request.</div>
+
+          <div class="form-error" id="joinError"></div>
+
+          <div class="form-group">
+            <label>Daycare name <span class="required">*</span></label>
+            <input type="text" id="joinDaycareInput" placeholder="e.g. Paws & Play Daycare" onkeydown="if(event.key==='Enter')requestAccess()">
+            <div class="helper">Enter the name as best you know it — we'll find the right match.</div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Your first name <span class="required">*</span></label>
+              <input type="text" id="joinFirstName" placeholder="e.g. Jamie">
+            </div>
+            <div class="form-group">
+              <label>Last name</label>
+              <input type="text" id="joinLastName" placeholder="e.g. Rivera">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Your email <span class="required">*</span></label>
+            <input type="email" id="joinEmail" placeholder="you@example.com" onkeydown="if(event.key==='Enter')requestAccess()">
+            <div class="helper">Your manager will use this to send your invite.</div>
+          </div>
+
+          <button class="btn-signup" id="joinSubmitBtn" onclick="requestAccess()">
+            <span id="joinBtnText">Send Request</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="login-prompt">Already have an account? <a href="login.html">Sign in</a></div>
+    </div>
+
+    <!-- ── NEW ACCOUNT SIGNUP (hidden until path chosen) ── -->
+    <div class="signup-wrapper" id="signupWrapper" style="display:none;">
 
       <!-- Left — Value + Guarantee -->
       <div class="value-col">
@@ -780,6 +978,7 @@
 
       <!-- Right — Form -->
       <div class="form-col">
+        <button class="join-back" onclick="showChooser()" style="margin-bottom:20px;">← Back to options</button>
         <div class="signup-card">
           <div class="card-title">Create your account</div>
           <div class="card-subtitle">Pick your plan, set up your daycare, and you're live.</div>
@@ -1108,8 +1307,86 @@
       }
     }
 
-    // Check if user returned from cancelled checkout
+    // ── Path chooser ──
+    function choosePath(path) {
+      document.getElementById('pathChooser').style.display = 'none';
+      if (path === 'new') {
+        document.getElementById('signupWrapper').style.display = 'flex';
+      } else {
+        document.getElementById('joinSection').style.display = 'block';
+      }
+    }
+
+    function showChooser() {
+      document.getElementById('pathChooser').style.display = 'block';
+      document.getElementById('signupWrapper').style.display = 'none';
+      document.getElementById('joinSection').style.display = 'none';
+    }
+
+    // ── Request access to an existing daycare ──
+    async function requestAccess() {
+      const btn = document.getElementById('joinSubmitBtn');
+      const btnText = document.getElementById('joinBtnText');
+      const errorEl = document.getElementById('joinError');
+      errorEl.classList.remove('visible');
+
+      const daycareInput = document.getElementById('joinDaycareInput').value.trim();
+      const firstName = document.getElementById('joinFirstName').value.trim();
+      const lastName = document.getElementById('joinLastName').value.trim();
+      const email = document.getElementById('joinEmail').value.trim();
+
+      if (!daycareInput || !firstName || !email) {
+        errorEl.textContent = 'Please fill in all required fields.';
+        errorEl.classList.add('visible');
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errorEl.textContent = 'Please enter a valid email address.';
+        errorEl.classList.add('visible');
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.textContent = 'Sending request…';
+
+      try {
+        const res = await fetch('/api/auth/request-access', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ daycare_name: daycareInput, first_name: firstName, last_name: lastName, email })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          if (data.error === 'no_match') {
+            errorEl.textContent = "We couldn't find a daycare with that name. Double-check the spelling, or ask your manager to send an invite directly from their Settings → Team page.";
+          } else {
+            errorEl.textContent = data.error || 'Something went wrong. Please try again.';
+          }
+          errorEl.classList.add('visible');
+          btn.disabled = false;
+          btnText.textContent = 'Send Request';
+          return;
+        }
+
+        // Success — show confirmation
+        document.getElementById('joinDaycareName').textContent = data.daycare_name;
+        document.getElementById('joinFormInner').style.display = 'none';
+        document.getElementById('joinSuccess').classList.add('visible');
+
+      } catch (err) {
+        errorEl.textContent = 'Something went wrong. Please try again.';
+        errorEl.classList.add('visible');
+        btn.disabled = false;
+        btnText.textContent = 'Send Request';
+      }
+    }
+
+    // Check if user returned from cancelled checkout — auto-open the new account form
     if (new URLSearchParams(window.location.search).get('cancelled')) {
+      choosePath('new');
       const errorEl = document.getElementById('formError');
       errorEl.textContent = 'Payment was cancelled. Your account has been created — you can try again or contact info@usetailwag.com.';
       errorEl.classList.add('visible');

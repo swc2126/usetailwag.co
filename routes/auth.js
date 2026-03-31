@@ -250,7 +250,7 @@ router.get('/me', requireAuth, async (req, res) => {
 
     const { data: daycare } = await supabaseAdmin
       .from('daycares')
-      .select('id, name, city, state')
+      .select('id, name, phone, street, city, state, zip, google_link')
       .eq('id', req.daycareId)
       .single();
 
@@ -263,6 +263,89 @@ router.get('/me', requireAuth, async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to load profile' });
+  }
+});
+
+// POST /api/auth/request-access — request to join an existing daycare (public)
+router.post('/request-access', async (req, res) => {
+  try {
+    const { daycare_name, first_name, last_name, email } = req.body;
+    if (!daycare_name || !first_name || !email) {
+      return res.status(400).json({ error: 'daycare_name, first_name, and email are required' });
+    }
+
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Invalid email address' });
+    }
+
+    // Fuzzy search: case-insensitive substring match on daycare name
+    const searchTerm = daycare_name.trim().replace(/\s+/g, ' ');
+    const { data: daycares, error } = await supabaseAdmin
+      .from('daycares')
+      .select('id, name, city, state, owner_id')
+      .ilike('name', `%${searchTerm}%`)
+      .limit(5);
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    if (!daycares || daycares.length === 0) {
+      return res.status(404).json({ error: 'no_match' });
+    }
+
+    const daycare = daycares[0];
+
+    // Get owner's email
+    const { data: ownerProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('email, first_name')
+      .eq('id', daycare.owner_id)
+      .single();
+
+    if (!ownerProfile?.email) {
+      return res.status(404).json({ error: 'no_match' });
+    }
+
+    const { sendEmail } = require('../utils/email');
+    const requesterName = [first_name, last_name].filter(Boolean).join(' ');
+    const ownerGreet = ownerProfile.first_name || 'there';
+    const location = [daycare.city, daycare.state].filter(Boolean).join(', ');
+
+    await sendEmail({
+      to: ownerProfile.email,
+      subject: `TailWag: ${requesterName} wants to join ${daycare.name}`,
+      html: `
+        <div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#f5f0e8;">
+          <div style="background:#0F1410;border-radius:12px;padding:24px;margin-bottom:20px;text-align:center;">
+            <div style="font-family:'Plus Jakarta Sans',Arial,sans-serif;font-weight:800;font-size:22px;color:#F5F0E8;">🐾 TailWag</div>
+          </div>
+          <div style="background:#fff;border-radius:12px;padding:28px;">
+            <h2 style="font-size:20px;font-weight:800;color:#0F1410;margin:0 0 12px;">New access request</h2>
+            <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">
+              Hi ${ownerGreet}! <strong>${requesterName}</strong> is requesting to be added as a staff member at
+              <strong>${daycare.name}</strong>${location ? ` in ${location}` : ''}.
+            </p>
+            <div style="background:#f8f5f0;border-radius:8px;padding:16px;margin-bottom:20px;">
+              <div style="font-size:13px;color:#666;margin-bottom:4px;font-weight:600;">Their email:</div>
+              <div style="font-size:15px;color:#0F1410;">${email}</div>
+            </div>
+            <p style="font-size:14px;color:#666;line-height:1.6;margin:0 0 24px;">
+              If you know this person and want to add them, log into TailWag and go to <strong>Settings → Team</strong> to send them an invite link.
+            </p>
+            <div style="background:#e8f5ee;border-radius:8px;padding:14px;font-size:13px;color:#1E6B4A;border-left:3px solid #1E6B4A;">
+              If you don't recognize this person, you can safely ignore this email.
+            </div>
+          </div>
+          <p style="font-size:12px;color:#aaa;text-align:center;margin-top:20px;">TailWag · <a href="https://usetailwag.co" style="color:#1E6B4A;text-decoration:none;">usetailwag.co</a></p>
+        </div>
+      `,
+      text: `Hi ${ownerGreet},\n\n${requesterName} (${email}) is requesting to join ${daycare.name} on TailWag.\n\nIf you know this person, log in to Settings → Team and send them an invite.\n\nIf you don't recognize them, ignore this email.`
+    });
+
+    res.json({ success: true, daycare_name: daycare.name });
+  } catch (err) {
+    console.error('Request access error:', err);
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
 });
 
