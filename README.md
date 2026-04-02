@@ -88,16 +88,48 @@ Sends a friendly post-visit review request to `DEMO_PHONE_1` for each demo dog.
 
 ---
 
-## ⚙️ Configuration Reference
+## 🛠️ Tools & Applications
 
-| Variable | Description |
+### Core Product
+| Tool | Function |
 |---|---|
-| `ANTHROPIC_API_KEY` | Your Anthropic API key for AI message generation |
-| `TWILIO_ACCOUNT_SID` | Your Twilio account SID |
-| `TWILIO_AUTH_TOKEN` | Your Twilio auth token |
-| `TWILIO_PHONE_NUMBER` | The Twilio number messages send FROM |
-| `DEMO_PHONE_1` | Your cell number — all demo SMS messages go here |
-| `DEMO_MODE` | Set to `true` to keep all messages routing to demo numbers only |
+| **Anthropic Claude** | AI-generated report cards, review requests, and message content |
+| **Twilio** | SMS/MMS delivery, dedicated phone numbers, A2P 10DLC compliance |
+| **Supabase** | PostgreSQL database, authentication, file storage, row-level security |
+| **Stripe** | Subscription billing and payment processing |
+| **Render** | Cloud hosting — auto-deploys on every push to `main` |
+| **Resend** | Transactional email (team invites, system notifications) |
+
+### Customer Experience & Support
+| Tool | Function |
+|---|---|
+| **Intercom** | In-app chat, customer support, help center, identity-verified via JWT |
+| **Brevo** | Customer service management, support email routing |
+| **Loom** | Instructional videos and member onboarding experience |
+
+### Marketing & Growth
+| Tool | Function |
+|---|---|
+| **Beehiiv** | Newsletter platform — *The Pickup Line* |
+
+---
+
+## ⚙️ Environment Variables Reference
+
+| Variable | Tool | Purpose |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Anthropic | AI message generation |
+| `TWILIO_ACCOUNT_SID` | Twilio | Account authentication |
+| `TWILIO_AUTH_TOKEN` | Twilio | Account authentication |
+| `TWILIO_PHONE_NUMBER` | Twilio | Outbound SMS sender number |
+| `SUPABASE_URL` | Supabase | Database connection |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase | Backend admin access (bypasses RLS) |
+| `STRIPE_SECRET_KEY` | Stripe | Payment processing |
+| `STRIPE_WEBHOOK_SECRET` | Stripe | Webhook signature verification |
+| `RESEND_API_KEY` | Resend | Transactional email |
+| `INTERCOM_SECRET` | Intercom | JWT identity verification |
+| `DEMO_PHONE_1` | — | Demo SMS routing number |
+| `DEMO_MODE` | — | Set to `true` to keep messages on demo numbers |
 
 ---
 
