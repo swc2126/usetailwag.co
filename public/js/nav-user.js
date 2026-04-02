@@ -138,8 +138,36 @@
       window.TailWagUserRole = userData.role;
 
       renderWidget(container, userData);
+      bootIntercom(userData, data.user?.id, session.access_token);
     } catch (e) {
       console.warn('nav-user fetch failed', e);
+    }
+  }
+
+  async function bootIntercom(userData, userId, accessToken) {
+    if (typeof window.Intercom !== 'function') return;
+    try {
+      const tokenRes = await fetch('/api/auth/intercom-token', {
+        headers: { Authorization: 'Bearer ' + accessToken }
+      });
+      const { token } = tokenRes.ok ? await tokenRes.json() : {};
+
+      const settings = {
+        api_base: 'https://api-iam.intercom.io',
+        app_id: 'ov6sdlds',
+        user_id: userId,
+        email: userData.email,
+        name: [userData.first_name, userData.last_name].filter(Boolean).join(' ') || userData.email
+      };
+      if (userData.daycare) {
+        settings.company = { company_id: userId, name: userData.daycare };
+      }
+      if (token) settings.user_hash = token;
+
+      window.Intercom('boot', settings);
+    } catch (e) {
+      console.warn('Intercom boot failed', e);
+      window.Intercom('boot', { app_id: 'ov6sdlds' });
     }
   }
 

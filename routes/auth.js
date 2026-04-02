@@ -240,6 +240,26 @@ router.post('/join', async (req, res) => {
 });
 
 // GET /api/auth/me — get current user's profile + role (uses Authorization header)
+// GET /api/auth/intercom-token — signed JWT for Intercom identity verification
+router.get('/intercom-token', requireAuth, async (req, res) => {
+  try {
+    const secret = process.env.INTERCOM_SECRET;
+    if (!secret) return res.status(500).json({ error: 'INTERCOM_SECRET not configured' });
+
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign(
+      { user_id: req.user.id, email: req.user.email },
+      secret,
+      { expiresIn: '1h' }
+    );
+    res.json({ token });
+  } catch (err) {
+    console.error('Intercom token error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/auth/me
 router.get('/me', requireAuth, async (req, res) => {
   try {
     const { data: profile } = await supabaseAdmin
