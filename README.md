@@ -110,7 +110,12 @@ Sends a friendly post-visit review request to `DEMO_PHONE_1` for each demo dog.
 ### Marketing & Growth
 | Tool | Function |
 |---|---|
-| **Beehiiv** | Newsletter platform — *The Pickup Line* |
+| **Canva** | Marketing design — social graphics, sales decks, one-pagers, ads |
+
+### Development & Operations
+| Tool | Function |
+|---|---|
+| **Notion** | Primary CRM, knowledge base, project tracking, outreach log |
 
 ---
 
