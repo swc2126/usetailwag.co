@@ -328,15 +328,8 @@ router.delete('/recurring/:id', requireAuth, async (req, res) => {
 // POST /api/appointments/inbound — called from Twilio webhook for incoming SMS
 // Also handles generic inbound (registered in server.js)
 router.post('/inbound', express.urlencoded({ extended: false }), async (req, res) => {
-  const { From, To, Body } = req.body;
+  const { From, To, Body, MessageSid } = req.body;
   const reply = (Body || '').trim().toUpperCase();
-
-  if (!['YES', 'NO', 'Y', 'N'].includes(reply)) {
-    // Not a YES/NO — ignore silently (Twilio needs 200)
-    return res.sendStatus(200);
-  }
-
-  const isConfirm = reply === 'YES' || reply === 'Y';
 
   // Find the daycare that owns this Twilio number
   const { data: config } = await supabaseAdmin
@@ -357,6 +350,25 @@ router.post('/inbound', express.urlencoded({ extended: false }), async (req, res
     .eq('phone', phone)
     .eq('active', true)
     .single();
+
+  // Always save inbound message to history (for all replies, not just YES/NO)
+  await supabaseAdmin.from('inbound_messages').insert({
+    daycare_id: config.daycare_id,
+    client_id: client?.id || null,
+    from_number: From,
+    to_number: To,
+    body: Body || '',
+    twilio_sid: MessageSid || null,
+    read: false,
+    received_at: new Date().toISOString()
+  });
+
+  // Only process YES/NO for appointment confirmation logic
+  if (!['YES', 'NO', 'Y', 'N'].includes(reply)) {
+    return res.sendStatus(200);
+  }
+
+  const isConfirm = reply === 'YES' || reply === 'Y';
 
   if (!client) return res.sendStatus(200);
 

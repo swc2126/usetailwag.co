@@ -250,6 +250,62 @@ router.post('/bulk', requireAuth, async (req, res) => {
   res.json({ success: true, ...results, usage: usage + results.sent, limit });
 });
 
+// GET /api/sms/thread/:clientId — full conversation thread (outbound + inbound) for a client
+router.get('/thread/:clientId', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+  const { clientId } = req.params;
+
+  const [{ data: outbound }, { data: inbound }] = await Promise.all([
+    supabaseAdmin
+      .from('messages')
+      .select('id, body, media_url, created_at, status')
+      .eq('daycare_id', req.daycareId)
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: true }),
+    supabaseAdmin
+      .from('inbound_messages')
+      .select('id, body, received_at, read')
+      .eq('daycare_id', req.daycareId)
+      .eq('client_id', clientId)
+      .order('received_at', { ascending: true })
+  ]);
+
+  const thread = [
+    ...(outbound || []).map(m => ({ ...m, direction: 'out', ts: m.created_at })),
+    ...(inbound || []).map(m => ({ ...m, direction: 'in', ts: m.received_at }))
+  ].sort((a, b) => new Date(a.ts) - new Date(b.ts));
+
+  res.json(thread);
+});
+
+// POST /api/sms/thread/:clientId/read — mark all inbound messages for a client as read
+router.post('/thread/:clientId/read', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+  await supabaseAdmin
+    .from('inbound_messages')
+    .update({ read: true })
+    .eq('daycare_id', req.daycareId)
+    .eq('client_id', req.params.clientId)
+    .eq('read', false);
+  res.json({ ok: true });
+});
+
+// GET /api/sms/unread — unread inbound message counts per client_id
+router.get('/unread', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+  const { data } = await supabaseAdmin
+    .from('inbound_messages')
+    .select('client_id')
+    .eq('daycare_id', req.daycareId)
+    .eq('read', false);
+
+  const counts = {};
+  (data || []).forEach(m => {
+    if (m.client_id) counts[m.client_id] = (counts[m.client_id] || 0) + 1;
+  });
+  res.json(counts);
+});
+
 // GET /api/sms/history — message history for the daycare
 router.get('/history', requireAuth, async (req, res) => {
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
