@@ -35,17 +35,17 @@ router.get('/subscribe', (req, res) => {
   res.redirect(301, 'https://usetailwag.co/chew-on-this');
 });
 
-// OPTIONS preflight for cross-origin requests (GitHub Pages → Render)
-router.options('/subscribe', (req, res) => {
+// CORS headers for all newsletter routes (GitHub Pages → Render)
+router.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type');
-  res.sendStatus(204);
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
 });
 
 // POST /api/newsletter/subscribe
 router.post('/subscribe', async (req, res) => {
-  res.set('Access-Control-Allow-Origin', '*');
   const { email } = req.body;
   if (!email || !email.includes('@')) {
     return res.status(400).json({ error: 'Valid email required.' });

@@ -284,16 +284,14 @@
 
   <div class="signup-box">
     <label for="heroEmail">Your email address</label>
-    <!-- Brevo subscription form — paste your form action URL from Brevo → Contacts → Forms -->
-    <form action="https://f1f71626.sibforms.com/serve/MUIFADWFD1rPv03AXq4deQswloeeqWQoVSKrXwddB9-3waLcmSVm4BquhhW4XUsLGuphAzObH1KNmUsUoB6VCSHwNMN3m5v4SlHxAgb_5C1gDSWiIeEMfixISC5KkrmBjmZ8Fn1CA_Z3QusEuqmku8it-R5tnQuftdZdOX-9dN7Lw_Olvm0fWgi9PiuQcM2xnzrtm648DnXd5B_3Hw==" method="POST" target="_blank" onsubmit="heroFormSubmit(event)">
-      <input type="hidden" name="email_address_check" value="">
-      <input type="hidden" name="locale" value="en">
+    <div id="heroFormWrap">
       <div class="signup-input-row">
-        <input type="email" name="EMAIL" id="heroEmail" class="signup-input" placeholder="you@yourdaycare.com" autocomplete="email" required>
-        <button type="submit" class="signup-btn" id="heroBtn">Subscribe →</button>
+        <input type="email" id="heroEmail" class="signup-input" placeholder="you@yourdaycare.com" autocomplete="email">
+        <button class="signup-btn" id="heroBtn" onclick="heroSubscribe()">Subscribe →</button>
       </div>
+      <div class="signup-error" id="heroError"></div>
       <p class="signup-fine">No spam. Unsubscribe anytime. We publish every two weeks.</p>
-    </form>
+    </div>
     <div class="signup-success" id="heroSuccess" style="display:none;">
       <div class="signup-success-icon">🐾</div>
       <h3>You're in!</h3>
@@ -350,12 +348,11 @@
 <section class="bottom-cta">
   <h2>Join the pack.</h2>
   <p>Free. Bi-monthly. Worth the two minutes it takes to read.</p>
-  <form action="https://f1f71626.sibforms.com/serve/MUIFADWFD1rPv03AXq4deQswloeeqWQoVSKrXwddB9-3waLcmSVm4BquhhW4XUsLGuphAzObH1KNmUsUoB6VCSHwNMN3m5v4SlHxAgb_5C1gDSWiIeEMfixISC5KkrmBjmZ8Fn1CA_Z3QusEuqmku8it-R5tnQuftdZdOX-9dN7Lw_Olvm0fWgi9PiuQcM2xnzrtm648DnXd5B_3Hw==" method="POST" target="_blank" onsubmit="bottomFormSubmit(event)" class="bottom-form">
-    <input type="hidden" name="email_address_check" value="">
-    <input type="hidden" name="locale" value="en">
-    <input type="email" name="EMAIL" id="bottomEmail" class="bottom-input" placeholder="your@email.com" autocomplete="email" required>
-    <button type="submit" class="bottom-btn" id="bottomBtn">Count me in</button>
-  </form>
+  <div class="bottom-form">
+    <input type="email" id="bottomEmail" class="bottom-input" placeholder="your@email.com" autocomplete="email">
+    <button class="bottom-btn" id="bottomBtn" onclick="bottomSubscribe()">Count me in</button>
+  </div>
+  <div class="bottom-error" id="bottomError"></div>
   <div class="bottom-success" id="bottomSuccess" style="display:none;">🐾 You're subscribed! Talk soon.</div>
 </section>
 
@@ -371,20 +368,60 @@
 </footer>
 
 <script>
-  function heroFormSubmit(e) {
-    // Show success message after form submits to Brevo (opens in new tab)
-    setTimeout(() => {
-      document.querySelector('.signup-box form').style.display = 'none';
-      document.getElementById('heroSuccess').style.display = 'block';
-    }, 300);
+  const API = 'https://usetailwag-co.onrender.com/api/newsletter/subscribe';
+
+  async function subscribe(email, btnEl, successEl, errorEl, wrapEl) {
+    const e = email.trim().toLowerCase();
+    if (!e || !e.includes('@')) {
+      errorEl.textContent = 'Please enter a valid email address.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+    btnEl.disabled = true;
+    const orig = btnEl.textContent;
+    btnEl.textContent = 'Subscribing…';
+
+    try {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: e })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+      if (wrapEl) wrapEl.style.display = 'none';
+      successEl.style.display = 'block';
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.style.display = 'block';
+      btnEl.disabled = false;
+      btnEl.textContent = orig;
+    }
   }
 
-  function bottomFormSubmit(e) {
-    setTimeout(() => {
-      document.querySelector('.bottom-form').style.display = 'none';
-      document.getElementById('bottomSuccess').style.display = 'block';
-    }, 300);
+  function heroSubscribe() {
+    subscribe(
+      document.getElementById('heroEmail').value,
+      document.getElementById('heroBtn'),
+      document.getElementById('heroSuccess'),
+      document.getElementById('heroError'),
+      document.getElementById('heroFormWrap')
+    );
   }
+
+  function bottomSubscribe() {
+    subscribe(
+      document.getElementById('bottomEmail').value,
+      document.getElementById('bottomBtn'),
+      document.getElementById('bottomSuccess'),
+      document.getElementById('bottomError'),
+      document.querySelector('.bottom-form')
+    );
+  }
+
+  document.getElementById('heroEmail').addEventListener('keydown', e => { if (e.key === 'Enter') heroSubscribe(); });
+  document.getElementById('bottomEmail').addEventListener('keydown', e => { if (e.key === 'Enter') bottomSubscribe(); });
 </script>
 
 </body>
