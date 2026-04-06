@@ -30,6 +30,11 @@ async function syncToBrevo(email) {
   }
 }
 
+// GET — redirect direct visits back to the landing page
+router.get('/subscribe', (req, res) => {
+  res.redirect(301, 'https://usetailwag.co/chew-on-this');
+});
+
 // OPTIONS preflight for cross-origin requests (GitHub Pages → Render)
 router.options('/subscribe', (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
