@@ -30,6 +30,19 @@ router.post('/', requireAuth, async (req, res) => {
   res.status(201).json(data);
 });
 
+// GET /api/clients/:id — single client with dogs
+router.get('/:id', requireAuth, async (req, res) => {
+  const { data, error } = await supabaseAdmin
+    .from('clients')
+    .select('*, dogs(id, name, breed)')
+    .eq('id', req.params.id)
+    .eq('daycare_id', req.daycareId)
+    .eq('active', true)
+    .single();
+  if (error || !data) return res.status(404).json({ error: 'Client not found' });
+  res.json(data);
+});
+
 // PUT /api/clients/:id — update client
 router.put('/:id', requireAuth, async (req, res) => {
   const { first_name, last_name, phone, email, notes } = req.body;
