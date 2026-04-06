@@ -970,7 +970,7 @@
       const past  = new Date(Date.now() - 90 * 86400000).toISOString().split('T')[0];
       const future= new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
 
-      const res = await fetch(`/api/appointments?client_id=${clientId}`, { headers: authHeaders });
+      const res = await fetch(`/api/appointments/by-client/${clientId}`, { headers: authHeaders });
       const all  = res.ok ? await res.json() : [];
 
       const upcoming = all.filter(a => a.appointment_date >= today).sort((a,b) => a.appointment_date.localeCompare(b.appointment_date));

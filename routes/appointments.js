@@ -97,6 +97,20 @@ router.get('/range', requireAuth, async (req, res) => {
   res.json(grouped);
 });
 
+// GET /api/appointments/by-client/:clientId — all appointments for one client
+router.get('/by-client/:clientId', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+  const { clientId } = req.params;
+  const { data, error } = await supabaseAdmin
+    .from('appointments')
+    .select('id, appointment_date, status, notes, dogs(id, name, breed)')
+    .eq('daycare_id', req.daycareId)
+    .eq('client_id', clientId)
+    .order('appointment_date', { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
 // GET /api/appointments?date=YYYY-MM-DD
 // Returns appointments for a date, merging in recurring schedules
 router.get('/', requireAuth, async (req, res) => {
