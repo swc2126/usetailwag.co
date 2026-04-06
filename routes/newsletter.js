@@ -30,8 +30,17 @@ async function syncToBrevo(email) {
   }
 }
 
+// OPTIONS preflight for cross-origin requests (GitHub Pages → Render)
+router.options('/subscribe', (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  res.sendStatus(204);
+});
+
 // POST /api/newsletter/subscribe
 router.post('/subscribe', async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
   const { email } = req.body;
   if (!email || !email.includes('@')) {
     return res.status(400).json({ error: 'Valid email required.' });
