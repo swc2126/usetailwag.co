@@ -413,12 +413,6 @@
         <!-- ══ MESSAGES TAB ══ -->
         <div class="tab-content active" id="tab-messages">
 
-          <!-- Conversation thread -->
-          <span class="msg-section-label">Conversation History</span>
-          <div class="thread-area" id="threadArea">
-            <div class="thread-empty-msg">Loading messages…</div>
-          </div>
-
           <!-- Compose -->
           <span class="msg-section-label">Send a Message</span>
 
@@ -496,20 +490,32 @@
           </div>
 
           <div class="send-result-msg" id="cpSendResult"></div>
+
+          <!-- Conversation thread (bottom) -->
+          <span class="msg-section-label" style="margin-top:24px;">Conversation History</span>
+          <div class="thread-area" id="threadArea">
+            <div class="thread-empty-msg">Loading messages…</div>
+          </div>
+
         </div>
 
         <!-- ══ SCHEDULE TAB ══ -->
         <div class="tab-content" id="tab-schedule">
+          <!-- Pet parent summary -->
+          <div id="schedClientSummary" style="display:flex;align-items:center;gap:14px;background:#fafaf8;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:20px;">
+            <div style="width:42px;height:42px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:var(--linen);flex-shrink:0;" id="schedAvatar">?</div>
+            <div>
+              <div style="font-weight:700;font-size:15px;color:var(--black);" id="schedClientName">—</div>
+              <div style="font-size:12px;color:#888;" id="schedClientPhone">—</div>
+            </div>
+          </div>
+
           <div id="apptLoading" style="text-align:center;padding:40px;"><div class="loading-spinner"></div></div>
           <div id="apptContent" style="display:none;">
-            <span class="msg-section-label">Upcoming Appointments</span>
-            <div class="appt-list" id="upcomingAppts"></div>
 
-            <span class="msg-section-label">Past Appointments</span>
-            <div class="appt-list" id="pastAppts"></div>
-
-            <div class="section-divider-label">Add Appointment</div>
-            <div class="add-appt-form">
+            <!-- 1. Book -->
+            <span class="msg-section-label">Book an Appointment</span>
+            <div class="add-appt-form" style="margin-bottom:24px;">
               <div class="form-row-sm">
                 <div class="form-group-sm">
                   <label>Dog</label>
@@ -531,6 +537,15 @@
               <div class="appt-error" id="apptError"></div>
               <button class="btn-sm btn-green" style="width:100%;" id="addApptBtn" onclick="addAppointment()">Add Appointment</button>
             </div>
+
+            <!-- 2. Upcoming -->
+            <span class="msg-section-label">Upcoming</span>
+            <div class="appt-list" id="upcomingAppts"></div>
+
+            <!-- 3. Past -->
+            <span class="msg-section-label" style="margin-top:8px;">Past</span>
+            <div class="appt-list" id="pastAppts"></div>
+
           </div>
         </div>
 
@@ -539,6 +554,21 @@
           <div id="reviewLoading" style="text-align:center;padding:40px;"><div class="loading-spinner"></div></div>
           <div id="reviewContent" style="display:none;">
 
+            <!-- 1. Send request (top) -->
+            <span class="msg-section-label">Send a Review Request</span>
+            <div class="compose-area" style="margin-bottom:10px;">
+              <div class="msg-preview-area">
+                <textarea id="reviewMsgBody" style="min-height:80px;" placeholder="Loading review request message…" oninput="reviewCharCount()"></textarea>
+              </div>
+              <div class="send-bar">
+                <span class="char-ct" id="reviewCharCount">0 / 160</span>
+                <button class="btn-sm btn-green" id="sendReviewBtn" onclick="sendReviewRequest()">Send Review Request ⭐</button>
+              </div>
+            </div>
+            <div id="reviewSendResult" class="send-result-msg" style="margin-bottom:16px;"></div>
+
+            <!-- 2. Review status cards -->
+            <span class="msg-section-label">Review Status</span>
             <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
               <div class="review-status-card" style="flex:1;min-width:140px;">
                 <div class="review-status-label">Review Requested</div>
@@ -549,19 +579,6 @@
                 <div class="review-status-value" id="reviewReceivedVal">—</div>
               </div>
             </div>
-
-            <span class="msg-section-label">Send a Review Request</span>
-            <div class="compose-area" style="margin-bottom:16px;">
-              <div class="msg-preview-area">
-                <textarea id="reviewMsgBody" style="min-height:80px;" placeholder="Loading review request message…" oninput="reviewCharCount()"></textarea>
-              </div>
-              <div class="send-bar">
-                <span class="char-ct" id="reviewCharCount">0 / 160</span>
-                <button class="btn-sm btn-green" id="sendReviewBtn" onclick="sendReviewRequest()">Send Review Request ⭐</button>
-              </div>
-            </div>
-
-            <div id="reviewSendResult" class="send-result-msg"></div>
 
             <div class="section-divider-label">Review Request History</div>
             <div class="review-history" id="reviewHistory"></div>
@@ -655,6 +672,11 @@
     document.getElementById('clientPhone').textContent  = formatPhone(client.phone) || '—';
     document.getElementById('breadcrumbName').textContent = fullName;
     document.title = `${fullName} — TailWag`;
+
+    // Schedule tab summary
+    document.getElementById('schedAvatar').textContent    = initials.toUpperCase() || '?';
+    document.getElementById('schedClientName').textContent = fullName;
+    document.getElementById('schedClientPhone').textContent = formatPhone(client.phone) || '—';
 
     if (client.email) {
       document.getElementById('clientEmail').textContent = client.email;
