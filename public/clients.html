@@ -432,7 +432,7 @@
       </div>
       <div class="form-group">
         <label>Phone *</label>
-        <input type="tel" id="ar_phone" placeholder="(555) 000-0000" autocomplete="off" maxlength="14" oninput="formatPhoneInput(this)">
+        <input type="tel" id="ar_phone" placeholder="1-555-000-0000" autocomplete="off" maxlength="14" oninput="formatPhoneInput(this)">
       </div>
       <div class="form-group">
         <label>Email</label>
@@ -490,7 +490,7 @@
       </div>
       <div class="form-group">
         <label>Phone *</label>
-        <input type="tel" id="ar_phone2" placeholder="(555) 000-0000" autocomplete="off" maxlength="14" oninput="formatPhoneInput(this)">
+        <input type="tel" id="ar_phone2" placeholder="1-555-000-0000" autocomplete="off" maxlength="14" oninput="formatPhoneInput(this)">
       </div>
       <div class="form-group">
         <label>Email</label>
@@ -524,7 +524,7 @@
     </div>
     <div class="form-group">
       <label>Phone *</label>
-      <input type="tel" id="phone" placeholder="(555) 000-0000" maxlength="14" oninput="formatPhoneInput(this)">
+      <input type="tel" id="phone" placeholder="1-555-000-0000" maxlength="14" oninput="formatPhoneInput(this)">
     </div>
     <div class="form-group">
       <label>Email</label>
@@ -783,7 +783,7 @@
           return `<tr style="opacity:0.6;">
             <td><em style="color:#bbb;">No dog added</em></td>
             <td><strong>${escHtml(c.last_name)}, ${escHtml(c.first_name)}</strong></td>
-            <td>${escHtml(c.phone || '—')}</td>
+            <td>${formatPhone(c.phone)}</td>
             <td>—</td>
             <td>
               <button class="action-btn add-dog-btn" onclick="openAddDogModal('${c.id}')">+ Add Dog</button>
@@ -796,7 +796,7 @@
             <span class="dog-chip" onclick="openEditDogModal(${JSON.stringify(dog).replace(/"/g,'&quot;')}, '${c.id}')" title="Edit ${escHtml(dog.name)}">${escHtml(dog.name)}</span>
           </td>
           <td>${escHtml(c.last_name)}, ${escHtml(c.first_name)}</td>
-          <td>${escHtml(c.phone || '—')}</td>
+          <td>${formatPhone(c.phone)}</td>
           <td style="color:#999;">${escHtml(dog.breed || '—')}</td>
           <td>
             <button class="action-btn profile-btn" onclick="window.location.href='/client-profile.html?id=${c.id}'">View Profile</button>
@@ -838,7 +838,7 @@
           : '<span style="color:#ccc;font-size:12px;">None yet</span>';
         return `<tr>
           <td><strong>${escHtml(c.last_name)}, ${escHtml(c.first_name)}</strong></td>
-          <td>${escHtml(c.phone || '—')}</td>
+          <td>${formatPhone(c.phone)}</td>
           <td>${escHtml(c.email || '—')}</td>
           <td>${dogsHtml}</td>
           <td>
@@ -866,15 +866,24 @@
     return '+1' + digits;
   }
 
-  // Auto-formats a phone input as (555) 000-0000 while typing
+  // Format a stored phone number for display as 1-XXX-XXX-XXXX
+  function formatPhone(p) {
+    if (!p) return '—';
+    const d = p.replace(/\D/g, '');
+    const n = d.startsWith('1') && d.length === 11 ? d.slice(1) : d;
+    if (n.length !== 10) return p;
+    return `1-${n.slice(0,3)}-${n.slice(3,6)}-${n.slice(6)}`;
+  }
+
+  // Auto-formats a phone input as 1-XXX-XXX-XXXX while typing
   function formatPhoneInput(el) {
     let digits = el.value.replace(/\D/g, '');
     if (digits.startsWith('1')) digits = digits.slice(1);
     digits = digits.slice(0, 10);
     let formatted = '';
-    if (digits.length > 6)      formatted = `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
-    else if (digits.length > 3) formatted = `(${digits.slice(0,3)}) ${digits.slice(3)}`;
-    else if (digits.length > 0) formatted = `(${digits}`;
+    if (digits.length > 6)      formatted = `1-${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
+    else if (digits.length > 3) formatted = `1-${digits.slice(0,3)}-${digits.slice(3)}`;
+    else if (digits.length > 0) formatted = `1-${digits}`;
     el.value = formatted;
   }
 
