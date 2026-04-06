@@ -782,7 +782,7 @@
         if (!dog) {
           return `<tr style="opacity:0.6;">
             <td><em style="color:#bbb;">No dog added</em></td>
-            <td><strong>${escHtml(c.first_name)} ${escHtml(c.last_name)}</strong></td>
+            <td><strong>${escHtml(c.last_name)}, ${escHtml(c.first_name)}</strong></td>
             <td>${escHtml(c.phone || '—')}</td>
             <td>—</td>
             <td>
@@ -795,7 +795,7 @@
           <td>
             <span class="dog-chip" onclick="openEditDogModal(${JSON.stringify(dog).replace(/"/g,'&quot;')}, '${c.id}')" title="Edit ${escHtml(dog.name)}">${escHtml(dog.name)}</span>
           </td>
-          <td>${escHtml(c.first_name)} ${escHtml(c.last_name)}</td>
+          <td>${escHtml(c.last_name)}, ${escHtml(c.first_name)}</td>
           <td>${escHtml(c.phone || '—')}</td>
           <td style="color:#999;">${escHtml(dog.breed || '—')}</td>
           <td>
@@ -837,7 +837,7 @@
             ).join('')
           : '<span style="color:#ccc;font-size:12px;">None yet</span>';
         return `<tr>
-          <td><strong>${escHtml(c.first_name)} ${escHtml(c.last_name)}</strong></td>
+          <td><strong>${escHtml(c.last_name)}, ${escHtml(c.first_name)}</strong></td>
           <td>${escHtml(c.phone || '—')}</td>
           <td>${escHtml(c.email || '—')}</td>
           <td>${dogsHtml}</td>
