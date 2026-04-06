@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Profile — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #0F1410; --green: #1E6B4A; --green-dark: #164D35;
+      --linen: #F5F0E8; --gold: #C4933F; --sage: #A8C5B0;
+      --slate: #2D3748; --border: rgba(0,0,0,0.08);
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
+
+    /* ── NAV ── */
+    .dashboard-nav {
+      background: var(--black); padding: 0 32px;
+      display: flex; justify-content: space-between; align-items: center; height: 60px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-left { display: flex; align-items: center; gap: 32px; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link { color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 14px; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
+    .nav-link.active { color: var(--linen); background: rgba(255,255,255,0.1); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+
+    /* ── PAGE ── */
+    .page-container { max-width: 1160px; margin: 0 auto; padding: 28px 24px; }
+
+    /* ── BACK + HEADER ── */
+    .back-bar {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px;
+    }
+    .back-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: #888; text-decoration: none;
+      background: #fff; border: 1px solid var(--border);
+      padding: 6px 14px; border-radius: 8px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .back-btn:hover { color: var(--green); border-color: var(--green); }
+    .breadcrumb { font-size: 13px; color: #bbb; }
+    .breadcrumb span { color: var(--slate); font-weight: 600; }
+
+    /* ── LAYOUT ── */
+    .profile-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
+
+    /* ── LEFT: CLIENT CARD ── */
+    .client-card {
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden; position: sticky; top: 80px;
+    }
+    .client-card-header {
+      background: var(--black); padding: 24px 20px;
+      text-align: center;
+    }
+    .client-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--green); border: 3px solid rgba(168,197,176,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800; font-size: 24px; color: var(--linen);
+      margin: 0 auto 12px;
+    }
+    .client-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 18px; color: var(--linen);
+      margin-bottom: 4px;
+    }
+    .client-phone { font-size: 13px; color: var(--sage); }
+    .client-card-body { padding: 20px; }
+
+    .info-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-bottom: 14px; font-size: 13px;
+    }
+    .info-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .info-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #bbb; margin-bottom: 2px; }
+    .info-value { color: var(--slate); font-weight: 500; }
+
+    .dog-section { margin-top: 6px; }
+    .dog-section-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: #bbb; margin-bottom: 10px;
+    }
+    .dog-card {
+      background: rgba(30,107,74,0.06); border: 1px solid rgba(30,107,74,0.15);
+      border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .dog-card:hover { border-color: var(--green); background: rgba(30,107,74,0.1); }
+    .dog-card.active { border-color: var(--green); background: rgba(30,107,74,0.12); }
+    .dog-card-name { font-weight: 700; font-size: 14px; color: var(--black); margin-bottom: 2px; }
+    .dog-chip-breed {
+      display: inline-block; background: rgba(196,147,63,0.12); color: var(--gold);
+      font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+    }
+
+    .notes-block {
+      background: rgba(245,240,232,0.6); border-radius: 8px;
+      padding: 10px 12px; margin-top: 14px;
+      font-size: 12px; color: #777; line-height: 1.5;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+    .notes-block-label { font-weight: 700; color: #999; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── RIGHT: TABBED PANEL ── */
+    .tabs-panel {
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .tabs-header {
+      display: flex; border-bottom: 1px solid var(--border);
+      background: #fafaf8;
+    }
+    .tab-btn {
+      flex: 1; padding: 16px 12px; text-align: center;
+      font-size: 14px; font-weight: 600; color: #999;
+      background: none; border: none; cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .tab-btn:hover { color: var(--slate); }
+    .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+    .tab-content { display: none; padding: 24px; }
+    .tab-content.active { display: block; }
+
+    /* ── MESSAGES TAB ── */
+    .msg-section-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: #999; margin-bottom: 10px; display: block;
+    }
+    .thread-area {
+      background: #1a1f1b; border-radius: 10px;
+      height: 260px; overflow-y: auto;
+      padding: 14px 16px; display: flex; flex-direction: column;
+      gap: 10px; margin-bottom: 20px;
+    }
+    .thread-empty-msg { text-align: center; color: rgba(245,240,232,0.4); font-size: 13px; margin: auto; }
+    .bubble-wrap { display: flex; flex-direction: column; }
+    .bubble-wrap.out { align-items: flex-end; }
+    .bubble-wrap.in  { align-items: flex-start; }
+    .bubble { max-width: 78%; padding: 10px 14px; border-radius: 16px; font-size: 13px; line-height: 1.6; word-break: break-word; }
+    .bubble.out { background: #1E6B4A; color: #fff; border-bottom-right-radius: 4px; }
+    .bubble.in  { background: #3a3f3b; color: #F5F0E8; border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+    .bubble-meta { font-size: 10px; color: rgba(100,100,100,0.7); margin-top: 3px; padding: 0 2px; }
+    .bubble-img { max-width: 180px; border-radius: 8px; margin-top: 6px; display: block; }
+
+    .compose-area { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .notes-row { padding: 14px; border-bottom: 1px solid var(--border); }
+    .notes-row textarea {
+      width: 100%; border: none; outline: none; resize: none;
+      font-family: 'Inter', sans-serif; font-size: 13px;
+      color: var(--slate); line-height: 1.6; min-height: 70px;
+    }
+    .quick-chips-sm { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+    .qchip {
+      display: inline-block; background: var(--linen); border: 1px solid rgba(0,0,0,0.1);
+      color: var(--slate); font-size: 11px; font-weight: 500; padding: 3px 9px;
+      border-radius: 20px; cursor: pointer; transition: background 0.15s;
+    }
+    .qchip:hover { background: rgba(30,107,74,0.08); border-color: var(--green); color: var(--green-dark); }
+
+    .compose-controls {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px; background: #fafaf8; flex-wrap: wrap;
+    }
+    .template-sel-sm {
+      flex: 1; min-width: 140px; padding: 8px 10px;
+      border: 1px solid #ddd; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 13px;
+      color: var(--slate); outline: none; background: #fff;
+    }
+    .template-sel-sm:focus { border-color: var(--green); }
+
+    .msg-preview-area { padding: 10px 14px; }
+    .msg-preview-area textarea {
+      width: 100%; border: none; outline: none; resize: vertical;
+      font-family: 'Inter', sans-serif; font-size: 13px;
+      color: var(--slate); line-height: 1.6; min-height: 90px;
+    }
+    .send-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 8px;
+    }
+    .send-bar-left { display: flex; align-items: center; gap: 8px; }
+    .char-ct { font-size: 12px; color: #bbb; }
+    .char-ct.warn { color: var(--gold); }
+    .char-ct.over { color: #e53e3e; }
+
+    .btn-sm {
+      padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif; border: none;
+      transition: background 0.2s;
+    }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-green:hover { background: var(--green-dark); }
+    .btn-green:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-outline-sm {
+      background: none; border: 1px solid var(--green); color: var(--green);
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.2s;
+    }
+    .btn-outline-sm:hover { background: rgba(30,107,74,0.06); }
+    .btn-outline-sm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .ai-btn {
+      width: 100%; background: var(--green); color: #fff; border: none;
+      border-radius: 8px; padding: 11px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: background 0.2s, opacity 0.2s; margin-bottom: 12px;
+    }
+    .ai-btn:hover { background: var(--green-dark); }
+    .ai-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .send-result-msg {
+      font-size: 13px; padding: 10px 14px; border-radius: 8px;
+      margin-top: 10px; display: none;
+    }
+    .send-result-msg.ok { background: rgba(30,107,74,0.1); color: var(--green); }
+    .send-result-msg.err { background: rgba(229,62,62,0.1); color: #e53e3e; }
+
+    /* great day toggle */
+    .toggle-row-sm { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .toggle-label-sm { font-size: 13px; font-weight: 600; color: var(--slate); }
+    .toggle-sub-sm { font-size: 11px; color: #999; margin-top: 2px; }
+    .toggle-sub-sm.on { color: var(--green); }
+    .toggle-switch-sm { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+    .toggle-switch-sm input { opacity: 0; width: 0; height: 0; }
+    .slider-sm { position: absolute; cursor: pointer; inset: 0; background: #ddd; border-radius: 22px; transition: background 0.2s; }
+    .slider-sm:before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle-switch-sm input:checked + .slider-sm { background: var(--green); }
+    .toggle-switch-sm input:checked + .slider-sm:before { transform: translateX(18px); }
+
+    /* photo attach */
+    .photo-row { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .photo-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gold); margin-bottom: 8px; display: block; }
+    .photo-preview-sm { max-height: 120px; width: 100%; object-fit: cover; border-radius: 8px; border: 1px solid rgba(196,147,63,0.3); display: block; margin-bottom: 6px; }
+
+    /* ── SCHEDULE TAB ── */
+    .appt-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .appt-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fafaf8; border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 16px;
+    }
+    .appt-date { font-weight: 700; font-size: 14px; color: var(--black); margin-bottom: 2px; }
+    .appt-session { font-size: 12px; color: #888; }
+    .appt-status {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .appt-status.confirmed { background: rgba(30,107,74,0.1); color: var(--green); }
+    .appt-status.pending   { background: rgba(196,147,63,0.1); color: var(--gold); }
+    .appt-status.cancelled { background: rgba(229,62,62,0.08); color: #e53e3e; }
+
+    .add-appt-form {
+      background: #fafaf8; border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; margin-top: 4px;
+    }
+    .add-appt-form h4 { font-size: 13px; font-weight: 700; color: var(--black); margin-bottom: 14px; }
+    .form-row-sm { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .form-group-sm { flex: 1; min-width: 120px; }
+    .form-group-sm label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #bbb; margin-bottom: 5px; }
+    .form-group-sm input, .form-group-sm select {
+      width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 13px; color: var(--slate); outline: none; background: #fff;
+    }
+    .form-group-sm input:focus, .form-group-sm select:focus { border-color: var(--green); }
+    .session-pills { display: flex; gap: 6px; margin-bottom: 12px; }
+    .session-pill {
+      flex: 1; text-align: center; padding: 8px 6px;
+      border: 1px solid #ddd; border-radius: 8px; cursor: pointer;
+      font-size: 12px; font-weight: 600; color: #999;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .session-pill.active { border-color: var(--green); color: var(--green); background: rgba(30,107,74,0.07); }
+    .appt-error { font-size: 12px; color: #e53e3e; margin-bottom: 8px; display: none; }
+
+    /* ── REVIEWS TAB ── */
+    .review-status-card {
+      background: #fafaf8; border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px; margin-bottom: 16px;
+    }
+    .review-status-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #bbb; margin-bottom: 6px; }
+    .review-status-value { font-size: 14px; font-weight: 600; color: var(--slate); }
+    .review-status-value.sent { color: var(--gold); }
+    .review-status-value.received { color: var(--green); }
+    .review-status-value.none { color: #bbb; }
+
+    .review-history { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .review-hist-item {
+      background: #fafaf8; border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px;
+      font-size: 13px; color: var(--slate);
+    }
+    .review-hist-date { font-size: 11px; color: #bbb; margin-top: 3px; }
+
+    .section-divider-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: #bbb; margin: 20px 0 12px;
+    }
+
+    /* ── EMPTY / LOADING ── */
+    .tab-empty { text-align: center; padding: 48px 24px; color: #bbb; font-size: 14px; }
+    .tab-empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+
+    /* ── LOADING SPINNER ── */
+    .loading-spinner {
+      width: 36px; height: 36px; border: 3px solid rgba(30,107,74,0.15);
+      border-top-color: var(--green); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+      .profile-layout { grid-template-columns: 1fr; }
+      .client-card { position: static; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="/dashboard.html" class="logo">
+      <svg width="28" height="28" viewBox="0 0 56 56" fill="none"><rect width="56" height="56" fill="#1E6B4A" rx="9"/><path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/><circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/></svg>
+      <span class="logo-text">TailWag</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/clients.html" class="nav-link active">Directory</a>
+      <a href="/messaging.html" class="nav-link">Messaging</a>
+      <a href="/schedule.html" class="nav-link">Schedule</a>
+      <a href="/reviews.html" class="nav-link">Reviews</a>
+      <a href="/team.html" class="nav-link">Team</a>
+      <a href="/settings.html" class="nav-link">Settings</a>
+    </nav>
+  </div>
+  <div class="nav-right">
+    <div id="navUserWidget"></div>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page-container">
+
+  <!-- Back bar -->
+  <div class="back-bar">
+    <a href="/clients.html" class="back-btn">← Directory</a>
+    <div class="breadcrumb">/ <span id="breadcrumbName">Client Profile</span></div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingState" style="text-align:center;padding:80px 20px;">
+    <div class="loading-spinner"></div>
+    <p style="color:#999;font-size:14px;">Loading profile…</p>
+  </div>
+
+  <!-- Content -->
+  <div id="pageContent" style="display:none;">
+    <div class="profile-layout">
+
+      <!-- LEFT: Client card -->
+      <div class="client-card">
+        <div class="client-card-header">
+          <div class="client-avatar" id="clientAvatar">?</div>
+          <div class="client-name" id="clientName">—</div>
+          <div class="client-phone" id="clientPhone">—</div>
+        </div>
+        <div class="client-card-body">
+          <div class="info-row" id="emailRow" style="display:none;">
+            <span class="info-icon">✉️</span>
+            <div>
+              <div class="info-label">Email</div>
+              <div class="info-value" id="clientEmail">—</div>
+            </div>
+          </div>
+
+          <div class="dog-section">
+            <div class="dog-section-title">Dogs</div>
+            <div id="dogList"></div>
+          </div>
+
+          <div class="notes-block" id="notesBlock" style="display:none;">
+            <div class="notes-block-label">Notes</div>
+            <div id="clientNotes"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Tabs -->
+      <div class="tabs-panel">
+        <div class="tabs-header">
+          <button class="tab-btn active" onclick="switchTab('messages')">💬 Messages</button>
+          <button class="tab-btn" onclick="switchTab('schedule')">📅 Schedule</button>
+          <button class="tab-btn" onclick="switchTab('reviews')">⭐ Reviews</button>
+        </div>
+
+        <!-- ══ MESSAGES TAB ══ -->
+        <div class="tab-content active" id="tab-messages">
+
+          <!-- Conversation thread -->
+          <span class="msg-section-label">Conversation History</span>
+          <div class="thread-area" id="threadArea">
+            <div class="thread-empty-msg">Loading messages…</div>
+          </div>
+
+          <!-- Compose -->
+          <span class="msg-section-label">Send a Message</span>
+
+          <!-- AI Generate button (report card only) -->
+          <div id="aiGenWrap" style="display:none;">
+            <button class="ai-btn" id="aiGenBtn" onclick="generateCard()">✨ Generate Report Card</button>
+            <div id="aiGenError" style="font-size:12px;color:#e53e3e;margin-bottom:8px;display:none;"></div>
+          </div>
+
+          <div class="compose-area">
+            <!-- Staff notes -->
+            <div class="notes-row">
+              <span class="msg-section-label" style="margin-bottom:6px;">Staff Notes</span>
+              <textarea id="cpStaffNotes" placeholder="What happened today? Even a few words helps." oninput="onCpNoteChange()"></textarea>
+              <div class="quick-chips-sm">
+                <span class="qchip" onclick="cpAppendNote('Loved fetch 🎾')">Loved fetch 🎾</span>
+                <span class="qchip" onclick="cpAppendNote('New friend 🐾')">New friend 🐾</span>
+                <span class="qchip" onclick="cpAppendNote('Water obsessed 💦')">Water obsessed 💦</span>
+                <span class="qchip" onclick="cpAppendNote('Napped hard 😴')">Napped hard 😴</span>
+                <span class="qchip" onclick="cpAppendNote('Zoomies 🌀')">Zoomies 🌀</span>
+                <span class="qchip" onclick="cpAppendNote('High energy 🔥')">High energy 🔥</span>
+                <span class="qchip" onclick="cpAppendNote('Shy but sweet 🤍')">Shy but sweet 🤍</span>
+              </div>
+            </div>
+
+            <!-- Template selector -->
+            <div class="compose-controls">
+              <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#bbb;white-space:nowrap;">Template</span>
+              <select class="template-sel-sm" id="cpTemplate" onchange="onCpTemplateChange()">
+                <option value="report_card">Report Card</option>
+                <option value="review_request">Review Request</option>
+                <option value="appt_reminder">Appointment Reminder</option>
+                <option value="custom">Custom Message</option>
+              </select>
+            </div>
+
+            <!-- Great Day toggle -->
+            <div class="toggle-row-sm">
+              <div>
+                <div class="toggle-label-sm">Great Day?</div>
+                <div class="toggle-sub-sm" id="cpToggleSub">Toggle on to append a Google review link</div>
+              </div>
+              <label class="toggle-switch-sm">
+                <input type="checkbox" id="cpGreatDay" onchange="onCpGreatDay()">
+                <span class="slider-sm"></span>
+              </label>
+            </div>
+
+            <!-- Photo attach -->
+            <div class="photo-row">
+              <span class="photo-label">📷 Add Photo</span>
+              <input type="file" id="cpPhotoInput" accept="image/*" style="display:none;" onchange="cpPhotoSelected(this)">
+              <div id="cpPhotoPreviewArea" style="display:none;margin-bottom:8px;position:relative;">
+                <img id="cpPhotoPreview" class="photo-preview-sm" alt="Photo preview">
+                <button onclick="cpClearPhoto()" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
+              </div>
+              <div id="cpPhotoStatus" style="font-size:11px;color:var(--gold);margin-bottom:6px;font-weight:600;"></div>
+              <button class="btn-outline-sm" style="width:100%;font-size:12px;border-color:rgba(196,147,63,0.4);color:var(--gold);" onclick="document.getElementById('cpPhotoInput').click()">Choose Photo</button>
+            </div>
+
+            <!-- Message body -->
+            <div class="msg-preview-area">
+              <textarea id="cpMsgBody" placeholder="Select a template to compose a message…" oninput="cpUpdateCharCount()"></textarea>
+            </div>
+
+            <!-- Send bar -->
+            <div class="send-bar">
+              <div class="send-bar-left">
+                <span class="char-ct" id="cpCharCount">0 / 160</span>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn-outline-sm" id="cpSendBtn" onclick="cpSendMessage()">Send 📱</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="send-result-msg" id="cpSendResult"></div>
+        </div>
+
+        <!-- ══ SCHEDULE TAB ══ -->
+        <div class="tab-content" id="tab-schedule">
+          <div id="apptLoading" style="text-align:center;padding:40px;"><div class="loading-spinner"></div></div>
+          <div id="apptContent" style="display:none;">
+            <span class="msg-section-label">Upcoming Appointments</span>
+            <div class="appt-list" id="upcomingAppts"></div>
+
+            <span class="msg-section-label">Past Appointments</span>
+            <div class="appt-list" id="pastAppts"></div>
+
+            <div class="section-divider-label">Add Appointment</div>
+            <div class="add-appt-form">
+              <div class="form-row-sm">
+                <div class="form-group-sm">
+                  <label>Dog</label>
+                  <select id="apptDogSelect"></select>
+                </div>
+                <div class="form-group-sm">
+                  <label>Date</label>
+                  <input type="date" id="apptDate">
+                </div>
+              </div>
+              <div class="form-group-sm" style="margin-bottom:12px;">
+                <label>Session</label>
+                <div class="session-pills">
+                  <div class="session-pill active" data-session="" onclick="selectSession(this)">Full Day</div>
+                  <div class="session-pill" data-session="am" onclick="selectSession(this)">AM Half</div>
+                  <div class="session-pill" data-session="pm" onclick="selectSession(this)">PM Half</div>
+                </div>
+              </div>
+              <div class="appt-error" id="apptError"></div>
+              <button class="btn-sm btn-green" style="width:100%;" id="addApptBtn" onclick="addAppointment()">Add Appointment</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ REVIEWS TAB ══ -->
+        <div class="tab-content" id="tab-reviews">
+          <div id="reviewLoading" style="text-align:center;padding:40px;"><div class="loading-spinner"></div></div>
+          <div id="reviewContent" style="display:none;">
+
+            <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+              <div class="review-status-card" style="flex:1;min-width:140px;">
+                <div class="review-status-label">Review Requested</div>
+                <div class="review-status-value" id="reviewRequestedVal">—</div>
+              </div>
+              <div class="review-status-card" style="flex:1;min-width:140px;">
+                <div class="review-status-label">Review Received</div>
+                <div class="review-status-value" id="reviewReceivedVal">—</div>
+              </div>
+            </div>
+
+            <span class="msg-section-label">Send a Review Request</span>
+            <div class="compose-area" style="margin-bottom:16px;">
+              <div class="msg-preview-area">
+                <textarea id="reviewMsgBody" style="min-height:80px;" placeholder="Loading review request message…" oninput="reviewCharCount()"></textarea>
+              </div>
+              <div class="send-bar">
+                <span class="char-ct" id="reviewCharCount">0 / 160</span>
+                <button class="btn-sm btn-green" id="sendReviewBtn" onclick="sendReviewRequest()">Send Review Request ⭐</button>
+              </div>
+            </div>
+
+            <div id="reviewSendResult" class="send-result-msg"></div>
+
+            <div class="section-divider-label">Review Request History</div>
+            <div class="review-history" id="reviewHistory"></div>
+
+            <div class="section-divider-label">Mark Review Received</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+              <button class="btn-sm btn-green" onclick="markReviewReceived()">✓ Mark Review Received</button>
+              <button class="btn-sm" style="background:#f5f5f5;color:#999;border:1px solid #ddd;" id="clearReceivedBtn" onclick="clearReviewReceived()" style="display:none;">Clear</button>
+            </div>
+            <div id="reviewMarkResult" class="send-result-msg"></div>
+          </div>
+        </div>
+
+      </div><!-- end tabs-panel -->
+    </div><!-- end profile-layout -->
+  </div><!-- end pageContent -->
+</div><!-- end page-container -->
+
+<script src="/js/nav-user.js"></script>
+<script>
+  // ── Auth ──────────────────────────────────────────────────────────
+  const session = JSON.parse(localStorage.getItem('tailwag_session') || '{}');
+  if (!session.access_token) window.location.href = '/login.html';
+  const authHeaders = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` };
+
+  // ── State ─────────────────────────────────────────────────────────
+  const params    = new URLSearchParams(window.location.search);
+  const clientId  = params.get('id');
+  if (!clientId) window.location.href = '/clients.html';
+
+  let client       = null;
+  let dogs         = [];
+  let selectedDog  = null;
+  let daycareName  = '';
+  let googleLink   = '';
+  let shortLink    = '';
+  let aiBase       = null;
+  let cpPendingMedia = null;
+  let selectedSession = '';  // '' = full, 'am', 'pm'
+  let schedTabLoaded  = false;
+  let reviewTabLoaded = false;
+
+  // ── TEMPLATES ─────────────────────────────────────────────────────
+  const TEMPLATES = {
+    report_card:    (o, d, dc, n) => `Hi ${o}! 🐾 ${d} had a great day at ${dc} today.${n ? ' ' + n : ''} See you next time!`,
+    appt_reminder:  (o, d, dc)    => `Hi ${o}! A friendly reminder that ${d} is scheduled at ${dc} tomorrow. Reply YES to confirm or NO to cancel. We'll hold the spot! — The ${dc} Team`,
+    review_request: (o, d, dc, n, lk) => `Hi ${o}! We hope ${d} had a fantastic time with us today. 🐾 If you have 30 seconds, an honest review means the world: ${lk || '[review link]'} Thank you! — ${dc}`,
+    custom: () => ''
+  };
+  const SEND_LABELS = { report_card: 'Send Report Card 📱', appt_reminder: 'Send Reminder 📱', review_request: 'Send Review Request 📱', custom: 'Send Message 📱' };
+
+  // ── INIT ──────────────────────────────────────────────────────────
+  async function init() {
+    try {
+      const [clientRes, statsRes] = await Promise.all([
+        fetch(`/api/clients/${clientId}`, { headers: authHeaders }),
+        fetch('/api/dashboard/stats', { headers: authHeaders })
+      ]);
+
+      if (clientRes.status === 401) { localStorage.removeItem('tailwag_session'); window.location.href = '/login.html'; return; }
+      if (!clientRes.ok) throw new Error('Client not found');
+
+      client = await clientRes.json();
+      dogs   = client.dogs || [];
+      selectedDog = dogs[0] || null;
+
+      if (statsRes.ok) {
+        const s = await statsRes.json();
+        daycareName = s.daycare?.name  || '';
+        googleLink  = s.daycare?.google_link || '';
+      }
+
+      renderClientCard();
+      await loadThread();
+      await populateCpTemplate();
+      updateCpAiBtn();
+
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('pageContent').style.display  = 'block';
+    } catch (err) {
+      document.getElementById('loadingState').innerHTML = `<p style="color:#e53e3e;font-size:14px;">${err.message}</p>`;
+    }
+  }
+
+  // ── CLIENT CARD ───────────────────────────────────────────────────
+  function renderClientCard() {
+    const fullName = `${client.first_name} ${client.last_name}`;
+    const initials = ((client.first_name || '')[0] || '') + ((client.last_name || '')[0] || '');
+    document.getElementById('clientAvatar').textContent = initials.toUpperCase() || '?';
+    document.getElementById('clientName').textContent   = fullName;
+    document.getElementById('clientPhone').textContent  = formatPhone(client.phone) || '—';
+    document.getElementById('breadcrumbName').textContent = fullName;
+    document.title = `${fullName} — TailWag`;
+
+    if (client.email) {
+      document.getElementById('clientEmail').textContent = client.email;
+      document.getElementById('emailRow').style.display = 'flex';
+    }
+    if (client.notes) {
+      document.getElementById('clientNotes').textContent = client.notes;
+      document.getElementById('notesBlock').style.display = 'block';
+    }
+
+    // Dogs
+    const dogList = document.getElementById('dogList');
+    if (!dogs.length) {
+      dogList.innerHTML = '<p style="font-size:13px;color:#bbb;">No dogs on file</p>';
+    } else {
+      dogList.innerHTML = dogs.map(d => `
+        <div class="dog-card ${selectedDog?.id === d.id ? 'active' : ''}" onclick="selectDog('${d.id}')">
+          <div class="dog-card-name">${esc(d.name)}</div>
+          ${d.breed ? `<span class="dog-chip-breed">${esc(d.breed)}</span>` : ''}
+        </div>`).join('');
+    }
+
+    // Dog selector for schedule tab
+    const apptDogSel = document.getElementById('apptDogSelect');
+    apptDogSel.innerHTML = dogs.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('');
+    if (!dogs.length) apptDogSel.innerHTML = '<option value="">No dogs on file</option>';
+
+    // Set today as default date
+    document.getElementById('apptDate').value = new Date().toISOString().split('T')[0];
+  }
+
+  function selectDog(dogId) {
+    selectedDog = dogs.find(d => d.id === dogId) || null;
+    document.querySelectorAll('.dog-card').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.dog-card').forEach(el => {
+      if (el.getAttribute('onclick') === `selectDog('${dogId}')`) el.classList.add('active');
+    });
+    aiBase = null;
+    populateCpTemplate();
+    updateCpAiBtn();
+  }
+
+  // ── TABS ──────────────────────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+      const tabs = ['messages','schedule','reviews'];
+      btn.classList.toggle('active', tabs[i] === name);
+    });
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    document.getElementById(`tab-${name}`).classList.add('active');
+
+    if (name === 'schedule' && !schedTabLoaded) { schedTabLoaded = true; loadSchedule(); }
+    if (name === 'reviews'  && !reviewTabLoaded) { reviewTabLoaded = true; loadReviews(); }
+  }
+
+  // ── MESSAGES TAB ─────────────────────────────────────────────────
+  async function loadThread() {
+    const area = document.getElementById('threadArea');
+    try {
+      const [threadRes] = await Promise.all([
+        fetch(`/api/sms/thread/${clientId}`, { headers: authHeaders }),
+        fetch(`/api/sms/thread/${clientId}/read`, { method: 'POST', headers: authHeaders })
+      ]);
+      if (!threadRes.ok) throw new Error();
+      const thread = await threadRes.json();
+
+      if (!thread.length) {
+        area.innerHTML = '<div class="thread-empty-msg">No messages yet. Send the first one below.</div>';
+        return;
+      }
+      area.innerHTML = thread.map(m => {
+        const time = new Date(m.ts).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+        const label = m.direction === 'out' ? 'TailWag' : client.first_name;
+        return `<div class="bubble-wrap ${m.direction}">
+          <div class="bubble ${m.direction}">${esc(m.body)}${m.media_url ? `<img src="${m.media_url}" class="bubble-img" alt="photo">` : ''}</div>
+          <div class="bubble-meta">${label} · ${time}</div>
+        </div>`;
+      }).join('');
+      area.scrollTop = area.scrollHeight;
+    } catch {
+      area.innerHTML = '<div class="thread-empty-msg">Could not load messages.</div>';
+    }
+  }
+
+  async function getShortLink() {
+    if (!googleLink) return '';
+    if (shortLink) return shortLink;
+    try {
+      const res = await fetch('/api/shortlinks', {
+        method: 'POST', headers: authHeaders,
+        body: JSON.stringify({ original_url: googleLink, label: 'Google Review' })
+      });
+      const data = await res.json();
+      shortLink = data.short_url || googleLink;
+      return shortLink;
+    } catch { return googleLink; }
+  }
+
+  async function populateCpTemplate() {
+    const template = document.getElementById('cpTemplate').value;
+    const owner  = client?.first_name || 'there';
+    const dog    = selectedDog?.name  || (dogs[0]?.name) || '[dog]';
+    const dc     = daycareName || 'our daycare';
+    const notes  = document.getElementById('cpStaffNotes').value.trim();
+    let msg = '';
+
+    if (template === 'report_card') {
+      msg = TEMPLATES.report_card(owner, dog, dc, notes);
+      if (document.getElementById('cpGreatDay').checked) {
+        const lk = await getShortLink();
+        if (lk) msg += ` If you have 30 seconds, an honest review means the world: ${lk}`;
+      }
+    } else if (template === 'appt_reminder') {
+      msg = TEMPLATES.appt_reminder(owner, dog, dc);
+    } else if (template === 'review_request') {
+      const lk = await getShortLink();
+      msg = TEMPLATES.review_request(owner, dog, dc, notes, lk);
+    }
+
+    document.getElementById('cpMsgBody').value = msg;
+    cpUpdateCharCount();
+  }
+
+  function onCpNoteChange() {
+    if (document.getElementById('cpTemplate').value === 'report_card') populateCpTemplate();
+  }
+
+  function onCpTemplateChange() {
+    aiBase = null;
+    updateCpAiBtn();
+    populateCpTemplate();
+    updateCpSendLabel();
+  }
+
+  function updateCpAiBtn() {
+    const show = document.getElementById('cpTemplate').value === 'report_card';
+    document.getElementById('aiGenWrap').style.display = show ? 'block' : 'none';
+  }
+
+  function updateCpSendLabel() {
+    const t = document.getElementById('cpTemplate').value;
+    document.getElementById('cpSendBtn').textContent = SEND_LABELS[t] || 'Send 📱';
+  }
+
+  async function onCpGreatDay() {
+    const on = document.getElementById('cpGreatDay').checked;
+    const sub = document.getElementById('cpToggleSub');
+    sub.textContent = on ? 'Review link will be included' : 'Toggle on to append a Google review link';
+    sub.className = 'toggle-sub-sm' + (on ? ' on' : '');
+
+    if (document.getElementById('cpTemplate').value === 'report_card') {
+      if (aiBase !== null) {
+        const lk = on ? await getShortLink() : '';
+        document.getElementById('cpMsgBody').value = lk
+          ? aiBase + ` If you have 30 seconds, an honest review means the world: ${lk}`
+          : aiBase;
+        cpUpdateCharCount();
+      } else {
+        await populateCpTemplate();
+      }
+    }
+  }
+
+  function cpAppendNote(text) {
+    const ta = document.getElementById('cpStaffNotes');
+    ta.value = ta.value.trim() ? ta.value.trim() + ' ' + text : text;
+    onCpNoteChange();
+  }
+
+  function cpUpdateCharCount() {
+    const len = document.getElementById('cpMsgBody').value.length;
+    const el  = document.getElementById('cpCharCount');
+    el.textContent = `${len} / 160`;
+    el.className = 'char-ct' + (len > 160 ? ' over' : len > 140 ? ' warn' : '');
+  }
+
+  async function generateCard() {
+    const btn = document.getElementById('aiGenBtn');
+    const errEl = document.getElementById('aiGenError');
+    errEl.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Crafting message…';
+    try {
+      const res = await fetch('/api/ai/report-card', {
+        method: 'POST', headers: authHeaders,
+        body: JSON.stringify({
+          dog_name: selectedDog?.name || dogs[0]?.name || '',
+          owner_first_name: client.first_name || '',
+          breed: selectedDog?.breed || dogs[0]?.breed || '',
+          notes: document.getElementById('cpStaffNotes').value || '',
+          daycare_name: daycareName || ''
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      aiBase = data.message;
+      if (document.getElementById('cpGreatDay').checked) {
+        const lk = await getShortLink();
+        document.getElementById('cpMsgBody').value = lk ? aiBase + ` If you have 30 seconds, an honest review means the world: ${lk}` : aiBase;
+      } else {
+        document.getElementById('cpMsgBody').value = aiBase;
+      }
+      cpUpdateCharCount();
+      btn.textContent = '✨ Regenerate';
+    } catch (err) {
+      errEl.textContent = err.message; errEl.style.display = 'block';
+      btn.textContent = '✨ Generate Report Card';
+    }
+    btn.disabled = false;
+  }
+
+  function cpPhotoSelected(input) {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById('cpPhotoPreview').src = URL.createObjectURL(file);
+    document.getElementById('cpPhotoPreviewArea').style.display = 'block';
+    document.getElementById('cpPhotoStatus').textContent = '✓ Ready to send';
+    cpPendingMedia = null;
+  }
+
+  function cpClearPhoto() {
+    document.getElementById('cpPhotoInput').value = '';
+    document.getElementById('cpPhotoPreviewArea').style.display = 'none';
+    document.getElementById('cpPhotoPreview').src = '';
+    document.getElementById('cpPhotoStatus').textContent = '';
+    cpPendingMedia = null;
+  }
+
+  function compressImage(file) {
+    return new Promise(resolve => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const MAX = 1200; let w = img.width, h = img.height;
+        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => resolve(new File([blob], file.name, { type: 'image/jpeg' })), 'image/jpeg', 0.82);
+      };
+      img.src = url;
+    });
+  }
+
+  async function cpUploadPhoto() {
+    const input = document.getElementById('cpPhotoInput');
+    if (!input.files[0]) return null;
+    document.getElementById('cpPhotoStatus').textContent = 'Compressing…';
+    const compressed = await compressImage(input.files[0]);
+    document.getElementById('cpPhotoStatus').textContent = 'Uploading…';
+    const fd = new FormData();
+    fd.append('file', compressed);
+    const res = await fetch('/api/sms/upload-media', { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` }, body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    document.getElementById('cpPhotoStatus').textContent = '✓ Uploaded';
+    return data.url;
+  }
+
+  async function cpSendMessage() {
+    const body   = document.getElementById('cpMsgBody').value.trim();
+    const result = document.getElementById('cpSendResult');
+    result.style.display = 'none';
+
+    if (!body) { showResult(result, 'Please compose a message.', false); return; }
+    if (!client.phone) { showResult(result, 'This client has no phone number on file.', false); return; }
+
+    const btn = document.getElementById('cpSendBtn');
+    const orig = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Sending…';
+
+    let mediaUrl = null;
+    const photoInput = document.getElementById('cpPhotoInput');
+    if (photoInput.files[0]) {
+      try { btn.textContent = 'Uploading photo…'; mediaUrl = await cpUploadPhoto(); btn.textContent = 'Sending…'; }
+      catch (err) { showResult(result, 'Photo upload failed: ' + err.message, false); btn.textContent = orig; btn.disabled = false; return; }
+    }
+
+    try {
+      const template = document.getElementById('cpTemplate').value;
+      const res = await fetch('/api/sms/send', {
+        method: 'POST', headers: authHeaders,
+        body: JSON.stringify({
+          client_id: clientId,
+          recipient_phone: client.phone,
+          body,
+          media_url: mediaUrl || undefined,
+          media_type: mediaUrl ? 'image' : 'none',
+          staff_notes: document.getElementById('cpStaffNotes').value.trim() || undefined,
+          is_report_card: template === 'report_card'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Send failed');
+      showResult(result, `✓ Message sent to ${client.first_name}!`, true);
+      document.getElementById('cpMsgBody').value = '';
+      document.getElementById('cpStaffNotes').value = '';
+      cpClearPhoto();
+      aiBase = null;
+      cpUpdateCharCount();
+      await loadThread();
+      if (template === 'review_request') { reviewTabLoaded = false; }
+    } catch (err) {
+      showResult(result, err.message, false);
+    }
+    btn.disabled = false; btn.textContent = orig;
+  }
+
+  // ── SCHEDULE TAB ─────────────────────────────────────────────────
+  async function loadSchedule() {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const past  = new Date(Date.now() - 90 * 86400000).toISOString().split('T')[0];
+      const future= new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
+
+      const res = await fetch(`/api/appointments?client_id=${clientId}`, { headers: authHeaders });
+      const all  = res.ok ? await res.json() : [];
+
+      const upcoming = all.filter(a => a.appointment_date >= today).sort((a,b) => a.appointment_date.localeCompare(b.appointment_date));
+      const past_    = all.filter(a => a.appointment_date <  today).sort((a,b) => b.appointment_date.localeCompare(a.appointment_date));
+
+      document.getElementById('upcomingAppts').innerHTML = upcoming.length
+        ? upcoming.map(apptHtml).join('')
+        : '<div class="tab-empty" style="padding:16px;"><div class="tab-empty-icon">📅</div>No upcoming appointments</div>';
+
+      document.getElementById('pastAppts').innerHTML = past_.length
+        ? past_.slice(0,10).map(apptHtml).join('')
+        : '<div class="tab-empty" style="padding:16px;color:#ccc;font-size:13px;">No past appointments</div>';
+
+      document.getElementById('apptLoading').style.display = 'none';
+      document.getElementById('apptContent').style.display = 'block';
+    } catch (err) {
+      document.getElementById('apptLoading').innerHTML = `<p style="color:#e53e3e;font-size:13px;">${err.message}</p>`;
+    }
+  }
+
+  function apptHtml(a) {
+    const d = new Date(a.appointment_date + 'T12:00:00');
+    const dateStr = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    const session = a.notes === 'am' ? 'AM Half Day' : a.notes === 'pm' ? 'PM Half Day' : 'Full Day';
+    const dogName = a.dogs?.name || '—';
+    const status = a.status || 'pending';
+    return `<div class="appt-item">
+      <div>
+        <div class="appt-date">${dateStr} · ${esc(dogName)}</div>
+        <div class="appt-session">${session}</div>
+      </div>
+      <span class="appt-status ${status}">${status}</span>
+    </div>`;
+  }
+
+  function selectSession(el) {
+    document.querySelectorAll('.session-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    selectedSession = el.dataset.session;
+  }
+
+  async function addAppointment() {
+    const dogId = document.getElementById('apptDogSelect').value;
+    const date  = document.getElementById('apptDate').value;
+    const errEl = document.getElementById('apptError');
+    const btn   = document.getElementById('addApptBtn');
+    errEl.style.display = 'none';
+
+    if (!date) { errEl.textContent = 'Please select a date.'; errEl.style.display = 'block'; return; }
+    if (!dogId) { errEl.textContent = 'No dog on file for this client.'; errEl.style.display = 'block'; return; }
+
+    btn.disabled = true; btn.textContent = 'Adding…';
+    try {
+      const res = await fetch('/api/appointments', {
+        method: 'POST', headers: authHeaders,
+        body: JSON.stringify({ dog_id: dogId, client_id: clientId, appointment_date: date, notes: selectedSession || null })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to add appointment');
+      schedTabLoaded = false;
+      await loadSchedule();
+      schedTabLoaded = true;
+      document.getElementById('apptDate').value = '';
+    } catch (err) {
+      errEl.textContent = err.message; errEl.style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = 'Add Appointment';
+  }
+
+  // ── REVIEWS TAB ──────────────────────────────────────────────────
+  async function loadReviews() {
+    try {
+      const [historyRes] = await Promise.all([
+        fetch(`/api/reviews/history`, { headers: authHeaders })
+      ]);
+
+      // Status from client record
+      const requested = client.review_requested_at;
+      const received  = client.review_received_at;
+
+      const reqEl = document.getElementById('reviewRequestedVal');
+      if (requested) {
+        reqEl.textContent = new Date(requested).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+        reqEl.className = 'review-status-value sent';
+      } else {
+        reqEl.textContent = 'Not yet sent';
+        reqEl.className = 'review-status-value none';
+      }
+
+      const recEl = document.getElementById('reviewReceivedVal');
+      if (received) {
+        recEl.textContent = new Date(received).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+        recEl.className = 'review-status-value received';
+        document.getElementById('clearReceivedBtn').style.display = 'inline-block';
+      } else {
+        recEl.textContent = 'Not marked yet';
+        recEl.className = 'review-status-value none';
+      }
+
+      // Pre-fill review request message
+      const dc  = daycareName || 'our daycare';
+      const dog = selectedDog?.name || dogs[0]?.name || '[dog]';
+      const lk  = await getShortLink();
+      const msg = TEMPLATES.review_request(client.first_name || 'there', dog, dc, '', lk);
+      document.getElementById('reviewMsgBody').value = msg;
+      reviewCharCount();
+
+      // History — filter to this client
+      const history = historyRes.ok ? await historyRes.json() : [];
+      const clientHistory = history.filter(m => m.client_id === clientId);
+      const histEl = document.getElementById('reviewHistory');
+      histEl.innerHTML = clientHistory.length
+        ? clientHistory.map(m => `
+            <div class="review-hist-item">
+              <div>${esc(m.body.substring(0, 100))}${m.body.length > 100 ? '…' : ''}</div>
+              <div class="review-hist-date">${new Date(m.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' })} · ${m.status}</div>
+            </div>`).join('')
+        : '<p style="font-size:13px;color:#bbb;">No review requests sent yet.</p>';
+
+      document.getElementById('reviewLoading').style.display = 'none';
+      document.getElementById('reviewContent').style.display = 'block';
+    } catch (err) {
+      document.getElementById('reviewLoading').innerHTML = `<p style="color:#e53e3e;font-size:13px;">${err.message}</p>`;
+    }
+  }
+
+  function reviewCharCount() {
+    const len = document.getElementById('reviewMsgBody').value.length;
+    const el = document.getElementById('reviewCharCount');
+    el.textContent = `${len} / 160`;
+    el.className = 'char-ct' + (len > 160 ? ' over' : len > 140 ? ' warn' : '');
+  }
+
+  async function sendReviewRequest() {
+    const body   = document.getElementById('reviewMsgBody').value.trim();
+    const result = document.getElementById('reviewSendResult');
+    result.style.display = 'none';
+    if (!body) { showResult(result, 'Message is empty.', false); return; }
+    if (!client.phone) { showResult(result, 'This client has no phone number on file.', false); return; }
+
+    const btn = document.getElementById('sendReviewBtn');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      const res = await fetch('/api/sms/send', {
+        method: 'POST', headers: authHeaders,
+        body: JSON.stringify({ client_id: clientId, recipient_phone: client.phone, body, is_report_card: false })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Send failed');
+
+      // Stamp review_requested_at
+      await fetch(`/api/reviews/client/${clientId}/requested`, { method: 'PATCH', headers: authHeaders });
+
+      showResult(result, `✓ Review request sent to ${client.first_name}!`, true);
+      reviewTabLoaded = false;
+      await loadReviews();
+      reviewTabLoaded = true;
+      await loadThread();
+    } catch (err) {
+      showResult(result, err.message, false);
+    }
+    btn.disabled = false; btn.textContent = 'Send Review Request ⭐';
+  }
+
+  async function markReviewReceived() {
+    const result = document.getElementById('reviewMarkResult');
+    result.style.display = 'none';
+    try {
+      const res = await fetch(`/api/reviews/client/${clientId}/received`, { method: 'PATCH', headers: authHeaders });
+      if (!res.ok) throw new Error('Failed to mark');
+      const data = await res.json();
+      client.review_received_at = data.review_received_at;
+      showResult(result, '✓ Review marked as received!', true);
+      reviewTabLoaded = false;
+      await loadReviews();
+      reviewTabLoaded = true;
+    } catch (err) {
+      showResult(result, err.message, false);
+    }
+  }
+
+  async function clearReviewReceived() {
+    try {
+      await fetch(`/api/reviews/client/${clientId}/received`, { method: 'DELETE', headers: authHeaders });
+      client.review_received_at = null;
+      reviewTabLoaded = false;
+      await loadReviews();
+      reviewTabLoaded = true;
+    } catch {}
+  }
+
+  // ── HELPERS ───────────────────────────────────────────────────────
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function formatPhone(p) {
+    if (!p) return '';
+    const d = p.replace(/\D/g,'');
+    const n = d.startsWith('1') && d.length === 11 ? d.slice(1) : d;
+    if (n.length !== 10) return p;
+    return `(${n.slice(0,3)}) ${n.slice(3,6)}-${n.slice(6)}`;
+  }
+
+  function showResult(el, msg, ok) {
+    el.textContent = msg;
+    el.className = 'send-result-msg ' + (ok ? 'ok' : 'err');
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
+  }
+
+  // ── START ─────────────────────────────────────────────────────────
+  init();
+</script>
+
+<script>
+  window.intercomSettings = { api_base: "https://api-iam.intercom.io", app_id: "ov6sdlds" };
+  (function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/ov6sdlds';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();
+</script>
+</body>
+</html>

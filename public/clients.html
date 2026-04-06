@@ -317,6 +317,8 @@
     }
     .action-btn.msg-btn { background: rgba(30,107,74,0.15); color: #1E6B4A; }
     .action-btn.msg-btn:hover { background: rgba(30,107,74,0.3); }
+    .action-btn.profile-btn { background: rgba(196,147,63,0.12); color: #9a6f24; }
+    .action-btn.profile-btn:hover { background: rgba(196,147,63,0.25); }
 
     /* Dog modal delete btn aligned left */
     .modal-actions-split { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
@@ -797,8 +799,9 @@
           <td>${escHtml(c.phone || '—')}</td>
           <td style="color:#999;">${escHtml(dog.breed || '—')}</td>
           <td>
-            <button class="action-btn edit-btn" onclick="openEditDogModal(${JSON.stringify(dog).replace(/"/g,'&quot;')}, '${c.id}')">Edit Dog</button>
+            <button class="action-btn profile-btn" onclick="window.location.href='/client-profile.html?id=${c.id}'">View Profile</button>
             <button class="action-btn msg-btn" onclick="openThread('${c.id}', '${escHtml(c.first_name)} ${escHtml(c.last_name)}')">💬${unreadCounts[c.id] ? `<span class="unread-badge">${unreadCounts[c.id]}</span>` : ''}</button>
+            <button class="action-btn edit-btn" onclick="openEditDogModal(${JSON.stringify(dog).replace(/"/g,'&quot;')}, '${c.id}')">Edit Dog</button>
             <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit Owner</button>
           </td>
         </tr>`;
@@ -814,9 +817,10 @@
         <th>Actions</th>
       </tr>`;
 
-      const sorted = [...clients].sort((a, b) =>
-        (a.last_name || '').localeCompare(b.last_name || '')
-      );
+      const sorted = [...clients].sort((a, b) => {
+        const lastCmp = (a.last_name || '').localeCompare(b.last_name || '');
+        return lastCmp !== 0 ? lastCmp : (a.first_name || '').localeCompare(b.first_name || '');
+      });
 
       document.getElementById('clientCount').textContent =
         `${total} pet parent${total !== 1 ? 's' : ''}`;
@@ -838,8 +842,9 @@
           <td>${escHtml(c.email || '—')}</td>
           <td>${dogsHtml}</td>
           <td>
-            <button class="action-btn add-dog-btn" onclick="openAddDogModal('${c.id}')">+ Dog</button>
+            <button class="action-btn profile-btn" onclick="window.location.href='/client-profile.html?id=${c.id}'">View Profile</button>
             <button class="action-btn msg-btn" onclick="openThread('${c.id}', '${escHtml(c.first_name)} ${escHtml(c.last_name)}')">💬${unreadCounts[c.id] ? `<span class="unread-badge">${unreadCounts[c.id]}</span>` : ''}</button>
+            <button class="action-btn add-dog-btn" onclick="openAddDogModal('${c.id}')">+ Dog</button>
             <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit</button>
             <button class="action-btn delete-btn" onclick="deleteClient('${c.id}', '${escHtml(c.first_name)} ${escHtml(c.last_name)}')">Delete</button>
           </td>
