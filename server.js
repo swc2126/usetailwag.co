@@ -69,6 +69,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Clean URL for newsletter landing page
+app.get('/chew-on-this', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'chew-on-this.html'));
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
