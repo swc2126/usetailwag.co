@@ -284,17 +284,17 @@
 
   <div class="signup-box">
     <label for="heroEmail">Your email address</label>
-
-    <div id="heroFormWrap">
+    <!-- Brevo subscription form — paste your form action URL from Brevo → Contacts → Forms -->
+    <form action="BREVO_FORM_ACTION_URL" method="POST" target="_blank" onsubmit="heroFormSubmit(event)">
+      <input type="hidden" name="email_address_check" value="">
+      <input type="hidden" name="locale" value="en">
       <div class="signup-input-row">
-        <input type="email" id="heroEmail" class="signup-input" placeholder="you@yourdaycare.com" autocomplete="email">
-        <button class="signup-btn" id="heroBtn" onclick="heroSubscribe()">Subscribe →</button>
+        <input type="email" name="EMAIL" id="heroEmail" class="signup-input" placeholder="you@yourdaycare.com" autocomplete="email" required>
+        <button type="submit" class="signup-btn" id="heroBtn">Subscribe →</button>
       </div>
-      <div class="signup-error" id="heroError"></div>
       <p class="signup-fine">No spam. Unsubscribe anytime. We publish every two weeks.</p>
-    </div>
-
-    <div class="signup-success" id="heroSuccess">
+    </form>
+    <div class="signup-success" id="heroSuccess" style="display:none;">
       <div class="signup-success-icon">🐾</div>
       <h3>You're in!</h3>
       <p>Check your inbox — your first issue lands in two weeks.<br>We'll send a welcome note shortly.</p>
@@ -350,12 +350,13 @@
 <section class="bottom-cta">
   <h2>Join the pack.</h2>
   <p>Free. Bi-monthly. Worth the two minutes it takes to read.</p>
-  <div class="bottom-form">
-    <input type="email" id="bottomEmail" class="bottom-input" placeholder="your@email.com" autocomplete="email">
-    <button class="bottom-btn" id="bottomBtn" onclick="bottomSubscribe()">Count me in</button>
-  </div>
-  <div class="bottom-success" id="bottomSuccess">🐾 You're subscribed! Talk soon.</div>
-  <div class="bottom-error" id="bottomError"></div>
+  <form action="BREVO_FORM_ACTION_URL" method="POST" target="_blank" onsubmit="bottomFormSubmit(event)" class="bottom-form">
+    <input type="hidden" name="email_address_check" value="">
+    <input type="hidden" name="locale" value="en">
+    <input type="email" name="EMAIL" id="bottomEmail" class="bottom-input" placeholder="your@email.com" autocomplete="email" required>
+    <button type="submit" class="bottom-btn" id="bottomBtn">Count me in</button>
+  </form>
+  <div class="bottom-success" id="bottomSuccess" style="display:none;">🐾 You're subscribed! Talk soon.</div>
 </section>
 
 <!-- FOOTER -->
@@ -370,66 +371,20 @@
 </footer>
 
 <script>
-  async function subscribe(email, btnEl, successEl, errorEl, formWrapEl) {
-    const e = email.trim().toLowerCase();
-    if (!e || !e.includes('@')) {
-      errorEl.textContent = 'Please enter a valid email address.';
-      errorEl.style.display = 'block';
-      return;
-    }
-    errorEl.style.display = 'none';
-    btnEl.disabled = true;
-    const orig = btnEl.textContent;
-    btnEl.textContent = 'Subscribing…';
-
-    try {
-      const res = await fetch('https://usetailwag-co.onrender.com/api/newsletter/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: e })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Something went wrong.');
-
-      if (formWrapEl) formWrapEl.style.display = 'none';
-      successEl.style.display = formWrapEl ? 'block' : 'block';
-    } catch (err) {
-      errorEl.textContent = err.message;
-      errorEl.style.display = 'block';
-      btnEl.disabled = false;
-      btnEl.textContent = orig;
-    }
+  function heroFormSubmit(e) {
+    // Show success message after form submits to Brevo (opens in new tab)
+    setTimeout(() => {
+      document.querySelector('.signup-box form').style.display = 'none';
+      document.getElementById('heroSuccess').style.display = 'block';
+    }, 300);
   }
 
-  function heroSubscribe() {
-    subscribe(
-      document.getElementById('heroEmail').value,
-      document.getElementById('heroBtn'),
-      document.getElementById('heroSuccess'),
-      document.getElementById('heroError'),
-      document.getElementById('heroFormWrap')
-    );
+  function bottomFormSubmit(e) {
+    setTimeout(() => {
+      document.querySelector('.bottom-form').style.display = 'none';
+      document.getElementById('bottomSuccess').style.display = 'block';
+    }, 300);
   }
-
-  function bottomSubscribe() {
-    const btn = document.getElementById('bottomBtn');
-    const successEl = document.getElementById('bottomSuccess');
-    const errorEl = document.getElementById('bottomError');
-    const email = document.getElementById('bottomEmail').value;
-
-    subscribe(email, btn, successEl, errorEl, null);
-    successEl.style.display = 'block';
-    document.getElementById('bottomEmail').style.display = 'none';
-    btn.style.display = 'none';
-  }
-
-  // Allow Enter key in email inputs
-  document.getElementById('heroEmail').addEventListener('keydown', e => {
-    if (e.key === 'Enter') heroSubscribe();
-  });
-  document.getElementById('bottomEmail').addEventListener('keydown', e => {
-    if (e.key === 'Enter') bottomSubscribe();
-  });
 </script>
 
 </body>
