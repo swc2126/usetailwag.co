@@ -74,6 +74,14 @@ app.get('/chew-on-this', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'chew-on-this.html'));
 });
 
+// Legal pages
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+});
+app.get('/terms', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'terms.html'));
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });

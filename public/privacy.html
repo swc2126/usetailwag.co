@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — TailWag</title>
+  <meta name="description" content="TailWag's Privacy Policy — how we collect, use, and protect your information.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #0F1410;
+      --green: #1E6B4A;
+      --green-dark: #164D35;
+      --linen: #F5F0E8;
+      --linen-dark: #EDE8DF;
+      --gold: #C4933F;
+      --sage: #A8C5B0;
+      --slate: #2D3748;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); overflow-x: hidden; }
+
+    /* NAV */
+    .nav {
+      background: var(--black);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 40px; position: sticky; top: 0; z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 18px; color: var(--linen); }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-link { font-size: 13px; color: rgba(245,240,232,0.5); text-decoration: none; transition: color 0.2s; }
+    .nav-link:hover { color: var(--linen); }
+    .nav-cta {
+      background: var(--green); color: var(--linen);
+      padding: 8px 20px; border-radius: 8px; font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 600; text-decoration: none;
+      transition: background 0.2s;
+    }
+    .nav-cta:hover { background: var(--green-dark); }
+
+    /* HERO BANNER */
+    .page-header {
+      background: var(--black);
+      padding: 56px 40px 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .page-header-inner { max-width: 860px; margin: 0 auto; }
+    .page-kicker {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--sage); margin-bottom: 12px;
+    }
+    .page-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800; font-size: clamp(32px, 5vw, 48px);
+      color: var(--linen); letter-spacing: -0.5px; margin-bottom: 16px;
+    }
+    .page-meta { font-size: 14px; color: rgba(245,240,232,0.45); }
+    .page-meta span { margin-right: 24px; }
+
+    /* LAYOUT */
+    .layout {
+      max-width: 1060px; margin: 0 auto;
+      display: grid; grid-template-columns: 220px 1fr;
+      gap: 48px; padding: 48px 40px 80px;
+      align-items: start;
+    }
+
+    /* TOC */
+    .toc {
+      position: sticky; top: 76px;
+      background: #fff; border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 24px; font-size: 13px;
+    }
+    .toc-title {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--green); margin-bottom: 16px;
+    }
+    .toc ol { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .toc a {
+      color: var(--slate); text-decoration: none; line-height: 1.4;
+      transition: color 0.15s; display: block;
+    }
+    .toc a:hover { color: var(--green); }
+
+    /* CONTENT */
+    .content { min-width: 0; }
+    .section { margin-bottom: 44px; padding-top: 8px; }
+    .section h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 22px; color: var(--black); margin-bottom: 14px;
+      padding-bottom: 10px; border-bottom: 2px solid var(--linen-dark);
+    }
+    .section h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 15px; color: var(--green); margin: 20px 0 8px;
+    }
+    .section p {
+      font-size: 15px; line-height: 1.8; color: var(--slate);
+      margin-bottom: 14px;
+    }
+    .section ul {
+      list-style: none; padding: 0; margin-bottom: 14px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .section ul li {
+      font-size: 15px; line-height: 1.7; color: var(--slate);
+      padding-left: 20px; position: relative;
+    }
+    .section ul li::before {
+      content: ''; position: absolute; left: 0; top: 10px;
+      width: 6px; height: 6px; background: var(--green);
+      border-radius: 50%;
+    }
+    .section ul li strong { color: var(--black); font-weight: 600; }
+
+    .highlight-box {
+      background: rgba(30,107,74,0.07); border-left: 3px solid var(--green);
+      border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0 20px;
+    }
+    .highlight-box p { margin-bottom: 0; font-size: 14px; }
+
+    /* FOOTER */
+    .footer {
+      background: var(--black);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 28px 40px;
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .footer-left { font-size: 13px; color: rgba(245,240,232,0.35); }
+    .footer-right { display: flex; gap: 20px; }
+    .footer-link { font-size: 13px; color: rgba(245,240,232,0.4); text-decoration: none; transition: color 0.2s; }
+    .footer-link:hover { color: rgba(245,240,232,0.7); }
+
+    @media (max-width: 720px) {
+      .nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      .page-header { padding: 40px 20px 32px; }
+      .layout { grid-template-columns: 1fr; padding: 32px 20px 60px; gap: 32px; }
+      .toc { position: static; }
+      .footer { flex-direction: column; align-items: flex-start; padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="/" class="nav-logo">
+    <svg width="28" height="28" viewBox="0 0 56 56" fill="none">
+      <rect width="56" height="56" rx="9" fill="#1E6B4A"/>
+      <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+    </svg>
+    <span class="nav-logo-text">TailWag</span>
+  </a>
+  <div class="nav-links">
+    <a href="/terms" class="nav-link">Terms of Service</a>
+    <a href="mailto:summer@usetailwag.co" class="nav-link">Contact</a>
+    <a href="/signup.html" class="nav-cta">Get TailWag →</a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <p class="page-kicker">Legal</p>
+    <h1 class="page-title">Privacy Policy</h1>
+    <div class="page-meta">
+      <span>Effective Date: April 1, 2026</span>
+      <span>Last Updated: April 1, 2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- TABLE OF CONTENTS -->
+  <aside class="toc">
+    <div class="toc-title">Contents</div>
+    <ol>
+      <li><a href="#s1">1. Introduction</a></li>
+      <li><a href="#s2">2. Information We Collect</a></li>
+      <li><a href="#s3">3. How We Use Information</a></li>
+      <li><a href="#s4">4. How We Share Information</a></li>
+      <li><a href="#s5">5. SMS & Pet Parent Consent</a></li>
+      <li><a href="#s6">6. Data Retention</a></li>
+      <li><a href="#s7">7. Data Security</a></li>
+      <li><a href="#s8">8. Children's Privacy</a></li>
+      <li><a href="#s9">9. Your Privacy Rights</a></li>
+      <li><a href="#s10">10. Cookies and Tracking</a></li>
+      <li><a href="#s11">11. Policy Changes</a></li>
+      <li><a href="#s12">12. Contact Us</a></li>
+    </ol>
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <div class="section" id="s1">
+      <h2>1. Introduction</h2>
+      <p>TailWag, operated by Summer Wright ("TailWag," "we," "us," or "our"), respects the privacy of our Subscribers (dog daycare businesses and their authorized team members) and their clients ("Pet Parents"). This Privacy Policy describes how we collect, use, share, and protect personal information when you use our platform at usetailwag.co and related services (the "Service").</p>
+      <p>This Privacy Policy applies to two categories of individuals:</p>
+      <ul>
+        <li><strong>Subscribers</strong> — Dog daycare businesses and their team members who create accounts and use the TailWag platform</li>
+        <li><strong>Pet Parents</strong> — Clients of our Subscribers whose contact information and pet data are entered into the platform by the Subscriber</li>
+      </ul>
+      <p>By using the Service, Subscribers agree to this Privacy Policy. Pet Parents' information is provided to us by Subscribers, who are responsible for obtaining appropriate consent (see Section 5).</p>
+    </div>
+
+    <div class="section" id="s2">
+      <h2>2. Information We Collect</h2>
+
+      <h3>2.1 Subscriber Account Information</h3>
+      <p>When a Subscriber registers for the Service, we collect:</p>
+      <ul>
+        <li>Business name, contact name, email address, and phone number</li>
+        <li>Account credentials (email and password, managed through Supabase Auth)</li>
+        <li>Business address and location</li>
+        <li>Billing information (processed and stored by Stripe — TailWag does not store credit card numbers)</li>
+        <li>Team member names, email addresses, and assigned roles</li>
+      </ul>
+
+      <h3>2.2 Pet Parent Information</h3>
+      <p>Subscribers enter the following Pet Parent information into the platform:</p>
+      <ul>
+        <li>Pet Parent name (first and last)</li>
+        <li>Mobile phone number</li>
+        <li>Pet name(s), breed(s), and any relevant notes</li>
+        <li>Visit history and appointment records</li>
+        <li>Staff-entered visit notes (used to generate personalized messages)</li>
+      </ul>
+      <p>TailWag does not collect Pet Parent information directly. All Pet Parent data is provided by the Subscriber.</p>
+
+      <h3>2.3 Automatically Collected Information</h3>
+      <p>When you use the Service, we may automatically collect:</p>
+      <ul>
+        <li>SMS delivery status and metadata (delivered, failed, read receipts) via Twilio</li>
+        <li>Message timestamps, character counts, and messaging volume</li>
+        <li>Basic usage analytics (login times, feature usage)</li>
+        <li>Device and browser information when accessing the web platform</li>
+        <li>IP addresses and general location data</li>
+      </ul>
+
+      <h3>2.4 AI-Processing Data</h3>
+      <p>When the Service generates personalized messages, the following data is processed through Anthropic's Claude API:</p>
+      <ul>
+        <li>Pet name, breed, and visit-specific notes entered by staff</li>
+        <li>General prompt instructions (not linked to the Pet Parent's identity)</li>
+      </ul>
+      <p>Pet Parent phone numbers and identifying contact information are not sent to the AI model. Only the content needed to generate a relevant message is transmitted.</p>
+    </div>
+
+    <div class="section" id="s3">
+      <h2>3. How We Use Information</h2>
+      <p>We use the information we collect for the following purposes:</p>
+      <ul>
+        <li><strong>Delivering the Service</strong> — Sending personalized report cards, appointment reminders, review requests, and other SMS messages on the Subscriber's behalf</li>
+        <li><strong>AI Message Generation</strong> — Processing staff notes through the Anthropic Claude API to produce relevant, personalized message content</li>
+        <li><strong>Sentiment Analysis</strong> — Analyzing staff-entered visit notes to identify positive and concerning visits, routing positive experiences toward review requests and flagging concerns for the Subscriber</li>
+        <li><strong>Account Management</strong> — Administering Subscriber accounts, processing payments, and managing team access</li>
+        <li><strong>Platform Improvement</strong> — Analyzing aggregated, de-identified usage patterns to improve features and user experience</li>
+        <li><strong>Communication</strong> — Sending Subscribers service-related emails, including onboarding guidance, billing confirmations, and product updates</li>
+        <li><strong>Newsletter</strong> — Delivering the "Chew on This" newsletter to individuals who have voluntarily subscribed (managed through Brevo)</li>
+        <li><strong>Compliance</strong> — Meeting legal obligations, enforcing our Terms of Service, and protecting against fraud or abuse</li>
+      </ul>
+    </div>
+
+    <div class="section" id="s4">
+      <h2>4. How We Share Information</h2>
+      <p>TailWag does not sell, rent, or trade personal information to third parties for marketing purposes. We share information only in the following circumstances:</p>
+
+      <h3>4.1 Third-Party Service Providers</h3>
+      <p>We use the following third-party services to operate the platform. Each processes data only as needed to perform their specific function:</p>
+      <ul>
+        <li><strong>Twilio, Inc.</strong> — Receives Pet Parent phone numbers and message content to deliver SMS/MMS messages. Twilio processes message delivery status and manages carrier-level opt-outs</li>
+        <li><strong>Supabase (Supabase, Inc.)</strong> — Hosts our database (all Subscriber and Pet Parent data), handles user authentication, and stores uploaded media files</li>
+        <li><strong>Stripe, Inc.</strong> — Processes subscription payments and stores billing information</li>
+        <li><strong>Anthropic, PBC</strong> — Processes pet names, breeds, and staff visit notes (not phone numbers or contact details) to generate AI-powered message content</li>
+        <li><strong>Brevo (Sendinblue)</strong> — Manages newsletter subscriptions and sends marketing emails to voluntarily subscribed individuals</li>
+        <li><strong>Resend</strong> — Delivers transactional emails such as team member invitations and system notifications</li>
+      </ul>
+
+      <h3>4.2 Legal Requirements</h3>
+      <p>We may disclose personal information if required by law, subpoena, court order, or other legal process, or if we believe in good faith that disclosure is necessary to protect our rights, your safety, or the safety of others.</p>
+
+      <h3>4.3 Business Transfers</h3>
+      <p>In the event of a merger, acquisition, or sale of all or a portion of TailWag's assets, personal information may be transferred as part of the transaction. We will notify affected Subscribers before their data is transferred and becomes subject to a different privacy policy.</p>
+    </div>
+
+    <div class="section" id="s5">
+      <h2>5. SMS Communications and Pet Parent Consent</h2>
+      <p>TailWag sends SMS messages to Pet Parents on behalf of Subscribers. We want to be transparent about how this works:</p>
+      <ul>
+        <li>TailWag acts as a technology platform. The Subscriber — not TailWag — is the sender of record for all SMS messages</li>
+        <li>Subscribers are solely responsible for obtaining valid opt-in consent from Pet Parents before entering their contact information into the platform (as detailed in Section 4 of the Terms of Service)</li>
+        <li>Messages are sent from a local phone number provisioned for the Subscriber's business</li>
+        <li>Pet Parents can opt out at any time by replying STOP to any message. Opt-out requests are processed automatically through Twilio</li>
+        <li>Message content is generated by AI based on staff-entered notes and is sent on behalf of the Subscriber's business, not on behalf of TailWag</li>
+      </ul>
+    </div>
+
+    <div class="section" id="s6">
+      <h2>6. Data Retention</h2>
+      <ul>
+        <li><strong>Active Accounts</strong> — We retain Subscriber and Pet Parent data for as long as the Subscriber's account is active and the subscription is current</li>
+        <li><strong>Post-Cancellation</strong> — After a Subscriber cancels, we retain data for 30 days to allow for account reactivation or data export requests. After 30 days, we will delete stored client data</li>
+        <li><strong>Message Logs</strong> — SMS delivery metadata (status, timestamps) may be retained for up to 12 months for compliance and troubleshooting purposes</li>
+        <li><strong>Billing Records</strong> — Payment records are retained as required by applicable tax and financial regulations</li>
+        <li><strong>Newsletter Subscribers</strong> — Newsletter subscriber information is retained until the individual unsubscribes</li>
+      </ul>
+      <p>Subscribers may request deletion of their data at any time by emailing <a href="mailto:summer@usetailwag.co" style="color:var(--green);">summer@usetailwag.co</a>. We will process deletion requests within 30 days.</p>
+    </div>
+
+    <div class="section" id="s7">
+      <h2>7. Data Security</h2>
+      <p>We take reasonable administrative, technical, and physical measures to protect personal information from unauthorized access, alteration, disclosure, or destruction. These measures include:</p>
+      <ul>
+        <li>Encryption of data in transit (HTTPS/TLS) and at rest through our hosting provider (Supabase)</li>
+        <li>Role-based access controls limiting team member access to data appropriate for their role</li>
+        <li>Authentication via Supabase Auth with session management</li>
+        <li>Payment information handled exclusively by Stripe, a PCI DSS Level 1 certified processor</li>
+        <li>Regular review of third-party provider security practices</li>
+      </ul>
+      <p>No method of transmission over the internet or electronic storage is 100% secure. While we strive to protect your information, we cannot guarantee absolute security.</p>
+    </div>
+
+    <div class="section" id="s8">
+      <h2>8. Children's Privacy</h2>
+      <p>The Service is designed for use by businesses, not individuals under the age of 13. We do not knowingly collect personal information from children under 13. If we learn that we have inadvertently collected information from a child under 13, we will delete it promptly. If you believe a child's information has been submitted to TailWag, please contact us at <a href="mailto:summer@usetailwag.co" style="color:var(--green);">summer@usetailwag.co</a>.</p>
+    </div>
+
+    <div class="section" id="s9">
+      <h2>9. Your Privacy Rights</h2>
+
+      <h3>9.1 All Users</h3>
+      <p>Regardless of your location, you have the right to:</p>
+      <ul>
+        <li>Request access to the personal information we hold about you</li>
+        <li>Request correction of inaccurate personal information</li>
+        <li>Request deletion of your personal information (subject to legal retention requirements)</li>
+        <li>Opt out of marketing communications at any time</li>
+      </ul>
+
+      <h3>9.2 California Residents (CCPA/CPRA)</h3>
+      <p>If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA) and California Privacy Rights Act (CPRA), including:</p>
+      <ul>
+        <li>The right to know what personal information we collect, use, and disclose</li>
+        <li>The right to request deletion of your personal information</li>
+        <li>The right to opt out of the sale or sharing of your personal information (note: TailWag does not sell personal information)</li>
+        <li>The right to non-discrimination for exercising your privacy rights</li>
+      </ul>
+
+      <h3>9.3 Pet Parents</h3>
+      <p>Pet Parents whose information is stored in TailWag may contact us directly at <a href="mailto:summer@usetailwag.co" style="color:var(--green);">summer@usetailwag.co</a> to exercise their privacy rights. We may need to verify your identity and coordinate with the relevant Subscriber to process your request.</p>
+    </div>
+
+    <div class="section" id="s10">
+      <h2>10. Cookies and Tracking</h2>
+      <p>The TailWag web platform may use cookies and similar technologies for session management and authentication. We do not use third-party advertising cookies or cross-site tracking technologies.</p>
+    </div>
+
+    <div class="section" id="s11">
+      <h2>11. Changes to This Privacy Policy</h2>
+      <p>We may update this Privacy Policy from time to time. We will notify Subscribers of material changes at least 30 days in advance by email. The "Last Updated" date at the top of this document will reflect the most recent revision.</p>
+    </div>
+
+    <div class="section" id="s12">
+      <h2>12. Contact Us</h2>
+      <p>If you have any questions, concerns, or requests related to this Privacy Policy or our data practices, please contact us:</p>
+      <div class="highlight-box">
+        <p><strong>TailWag</strong><br>
+        Email: <a href="mailto:summer@usetailwag.co" style="color:var(--green);">summer@usetailwag.co</a><br>
+        Website: <a href="https://usetailwag.co" style="color:var(--green);">usetailwag.co</a></p>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
+
+<!-- FOOTER -->
+<footer class="footer">
+  <span class="footer-left">© 2026 TailWag · Built for dog people by dog people.</span>
+  <div class="footer-right">
+    <a href="/" class="footer-link">Home</a>
+    <a href="/terms" class="footer-link">Terms of Service</a>
+    <a href="/privacy" class="footer-link">Privacy Policy</a>
+    <a href="mailto:summer@usetailwag.co" class="footer-link">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>

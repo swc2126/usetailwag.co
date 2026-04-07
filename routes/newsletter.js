@@ -4,7 +4,7 @@ const { supabaseAdmin } = require('../config/supabase');
 const { sendEmail } = require('../utils/email');
 
 // Sync subscriber to Brevo contact list (fire and forget)
-async function syncToBrevo(email) {
+async function syncToBrevo(email, attrs = {}) {
   const apiKey = process.env.BREVO_API_KEY;
   const listId = process.env.BREVO_LIST_ID; // numeric list ID from Brevo dashboard
   if (!apiKey) return;
@@ -12,6 +12,15 @@ async function syncToBrevo(email) {
   try {
     const body = { email, updateEnabled: true };
     if (listId) body.listIds = [parseInt(listId, 10)];
+
+    // Map profile fields to Brevo contact attributes
+    const attributes = {};
+    if (attrs.opened_month) attributes.OPENED_MONTH = attrs.opened_month;
+    if (attrs.opened_year)  attributes.OPENED_YEAR  = parseInt(attrs.opened_year, 10);
+    if (attrs.dogs_served)  attributes.DOGS_SERVED  = attrs.dogs_served;
+    if (attrs.staff_count)  attributes.STAFF_COUNT  = attrs.staff_count;
+    if (attrs.role)         attributes.ROLE         = attrs.role === 'Other' && attrs.role_other ? attrs.role_other : attrs.role;
+    if (Object.keys(attributes).length) body.attributes = attributes;
 
     const res = await fetch('https://api.brevo.com/v3/contacts', {
       method: 'POST',
@@ -46,17 +55,26 @@ router.use((req, res, next) => {
 
 // POST /api/newsletter/subscribe
 router.post('/subscribe', async (req, res) => {
-  const { email } = req.body;
+  const { email, opened_month, opened_year, dogs_served, staff_count, role, role_other } = req.body;
   if (!email || !email.includes('@')) {
     return res.status(400).json({ error: 'Valid email required.' });
   }
 
   const normalizedEmail = email.toLowerCase().trim();
 
-  // Upsert — if already subscribed, return success silently
+  // Build upsert record — include optional profile fields when provided
+  const record = { email: normalizedEmail };
+  if (opened_month) record.opened_month = opened_month;
+  if (opened_year)  record.opened_year  = parseInt(opened_year, 10);
+  if (dogs_served)  record.dogs_served  = dogs_served;
+  if (staff_count)  record.staff_count  = staff_count;
+  if (role)         record.role         = role;
+  if (role_other)   record.role_other   = role_other;
+
+  // Upsert — if already subscribed, update their profile data
   const { error } = await supabaseAdmin
     .from('newsletter_subscribers')
-    .upsert({ email: normalizedEmail }, { onConflict: 'email', ignoreDuplicates: true });
+    .upsert(record, { onConflict: 'email', ignoreDuplicates: false });
 
   if (error) {
     console.error('Newsletter subscribe error:', error);
@@ -64,7 +82,7 @@ router.post('/subscribe', async (req, res) => {
   }
 
   // Sync to Brevo contact list (fire and forget)
-  syncToBrevo(normalizedEmail);
+  syncToBrevo(normalizedEmail, { opened_month, opened_year, dogs_served, staff_count, role, role_other });
 
   // Send welcome email (fire and forget)
   sendEmail({

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service — TailWag</title>
+  <meta name="description" content="TailWag's Terms of Service — the agreement governing your use of the TailWag platform.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #0F1410;
+      --green: #1E6B4A;
+      --green-dark: #164D35;
+      --linen: #F5F0E8;
+      --linen-dark: #EDE8DF;
+      --gold: #C4933F;
+      --sage: #A8C5B0;
+      --slate: #2D3748;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); overflow-x: hidden; }
+
+    /* NAV */
+    .nav {
+      background: var(--black);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 40px; position: sticky; top: 0; z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 18px; color: var(--linen); }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-link { font-size: 13px; color: rgba(245,240,232,0.5); text-decoration: none; transition: color 0.2s; }
+    .nav-link:hover { color: var(--linen); }
+    .nav-cta {
+      background: var(--green); color: var(--linen);
+      padding: 8px 20px; border-radius: 8px; font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 600; text-decoration: none;
+      transition: background 0.2s;
+    }
+    .nav-cta:hover { background: var(--green-dark); }
+
+    /* PAGE HEADER */
+    .page-header {
+      background: var(--black);
+      padding: 56px 40px 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .page-header-inner { max-width: 860px; margin: 0 auto; }
+    .page-kicker {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--sage); margin-bottom: 12px;
+    }
+    .page-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800; font-size: clamp(32px, 5vw, 48px);
+      color: var(--linen); letter-spacing: -0.5px; margin-bottom: 16px;
+    }
+    .page-meta { font-size: 14px; color: rgba(245,240,232,0.45); }
+    .page-meta span { margin-right: 24px; }
+
+    /* LAYOUT */
+    .layout {
+      max-width: 1060px; margin: 0 auto;
+      display: grid; grid-template-columns: 220px 1fr;
+      gap: 48px; padding: 48px 40px 80px;
+      align-items: start;
+    }
+
+    /* TOC */
+    .toc {
+      position: sticky; top: 76px;
+      background: #fff; border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 24px; font-size: 13px;
+    }
+    .toc-title {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--green); margin-bottom: 16px;
+    }
+    .toc ol { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .toc a {
+      color: var(--slate); text-decoration: none; line-height: 1.4;
+      transition: color 0.15s; display: block;
+    }
+    .toc a:hover { color: var(--green); }
+
+    /* CONTENT */
+    .content { min-width: 0; }
+    .section { margin-bottom: 44px; padding-top: 8px; }
+    .section h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 22px; color: var(--black); margin-bottom: 14px;
+      padding-bottom: 10px; border-bottom: 2px solid var(--linen-dark);
+    }
+    .section h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 15px; color: var(--green); margin: 20px 0 8px;
+    }
+    .section p {
+      font-size: 15px; line-height: 1.8; color: var(--slate);
+      margin-bottom: 14px;
+    }
+    .section ul {
+      list-style: none; padding: 0; margin-bottom: 14px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .section ul li {
+      font-size: 15px; line-height: 1.7; color: var(--slate);
+      padding-left: 20px; position: relative;
+    }
+    .section ul li::before {
+      content: ''; position: absolute; left: 0; top: 10px;
+      width: 6px; height: 6px; background: var(--green);
+      border-radius: 50%;
+    }
+    .section ul li strong { color: var(--black); font-weight: 600; }
+
+    .important-box {
+      background: rgba(196,147,63,0.08); border-left: 3px solid var(--gold);
+      border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0 20px;
+    }
+    .important-box p { margin-bottom: 0; font-size: 14px; }
+    .important-box strong { color: var(--black); }
+
+    .highlight-box {
+      background: rgba(30,107,74,0.07); border-left: 3px solid var(--green);
+      border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0 20px;
+    }
+    .highlight-box p { margin-bottom: 0; font-size: 14px; }
+
+    .consent-quote {
+      background: #fff; border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 8px; padding: 18px 20px; margin: 12px 0 18px;
+      font-style: italic; font-size: 14px; line-height: 1.7; color: var(--slate);
+      position: relative; padding-left: 28px;
+    }
+    .consent-quote::before {
+      content: '"'; position: absolute; left: 10px; top: 12px;
+      font-size: 32px; color: var(--green); font-family: Georgia, serif;
+      line-height: 1;
+    }
+
+    .caps-block {
+      font-size: 13px; line-height: 1.8; color: var(--slate);
+      background: rgba(0,0,0,0.03); border-radius: 8px;
+      padding: 16px 20px; margin-bottom: 14px;
+      font-weight: 500;
+    }
+
+    /* FOOTER */
+    .footer {
+      background: var(--black);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 28px 40px;
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .footer-left { font-size: 13px; color: rgba(245,240,232,0.35); }
+    .footer-right { display: flex; gap: 20px; }
+    .footer-link { font-size: 13px; color: rgba(245,240,232,0.4); text-decoration: none; transition: color 0.2s; }
+    .footer-link:hover { color: rgba(245,240,232,0.7); }
+
+    @media (max-width: 720px) {
+      .nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      .page-header { padding: 40px 20px 32px; }
+      .layout { grid-template-columns: 1fr; padding: 32px 20px 60px; gap: 32px; }
+      .toc { position: static; }
+      .footer { flex-direction: column; align-items: flex-start; padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="/" class="nav-logo">
+    <svg width="28" height="28" viewBox="0 0 56 56" fill="none">
+      <rect width="56" height="56" rx="9" fill="#1E6B4A"/>
+      <path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+      <circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/>
+    </svg>
+    <span class="nav-logo-text">TailWag</span>
+  </a>
+  <div class="nav-links">
+    <a href="/privacy" class="nav-link">Privacy Policy</a>
+    <a href="mailto:summer@usetailwag.co" class="nav-link">Contact</a>
+    <a href="/signup.html" class="nav-cta">Get TailWag →</a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <p class="page-kicker">Legal</p>
+    <h1 class="page-title">Terms of Service</h1>
+    <div class="page-meta">
+      <span>Effective Date: April 1, 2026</span>
+      <span>Last Updated: April 1, 2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- TABLE OF CONTENTS -->
+  <aside class="toc">
+    <div class="toc-title">Contents</div>
+    <ol>
+      <li><a href="#s1">1. Acceptance of Terms</a></li>
+      <li><a href="#s2">2. Description of Service</a></li>
+      <li><a href="#s3">3. Account Registration</a></li>
+      <li><a href="#s4">4. SMS Consent & Compliance</a></li>
+      <li><a href="#s5">5. Acceptable Use</a></li>
+      <li><a href="#s6">6. AI-Generated Content</a></li>
+      <li><a href="#s7">7. Billing and Payment</a></li>
+      <li><a href="#s8">8. Term and Termination</a></li>
+      <li><a href="#s9">9. Intellectual Property</a></li>
+      <li><a href="#s10">10. Third-Party Services</a></li>
+      <li><a href="#s11">11. Disclaimers</a></li>
+      <li><a href="#s12">12. Limitation of Liability</a></li>
+      <li><a href="#s13">13. Indemnification</a></li>
+      <li><a href="#s14">14. Governing Law</a></li>
+      <li><a href="#s15">15. Changes to Terms</a></li>
+      <li><a href="#s16">16. General Provisions</a></li>
+      <li><a href="#s17">17. Contact</a></li>
+    </ol>
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <div class="section" id="s1">
+      <h2>1. Acceptance of Terms</h2>
+      <p>These Terms of Service ("Terms") constitute a legally binding agreement between you ("Subscriber," "you," or "your") and TailWag, operated by Summer Wright ("TailWag," "we," "us," or "our"), governing your access to and use of the TailWag platform, including our website at usetailwag.co, our SMS communication tools, and any related services (collectively, the "Service").</p>
+      <p>By creating an account, subscribing to a plan, or otherwise accessing or using the Service, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you are accepting these Terms on behalf of a business or other legal entity, you represent that you have the authority to bind that entity.</p>
+      <p>If you do not agree to these Terms, you may not access or use the Service.</p>
+    </div>
+
+    <div class="section" id="s2">
+      <h2>2. Description of Service</h2>
+      <p>TailWag provides a cloud-based SMS communication platform designed for independent dog daycares, boarding facilities, grooming salons, and training centers. The Service enables Subscribers to send personalized text messages to their clients ("Pet Parents") on behalf of the Subscriber's business.</p>
+      <p>Core features include:</p>
+      <ul>
+        <li><strong>Personalized Report Cards</strong> — AI-assisted messages sent to Pet Parents summarizing their pet's visit, generated from staff-entered notes</li>
+        <li><strong>Appointment Reminders</strong> — Automated SMS reminders to reduce no-shows, configured by the Subscriber</li>
+        <li><strong>Review Requests</strong> — Timed requests for Google reviews, sent to Pet Parents after positive visits</li>
+        <li><strong>Dedicated Phone Number</strong> — A local phone number provisioned for the Subscriber's outbound messaging</li>
+        <li><strong>Sentiment Monitoring</strong> — Automated analysis of staff notes to flag concerning visits and route positive experiences toward review requests</li>
+        <li><strong>Media Messaging</strong> — Ability to include photos in SMS/MMS messages (plan-dependent)</li>
+      </ul>
+      <p>Specific features and messaging limits vary by subscription plan. TailWag reserves the right to modify, add, or discontinue features with reasonable notice to Subscribers.</p>
+    </div>
+
+    <div class="section" id="s3">
+      <h2>3. Account Registration and Security</h2>
+      <p>To use the Service, you must create an account and provide accurate, current, and complete information. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</p>
+      <p>TailWag supports multiple user accounts per Subscriber (the number varies by plan). The Subscriber is responsible for managing team member access and ensuring that all authorized users comply with these Terms.</p>
+      <p>You agree to notify TailWag immediately at <a href="mailto:summer@usetailwag.co" style="color:var(--green);">summer@usetailwag.co</a> if you become aware of any unauthorized use of your account or any other breach of security.</p>
+    </div>
+
+    <div class="section" id="s4">
+      <h2>4. SMS Consent and Compliance</h2>
+      <div class="important-box">
+        <p><strong>This section is critical.</strong> TailWag sends SMS messages on behalf of the Subscriber to the Subscriber's clients (Pet Parents). Federal law, including the <strong>Telephone Consumer Protection Act (TCPA)</strong>, requires prior express consent before sending non-emergency text messages.</p>
+      </div>
+
+      <h3>4.1 Subscriber's Obligation to Obtain Consent</h3>
+      <p>The Subscriber is solely responsible for obtaining valid, documented opt-in consent from each Pet Parent before their contact information is entered into the TailWag platform. This is not optional — it is a legal requirement.</p>
+
+      <h3>4.2 Required Consent Language</h3>
+      <p>Opt-in consent must be collected in writing (physical or electronic) and must clearly disclose that the Pet Parent will receive automated SMS messages. The Subscriber's intake forms, registration documents, or digital sign-up process must include language substantially similar to:</p>
+      <div class="consent-quote">
+        By providing your phone number, you consent to receive automated text messages from [Business Name] regarding your pet's visits, appointment reminders, and review requests. Message frequency varies. Message and data rates may apply. Reply STOP to opt out at any time.
+      </div>
+
+      <h3>4.3 Record-Keeping</h3>
+      <p>The Subscriber must maintain records of each Pet Parent's opt-in consent and make them available to TailWag upon request. Records should include the date, method of consent (e.g., signed intake form, digital checkbox), and the specific disclosure language presented.</p>
+
+      <h3>4.4 Opt-Out Handling</h3>
+      <ul>
+        <li>TailWag will include standard opt-out language (e.g., "Reply STOP to opt out") in messages where required by carrier or regulatory guidelines</li>
+        <li>The Subscriber must honor all opt-out (STOP) requests promptly and remove opted-out contacts from the platform within 48 hours</li>
+        <li>TailWag will process carrier-level STOP requests automatically when received through Twilio's opt-out management</li>
+      </ul>
+
+      <h3>4.5 Compliance Cooperation</h3>
+      <p>If TailWag receives a complaint or legal inquiry related to messages sent on the Subscriber's behalf, the Subscriber agrees to cooperate fully and provide documentation of consent. The Subscriber agrees to indemnify and hold TailWag harmless from any claims, fines, or damages arising from the Subscriber's failure to obtain or document proper consent.</p>
+      <p>TailWag will provide sample opt-in language and guidance during onboarding, but the Subscriber is ultimately responsible for compliance with all applicable federal, state, and local laws governing SMS communication, including the TCPA, CAN-SPAM Act, and any state-specific regulations.</p>
+    </div>
+
+    <div class="section" id="s5">
+      <h2>5. Acceptable Use</h2>
+      <p>You agree to use the Service only for legitimate business communication related to pet care services (daycare, boarding, training, grooming). You agree not to:</p>
+      <ul>
+        <li>Send spam, unsolicited marketing messages, or messages to individuals who have not provided opt-in consent</li>
+        <li>Use the Service for any unlawful, fraudulent, or deceptive purpose</li>
+        <li>Transmit content that is threatening, harassing, defamatory, obscene, or otherwise objectionable</li>
+        <li>Attempt to gain unauthorized access to TailWag's systems, other users' accounts, or any networks connected to the Service</li>
+        <li>Reverse-engineer, decompile, or attempt to extract the source code of the Service</li>
+        <li>Use the Service to transmit viruses, malware, or other harmful code</li>
+        <li>Resell, sublicense, or redistribute the Service without TailWag's prior written consent</li>
+        <li>Use the platform in any manner that could disable, overburden, or impair the Service</li>
+      </ul>
+      <p>TailWag reserves the right to suspend or terminate your account immediately if we reasonably determine that you have violated this Section.</p>
+    </div>
+
+    <div class="section" id="s6">
+      <h2>6. AI-Generated Content</h2>
+      <p>TailWag uses artificial intelligence (powered by Anthropic's Claude API) to generate personalized message content, including report cards and review requests. This content is generated based on information provided by the Subscriber's staff (e.g., visit notes, pet names, activities).</p>
+      <ul>
+        <li>TailWag makes reasonable efforts to ensure AI-generated content is accurate, appropriate, and relevant</li>
+        <li>The Subscriber acknowledges that AI-generated messages may occasionally contain errors or inaccuracies and agrees to review flagged messages as needed</li>
+        <li>TailWag does not provide veterinary, training, behavioral, or professional pet care advice through its AI-generated messages</li>
+        <li>The Subscriber is responsible for the accuracy of the information their staff enters into the platform, which forms the basis of AI-generated content</li>
+      </ul>
+    </div>
+
+    <div class="section" id="s7">
+      <h2>7. Billing and Payment</h2>
+
+      <h3>7.1 Subscription Plans</h3>
+      <p>TailWag offers subscription plans on a monthly recurring basis. Current plans, pricing, and included features are communicated at the time of enrollment. Plan details may include limits on monthly messages, user accounts, and feature access.</p>
+
+      <h3>7.2 Payment Processing</h3>
+      <p>All payments are processed through Stripe, Inc. ("Stripe"). By subscribing, you authorize TailWag and Stripe to charge your selected payment method on a recurring monthly basis. All fees are in U.S. dollars.</p>
+      <p>TailWag does not store your credit card or banking information directly. Payment information is handled entirely by Stripe in accordance with Stripe's Terms of Service and Privacy Policy.</p>
+
+      <h3>7.3 Failed Payments</h3>
+      <p>If a payment fails, TailWag will attempt to collect for up to 7 days. If payment is not successfully collected, TailWag may suspend the Service until the outstanding balance is resolved. Continued non-payment may result in account termination.</p>
+
+      <h3>7.4 Founders Circle Pricing</h3>
+      <p>Subscribers enrolled under TailWag's Founders Circle program receive a preferred monthly rate locked for eighteen (18) months from their billing start date. After 18 months, TailWag may adjust pricing with at least 30 days' written notice. Any adjusted rate will not exceed TailWag's then-current standard published pricing.</p>
+
+      <h3>7.5 No Refunds</h3>
+      <p>Subscription fees are non-refundable. No refunds or credits will be issued for partial months of service or for periods in which the Service was available but not used.</p>
+    </div>
+
+    <div class="section" id="s8">
+      <h2>8. Term and Termination</h2>
+      <ul>
+        <li>This agreement begins when you create an account or subscribe to a plan and continues on a month-to-month basis</li>
+        <li>Either party may cancel with 30 days' written notice (email to <a href="mailto:summer@usetailwag.co" style="color:var(--green);">summer@usetailwag.co</a> is sufficient)</li>
+        <li>Upon cancellation, your access to the Service will end at the close of the current billing cycle</li>
+        <li>TailWag may suspend or terminate your account immediately if you violate Section 4 (SMS Compliance) or Section 5 (Acceptable Use)</li>
+        <li>Upon termination, TailWag will retain your data for 30 days during which you may request an export. After 30 days, TailWag will delete stored client data in accordance with the Privacy Policy</li>
+      </ul>
+    </div>
+
+    <div class="section" id="s9">
+      <h2>9. Intellectual Property</h2>
+      <p>TailWag and its licensors retain all right, title, and interest in and to the Service, including all software, algorithms, designs, text, graphics, and other content provided by TailWag (collectively, "TailWag IP"). These Terms do not grant you any right to use TailWag's trademarks, logos, or brand features without prior written consent.</p>
+      <p>The Subscriber retains ownership of all data and content they input into the platform (client information, staff notes, uploaded media). TailWag does not claim ownership of Subscriber content.</p>
+    </div>
+
+    <div class="section" id="s10">
+      <h2>10. Third-Party Services</h2>
+      <p>The Service relies on and integrates with third-party providers. By using TailWag, you acknowledge that portions of the Service are delivered through:</p>
+      <ul>
+        <li><strong>Twilio, Inc.</strong> — SMS and MMS message delivery, phone number provisioning, and carrier-level opt-out management</li>
+        <li><strong>Supabase (Supabase, Inc.)</strong> — Database hosting, user authentication, and media file storage</li>
+        <li><strong>Stripe, Inc.</strong> — Payment processing and subscription billing</li>
+        <li><strong>Anthropic, PBC</strong> — AI model (Claude) for generating personalized message content</li>
+        <li><strong>Brevo (Sendinblue)</strong> — Marketing email and newsletter delivery</li>
+        <li><strong>Resend</strong> — Transactional email delivery (team invitations, system notifications)</li>
+      </ul>
+      <p>These third-party services operate under their own terms of service and privacy policies. TailWag is not responsible for the availability, security practices, or policies of third-party providers, though we select and monitor our vendors with care.</p>
+    </div>
+
+    <div class="section" id="s11">
+      <h2>11. Disclaimers</h2>
+      <div class="caps-block">
+        THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+      </div>
+      <p>TailWag does not warrant that the Service will be uninterrupted, error-free, or free of harmful components. TailWag does not guarantee specific business outcomes, including but not limited to a certain number of reviews, revenue increase, client retention rate, or reduction in no-shows.</p>
+      <p>TailWag will make reasonable efforts to maintain platform uptime and reliability. Scheduled maintenance or updates will be communicated in advance when possible. TailWag is not liable for service interruptions caused by third-party providers, internet outages, carrier issues, or circumstances beyond its reasonable control.</p>
+    </div>
+
+    <div class="section" id="s12">
+      <h2>12. Limitation of Liability</h2>
+      <div class="caps-block">
+        TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, TAILWAG'S TOTAL AGGREGATE LIABILITY ARISING OUT OF OR RELATED TO THESE TERMS OR THE SERVICE SHALL NOT EXCEED THE TOTAL FEES PAID BY THE SUBSCRIBER TO TAILWAG IN THE THREE (3) MONTHS IMMEDIATELY PRECEDING THE EVENT GIVING RISE TO THE CLAIM.
+      </div>
+      <div class="caps-block">
+        IN NO EVENT SHALL TAILWAG BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, DATA, BUSINESS OPPORTUNITIES, OR GOODWILL, REGARDLESS OF WHETHER TAILWAG WAS ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+      </div>
+    </div>
+
+    <div class="section" id="s13">
+      <h2>13. Indemnification</h2>
+      <p>You agree to indemnify, defend, and hold harmless TailWag, its owner, affiliates, and agents from and against any and all claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising out of or related to:</p>
+      <ul>
+        <li>Your use of the Service</li>
+        <li>Your violation of these Terms</li>
+        <li>Your failure to obtain or document proper SMS consent as required by Section 4</li>
+        <li>Any claim by a Pet Parent or third party arising from messages sent through the Service on your behalf</li>
+        <li>Your violation of any applicable law or regulation</li>
+      </ul>
+    </div>
+
+    <div class="section" id="s14">
+      <h2>14. Governing Law and Dispute Resolution</h2>
+      <p>These Terms shall be governed by and construed in accordance with the laws of the State of Texas, without regard to its conflict of law provisions. Any disputes arising under or in connection with these Terms shall be resolved in the state or federal courts located in Dallas County, Texas, and you consent to the personal jurisdiction of such courts.</p>
+    </div>
+
+    <div class="section" id="s15">
+      <h2>15. Changes to These Terms</h2>
+      <p>TailWag may update these Terms from time to time. We will notify you of material changes at least 30 days in advance by email or through the Service. Continued use of the Service after changes take effect constitutes your acceptance of the revised Terms. If you do not agree with any changes, you may cancel your subscription under Section 8.</p>
+    </div>
+
+    <div class="section" id="s16">
+      <h2>16. General Provisions</h2>
+      <ul>
+        <li><strong>Entire Agreement.</strong> These Terms, together with the Privacy Policy and any Subscription Service Agreement, constitute the entire agreement between you and TailWag regarding the Service</li>
+        <li><strong>Severability.</strong> If any provision of these Terms is found to be unenforceable, the remaining provisions will continue in full force and effect</li>
+        <li><strong>Waiver.</strong> TailWag's failure to enforce any right or provision of these Terms does not constitute a waiver of that right or provision</li>
+        <li><strong>Assignment.</strong> You may not assign or transfer these Terms without TailWag's prior written consent. TailWag may assign its rights and obligations under these Terms in connection with a merger, acquisition, or sale of assets</li>
+        <li><strong>Force Majeure.</strong> TailWag shall not be liable for any failure or delay in performance due to causes beyond its reasonable control, including natural disasters, acts of government, internet or telecommunications failures, or third-party service outages</li>
+      </ul>
+    </div>
+
+    <div class="section" id="s17">
+      <h2>17. Contact Information</h2>
+      <p>If you have any questions about these Terms, please contact us:</p>
+      <div class="highlight-box">
+        <p><strong>TailWag</strong><br>
+        Email: <a href="mailto:summer@usetailwag.co" style="color:var(--green);">summer@usetailwag.co</a><br>
+        Website: <a href="https://usetailwag.co" style="color:var(--green);">usetailwag.co</a></p>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
+
+<!-- FOOTER -->
+<footer class="footer">
+  <span class="footer-left">© 2026 TailWag · Built for dog people by dog people.</span>
+  <div class="footer-right">
+    <a href="/" class="footer-link">Home</a>
+    <a href="/terms" class="footer-link">Terms of Service</a>
+    <a href="/privacy" class="footer-link">Privacy Policy</a>
+    <a href="mailto:summer@usetailwag.co" class="footer-link">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>

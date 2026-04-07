@@ -6,7 +6,8 @@ const { requireAuth } = require('../middleware/auth');
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {
   try {
-    const { email, password, first_name, last_name, daycare_name, phone, city, state, google_link } = req.body;
+    const { email, password, first_name, last_name, daycare_name, phone, city, state, google_link,
+            opened_month, opened_year, dogs_served, staff_count, role, role_other } = req.body;
 
     // Create user in Supabase Auth
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
@@ -31,12 +32,18 @@ router.post('/signup', async (req, res) => {
     });
 
     // Create daycare
-    await supabaseAdmin.from('daycares').insert({
+    const daycareRecord = {
       owner_id: userId,
       name: daycare_name,
       address: [city, state].filter(Boolean).join(', '),
       phone
-    });
+    };
+    if (opened_month) daycareRecord.opened_month = opened_month;
+    if (opened_year)  daycareRecord.opened_year  = parseInt(opened_year, 10);
+    if (dogs_served)  daycareRecord.dogs_served  = dogs_served;
+    if (staff_count)  daycareRecord.staff_count  = staff_count;
+    if (role)         daycareRecord.owner_role   = role === 'Other' && role_other ? role_other : role;
+    await supabaseAdmin.from('daycares').insert(daycareRecord);
 
     // Create inactive subscription record
     await supabaseAdmin.from('subscriptions').insert({

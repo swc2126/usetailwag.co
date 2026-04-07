@@ -1217,6 +1217,55 @@
               <div class="helper">We'll use this to route review requests. You can add it later.</div>
             </div>
 
+            <div class="form-row">
+              <div class="form-group">
+                <label>Month opened</label>
+                <select name="opened_month">
+                  <option value="">Month (optional)</option>
+                  <option>January</option><option>February</option><option>March</option>
+                  <option>April</option><option>May</option><option>June</option>
+                  <option>July</option><option>August</option><option>September</option>
+                  <option>October</option><option>November</option><option>December</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Year opened</label>
+                <select name="opened_year" id="signupYearSelect">
+                  <option value="">Year (optional)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Dogs you serve per day</label>
+              <select name="dogs_served">
+                <option value="">Select a range (optional)</option>
+                <option>1–10</option><option>11–25</option><option>26–50</option>
+                <option>51–100</option><option>100+</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Team size (including yourself)</label>
+              <select name="staff_count">
+                <option value="">Select a range (optional)</option>
+                <option>Just me</option><option>2–3</option><option>4–6</option>
+                <option>7–10</option><option>11–20</option><option>20+</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Your role</label>
+              <select name="role" id="signupRole" onchange="signupRoleChange()">
+                <option value="">Select your role (optional)</option>
+                <option>Owner</option><option>General Manager</option>
+                <option>Operations Manager</option><option>Staff Member</option><option>Other</option>
+              </select>
+            </div>
+            <div class="form-group" id="signupRoleOtherGroup" style="display:none;margin-top:-12px;">
+              <input type="text" name="role_other" placeholder="Describe your role">
+            </div>
+
             <!-- ── ACCOUNT INFO ── -->
             <div class="section-divider" style="margin-top: 24px;">Your Account</div>
 
@@ -1260,7 +1309,7 @@
             </button>
 
             <div class="terms">
-              By signing up you agree to our <a href="/terms.pdf" target="_blank">Terms of Service</a> and <a href="/privacy.pdf" target="_blank">Privacy Policy</a>.<br>
+              By signing up you agree to our <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a>.<br>
               Cancel anytime from your dashboard — we'll never make it hard to leave.
             </div>
           </form>
@@ -1279,6 +1328,22 @@
   </footer>
 
   <script>
+    // ── Year dropdown + role toggle ──
+    (function() {
+      const sel = document.getElementById('signupYearSelect');
+      if (!sel) return;
+      const cur = new Date().getFullYear();
+      for (let y = cur; y >= 1990; y--) {
+        const o = document.createElement('option');
+        o.value = y; o.textContent = y; sel.appendChild(o);
+      }
+    })();
+
+    function signupRoleChange() {
+      const v = document.getElementById('signupRole').value;
+      document.getElementById('signupRoleOtherGroup').style.display = v === 'Other' ? 'block' : 'none';
+    }
+
     // ── Pricing data ──
     const pricing = {
       starter:       { monthly: 99,  name: 'Starter',              fcPlan: false },
@@ -1407,7 +1472,13 @@
           phone: form.phone?.value || '',
           city: form.city.value,
           state: form.state.value,
-          google_link: form.google_link?.value || ''
+          google_link: form.google_link?.value || '',
+          opened_month: form.opened_month?.value || '',
+          opened_year:  form.opened_year?.value  ? parseInt(form.opened_year.value, 10) : null,
+          dogs_served:  form.dogs_served?.value  || '',
+          staff_count:  form.staff_count?.value  || '',
+          role:         form.role?.value          || '',
+          role_other:   form.role_other?.value    || ''
         };
 
         // Step 1: Create account in Supabase

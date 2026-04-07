@@ -122,6 +122,24 @@
     .signup-btn:hover { background: var(--green-dark); }
     .signup-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+    .signup-select {
+      width: 100%; padding: 13px 18px; border-radius: 10px;
+      border: 1px solid rgba(245,240,232,0.15);
+      background: rgba(255,255,255,0.06) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='rgba(245,240,232,0.4)' d='M5 6L0 0h10z'/%3E%3C/svg%3E") no-repeat right 16px center;
+      color: var(--linen); font-family: 'Inter', sans-serif; font-size: 15px;
+      outline: none; transition: border-color 0.2s; appearance: none; cursor: pointer;
+    }
+    .signup-select:focus { border-color: var(--green); }
+    .signup-select option { background: #1a2b1f; color: var(--linen); }
+    .signup-mini-divider {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--sage);
+      margin: 20px 0 14px; display: flex; align-items: center; gap: 10px;
+    }
+    .signup-mini-divider::before, .signup-mini-divider::after {
+      content: ''; flex: 1; height: 1px; background: rgba(245,240,232,0.12);
+    }
+
     .signup-fine {
       font-size: 12px; color: rgba(245,240,232,0.35);
       text-align: center; line-height: 1.6;
@@ -283,18 +301,54 @@
   </p>
 
   <div class="signup-box">
-    <label for="heroEmail">Your email address</label>
-
     <div id="heroFormWrap">
-      <div class="signup-input-row">
+      <label for="heroEmail">Your email address</label>
+      <div class="signup-input-row" style="margin-bottom:20px;">
         <input type="email" id="heroEmail" class="signup-input" placeholder="you@yourdaycare.com" autocomplete="email">
         <button class="signup-btn" id="heroBtn" onclick="heroSubscribe()">Subscribe →</button>
       </div>
-      <div class="signup-error" id="heroError"></div>
-      <p class="signup-fine">No spam. Unsubscribe anytime. We publish every two weeks.</p>
+
+      <div class="signup-mini-divider">About your daycare</div>
+
+      <label>When did you open?</label>
+      <div class="signup-input-row" style="margin-bottom:14px;">
+        <select id="heroMonth" class="signup-select">
+          <option value="">Month</option>
+          <option>January</option><option>February</option><option>March</option>
+          <option>April</option><option>May</option><option>June</option>
+          <option>July</option><option>August</option><option>September</option>
+          <option>October</option><option>November</option><option>December</option>
+        </select>
+        <select id="heroYear" class="signup-select"><option value="">Year</option></select>
+      </div>
+
+      <label>Dogs you see per day</label>
+      <select id="heroDogs" class="signup-select" style="margin-bottom:14px;">
+        <option value="">Select a range</option>
+        <option>1–10</option><option>11–25</option><option>26–50</option>
+        <option>51–100</option><option>100+</option>
+      </select>
+
+      <label>Team size (including yourself)</label>
+      <select id="heroStaff" class="signup-select" style="margin-bottom:14px;">
+        <option value="">Select a range</option>
+        <option>Just me</option><option>2–3</option><option>4–6</option>
+        <option>7–10</option><option>11–20</option><option>20+</option>
+      </select>
+
+      <label>Your role</label>
+      <select id="heroRole" class="signup-select" style="margin-bottom:8px;" onchange="heroRoleChange()">
+        <option value="">Select your role</option>
+        <option>Owner</option><option>General Manager</option>
+        <option>Operations Manager</option><option>Staff Member</option><option>Other</option>
+      </select>
+      <input type="text" id="heroRoleOther" class="signup-input" placeholder="Describe your role" style="display:none;margin-top:8px;margin-bottom:14px;">
+
+      <div class="signup-error" id="heroError" style="margin-top:10px;"></div>
+      <p class="signup-fine" style="margin-top:14px;">No spam. Unsubscribe anytime. We publish every two weeks.</p>
     </div>
 
-    <div class="signup-success" id="heroSuccess">
+    <div class="signup-success" id="heroSuccess" style="display:none;">
       <div class="signup-success-icon">🐾</div>
       <h3>You're in!</h3>
       <p>Check your inbox — your first issue lands in two weeks.<br>We'll send a welcome note shortly.</p>
@@ -364,13 +418,28 @@
   <div class="footer-right">
     <a href="/" class="footer-link">Home</a>
     <a href="/signup.html" class="footer-link">Get TailWag</a>
-    <a href="mailto:summer@usetailwag.com" class="footer-link">Contact</a>
-    <a href="/privacy.pdf" target="_blank" class="footer-link">Privacy</a>
+    <a href="mailto:summer@usetailwag.co" class="footer-link">Contact</a>
+    <a href="/privacy" class="footer-link">Privacy</a>
   </div>
 </footer>
 
 <script>
-  async function subscribe(email, btnEl, successEl, errorEl, formWrapEl) {
+  // Populate year dropdown
+  (function() {
+    const sel = document.getElementById('heroYear');
+    const cur = new Date().getFullYear();
+    for (let y = cur; y >= 1990; y--) {
+      const o = document.createElement('option');
+      o.value = y; o.textContent = y; sel.appendChild(o);
+    }
+  })();
+
+  function heroRoleChange() {
+    const v = document.getElementById('heroRole').value;
+    document.getElementById('heroRoleOther').style.display = v === 'Other' ? 'block' : 'none';
+  }
+
+  async function subscribe(email, extra, btnEl, successEl, errorEl, wrapEl) {
     const e = email.trim().toLowerCase();
     if (!e || !e.includes('@')) {
       errorEl.textContent = 'Please enter a valid email address.';
@@ -386,13 +455,12 @@
       const res = await fetch('/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: e })
+        body: JSON.stringify({ email: e, ...extra })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Something went wrong.');
-
-      if (formWrapEl) formWrapEl.style.display = 'none';
-      successEl.style.display = formWrapEl ? 'block' : 'block';
+      if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+      if (wrapEl) wrapEl.style.display = 'none';
+      successEl.style.display = 'block';
     } catch (err) {
       errorEl.textContent = err.message;
       errorEl.style.display = 'block';
@@ -402,8 +470,17 @@
   }
 
   function heroSubscribe() {
+    const role = document.getElementById('heroRole').value;
     subscribe(
       document.getElementById('heroEmail').value,
+      {
+        opened_month: document.getElementById('heroMonth').value || null,
+        opened_year:  document.getElementById('heroYear').value ? parseInt(document.getElementById('heroYear').value) : null,
+        dogs_served:  document.getElementById('heroDogs').value  || null,
+        staff_count:  document.getElementById('heroStaff').value || null,
+        role:         role || null,
+        role_other:   (role === 'Other' ? document.getElementById('heroRoleOther').value : null) || null
+      },
       document.getElementById('heroBtn'),
       document.getElementById('heroSuccess'),
       document.getElementById('heroError'),
@@ -412,24 +489,17 @@
   }
 
   function bottomSubscribe() {
-    const btn = document.getElementById('bottomBtn');
-    const successEl = document.getElementById('bottomSuccess');
-    const errorEl = document.getElementById('bottomError');
-    const email = document.getElementById('bottomEmail').value;
-
-    subscribe(email, btn, successEl, errorEl, null);
-    successEl.style.display = 'block';
-    document.getElementById('bottomEmail').style.display = 'none';
-    btn.style.display = 'none';
+    subscribe(
+      document.getElementById('bottomEmail').value, {},
+      document.getElementById('bottomBtn'),
+      document.getElementById('bottomSuccess'),
+      document.getElementById('bottomError'),
+      document.querySelector('.bottom-form')
+    );
   }
 
-  // Allow Enter key in email inputs
-  document.getElementById('heroEmail').addEventListener('keydown', e => {
-    if (e.key === 'Enter') heroSubscribe();
-  });
-  document.getElementById('bottomEmail').addEventListener('keydown', e => {
-    if (e.key === 'Enter') bottomSubscribe();
-  });
+  document.getElementById('heroEmail').addEventListener('keydown', e => { if (e.key === 'Enter') heroSubscribe(); });
+  document.getElementById('bottomEmail').addEventListener('keydown', e => { if (e.key === 'Enter') bottomSubscribe(); });
 </script>
 
 </body>

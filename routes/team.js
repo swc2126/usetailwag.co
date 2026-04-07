@@ -93,7 +93,7 @@ router.post('/invite', requireAuth, async (req, res) => {
         ? `${inviterRes.data.first_name || ''} ${inviterRes.data.last_name || ''}`.trim() || req.user.email
         : req.user.email;
       const daycareName = daycareRes.data?.name || 'your daycare';
-      const baseUrl = process.env.BASE_URL || 'https://usetailwag-co.onrender.com';
+      const baseUrl = process.env.BASE_URL || 'https://usetailwag.co';
       const joinUrl = `${baseUrl}/join.html?token=${inviteToken}`;
 
       await sendTeamInvite({ to: email, inviterName, daycareName, joinUrl });

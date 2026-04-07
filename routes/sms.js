@@ -87,7 +87,7 @@ router.post('/send', requireAuth, async (req, res) => {
     from: fromNumber,
     to: recipient_phone,
     body,
-    statusCallback: `${process.env.BASE_URL || 'https://usetailwag-co.onrender.com'}/api/sms/status`
+    statusCallback: `${process.env.BASE_URL || 'https://usetailwag.co'}/api/sms/status`
   };
   if (media_url) messageParams.mediaUrl = [media_url];
 
@@ -218,7 +218,7 @@ router.post('/bulk', requireAuth, async (req, res) => {
       from: fromNumber,
       to: recipient.phone,
       body,
-      statusCallback: `${process.env.BASE_URL || 'https://usetailwag-co.onrender.com'}/api/sms/status`
+      statusCallback: `${process.env.BASE_URL || 'https://usetailwag.co'}/api/sms/status`
     };
     if (media_url) messageParams.mediaUrl = [media_url];
 
