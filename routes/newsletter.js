@@ -72,9 +72,22 @@ router.post('/subscribe', async (req, res) => {
   if (role_other)   record.role_other   = role_other;
 
   // Upsert — if already subscribed, update their profile data
-  const { error } = await supabaseAdmin
+  let { error } = await supabaseAdmin
     .from('newsletter_subscribers')
     .upsert(record, { onConflict: 'email', ignoreDuplicates: false });
+
+  // If upsert failed (e.g. new columns not yet migrated), fall back to email-only upsert
+  if (error) {
+    console.error('Newsletter upsert error (full record):', error.message);
+    const fallback = await supabaseAdmin
+      .from('newsletter_subscribers')
+      .upsert({ email: normalizedEmail }, { onConflict: 'email', ignoreDuplicates: true });
+    if (fallback.error) {
+      console.error('Newsletter subscribe error (fallback):', fallback.error);
+      return res.status(500).json({ error: 'Could not subscribe. Please try again.' });
+    }
+    error = null;
+  }
 
   if (error) {
     console.error('Newsletter subscribe error:', error);
