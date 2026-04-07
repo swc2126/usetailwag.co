@@ -122,13 +122,13 @@ router.post('/subscribe', async (req, res) => {
             If you ever want off the list, just reply "unsubscribe" and we'll take care of it right away.
           </p>
           <p style="color:#888;font-size:13px;margin-top:24px;border-top:1px solid #ddd;padding-top:16px;">
-            — Summer, TailWag<br>
-            <a href="mailto:summer@usetailwag.com" style="color:#1E6B4A;text-decoration:none;">summer@usetailwag.com</a>
+            — The TailWag Team<br>
+            <a href="mailto:info@usetailwag.co" style="color:#1E6B4A;text-decoration:none;">info@usetailwag.co</a>
           </p>
         </div>
       </div>
     `,
-    text: `You're in — Chew on This 🐾\n\nEvery two weeks: real stories, real numbers, and practical tips from independent dog daycares doing the work. No fluff. No sales pitch.\n\n— Summer, TailWag\nsummer@usetailwag.com`
+    text: `You're in — Chew on This 🐾\n\nEvery two weeks: real stories, real numbers, and practical tips from independent dog daycares doing the work. No fluff. No sales pitch.\n\n— The TailWag Team\ninfo@usetailwag.co`
   }).catch(err => console.error('Welcome email error:', err));
 
   return res.json({ ok: true });
