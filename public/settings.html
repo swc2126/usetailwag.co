@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YFRN3VT005"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YFRN3VT005');
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Settings — TailWag</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -203,29 +211,69 @@
     <!-- Daycare Info Card -->
     <div class="settings-card">
       <h2>Daycare Info</h2>
-      <div class="info-row">
-        <span class="info-label">Daycare Name</span>
-        <span class="info-value" id="daycareName">—</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">City</span>
-        <span class="info-value" id="daycareCity">—</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">State</span>
-        <span class="info-value" id="daycareState">—</span>
-      </div>
-      <div style="margin-top: 16px;">
-        <label style="font-size:13px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;">Google Review Link</label>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <input type="url" id="googleLinkInput" placeholder="https://share.google/..."
-            style="flex:1;min-width:200px;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;"
+      <p style="font-size:13px;color:#888;margin-bottom:20px;">This information appears in messages sent to pet parents and is used across TailWag.</p>
+
+      <div style="display:grid;gap:14px;">
+
+        <!-- Daycare Name -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">Daycare Name *</label>
+          <input type="text" id="dcName" placeholder="Paws &amp; Play Dog Daycare"
+            style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;"
             onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'">
-          <button class="btn-primary" onclick="saveGoogleLink()" id="saveGoogleBtn">Save</button>
         </div>
-        <div id="googleLinkMsg" style="font-size:12px;margin-top:6px;display:none;"></div>
-        <p style="font-size:12px;color:#aaa;margin-top:6px;">Used in review request messages. Paste your Google Business review link here.</p>
+
+        <!-- Phone -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">Business Phone</label>
+          <input type="tel" id="dcPhone" placeholder="(555) 000-0000"
+            style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'">
+        </div>
+
+        <!-- Street -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">Street Address</label>
+          <input type="text" id="dcStreet" placeholder="123 Main Street, Suite 100"
+            style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'">
+        </div>
+
+        <!-- City / State / Zip row -->
+        <div style="display:grid;grid-template-columns:1fr 80px 100px;gap:10px;">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">City</label>
+            <input type="text" id="dcCity" placeholder="Dallas"
+              style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;"
+              onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">State</label>
+            <input type="text" id="dcState" placeholder="TX" maxlength="2"
+              style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;text-transform:uppercase;"
+              onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">ZIP Code</label>
+            <input type="text" id="dcZip" placeholder="75201" maxlength="10"
+              style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;"
+              onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'">
+          </div>
+        </div>
+
+        <!-- Google Review Link -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">Google Review Link</label>
+          <input type="url" id="googleLinkInput" placeholder="https://share.google/..."
+            style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'">
+          <p style="font-size:12px;color:#aaa;margin-top:5px;">Used in review request messages. Paste your Google Business review URL here.</p>
+        </div>
+
       </div>
+
+      <button class="btn-primary" onclick="saveDaycareInfo()" id="saveDaycareBtn" style="margin-top:20px;">Save Daycare Info</button>
+      <div id="daycareInfoMsg" class="msg" style="margin-top:10px;"></div>
     </div>
 
     <!-- Sentiment & Reviews Card -->
@@ -363,14 +411,17 @@
       // TailWag number
       await loadTwilioNumber();
 
-      // Daycare info
+      // Daycare info — populate editable fields
       if (meData?.daycare) {
-        document.getElementById('daycareName').textContent = meData.daycare.name || '—';
-        document.getElementById('daycareCity').textContent = meData.daycare.city || '—';
-        document.getElementById('daycareState').textContent = meData.daycare.state || '—';
-        if (meData.daycare.google_link) {
-          document.getElementById('googleLinkInput').value = meData.daycare.google_link;
-        }
+        const dc = meData.daycare;
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+        setVal('dcName',        dc.name);
+        setVal('dcPhone',       dc.phone);
+        setVal('dcStreet',      dc.street);
+        setVal('dcCity',        dc.city);
+        setVal('dcState',       dc.state);
+        setVal('dcZip',         dc.zip);
+        setVal('googleLinkInput', dc.google_link);
       }
 
       // Account
@@ -404,34 +455,49 @@
     }
   }
 
-  async function saveGoogleLink() {
-    const session = JSON.parse(localStorage.getItem('tailwag_session'));
-    const url = document.getElementById('googleLinkInput').value.trim();
-    const btn = document.getElementById('saveGoogleBtn');
-    const msg = document.getElementById('googleLinkMsg');
+  async function saveDaycareInfo() {
+    const btn = document.getElementById('saveDaycareBtn');
+    const msg = document.getElementById('daycareInfoMsg');
 
-    btn.disabled = true;
-    btn.textContent = 'Saving…';
+    const name = document.getElementById('dcName').value.trim();
+    if (!name) {
+      msg.textContent = '❌ Daycare name is required.';
+      msg.className = 'msg msg-error'; msg.style.display = 'block';
+      document.getElementById('dcName').focus();
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Saving…';
     msg.style.display = 'none';
 
+    const payload = {
+      name,
+      phone:        document.getElementById('dcPhone').value.trim(),
+      street:       document.getElementById('dcStreet').value.trim(),
+      city:         document.getElementById('dcCity').value.trim(),
+      state:        document.getElementById('dcState').value.trim().toUpperCase(),
+      zip:          document.getElementById('dcZip').value.trim(),
+      google_link:  document.getElementById('googleLinkInput').value.trim()
+    };
+
     const res = await fetch('/api/dashboard/daycare', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-      body: JSON.stringify({ google_link: url })
+      method: 'PUT', headers: authHeaders,
+      body: JSON.stringify(payload)
     });
     const data = await res.json();
 
-    btn.disabled = false;
-    btn.textContent = 'Save';
+    btn.disabled = false; btn.textContent = 'Save Daycare Info';
     msg.style.display = 'block';
 
     if (res.ok) {
-      msg.textContent = '✅ Google review link saved.';
-      msg.style.color = '#1E6B4A';
+      msg.textContent = '✅ Daycare info saved.';
+      msg.className = 'msg msg-success';
     } else {
       msg.textContent = '❌ ' + (data.error || 'Failed to save.');
-      msg.style.color = '#e53e3e';
+      msg.className = 'msg msg-error';
     }
+
+    setTimeout(() => { msg.style.display = 'none'; }, 4000);
   }
 
   function handleLogout() {
@@ -461,14 +527,15 @@
 
       document.getElementById('sentimentCard').style.display = 'block';
 
-      if (cfg.enabled) {
-        document.getElementById('sentimentEnabled').checked = true;
-        document.getElementById('sentimentToggle').classList.add('on');
-      }
-      if (cfg.auto_send_review !== false) {
-        document.getElementById('autoSendReview').checked = true;
-        document.getElementById('autoReviewToggle').classList.add('on');
-      }
+      // Default both to ON when no config exists yet (cfg.enabled === undefined → treat as true)
+      const sentimentOn   = cfg.enabled           !== false;
+      const autoReviewOn  = cfg.auto_send_review  !== false;
+
+      document.getElementById('sentimentEnabled').checked = sentimentOn;
+      document.getElementById('sentimentToggle').classList.toggle('on', sentimentOn);
+
+      document.getElementById('autoSendReview').checked = autoReviewOn;
+      document.getElementById('autoReviewToggle').classList.toggle('on', autoReviewOn);
       const delay = cfg.review_delay_hours || 2;
       const delayRadio = document.querySelector(`input[name="delayHours"][value="${delay}"]`);
       if (delayRadio) delayRadio.checked = true;
