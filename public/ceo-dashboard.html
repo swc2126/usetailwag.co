@@ -315,6 +315,77 @@
       .page-container { padding: 24px 16px; }
       .location-info { grid-template-columns: 1fr; }
     }
+
+    /* DRAWER */
+    .kpi-clickable { cursor: pointer; transition: box-shadow 0.18s, transform 0.18s; }
+    .kpi-clickable:hover { box-shadow: 0 4px 20px rgba(30,107,74,0.18); transform: translateY(-1px); }
+    .dist-row.clickable { cursor: pointer; border-radius: 6px; padding: 4px 0; transition: background 0.15s; }
+    .dist-row.clickable:hover { background: rgba(30,107,74,0.05); }
+
+    .drawer-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.35); z-index: 900;
+      animation: fadeIn 0.2s ease;
+    }
+    .drawer-overlay.open { display: block; }
+    .drawer {
+      position: fixed; top: 0; right: -520px; width: 500px; max-width: 95vw;
+      height: 100vh; background: #fff; z-index: 901;
+      box-shadow: -8px 0 40px rgba(0,0,0,0.15);
+      transition: right 0.28s cubic-bezier(0.4,0,0.2,1);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .drawer.open { right: 0; }
+    .drawer-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 24px 24px 18px; background: var(--black);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .drawer-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 18px; color: var(--linen); }
+    .drawer-sub { font-size: 12px; color: var(--sage); margin-top: 3px; }
+    .drawer-close {
+      background: rgba(255,255,255,0.1); border: none; color: var(--linen);
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+      font-size: 14px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.15s;
+    }
+    .drawer-close:hover { background: rgba(255,255,255,0.2); }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Drawer table */
+    .d-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .d-table th { text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #999; border-bottom: 2px solid #f0f0f0; }
+    .d-table td { padding: 10px 10px; border-bottom: 1px solid #f5f5f5; color: var(--slate); vertical-align: middle; }
+    .d-table tr:last-child td { border-bottom: none; }
+    .d-table tr:hover td { background: rgba(30,107,74,0.03); }
+    .d-table .bold { font-weight: 700; color: var(--black); }
+    .d-table tr.d-row-danger td { background: rgba(229,62,62,0.05); }
+    .d-table tr.d-row-warn td { background: rgba(214,158,46,0.06); }
+
+    /* Drawer stat summary row */
+    .d-summary { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .d-sum-card { flex: 1; min-width: 100px; background: #f8f7f5; border-radius: 10px; padding: 14px; text-align: center; }
+    .d-sum-val { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 24px; color: var(--black); }
+    .d-sum-lbl { font-size: 11px; color: #999; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Drawer section header */
+    .d-section { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #bbb; margin: 20px 0 8px; }
+
+    /* Status chip */
+    .d-chip { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+    .d-chip.active { background: rgba(30,107,74,0.12); color: #1E6B4A; }
+    .d-chip.past_due { background: rgba(237,137,54,0.15); color: #c05621; }
+    .d-chip.canceled { background: rgba(229,62,62,0.12); color: #c53030; }
+    .d-chip.none { background: #f0f0f0; color: #999; }
+    .d-chip.inactive { background: rgba(229,62,62,0.12); color: #c53030; }
+    .d-chip.warning { background: rgba(237,137,54,0.15); color: #c05621; }
+    .d-chip.healthy { background: rgba(30,107,74,0.12); color: #1E6B4A; }
+    .d-chip.starter { background: rgba(168,197,176,0.2); color: #4a7c59; }
+    .d-chip.growth { background: rgba(30,107,74,0.15); color: #1E6B4A; }
+    .d-chip.partner { background: rgba(196,147,63,0.18); color: #C4933F; }
+
+    .d-empty { text-align: center; padding: 32px 16px; color: #999; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -353,22 +424,22 @@
 
       <!-- Row 1: Accent KPI cards -->
       <div class="kpi-row kpi-row-4" id="kpiRow1">
-        <div class="stat-card accent">
+        <div class="stat-card accent kpi-clickable" onclick="openDrawer('accounts', data)" style="cursor:pointer;">
           <div class="stat-label">Active Accounts</div>
           <div class="stat-value" id="kpiLocations">—</div>
           <div class="stat-sub">daycares on platform</div>
         </div>
-        <div class="stat-card accent">
+        <div class="stat-card accent kpi-clickable" onclick="openDrawer('mrr', data)" style="cursor:pointer;">
           <div class="stat-label">Est. MRR</div>
           <div class="stat-value" id="kpiMrr">—</div>
           <div class="stat-sub">per month</div>
         </div>
-        <div class="stat-card accent">
+        <div class="stat-card accent kpi-clickable" onclick="openDrawer('clients', data)" style="cursor:pointer;">
           <div class="stat-label">Total Clients</div>
           <div class="stat-value" id="kpiClients">—</div>
           <div class="stat-sub">pet parents enrolled</div>
         </div>
-        <div class="stat-card accent">
+        <div class="stat-card accent kpi-clickable" onclick="openDrawer('dogs', data)" style="cursor:pointer;">
           <div class="stat-label">Total Dogs</div>
           <div class="stat-value" id="kpiDogs">—</div>
           <div class="stat-sub">active enrollments</div>
@@ -377,22 +448,22 @@
 
       <!-- Row 2: White KPI cards -->
       <div class="kpi-row kpi-row-4" style="margin-bottom:28px;">
-        <div class="stat-card">
+        <div class="stat-card kpi-clickable" onclick="openDrawer('new_accounts', data)" style="cursor:pointer;">
           <div class="stat-label">New Accounts (30d)</div>
           <div class="stat-value" id="kpiNew30d">—</div>
           <div class="stat-sub">signups this month</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card kpi-clickable" onclick="openDrawer('messages', data)" style="cursor:pointer;">
           <div class="stat-label">Messages Sent (30d)</div>
           <div class="stat-value" id="kpiMsgs30d">—</div>
           <div class="stat-sub">across all locations</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card kpi-clickable" onclick="openDrawer('inactive', data)" style="cursor:pointer;">
           <div class="stat-label">Inactive 14d+</div>
           <div class="stat-value" id="kpiInactive14d" style="color:#e53e3e;">—</div>
           <div class="stat-sub">churn risk accounts</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card kpi-clickable" onclick="openDrawer('zero_usage', data)" style="cursor:pointer;">
           <div class="stat-label">Zero Usage 7d</div>
           <div class="stat-value" id="kpiZero7d" style="color:#d69e2e;">—</div>
           <div class="stat-sub">no messages this week</div>
@@ -551,8 +622,24 @@
     </div>
   </div>
 
+  <!-- DRAWER -->
+  <div id="drawerOverlay" class="drawer-overlay" onclick="closeDrawer()"></div>
+  <div id="drawer" class="drawer">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title" id="drawerTitle"></div>
+        <div class="drawer-sub" id="drawerSub"></div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </div>
+
   <script src="/js/nav-user.js"></script>
   <script>
+    // Global data store for drawer access
+    let data = null;
+
     const SUPABASE_URL = 'https://bixfhpzcqxjtdprjmuhx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpeGZocHpjcXhqdGRwcmptdWh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI2MDUzNTMsImV4cCI6MjA1ODE4MTM1M30.VKZBasNmXMFNQABMCnNmQOcVMZVnnvHrBHLTmqvf9mow';
 
@@ -642,7 +729,7 @@
         const pct = total ? Math.round((count / total) * 100) : 0;
         const mrr = count * (PLAN_MRR[p.key] || 0);
         return `
-          <div class="dist-row">
+          <div class="dist-row clickable" onclick="openDrawer('plan_filter', data, '${p.key}')" style="cursor:pointer;">
             <div class="dist-row-header">
               <span class="dist-label">${p.label} <strong>${count}</strong></span>
               <span class="dist-meta">${mrr ? formatMoney(mrr) + '/mo' : '—'}</span>
@@ -659,8 +746,9 @@
       const max = states[0].count;
       return states.map(s => {
         const pct = max ? Math.round((s.count / max) * 100) : 0;
+        const stateKey = esc(s.state).replace(/'/g, "\\'");
         return `
-          <div class="dist-row">
+          <div class="dist-row clickable" onclick="openDrawer('state_filter', data, '${stateKey}')" style="cursor:pointer;">
             <div class="dist-row-header">
               <span class="dist-label">${esc(s.state)}</span>
               <span class="dist-meta">${s.count} location${s.count !== 1 ? 's' : ''}</span>
@@ -685,7 +773,7 @@
         const count = dist[item.key] || 0;
         const pct = total ? Math.round((count / total) * 100) : 0;
         return `
-          <div class="dist-row">
+          <div class="dist-row clickable" onclick="openDrawer('status_filter', data, '${item.key}')" style="cursor:pointer;">
             <div class="dist-row-header">
               <span class="dist-label">${statusDot(item.key)}${item.label} <strong>${count}</strong></span>
               <span class="dist-meta">${pct}%</span>
@@ -734,9 +822,9 @@
 
         let warningBanner = '';
         if (loc.is_inactive_14d) {
-          warningBanner = `<div class="warning-banner danger">Inactive ${loc.days_since_last_msg !== null ? loc.days_since_last_msg : '14+'} days — churn risk</div>`;
+          warningBanner = `<div class="warning-banner danger" onclick="openDrawer('inactive', data)" style="cursor:pointer;">Inactive ${loc.days_since_last_msg !== null ? loc.days_since_last_msg : '14+'} days — churn risk</div>`;
         } else if (loc.is_zero_7d) {
-          warningBanner = `<div class="warning-banner caution">No messages this week</div>`;
+          warningBanner = `<div class="warning-banner caution" onclick="openDrawer('zero_usage', data)" style="cursor:pointer;">No messages this week</div>`;
         }
 
         return `
@@ -896,6 +984,375 @@
       }
     }
 
+    // ===================== DRAWER =====================
+    const PLAN_MRR_MAP = { starter: 99, growth: 179, partner: 249 };
+
+    function planChip(plan) {
+      const p = (plan || 'none').toLowerCase();
+      return `<span class="d-chip ${p}">${capitalize(p)}</span>`;
+    }
+    function statusChip(status) {
+      const s = (status || 'none').toLowerCase().replace(' ', '_');
+      const labels = { active: 'Active', past_due: 'Past Due', canceled: 'Canceled', none: 'No Plan' };
+      return `<span class="d-chip ${s}">${labels[s] || esc(status)}</span>`;
+    }
+    function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+    function cityStateStr(loc) { return [loc.city, loc.state].filter(Boolean).join(', ') || esc(loc.street) || '—'; }
+    function memberSinceDays(days) {
+      if (days === null || days === undefined) return '—';
+      if (days < 30) return `${days}d`;
+      if (days < 365) return `${Math.floor(days / 30)}mo`;
+      return `${(days / 365).toFixed(1)}yr`;
+    }
+    function activityChip(days) {
+      if (days === null || days === undefined) return '<span class="d-chip inactive">Never</span>';
+      if (days <= 3) return '<span class="d-chip healthy">Healthy</span>';
+      if (days <= 13) return '<span class="d-chip warning">Warning</span>';
+      return '<span class="d-chip inactive">Inactive</span>';
+    }
+    function fmtDate(isoStr) {
+      if (!isoStr) return '—';
+      return new Date(isoStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function buildDrawerContent(type, d, filter) {
+      const locs = d.locations || [];
+      switch (type) {
+
+        case 'accounts': {
+          const rows = [...locs].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+          return {
+            title: 'All Accounts',
+            subtitle: `${d.totals.locations} active location${d.totals.locations !== 1 ? 's' : ''}`,
+            html: `
+              <div class="d-summary">
+                <div class="d-sum-card"><div class="d-sum-val">${d.totals.locations}</div><div class="d-sum-lbl">Accounts</div></div>
+                <div class="d-sum-card"><div class="d-sum-val">${d.totals.clients.toLocaleString()}</div><div class="d-sum-lbl">Clients</div></div>
+                <div class="d-sum-card"><div class="d-sum-val">${d.totals.dogs.toLocaleString()}</div><div class="d-sum-lbl">Dogs</div></div>
+              </div>
+              <table class="d-table">
+                <thead><tr><th>Name</th><th>Location</th><th>Plan</th><th>Clients</th><th>Dogs</th><th>Msgs/30d</th><th>Since</th></tr></thead>
+                <tbody>${rows.map(l => `
+                  <tr>
+                    <td class="bold">${esc(l.name)}</td>
+                    <td>${cityStateStr(l)}</td>
+                    <td>${planChip(l.subscription?.plan)}</td>
+                    <td>${l.clients}</td>
+                    <td>${l.dogs}</td>
+                    <td>${l.messages_30d}</td>
+                    <td>${memberSinceDays(l.days_since_signup)}</td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>`
+          };
+        }
+
+        case 'mrr': {
+          const activeCount = locs.filter(l => l.subscription?.status === 'active').length;
+          const arpa = activeCount ? Math.round(d.totals.mrr / activeCount) : 0;
+          const planCounts = { starter: 0, growth: 0, partner: 0, none: 0 };
+          locs.forEach(l => {
+            const p = (l.subscription?.plan || 'none').toLowerCase();
+            planCounts[p] = (planCounts[p] || 0) + 1;
+          });
+          const mrrRows = [...locs].filter(l => l.mrr > 0).sort((a, b) => b.mrr - a.mrr);
+          return {
+            title: 'Monthly Recurring Revenue',
+            subtitle: `$${d.totals.mrr.toLocaleString()} estimated MRR`,
+            html: `
+              <div class="d-summary">
+                <div class="d-sum-card"><div class="d-sum-val">$${d.totals.mrr.toLocaleString()}</div><div class="d-sum-lbl">Total MRR</div></div>
+                <div class="d-sum-card"><div class="d-sum-val">${activeCount}</div><div class="d-sum-lbl">Active Accts</div></div>
+                <div class="d-sum-card"><div class="d-sum-val">$${arpa}</div><div class="d-sum-lbl">Avg ARPA</div></div>
+              </div>
+              <div class="d-section">By Plan</div>
+              <table class="d-table">
+                <thead><tr><th>Plan</th><th>Price/mo</th><th>Accounts</th><th>MRR</th></tr></thead>
+                <tbody>
+                  ${['partner','growth','starter'].map(p => `
+                  <tr>
+                    <td>${planChip(p)}</td>
+                    <td>$${PLAN_MRR_MAP[p]}</td>
+                    <td>${planCounts[p] || 0}</td>
+                    <td class="bold">$${((planCounts[p] || 0) * PLAN_MRR_MAP[p]).toLocaleString()}</td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>
+              <div class="d-section">Account Breakdown</div>
+              <table class="d-table">
+                <thead><tr><th>Name</th><th>Plan</th><th>Status</th><th>MRR</th></tr></thead>
+                <tbody>${mrrRows.map(l => `
+                  <tr>
+                    <td class="bold">${esc(l.name)}</td>
+                    <td>${planChip(l.subscription?.plan)}</td>
+                    <td>${statusChip(l.subscription?.status)}</td>
+                    <td>$${(l.mrr || 0).toLocaleString()}/mo</td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>`
+          };
+        }
+
+        case 'clients': {
+          const rows = [...locs].sort((a, b) => b.clients - a.clients);
+          return {
+            title: 'Pet Parents by Location',
+            subtitle: `${d.totals.clients.toLocaleString()} total active clients`,
+            html: `
+              <table class="d-table">
+                <thead><tr><th>Location</th><th>State</th><th>Clients</th><th>Dogs</th><th>Ratio</th></tr></thead>
+                <tbody>${rows.map(l => {
+                  const ratio = l.clients > 0 ? (l.dogs / l.clients).toFixed(1) : '—';
+                  return `<tr>
+                    <td class="bold">${esc(l.name)}</td>
+                    <td>${esc(l.state) || '—'}</td>
+                    <td>${l.clients}</td>
+                    <td>${l.dogs}</td>
+                    <td>${ratio !== '—' ? ratio + ' dogs/client' : '—'}</td>
+                  </tr>`;
+                }).join('')}
+                </tbody>
+              </table>`
+          };
+        }
+
+        case 'dogs': {
+          const rows = [...locs].sort((a, b) => b.dogs - a.dogs);
+          return {
+            title: 'Dogs by Location',
+            subtitle: `${d.totals.dogs.toLocaleString()} total active dogs`,
+            html: `
+              <table class="d-table">
+                <thead><tr><th>Location</th><th>State</th><th>Dogs</th><th>Clients</th><th>Ratio</th></tr></thead>
+                <tbody>${rows.map(l => {
+                  const ratio = l.clients > 0 ? (l.dogs / l.clients).toFixed(1) : '—';
+                  return `<tr>
+                    <td class="bold">${esc(l.name)}</td>
+                    <td>${esc(l.state) || '—'}</td>
+                    <td>${l.dogs}</td>
+                    <td>${l.clients}</td>
+                    <td>${ratio !== '—' ? ratio + ' dogs/client' : '—'}</td>
+                  </tr>`;
+                }).join('')}
+                </tbody>
+              </table>`
+          };
+        }
+
+        case 'new_accounts': {
+          const recent = locs.filter(l => l.days_since_signup !== null && l.days_since_signup <= 30)
+            .sort((a, b) => a.days_since_signup - b.days_since_signup);
+          return {
+            title: 'New Accounts',
+            subtitle: 'Signed up in the last 30 days',
+            html: recent.length === 0
+              ? '<div class="d-empty">No new accounts in the last 30 days.</div>'
+              : `<table class="d-table">
+                  <thead><tr><th>Name</th><th>City/State</th><th>Plan</th><th>Signup Date</th><th>Owner</th></tr></thead>
+                  <tbody>${recent.map(l => `
+                    <tr>
+                      <td class="bold">${esc(l.name)}</td>
+                      <td>${cityStateStr(l)}</td>
+                      <td>${planChip(l.subscription?.plan)}</td>
+                      <td>${fmtDate(l.created_at)}</td>
+                      <td>${esc(l.owner?.name || '—')}</td>
+                    </tr>`).join('')}
+                  </tbody>
+                </table>`
+          };
+        }
+
+        case 'messages': {
+          const rows = [...locs].sort((a, b) => b.messages_30d - a.messages_30d);
+          const totalMsgs = d.totals.messages_30d;
+          const avg = locs.length ? Math.round(totalMsgs / locs.length) : 0;
+          return {
+            title: 'Message Volume',
+            subtitle: 'Last 30 days across all accounts',
+            html: `
+              <div class="d-summary">
+                <div class="d-sum-card"><div class="d-sum-val">${totalMsgs.toLocaleString()}</div><div class="d-sum-lbl">Total Msgs</div></div>
+                <div class="d-sum-card"><div class="d-sum-val">${avg.toLocaleString()}</div><div class="d-sum-lbl">Avg / Acct</div></div>
+              </div>
+              <table class="d-table">
+                <thead><tr><th>Name</th><th>Msgs/30d</th><th>Msgs/7d</th><th>Last Message</th><th>Activity</th></tr></thead>
+                <tbody>${rows.map(l => `
+                  <tr>
+                    <td class="bold">${esc(l.name)}</td>
+                    <td>${l.messages_30d}</td>
+                    <td>${l.messages_7d}</td>
+                    <td>${formatDays(l.days_since_last_msg)}</td>
+                    <td>${activityChip(l.days_since_last_msg)}</td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>`
+          };
+        }
+
+        case 'inactive': {
+          const rows = locs.filter(l => l.is_inactive_14d)
+            .sort((a, b) => {
+              if (a.days_since_last_msg === null) return -1;
+              if (b.days_since_last_msg === null) return 1;
+              return b.days_since_last_msg - a.days_since_last_msg;
+            });
+          return {
+            title: 'Inactive Accounts',
+            subtitle: 'No messages sent in 14+ days',
+            html: rows.length === 0
+              ? '<div class="d-empty">✅ No accounts inactive 14+ days — looking healthy!</div>'
+              : `<table class="d-table">
+                  <thead><tr><th>Name</th><th>Plan</th><th>Days Inactive</th><th>Last Message</th><th>Owner Email</th><th>Status</th></tr></thead>
+                  <tbody>${rows.map(l => {
+                    const days = l.days_since_last_msg;
+                    const rowClass = days !== null && days >= 30 ? 'd-row-danger' : 'd-row-warn';
+                    return `<tr class="${rowClass}">
+                      <td class="bold">${esc(l.name)}</td>
+                      <td>${planChip(l.subscription?.plan)}</td>
+                      <td>${days !== null ? days + 'd' : 'Never'}</td>
+                      <td>${formatDays(days)}</td>
+                      <td>${esc(l.owner?.email || '—')}</td>
+                      <td>${statusChip(l.subscription?.status)}</td>
+                    </tr>`;
+                  }).join('')}
+                  </tbody>
+                </table>`
+          };
+        }
+
+        case 'zero_usage': {
+          const rows = locs.filter(l => l.is_zero_7d);
+          return {
+            title: 'Zero Usage This Week',
+            subtitle: 'Active accounts with no messages in 7 days',
+            html: rows.length === 0
+              ? '<div class="d-empty">✅ All accounts sent messages this week.</div>'
+              : `<table class="d-table">
+                  <thead><tr><th>Name</th><th>Plan</th><th>Msgs/30d</th><th>Msgs/7d</th><th>Subscription</th><th>Days Since Last</th></tr></thead>
+                  <tbody>${rows.map(l => `
+                    <tr>
+                      <td class="bold">${esc(l.name)}</td>
+                      <td>${planChip(l.subscription?.plan)}</td>
+                      <td>${l.messages_30d}</td>
+                      <td>${l.messages_7d}</td>
+                      <td>${statusChip(l.subscription?.status)}</td>
+                      <td>${l.days_since_last_msg !== null ? l.days_since_last_msg + 'd' : 'Never'}</td>
+                    </tr>`).join('')}
+                  </tbody>
+                </table>`
+          };
+        }
+
+        case 'plan_filter': {
+          const plan = (filter || '').toLowerCase();
+          const price = PLAN_MRR_MAP[plan] || 0;
+          const rows = locs.filter(l => (l.subscription?.plan || 'none').toLowerCase() === plan)
+            .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+          return {
+            title: `${capitalize(plan)} Plan Accounts`,
+            subtitle: `${rows.length} account${rows.length !== 1 ? 's' : ''} on the ${plan} plan${price ? ` ($${price}/mo)` : ''}`,
+            html: rows.length === 0
+              ? `<div class="d-empty">No accounts on the ${capitalize(plan)} plan.</div>`
+              : `<table class="d-table">
+                  <thead><tr><th>Name</th><th>City/State</th><th>Status</th><th>Clients</th><th>Msgs/30d</th><th>Since</th></tr></thead>
+                  <tbody>${rows.map(l => `
+                    <tr>
+                      <td class="bold">${esc(l.name)}</td>
+                      <td>${cityStateStr(l)}</td>
+                      <td>${statusChip(l.subscription?.status)}</td>
+                      <td>${l.clients}</td>
+                      <td>${l.messages_30d}</td>
+                      <td>${memberSinceDays(l.days_since_signup)}</td>
+                    </tr>`).join('')}
+                  </tbody>
+                </table>`
+          };
+        }
+
+        case 'state_filter': {
+          const rows = locs.filter(l => {
+            if (filter === 'Not Set') return !l.state;
+            return l.state === filter;
+          }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+          return {
+            title: `Accounts in ${filter}`,
+            subtitle: `${rows.length} location${rows.length !== 1 ? 's' : ''} in ${filter}`,
+            html: rows.length === 0
+              ? `<div class="d-empty">No accounts found in ${esc(filter)}.</div>`
+              : `<table class="d-table">
+                  <thead><tr><th>Name</th><th>City/State</th><th>Plan</th><th>Clients</th><th>Msgs/30d</th><th>Owner</th></tr></thead>
+                  <tbody>${rows.map(l => `
+                    <tr>
+                      <td class="bold">${esc(l.name)}</td>
+                      <td>${cityStateStr(l)}</td>
+                      <td>${planChip(l.subscription?.plan)}</td>
+                      <td>${l.clients}</td>
+                      <td>${l.messages_30d}</td>
+                      <td>${esc(l.owner?.name || '—')}</td>
+                    </tr>`).join('')}
+                  </tbody>
+                </table>`
+          };
+        }
+
+        case 'status_filter': {
+          const rows = locs.filter(l => {
+            const s = (l.subscription?.status || 'none').toLowerCase();
+            return s === (filter || 'none');
+          }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+          const statusLabels = { active: 'Active', past_due: 'Past Due', canceled: 'Canceled', none: 'No Subscription' };
+          const subLabels = { active: 'All billing up to date', past_due: 'Payment failed — needs attention', canceled: 'Subscription canceled', none: 'No active subscription on file' };
+          return {
+            title: `${statusLabels[filter] || capitalize(filter)} Accounts`,
+            subtitle: subLabels[filter] || `${rows.length} account${rows.length !== 1 ? 's' : ''}`,
+            html: rows.length === 0
+              ? `<div class="d-empty">No accounts with status: ${esc(filter)}.</div>`
+              : `<table class="d-table">
+                  <thead><tr><th>Name</th><th>Plan</th><th>Billing</th><th>Owner</th><th>Email</th></tr></thead>
+                  <tbody>${rows.map(l => `
+                    <tr>
+                      <td class="bold">${esc(l.name)}</td>
+                      <td>${planChip(l.subscription?.plan)}</td>
+                      <td>${esc(l.subscription?.billing_cycle || '—')}</td>
+                      <td>${esc(l.owner?.name || '—')}</td>
+                      <td>${esc(l.owner?.email || '—')}</td>
+                    </tr>`).join('')}
+                  </tbody>
+                </table>`
+          };
+        }
+
+        default:
+          return { title: 'Detail', subtitle: '', html: '<div class="d-empty">No data available.</div>' };
+      }
+    }
+
+    function openDrawer(type, d, filter) {
+      if (!d) return;
+      const drawer = document.getElementById('drawer');
+      const overlay = document.getElementById('drawerOverlay');
+      const titleEl = document.getElementById('drawerTitle');
+      const subEl = document.getElementById('drawerSub');
+      const body = document.getElementById('drawerBody');
+
+      const content = buildDrawerContent(type, d, filter);
+      titleEl.textContent = content.title;
+      subEl.textContent = content.subtitle;
+      body.innerHTML = content.html;
+
+      drawer.classList.add('open');
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawer').classList.remove('open');
+      document.getElementById('drawerOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
     async function load() {
       const token = getToken();
       if (!token) { window.location.href = '/login.html'; return; }
@@ -910,7 +1367,7 @@
           return;
         }
 
-        const data = await res.json();
+        data = await res.json();
         console.log('[CEO] API response:', JSON.stringify(data).slice(0, 300));
 
         const now = new Date();
