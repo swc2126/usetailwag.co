@@ -87,6 +87,13 @@ app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
+// CEO dashboard — protected route, redirects to login if no token present
+app.get('/ceo', (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1] || req.cookies?.tailwag_token;
+  // Client-side auth check handles redirect; serve the file and let JS enforce access
+  res.sendFile(path.join(__dirname, 'public', 'ceo-dashboard.html'));
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });

@@ -194,6 +194,7 @@
             </div>
           </div>
           <a href="/profile.html" class="nu-dd-item">👤 &nbsp;My Profile</a>
+          ${u.role === 'owner' ? `<a href="/ceo" class="nu-dd-item">📊 &nbsp;CEO Dashboard</a>` : ''}
           <div class="nu-dd-divider"></div>
           <button class="nu-dd-item danger" onclick="window.__nuLogout()">Sign Out</button>
         </div>
