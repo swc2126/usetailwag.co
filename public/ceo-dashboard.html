@@ -428,8 +428,15 @@
 
       try {
         const res = await authFetch('/api/ceo/overview');
+        console.log('[CEO] /api/ceo/overview status:', res.status);
         if (res.status === 401) { window.location.href = '/login.html'; return; }
+        if (res.status === 403) {
+          document.getElementById('locationsContainer').innerHTML =
+            '<div class="empty-state"><div class="empty-title">Access Denied (403)</div><div class="empty-text">Your account does not have CEO dashboard access. Check that your role is owner, manager, or super_admin.</div></div>';
+          return;
+        }
         const data = await res.json();
+        console.log('[CEO] API response:', JSON.stringify(data));
 
         // Rollup totals
         document.getElementById('totalLocations').textContent = data.totals.locations;
@@ -439,7 +446,7 @@
 
         const now = new Date();
         document.getElementById('lastUpdated').textContent =
-          `Updated ${now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · ${data.totals.locations} location${data.totals.locations !== 1 ? 's' : ''} in your portfolio`;
+          `Updated ${now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · ${data.totals.locations} location${data.totals.locations !== 1 ? 's' : ''} in your portfolio · role: ${data.role || 'unknown'}`;
 
         renderLocations(data.locations);
         await loadAllClients(data.locations);

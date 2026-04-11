@@ -6,6 +6,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 // GET /api/ceo/overview
 router.get('/overview', requireAuth, requireRole('super_admin', 'owner', 'manager'), async (req, res) => {
   try {
+    console.log('[CEO] overview hit — userId:', req.user?.id, 'role:', req.userRole);
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
@@ -38,6 +39,7 @@ router.get('/overview', requireAuth, requireRole('super_admin', 'owner', 'manage
         .order('name'));
     }
 
+    console.log('[CEO] daycares found:', daycares?.length ?? 0, '| error:', dcError?.message ?? null);
     if (dcError) {
       console.error('CEO daycares query error:', dcError.message);
       return res.status(500).json({ error: dcError.message });
@@ -111,6 +113,11 @@ router.get('/overview', requireAuth, requireRole('super_admin', 'owner', 'manage
     console.error('CEO overview error:', err);
     res.status(500).json({ error: 'Failed to load overview' });
   }
+});
+
+// GET /api/ceo/whoami — debug endpoint to check role
+router.get('/whoami', requireAuth, async (req, res) => {
+  res.json({ userId: req.user?.id, email: req.user?.email, role: req.userRole, daycareId: req.daycareId });
 });
 
 // GET /api/ceo/accounts — super_admin only
