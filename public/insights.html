@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insights — TailWag</title>
+  <link rel="icon" href="/images/tailwag-favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YFRN3VT005"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-YFRN3VT005');</script>
+
+  <style>
+    :root {
+      --black:      #0F1410;
+      --green:      #1E6B4A;
+      --green-dark: #164D35;
+      --linen:      #F5F0E8;
+      --gold:       #C4933F;
+      --sage:       #A8C5B0;
+      --slate:      #2D3748;
+      --card-bg:    rgba(255,255,255,0.04);
+      --card-border: rgba(168,197,176,0.12);
+      --text-dim:   rgba(245,240,232,0.55);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--black);
+      color: var(--linen);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    .top-nav {
+      background: rgba(15,20,16,0.97);
+      border-bottom: 1px solid rgba(168,197,176,0.12);
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-main {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; height: 60px;
+    }
+
+    .nav-left {
+      display: flex; align-items: center; gap: 14px;
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav-logo img {
+      height: 28px; width: auto;
+    }
+
+    .nav-logo-text {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800; font-size: 16px; color: var(--linen);
+    }
+
+    .nav-sep {
+      color: rgba(168,197,176,0.3);
+      font-size: 18px; font-weight: 300;
+    }
+
+    .nav-daycare-name {
+      font-size: 13px; font-weight: 500;
+      color: rgba(245,240,232,0.65);
+      max-width: 200px; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    .nav-right {
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    /* Location selector */
+    #locationSelectWrap { display: none; }
+    #locationSelect {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(168,197,176,0.2);
+      color: var(--linen);
+      padding: 6px 10px; border-radius: 8px;
+      font-size: 13px; font-family: 'Inter', sans-serif;
+      cursor: pointer; outline: none;
+    }
+    #locationSelect:focus { border-color: var(--green); }
+    #locationSelect option { background: #1a2620; color: var(--linen); }
+
+    /* View As toggle */
+    #viewAsWrap {
+      display: none;
+      position: relative;
+    }
+
+    #viewAsBtn {
+      background: rgba(196,147,63,0.12);
+      border: 1px solid rgba(196,147,63,0.25);
+      color: var(--gold);
+      padding: 6px 12px; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      display: flex; align-items: center; gap: 6px;
+    }
+    #viewAsBtn:hover { background: rgba(196,147,63,0.18); }
+
+    .viewas-dropdown {
+      display: none; position: absolute;
+      top: calc(100% + 6px); right: 0;
+      background: #1a2620; border: 1px solid rgba(168,197,176,0.15);
+      border-radius: 10px; min-width: 160px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      overflow: hidden; z-index: 200;
+    }
+    .viewas-dropdown.open { display: block; }
+    .viewas-opt {
+      padding: 10px 14px; font-size: 13px;
+      color: rgba(245,240,232,0.75); cursor: pointer;
+      transition: background 0.12s;
+    }
+    .viewas-opt:hover { background: rgba(30,107,74,0.15); color: var(--linen); }
+    .viewas-opt.active { color: var(--sage); font-weight: 600; }
+
+    /* ── TAB BAR ── */
+    .tab-bar {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 24px;
+      display: flex; gap: 0;
+      border-top: 1px solid rgba(168,197,176,0.08);
+    }
+
+    .tab-btn {
+      padding: 12px 20px;
+      font-size: 13px; font-weight: 600;
+      color: rgba(245,240,232,0.5);
+      background: none; border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer; transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: rgba(245,240,232,0.8); }
+    .tab-btn.active {
+      color: var(--linen);
+      border-bottom-color: var(--green);
+    }
+
+    /* ── MAIN CONTENT ── */
+    .page-content {
+      max-width: 1200px; margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── SECTION ── */
+    .section { margin-bottom: 36px; }
+    .section-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px; font-weight: 700;
+      color: var(--sage); letter-spacing: 0.3px;
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-title::after {
+      content: ''; flex: 1;
+      height: 1px; background: rgba(168,197,176,0.12);
+    }
+
+    /* ── STAT CARDS ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .stat-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .stat-grid, .stat-grid-3 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .stat-grid, .stat-grid-3 { grid-template-columns: 1fr; }
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px; padding: 20px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: rgba(168,197,176,0.25); }
+
+    .stat-card.accent {
+      background: var(--green-dark);
+      border-color: rgba(30,107,74,0.4);
+    }
+    .stat-card.accent-gold {
+      background: rgba(196,147,63,0.08);
+      border-color: rgba(196,147,63,0.2);
+    }
+    .stat-card.accent-warn {
+      background: rgba(196,147,63,0.06);
+      border-color: rgba(196,147,63,0.15);
+      cursor: pointer;
+    }
+    .stat-card.accent-warn:hover { border-color: rgba(196,147,63,0.35); }
+
+    .stat-label {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.7px;
+      color: var(--text-dim); margin-bottom: 8px;
+    }
+    .stat-card.accent .stat-label { color: rgba(168,197,176,0.7); }
+    .stat-card.accent-gold .stat-label { color: rgba(196,147,63,0.7); }
+
+    .stat-value {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 34px; font-weight: 800;
+      color: var(--linen); line-height: 1;
+    }
+    .stat-card.accent-gold .stat-value { color: var(--gold); }
+
+    .stat-sub {
+      font-size: 11px; color: var(--text-dim);
+      margin-top: 6px;
+    }
+
+    /* ── TEAM VOLUME BAR ── */
+    .volume-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px; padding: 20px 24px;
+    }
+    .volume-label {
+      font-size: 14px; font-weight: 600;
+      color: var(--linen); margin-bottom: 12px;
+    }
+    .bar-track {
+      background: rgba(255,255,255,0.06);
+      border-radius: 8px; height: 12px;
+      overflow: hidden; margin-bottom: 10px;
+    }
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--sage));
+      border-radius: 8px;
+      transition: width 0.6s ease;
+    }
+    .volume-sub { font-size: 12px; color: var(--text-dim); }
+
+    /* ── STACKED BAR ── */
+    .stacked-bar-wrap {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px; padding: 20px 24px;
+    }
+    .stacked-bar-total {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 28px; font-weight: 800;
+      color: var(--linen); margin-bottom: 4px;
+    }
+    .stacked-bar-sublabel {
+      font-size: 12px; color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+    .stacked-bar-track {
+      display: flex; height: 14px;
+      border-radius: 8px; overflow: hidden;
+      margin-bottom: 14px;
+      gap: 2px;
+    }
+    .stacked-seg { height: 100%; transition: width 0.6s ease; }
+    .stacked-seg.report  { background: var(--green); }
+    .stacked-seg.reminder{ background: #4a9eff; }
+    .stacked-seg.review  { background: var(--gold); }
+    .stacked-seg.other   { background: rgba(255,255,255,0.2); }
+
+    .stacked-legend {
+      display: flex; flex-wrap: wrap; gap: 14px;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 12px; color: rgba(245,240,232,0.7);
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
+    }
+    .legend-dot.report  { background: var(--green); }
+    .legend-dot.reminder{ background: #4a9eff; }
+    .legend-dot.review  { background: var(--gold); }
+    .legend-dot.other   { background: rgba(255,255,255,0.2); }
+
+    /* ── TEAM TABLE ── */
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px; overflow: hidden;
+    }
+    .table-card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(168,197,176,0.1);
+      font-size: 14px; font-weight: 700;
+      color: var(--linen);
+    }
+
+    table.insights-table {
+      width: 100%; border-collapse: collapse;
+    }
+    .insights-table th {
+      padding: 10px 16px;
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--text-dim);
+      border-bottom: 1px solid rgba(168,197,176,0.08);
+      text-align: left;
+    }
+    .insights-table td {
+      padding: 12px 16px;
+      font-size: 13px; color: rgba(245,240,232,0.85);
+      border-bottom: 1px solid rgba(168,197,176,0.05);
+    }
+    .insights-table tr:last-child td { border-bottom: none; }
+    .insights-table tr.me td { background: rgba(30,107,74,0.06); }
+    .insights-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .mini-bar-wrap {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .mini-bar-track {
+      flex: 1; background: rgba(255,255,255,0.06);
+      border-radius: 4px; height: 6px; overflow: hidden;
+    }
+    .mini-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--sage));
+      border-radius: 4px;
+    }
+
+    /* ── ROLE BADGE ── */
+    .role-badge {
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      padding: 2px 8px; border-radius: 10px; display: inline-block;
+    }
+    .role-badge.owner    { background: rgba(196,147,63,0.15); color: var(--gold); }
+    .role-badge.manager  { background: rgba(30,107,74,0.15); color: #4ade80; }
+    .role-badge.team_member { background: rgba(255,255,255,0.08); color: rgba(245,240,232,0.6); }
+
+    /* ── PLAN BADGE ── */
+    .plan-badge {
+      font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 4px 12px; border-radius: 20px; display: inline-block;
+    }
+    .plan-badge.starter { background: rgba(255,255,255,0.08); color: rgba(245,240,232,0.7); }
+    .plan-badge.growth  { background: rgba(30,107,74,0.2); color: #4ade80; }
+    .plan-badge.partner { background: rgba(196,147,63,0.18); color: var(--gold); }
+
+    /* ── STATUS BADGE ── */
+    .status-dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; margin-right: 6px;
+    }
+    .status-dot.active   { background: #4ade80; }
+    .status-dot.past_due { background: var(--gold); }
+    .status-dot.canceled { background: #f87171; }
+
+    /* ── FINANCIAL CARDS ── */
+    .fin-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px; padding: 24px;
+    }
+    .fin-cost {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 42px; font-weight: 800;
+      color: var(--linen); margin: 12px 0;
+    }
+    .fin-cost span { font-size: 18px; color: var(--text-dim); }
+
+    /* ── QUICK LINKS ── */
+    .quick-links {
+      display: flex; flex-wrap: wrap; gap: 10px;
+    }
+    .quick-link-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(30,107,74,0.12);
+      border: 1px solid rgba(30,107,74,0.25);
+      color: var(--sage); padding: 10px 18px;
+      border-radius: 10px; text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      transition: all 0.15s; font-family: 'Inter', sans-serif;
+    }
+    .quick-link-btn:hover {
+      background: rgba(30,107,74,0.22);
+      border-color: rgba(30,107,74,0.4);
+      color: var(--linen);
+    }
+
+    /* ── TYPE NOTE ── */
+    .type-note {
+      font-size: 11px; color: var(--text-dim);
+      font-style: italic; margin-top: 10px;
+    }
+
+    /* ── LOCATION TABLE ── */
+    .locations-table-wrap {
+      overflow-x: auto;
+    }
+
+    /* ── LOADING / ERROR ── */
+    #loadingState {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 60vh; gap: 16px;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(168,197,176,0.15);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #errorState {
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 60vh; gap: 12px; text-align: center;
+    }
+    #errorState h2 { font-size: 20px; color: var(--linen); }
+    #errorState p  { color: var(--text-dim); font-size: 14px; }
+
+    /* ── DRAWER ── */
+    #inactiveDrawer {
+      position: fixed; top: 0; right: -440px; width: 420px;
+      height: 100vh; background: #141d17;
+      border-left: 1px solid rgba(168,197,176,0.12);
+      z-index: 500; transition: right 0.3s ease;
+      overflow-y: auto;
+      padding: 24px;
+    }
+    #inactiveDrawer.open { right: 0; }
+    .drawer-overlay {
+      display: none; position: fixed;
+      inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 499;
+    }
+    .drawer-overlay.open { display: block; }
+    .drawer-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px; font-weight: 700;
+      color: var(--linen); margin-bottom: 4px;
+    }
+    .drawer-sub {
+      font-size: 12px; color: var(--text-dim);
+      margin-bottom: 20px;
+    }
+    .drawer-close {
+      position: absolute; top: 20px; right: 20px;
+      background: none; border: none; color: var(--text-dim);
+      font-size: 20px; cursor: pointer; line-height: 1;
+    }
+    .drawer-close:hover { color: var(--linen); }
+    .drawer-item {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(168,197,176,0.07);
+    }
+    .drawer-item:last-child { border-bottom: none; }
+    .drawer-item-name {
+      font-weight: 600; font-size: 14px;
+      color: var(--linen); margin-bottom: 3px;
+    }
+    .drawer-item-meta {
+      font-size: 12px; color: var(--text-dim);
+    }
+    .drawer-spinner {
+      display: flex; justify-content: center;
+      padding: 40px 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="top-nav">
+  <div class="nav-main">
+    <div class="nav-left">
+      <a href="/dashboard.html" class="nav-logo">
+        <img src="/images/tailwag-logo.png" alt="TailWag" onerror="this.style.display='none'" />
+        <span class="nav-logo-text">TailWag</span>
+      </a>
+      <span class="nav-sep">|</span>
+      <span class="nav-daycare-name" id="navDaycareName">Loading...</span>
+    </div>
+    <div class="nav-right">
+      <div id="locationSelectWrap">
+        <select id="locationSelect" onchange="switchLocation(this.value)"></select>
+      </div>
+      <div id="viewAsWrap">
+        <button id="viewAsBtn" onclick="toggleViewAsDropdown(event)">
+          <span id="viewAsLabel">Owner View</span> ▾
+        </button>
+        <div class="viewas-dropdown" id="viewAsDropdown">
+          <div class="viewas-opt" data-role="owner" onclick="setViewAs('owner')">Owner View</div>
+          <div class="viewas-opt" data-role="manager" onclick="setViewAs('manager')">Manager View</div>
+          <div class="viewas-opt" data-role="team_member" onclick="setViewAs('team_member')">Team Member View</div>
+        </div>
+      </div>
+      <div id="navUserWidget"></div>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabActivity" onclick="switchTab('activity')">My Activity</button>
+    <button class="tab-btn" id="tabLocation" onclick="switchTab('location')">Location</button>
+    <button class="tab-btn" id="tabFinancial" onclick="switchTab('financial')" style="display:none">Financial</button>
+  </div>
+</nav>
+
+<!-- Loading -->
+<div id="loadingState">
+  <div class="spinner"></div>
+  <p style="color:var(--text-dim);font-size:14px;">Loading insights…</p>
+</div>
+
+<!-- Error -->
+<div id="errorState">
+  <h2>Unable to load insights</h2>
+  <p id="errorMsg">Something went wrong. Please try again.</p>
+  <a href="/dashboard.html" class="quick-link-btn" style="margin-top:8px;">Back to Dashboard</a>
+</div>
+
+<!-- Page Content -->
+<div class="page-content" id="pageContent" style="display:none">
+
+  <!-- TAB: My Activity -->
+  <div class="tab-panel active" id="panelActivity">
+
+    <div class="section">
+      <div class="section-title">My Performance</div>
+      <div class="stat-grid">
+        <div class="stat-card accent">
+          <div class="stat-label">Messages Today</div>
+          <div class="stat-value" id="pMsgsToday">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">This Week</div>
+          <div class="stat-value" id="pMsgsWeek">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">This Month</div>
+          <div class="stat-value" id="pMsgsMonth">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Day Streak 🔥</div>
+          <div class="stat-value" id="pStreak">—</div>
+          <div class="stat-sub">consecutive active days</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">My Share of Team Volume</div>
+      <div class="volume-card">
+        <div class="volume-label" id="teamVolLabel">You sent —% of this week's messages</div>
+        <div class="bar-track">
+          <div class="bar-fill" id="teamVolBar" style="width:0%"></div>
+        </div>
+        <div class="volume-sub" id="teamVolSub">— messages this week vs — team total</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Location Volume This Month</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Report Cards</div>
+          <div class="stat-value" id="tReport">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Reminders</div>
+          <div class="stat-value" id="tReminder">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Review Requests</div>
+          <div class="stat-value" id="tReview">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Other / Bulk</div>
+          <div class="stat-value" id="tOther">—</div>
+        </div>
+      </div>
+      <p class="type-note">Message type tracking began recently. Historical messages appear as 'Other'.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Quick Links</div>
+      <div class="quick-links">
+        <a href="/dashboard.html" class="quick-link-btn">→ Send Report Card</a>
+        <a href="/dashboard.html" class="quick-link-btn">→ View Clients</a>
+        <a href="#" class="quick-link-btn" id="googleReviewLink" style="display:none">→ Review Google Reviews</a>
+      </div>
+    </div>
+
+  </div><!-- /panelActivity -->
+
+  <!-- TAB: Location -->
+  <div class="tab-panel" id="panelLocation" data-min-role="manager">
+
+    <div class="section">
+      <div class="section-title">Location Overview</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Active Clients</div>
+          <div class="stat-value" id="lClients">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Dogs</div>
+          <div class="stat-value" id="lDogs">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Messages This Month</div>
+          <div class="stat-value" id="lMsgs30">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Team Members</div>
+          <div class="stat-value" id="lTeam">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Team Performance</div>
+      <div class="table-card">
+        <div class="table-card-header">Team Activity — Last 30 Days</div>
+        <div class="locations-table-wrap">
+          <table class="insights-table" id="teamTable">
+            <thead>
+              <tr>
+                <th>Team Member</th>
+                <th>Role</th>
+                <th>Messages This Month</th>
+                <th>Messages This Week</th>
+                <th>Activity</th>
+              </tr>
+            </thead>
+            <tbody id="teamTbody">
+              <tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:24px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Message Breakdown</div>
+      <div class="stacked-bar-wrap">
+        <div class="stacked-bar-total" id="stackedTotal">—</div>
+        <div class="stacked-bar-sublabel">Messages This Month by Type</div>
+        <div class="stacked-bar-track" id="stackedBar">
+          <div class="stacked-seg report"   id="segReport"   style="width:25%"></div>
+          <div class="stacked-seg reminder" id="segReminder" style="width:25%"></div>
+          <div class="stacked-seg review"   id="segReview"   style="width:25%"></div>
+          <div class="stacked-seg other"    id="segOther"    style="width:25%"></div>
+        </div>
+        <div class="stacked-legend">
+          <div class="legend-item"><div class="legend-dot report"></div><span id="legendReport">Report Cards: —</span></div>
+          <div class="legend-item"><div class="legend-dot reminder"></div><span id="legendReminder">Reminders: —</span></div>
+          <div class="legend-item"><div class="legend-dot review"></div><span id="legendReview">Review Requests: —</span></div>
+          <div class="legend-item"><div class="legend-dot other"></div><span id="legendOther">Other / Bulk: —</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Client Health</div>
+      <div class="stat-grid-3">
+        <div class="stat-card accent-gold">
+          <div class="stat-label">New Clients (30d)</div>
+          <div class="stat-value" id="lNewClients">—</div>
+        </div>
+        <div class="stat-card accent-warn" onclick="openInactiveDrawer()">
+          <div class="stat-label">Inactive Clients (30d)</div>
+          <div class="stat-value" id="lInactive">—</div>
+          <div class="stat-sub">Click to see who →</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Active Clients</div>
+          <div class="stat-value" id="lTotalClients">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" data-min-role="manager">
+      <div class="section-title">Operational Links</div>
+      <div class="quick-links">
+        <a href="/dashboard.html" class="quick-link-btn">→ Open Dashboard</a>
+        <a href="/team.html" class="quick-link-btn">→ Manage Team</a>
+        <a href="/dashboard.html" class="quick-link-btn">→ View Appointments</a>
+      </div>
+    </div>
+
+  </div><!-- /panelLocation -->
+
+  <!-- TAB: Financial -->
+  <div class="tab-panel" id="panelFinancial" data-min-role="owner">
+
+    <div class="section">
+      <div class="section-title">Your Subscription</div>
+      <div class="fin-card">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span class="plan-badge" id="finPlanBadge">—</span>
+          <span id="finStatus" style="font-size:13px;color:var(--text-dim)">—</span>
+        </div>
+        <div class="fin-cost"><span>$</span><span id="finCost">—</span><span>/mo</span></div>
+        <div style="font-size:13px;color:var(--text-dim);margin-bottom:16px">
+          Billing: <span id="finCycle" style="color:var(--linen)">—</span>
+        </div>
+        <a href="/settings.html" class="quick-link-btn">Manage Billing →</a>
+      </div>
+    </div>
+
+    <div class="section" id="allLocationsSection" style="display:none">
+      <div class="section-title">All Your Locations</div>
+      <div class="table-card">
+        <div class="table-card-header">Portfolio Overview</div>
+        <div class="locations-table-wrap">
+          <table class="insights-table">
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>City / State</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="allLocationsTbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <a href="/ceo" class="quick-link-btn">View Full Portfolio →</a>
+      </div>
+    </div>
+
+    <div class="section" id="superAdminSection" style="display:none">
+      <div class="section-title">Platform Overview</div>
+      <div class="quick-links">
+        <a href="/ceo" class="quick-link-btn">→ Open CEO Dashboard</a>
+      </div>
+    </div>
+
+  </div><!-- /panelFinancial -->
+
+</div><!-- /pageContent -->
+
+<!-- Inactive Clients Drawer -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeInactiveDrawer()"></div>
+<div id="inactiveDrawer">
+  <button class="drawer-close" onclick="closeInactiveDrawer()">✕</button>
+  <div class="drawer-title">Inactive Clients</div>
+  <div class="drawer-sub">Active clients with no messages in the last 30 days</div>
+  <div id="drawerContent">
+    <div class="drawer-spinner"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<script src="/js/nav-user.js"></script>
+<script>
+(function () {
+  // ── Auth ────────────────────────────────────────────────────────────────────
+  function getToken() {
+    try {
+      const s = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+      if (s?.access_token) return s.access_token;
+      const r = localStorage.getItem('sb-bixfhpzcqxjtdprjmuhx-auth-token');
+      return r ? JSON.parse(r)?.access_token : null;
+    } catch { return null; }
+  }
+
+  const SUPABASE_URL  = 'https://bixfhpzcqxjtdprjmuhx.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpeGZocHpjcXhqdGRwcmptdWh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI2MDUzNTMsImV4cCI6MjA1ODE4MTM1M30.VKZBasNmXMFNQABMCnNmQOcVMZVnqvF9mow';
+
+  // ── State ───────────────────────────────────────────────────────────────────
+  const ROLE_ORDER = ['team_member', 'manager', 'owner', 'super_admin'];
+  let analyticsData = null;
+  let effectiveRole = 'team_member';
+  let currentTab    = 'activity';
+  let currentDaycareId = null;
+
+  // ── Tabs ────────────────────────────────────────────────────────────────────
+  window.switchTab = function (tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    const btn = document.getElementById('tab' + capitalize(tab));
+    const panel = document.getElementById('panel' + capitalize(tab));
+    if (btn)   btn.classList.add('active');
+    if (panel) panel.classList.add('active');
+  };
+
+  function capitalize(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  // ── View As ─────────────────────────────────────────────────────────────────
+  window.toggleViewAsDropdown = function (e) {
+    e.stopPropagation();
+    document.getElementById('viewAsDropdown').classList.toggle('open');
+  };
+
+  window.setViewAs = function (role) {
+    effectiveRole = role;
+    document.getElementById('viewAsLabel').textContent = fmtRole(role) + ' View';
+    document.getElementById('viewAsDropdown').classList.remove('open');
+    // Mark active option
+    document.querySelectorAll('.viewas-opt').forEach(el => {
+      el.classList.toggle('active', el.dataset.role === role);
+    });
+    sessionStorage.setItem('tw_viewAs', role);
+    applyVisibility();
+  };
+
+  function fmtRole(r) {
+    return { team_member: 'Team Member', manager: 'Manager', owner: 'Owner', super_admin: 'Super Admin' }[r] || r;
+  }
+
+  function applyVisibility() {
+    // Financial tab visibility
+    const financialTab = document.getElementById('tabFinancial');
+    if (financialTab) {
+      financialTab.style.display = ROLE_ORDER.indexOf(effectiveRole) >= ROLE_ORDER.indexOf('owner') ? '' : 'none';
+    }
+
+    // data-min-role elements
+    document.querySelectorAll('[data-min-role]').forEach(el => {
+      const minRole = el.dataset.minRole;
+      el.style.display = ROLE_ORDER.indexOf(effectiveRole) >= ROLE_ORDER.indexOf(minRole) ? '' : 'none';
+    });
+
+    // If on financial tab but it just got hidden, switch to activity
+    if (ROLE_ORDER.indexOf(effectiveRole) < ROLE_ORDER.indexOf('owner') && currentTab === 'financial') {
+      switchTab('activity');
+    }
+  }
+
+  // ── Location switching ───────────────────────────────────────────────────────
+  window.switchLocation = function (id) {
+    currentDaycareId = id;
+    // Update URL without reload
+    const url = new URL(window.location.href);
+    url.searchParams.set('daycare', id);
+    window.history.pushState({}, '', url.toString());
+    loadData(id);
+  };
+
+  // ── Load data ────────────────────────────────────────────────────────────────
+  async function loadData(daycareId) {
+    const token = getToken();
+    if (!token) { window.location.href = '/login.html'; return; }
+
+    document.getElementById('loadingState').style.display  = 'flex';
+    document.getElementById('pageContent').style.display   = 'none';
+    document.getElementById('errorState').style.display    = 'none';
+
+    try {
+      let url = '/api/analytics/overview';
+      if (daycareId) url += '?daycareId=' + encodeURIComponent(daycareId);
+
+      const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+      if (res.status === 401) { window.location.href = '/login.html'; return; }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Request failed');
+      }
+
+      const data = await res.json();
+      analyticsData = data;
+      currentDaycareId = data.daycare?.id || daycareId;
+
+      // Determine effective role
+      effectiveRole = data.role;
+      const savedViewAs = sessionStorage.getItem('tw_viewAs');
+      if (savedViewAs && ROLE_ORDER.indexOf(savedViewAs) <= ROLE_ORDER.indexOf(data.role)) {
+        effectiveRole = savedViewAs;
+      }
+
+      renderAll(data);
+
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('pageContent').style.display  = 'block';
+
+    } catch (err) {
+      console.error('[Insights] load error:', err);
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('errorState').style.display   = 'flex';
+      document.getElementById('errorMsg').textContent = err.message || 'Failed to load data.';
+    }
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────────
+  function renderAll(data) {
+    const { personal, location, financial, all_locations, daycare, role } = data;
+
+    // Nav daycare name
+    document.getElementById('navDaycareName').textContent = daycare?.name || '';
+
+    // View As toggle — only show for owner+
+    if (ROLE_ORDER.indexOf(role) >= ROLE_ORDER.indexOf('owner')) {
+      document.getElementById('viewAsWrap').style.display = 'block';
+      setViewAs(effectiveRole);
+    }
+
+    // Location selector — show if multiple locations
+    if (all_locations && all_locations.length > 1) {
+      const wrap = document.getElementById('locationSelectWrap');
+      const sel  = document.getElementById('locationSelect');
+      wrap.style.display = 'block';
+      sel.innerHTML = all_locations.map(l =>
+        `<option value="${esc(l.id)}" ${l.id === currentDaycareId ? 'selected' : ''}>${esc(l.name)}</option>`
+      ).join('');
+    }
+
+    // ── Personal stats
+    document.getElementById('pMsgsToday').textContent  = fmt(personal.msgs_today);
+    document.getElementById('pMsgsWeek').textContent   = fmt(personal.msgs_week);
+    document.getElementById('pMsgsMonth').textContent  = fmt(personal.msgs_month);
+    document.getElementById('pStreak').textContent     = fmt(personal.streak);
+
+    const pct = personal.team_volume_pct || 0;
+    document.getElementById('teamVolLabel').textContent = `You sent ${pct}% of this week's messages`;
+    document.getElementById('teamVolBar').style.width   = Math.min(pct, 100) + '%';
+    document.getElementById('teamVolSub').textContent   =
+      `${personal.msgs_week} messages this week vs ${location.msgs_week} team total`;
+
+    // Message type counts
+    const tc = location.msg_type_counts || {};
+    document.getElementById('tReport').textContent  = fmt(tc.report_card || 0);
+    document.getElementById('tReminder').textContent = fmt(tc.reminder || 0);
+    document.getElementById('tReview').textContent  = fmt(tc.review_request || 0);
+    document.getElementById('tOther').textContent   = fmt((tc.bulk || 0) + (tc.custom || 0));
+
+    // Google link
+    if (daycare?.google_link) {
+      const gl = document.getElementById('googleReviewLink');
+      gl.href = daycare.google_link;
+      gl.style.display = '';
+    }
+
+    // ── Location stats
+    document.getElementById('lClients').textContent    = fmt(location.clients);
+    document.getElementById('lDogs').textContent       = fmt(location.dogs);
+    document.getElementById('lMsgs30').textContent     = fmt(location.msgs_30d);
+    document.getElementById('lTeam').textContent       = fmt(location.team_members);
+    document.getElementById('lNewClients').textContent = fmt(location.new_clients_30d);
+    document.getElementById('lInactive').textContent   = fmt(location.inactive_clients_30d);
+    document.getElementById('lTotalClients').textContent = fmt(location.clients);
+
+    // Stacked bar
+    const total = location.msgs_30d || 0;
+    document.getElementById('stackedTotal').textContent = fmt(total);
+    if (total > 0) {
+      const r  = tc.report_card || 0;
+      const rm = tc.reminder    || 0;
+      const rv = tc.review_request || 0;
+      const ot = (tc.bulk || 0) + (tc.custom || 0);
+      document.getElementById('segReport').style.width   = pctOf(r,  total);
+      document.getElementById('segReminder').style.width = pctOf(rm, total);
+      document.getElementById('segReview').style.width   = pctOf(rv, total);
+      document.getElementById('segOther').style.width    = pctOf(ot, total);
+    }
+    document.getElementById('legendReport').textContent   = `Report Cards: ${fmt(tc.report_card || 0)}`;
+    document.getElementById('legendReminder').textContent = `Reminders: ${fmt(tc.reminder || 0)}`;
+    document.getElementById('legendReview').textContent   = `Review Requests: ${fmt(tc.review_request || 0)}`;
+    document.getElementById('legendOther').textContent    = `Other / Bulk: ${fmt((tc.bulk || 0) + (tc.custom || 0))}`;
+
+    // Team table
+    renderTeamTable(location.team || [], role, data);
+
+    // ── Financial
+    if (financial) {
+      const planKey = (financial.plan || '').toLowerCase();
+      const badge = document.getElementById('finPlanBadge');
+      badge.textContent = financial.plan || 'N/A';
+      badge.className = 'plan-badge ' + planKey;
+
+      const statusEl = document.getElementById('finStatus');
+      const dot = `<span class="status-dot ${financial.status || ''}"></span>`;
+      statusEl.innerHTML = dot + (financial.status || 'Unknown');
+
+      document.getElementById('finCost').textContent  = fmt(financial.monthly_cost || 0);
+      document.getElementById('finCycle').textContent = capitalize(financial.billing_cycle || 'monthly');
+    }
+
+    // All locations table
+    if (all_locations && all_locations.length > 1) {
+      const tbody = document.getElementById('allLocationsTbody');
+      tbody.innerHTML = all_locations.map(l => `
+        <tr>
+          <td style="font-weight:600">${esc(l.name)}</td>
+          <td style="color:var(--text-dim)">${esc([l.city, l.state].filter(Boolean).join(', '))}</td>
+          <td><a href="/insights?daycare=${esc(l.id)}" class="quick-link-btn" style="padding:6px 12px;font-size:12px">View Insights →</a></td>
+        </tr>
+      `).join('');
+      document.getElementById('allLocationsSection').style.display = '';
+    }
+
+    // Super admin section
+    if (role === 'super_admin') {
+      document.getElementById('superAdminSection').style.display = '';
+    }
+
+    applyVisibility();
+  }
+
+  function renderTeamTable(team, role, data) {
+    const tbody = document.getElementById('teamTbody');
+    if (!team.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:20px">No team data</td></tr>';
+      return;
+    }
+    const maxMsgs = Math.max(...team.map(t => t.msgs_month), 1);
+    const myId = data.personal ? null : null; // we use window TailWagUser
+    tbody.innerHTML = team.map(t => {
+      const barW = Math.round((t.msgs_month / maxMsgs) * 100);
+      const isMe = window.TailWagCurrentUserId && t.user_id === window.TailWagCurrentUserId;
+      return `
+        <tr class="${isMe ? 'me' : ''}">
+          <td style="font-weight:600">${esc(t.name)}${isMe ? ' <span style="font-size:10px;color:var(--sage)">(you)</span>' : ''}</td>
+          <td><span class="role-badge ${t.role}">${fmtRole(t.role)}</span></td>
+          <td>${fmt(t.msgs_month)}</td>
+          <td>${fmt(t.msgs_week)}</td>
+          <td>
+            <div class="mini-bar-wrap">
+              <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${barW}%"></div></div>
+              <span style="font-size:11px;color:var(--text-dim);width:28px;text-align:right">${barW}%</span>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ── Inactive drawer ──────────────────────────────────────────────────────────
+  window.openInactiveDrawer = function () {
+    document.getElementById('inactiveDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+    loadInactiveClients();
+  };
+
+  window.closeInactiveDrawer = function () {
+    document.getElementById('inactiveDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+  };
+
+  async function loadInactiveClients() {
+    const content = document.getElementById('drawerContent');
+    content.innerHTML = '<div class="drawer-spinner"><div class="spinner"></div></div>';
+
+    try {
+      const token = getToken();
+      const daycareId = currentDaycareId;
+
+      // Fetch all active clients for daycare
+      const clientsRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/clients?daycare_id=eq.${daycareId}&active=eq.true&select=id,first_name,last_name,phone,created_at`,
+        { headers: {
+          'apikey': SUPABASE_ANON,
+          'Authorization': 'Bearer ' + token,
+          'Range': '0-199'
+        }}
+      );
+      const clients = clientsRes.ok ? await clientsRes.json() : [];
+
+      // Fetch recent messages (last 30d) to know which clients are active
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString();
+      const msgsRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/messages?daycare_id=eq.${daycareId}&created_at=gte.${thirtyDaysAgo}&select=client_id&limit=1000`,
+        { headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + token } }
+      );
+      const msgs = msgsRes.ok ? await msgsRes.json() : [];
+      const recentSet = new Set(msgs.filter(m => m.client_id).map(m => m.client_id));
+
+      const inactive = (Array.isArray(clients) ? clients : []).filter(c => !recentSet.has(c.id));
+
+      if (!inactive.length) {
+        content.innerHTML = '<p style="color:var(--text-dim);font-size:13px;padding:16px 0">No inactive clients found — great work!</p>';
+        return;
+      }
+
+      content.innerHTML = inactive.map(c => `
+        <div class="drawer-item">
+          <div class="drawer-item-name">${esc([c.first_name, c.last_name].filter(Boolean).join(' ') || 'Unknown')}</div>
+          <div class="drawer-item-meta">
+            ${c.phone ? 'Phone: ' + esc(c.phone) + ' · ' : ''}
+            Client since ${c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', {month:'short',year:'numeric'}) : '—'}
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      content.innerHTML = `<p style="color:var(--text-dim);font-size:13px">Failed to load: ${esc(err.message)}</p>`;
+    }
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────────────
+  function fmt(n) {
+    const num = Number(n) || 0;
+    return num >= 1000 ? (num / 1000).toFixed(1) + 'k' : String(num);
+  }
+
+  function pctOf(part, total) {
+    if (!total) return '0%';
+    return Math.round((part / total) * 100) + '%';
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────────
+  document.addEventListener('click', function () {
+    document.getElementById('viewAsDropdown')?.classList.remove('open');
+  });
+
+  window.TailWagCurrentUserId = null; // will be set if nav-user exposes it
+
+  // Pre-select daycare from URL param
+  const urlDaycareId = new URLSearchParams(window.location.search).get('daycare');
+
+  // Wait for DOM then load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => loadData(urlDaycareId));
+  } else {
+    loadData(urlDaycareId);
+  }
+})();
+</script>
+</body>
+</html>

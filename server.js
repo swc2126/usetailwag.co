@@ -63,6 +63,8 @@ app.use('/api/appointments', require('./routes/appointments'));
 app.use('/api/import', require('./routes/import'));
 app.use('/api/newsletter', require('./routes/newsletter'));
 app.use('/api/sentiment', require('./routes/sentiment'));
+const analyticsRouter = require('./routes/analytics');
+app.use('/api/analytics', analyticsRouter);
 
 // Serve index.html for root
 app.get('/', (req, res) => {
@@ -85,6 +87,11 @@ app.get('/terms', (req, res) => {
 // Signup clean URL (preserves ?plan= query param)
 app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+});
+
+// Insights dashboard — role-based analytics for all users
+app.get('/insights', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'insights.html'));
 });
 
 // CEO dashboard — protected route, redirects to login if no token present
