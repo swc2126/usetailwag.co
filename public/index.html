@@ -994,10 +994,16 @@
         }
         .newsletter-form {
             display: flex;
+            flex-direction: column;
             gap: 10px;
             max-width: 440px;
             margin: 0 auto 14px;
         }
+        .newsletter-name-row {
+            display: flex;
+            gap: 10px;
+        }
+        .newsletter-form input[type="text"],
         .newsletter-form input[type="email"] {
             flex: 1;
             padding: 13px 16px;
@@ -1010,11 +1016,17 @@
             outline: none;
             transition: border-color 0.2s;
         }
+        .newsletter-form input[type="text"]:focus,
         .newsletter-form input[type="email"]:focus {
             border-color: var(--green);
         }
+        .newsletter-form input[type="text"]::placeholder,
         .newsletter-form input[type="email"]::placeholder {
             color: #aaa;
+        }
+        .newsletter-submit-row {
+            display: flex;
+            gap: 10px;
         }
         .newsletter-submit {
             background: var(--green);
@@ -1859,8 +1871,14 @@
             <h2 class="newsletter-headline">Tips for running a better daycare — straight from the field.</h2>
             <p class="newsletter-desc">Real stories, real numbers, and practical tips from daycares we work with every week.<br>One email, every two weeks. No fluff. No sales pitch.</p>
             <form class="newsletter-form" id="newsletterForm" onsubmit="submitNewsletter(event)">
-                <input type="email" id="newsletterEmail" placeholder="your@email.com" required autocomplete="email">
-                <button type="submit" class="newsletter-submit" id="newsletterBtn">Get on the list →</button>
+                <div class="newsletter-name-row">
+                    <input type="text" id="newsletterFirstName" placeholder="First name" autocomplete="given-name">
+                    <input type="text" id="newsletterLastName" placeholder="Last name" autocomplete="family-name">
+                </div>
+                <div class="newsletter-submit-row">
+                    <input type="email" id="newsletterEmail" placeholder="your@email.com" required autocomplete="email" style="flex:1;">
+                    <button type="submit" class="newsletter-submit" id="newsletterBtn">Get on the list →</button>
+                </div>
             </form>
             <p class="newsletter-fine">No spam. Unsubscribe anytime.</p>
             <p class="newsletter-success" id="newsletterSuccess">✓ You're on the list. First issue lands in two weeks.</p>
@@ -1956,6 +1974,8 @@
       async function submitNewsletter(e) {
         e.preventDefault();
         const email = document.getElementById('newsletterEmail').value.trim();
+        const first_name = document.getElementById('newsletterFirstName').value.trim();
+        const last_name = document.getElementById('newsletterLastName').value.trim();
         const btn = document.getElementById('newsletterBtn');
         const success = document.getElementById('newsletterSuccess');
         btn.textContent = 'Subscribing…';
@@ -1964,7 +1984,7 @@
           const res = await fetch('/api/newsletter/subscribe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
+            body: JSON.stringify({ email, first_name, last_name })
           });
           const data = await res.json();
           if (res.ok) {

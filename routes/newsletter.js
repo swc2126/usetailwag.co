@@ -14,6 +14,8 @@ async function syncToBrevo(email, attrs = {}) {
 
     // Map profile fields to Brevo contact attributes
     const attributes = {};
+    if (attrs.first_name)   attributes.FIRSTNAME    = attrs.first_name;
+    if (attrs.last_name)    attributes.LASTNAME     = attrs.last_name;
     if (attrs.opened_month) attributes.OPENED_MONTH = attrs.opened_month;
     if (attrs.opened_year)  attributes.OPENED_YEAR  = parseInt(attrs.opened_year, 10);
     if (attrs.dogs_served)  attributes.DOGS_SERVED  = attrs.dogs_served;
@@ -54,7 +56,7 @@ router.use((req, res, next) => {
 
 // POST /api/newsletter/subscribe
 router.post('/subscribe', async (req, res) => {
-  const { email, opened_month, opened_year, dogs_served, staff_count, role, role_other } = req.body;
+  const { email, first_name, last_name, opened_month, opened_year, dogs_served, staff_count, role, role_other } = req.body;
   if (!email || !email.includes('@')) {
     return res.status(400).json({ error: 'Valid email required.' });
   }
@@ -95,7 +97,7 @@ router.post('/subscribe', async (req, res) => {
 
   // Sync to Brevo contact list (fire and forget)
   // Welcome email is handled by Brevo automation triggered on contact added to list
-  syncToBrevo(normalizedEmail, { opened_month, opened_year, dogs_served, staff_count, role, role_other });
+  syncToBrevo(normalizedEmail, { first_name, last_name, opened_month, opened_year, dogs_served, staff_count, role, role_other });
 
   return res.json({ ok: true });
 });

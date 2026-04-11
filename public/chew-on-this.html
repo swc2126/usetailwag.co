@@ -310,6 +310,10 @@
 
   <div class="signup-box">
     <div id="heroFormWrap">
+      <div class="signup-input-row" style="margin-bottom:14px;">
+        <input type="text" id="heroFirstName" class="signup-input" placeholder="First name" autocomplete="given-name">
+        <input type="text" id="heroLastName" class="signup-input" placeholder="Last name" autocomplete="family-name">
+      </div>
       <label for="heroEmail">Your email address</label>
       <div class="signup-input-row" style="margin-bottom:20px;">
         <input type="email" id="heroEmail" class="signup-input" placeholder="you@yourdaycare.com" autocomplete="email">
@@ -413,6 +417,8 @@
   <h2>Join the pack.</h2>
   <p>Free. Bi-monthly. Worth the two minutes it takes to read.</p>
   <div class="bottom-form">
+    <input type="text" id="bottomFirstName" class="bottom-input" placeholder="First name" autocomplete="given-name" style="max-width:160px;">
+    <input type="text" id="bottomLastName" class="bottom-input" placeholder="Last name" autocomplete="family-name" style="max-width:160px;">
     <input type="email" id="bottomEmail" class="bottom-input" placeholder="your@email.com" autocomplete="email">
     <button class="bottom-btn" id="bottomBtn" onclick="bottomSubscribe()">Count me in</button>
   </div>
@@ -482,6 +488,8 @@
     subscribe(
       document.getElementById('heroEmail').value,
       {
+        first_name:   document.getElementById('heroFirstName').value.trim() || null,
+        last_name:    document.getElementById('heroLastName').value.trim()  || null,
         opened_month: document.getElementById('heroMonth').value || null,
         opened_year:  document.getElementById('heroYear').value ? parseInt(document.getElementById('heroYear').value) : null,
         dogs_served:  document.getElementById('heroDogs').value  || null,
@@ -498,7 +506,11 @@
 
   function bottomSubscribe() {
     subscribe(
-      document.getElementById('bottomEmail').value, {},
+      document.getElementById('bottomEmail').value,
+      {
+        first_name: document.getElementById('bottomFirstName').value.trim() || null,
+        last_name:  document.getElementById('bottomLastName').value.trim()  || null,
+      },
       document.getElementById('bottomBtn'),
       document.getElementById('bottomSuccess'),
       document.getElementById('bottomError'),
