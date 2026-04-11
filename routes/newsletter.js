@@ -52,6 +52,56 @@ async function syncToBrevo(email, attrs = {}) {
   }
 }
 
+// Send welcome email via Brevo transactional API (fire and forget)
+async function sendBrevoWelcome(email, firstName) {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return;
+
+  const name = firstName ? firstName : 'there';
+
+  try {
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sender: { name: 'The TailWag Team', email: 'info@usetailwag.co' },
+        to: [{ email }],
+        subject: 'You\'re in — Chew on This 🐾',
+        htmlContent: `
+          <div style="font-family:Inter,Arial,sans-serif;max-width:520px;margin:0 auto;background:#F5F0E8;border-radius:12px;overflow:hidden;">
+            <div style="background:#0F1410;padding:28px 32px;">
+              <span style="color:#F5F0E8;font-weight:800;font-size:20px;">🐾 TailWag</span>
+            </div>
+            <div style="padding:32px;">
+              <p style="color:#C4933F;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;">Chew on This · Bi-monthly newsletter</p>
+              <h2 style="color:#0F1410;font-size:22px;font-weight:800;margin:0 0 16px;line-height:1.3;">Hey ${name}, you're on the list. 🐾</h2>
+              <p style="color:#444;font-size:15px;line-height:1.7;margin-bottom:16px;">
+                Every two weeks you'll get one short, useful email — real stories, real numbers, and practical tips from independent dog daycares doing the work.
+              </p>
+              <p style="color:#444;font-size:15px;line-height:1.7;margin-bottom:24px;">
+                No fluff. No sales pitch. Just the stuff worth reading over your morning coffee.
+              </p>
+              <p style="color:#888;font-size:13px;">
+                If you ever want off the list, just reply "unsubscribe" and we'll take care of it right away.
+              </p>
+              <p style="color:#888;font-size:13px;margin-top:24px;border-top:1px solid #ddd;padding-top:16px;">
+                — The TailWag Team<br>
+                <a href="mailto:info@usetailwag.co" style="color:#1E6B4A;text-decoration:none;">info@usetailwag.co</a>
+              </p>
+            </div>
+          </div>
+        `
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      console.error('Brevo welcome email error:', err);
+    }
+  } catch (err) {
+    console.error('Brevo welcome email fetch error:', err.message);
+  }
+}
+
 // GET — redirect direct visits back to the landing page
 router.get('/subscribe', (req, res) => {
   res.redirect(301, 'https://usetailwag.co/chew-on-this');
@@ -107,9 +157,9 @@ router.post('/subscribe', async (req, res) => {
     return res.status(500).json({ error: 'Could not subscribe. Please try again.' });
   }
 
-  // Sync to Brevo contact list (fire and forget)
-  // Welcome email is handled by Brevo automation triggered on contact added to list
+  // Sync to Brevo contact list + send welcome email (fire and forget)
   syncToBrevo(normalizedEmail, { first_name, last_name, opened_month, opened_year, dogs_served, staff_count, role, role_other });
+  sendBrevoWelcome(normalizedEmail, first_name);
 
   return res.json({ ok: true });
 });
