@@ -5,14 +5,14 @@ const { supabaseAdmin } = require('../config/supabase');
 // Sync subscriber to Brevo contact list (fire and forget)
 async function syncToBrevo(email, attrs = {}) {
   const apiKey = process.env.BREVO_API_KEY;
-  const listId = process.env.BREVO_LIST_ID; // numeric list ID from Brevo dashboard
+  const listId = process.env.BREVO_LIST_ID;
   if (!apiKey) return;
 
-  try {
-    const body = { email, updateEnabled: true };
-    if (listId) body.listIds = [parseInt(listId, 10)];
+  const headers = { 'api-key': apiKey, 'Content-Type': 'application/json' };
 
-    // Map profile fields to Brevo contact attributes
+  try {
+    // Step 1 — Create or update the contact with attributes (no listIds here)
+    const body = { email, updateEnabled: true };
     const attributes = {};
     if (attrs.first_name)   attributes.FIRSTNAME    = attrs.first_name;
     if (attrs.last_name)    attributes.LASTNAME     = attrs.last_name;
@@ -23,16 +23,28 @@ async function syncToBrevo(email, attrs = {}) {
     if (attrs.role)         attributes.ROLE         = attrs.role === 'Other' && attrs.role_other ? attrs.role_other : attrs.role;
     if (Object.keys(attributes).length) body.attributes = attributes;
 
-    const res = await fetch('https://api.brevo.com/v3/contacts', {
+    const contactRes = await fetch('https://api.brevo.com/v3/contacts', {
       method: 'POST',
-      headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(body)
     });
-    if (!res.ok) {
-      const err = await res.json();
-      // 400 with "Contact already exist" is fine — Brevo returns this for existing contacts
+    if (!contactRes.ok) {
+      const err = await contactRes.json();
       if (err.code !== 'duplicate_parameter') {
-        console.error('Brevo sync error:', err);
+        console.error('Brevo create contact error:', err);
+      }
+    }
+
+    // Step 2 — Explicitly add to list via dedicated endpoint (this reliably fires the automation trigger)
+    if (listId) {
+      const listRes = await fetch(`https://api.brevo.com/v3/contacts/lists/${parseInt(listId, 10)}/contacts/add`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ emails: [email] })
+      });
+      if (!listRes.ok) {
+        const err = await listRes.json();
+        console.error('Brevo add-to-list error:', err);
       }
     }
   } catch (err) {
