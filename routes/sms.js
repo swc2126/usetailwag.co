@@ -113,7 +113,8 @@ router.post('/send', requireAuth, async (req, res) => {
       media_url: media_url || null,
       media_type: media_type || 'none',
       twilio_sid: twilioSid || null,
-      status
+      status,
+      message_type: staff_notes ? 'report_card' : 'custom'
     })
     .select()
     .single();
@@ -243,7 +244,8 @@ router.post('/bulk', requireAuth, async (req, res) => {
       media_type: media_type || 'none',
       twilio_sid: twilioSid || null,
       status,
-      is_bulk: true
+      is_bulk: true,
+      message_type: 'bulk'
     });
   }
 
