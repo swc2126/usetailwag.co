@@ -4,11 +4,21 @@
  * an avatar + name + role badge + dropdown in #navUserWidget.
  */
 (function () {
-  const ROLE_LABELS = { owner: 'Site Manager', admin: 'Site Manager', staff: 'Team Member' };
+  const ROLE_LABELS = {
+    super_admin:  'TailWag Admin',
+    owner:        'Owner',
+    manager:      'Manager',
+    admin:        'Manager',      // legacy
+    team_member:  'Team Member',
+    staff:        'Team Member'   // legacy
+  };
   const ROLE_COLORS = {
-    owner: 'background:rgba(196,147,63,0.18);color:#C4933F;',
-    admin: 'background:rgba(196,147,63,0.18);color:#C4933F;',
-    staff: 'background:rgba(255,255,255,0.1);color:rgba(245,240,232,0.6);'
+    super_admin:  'background:rgba(99,102,241,0.18);color:#818cf8;',
+    owner:        'background:rgba(196,147,63,0.18);color:#C4933F;',
+    manager:      'background:rgba(30,107,74,0.18);color:#4ade80;',
+    admin:        'background:rgba(30,107,74,0.18);color:#4ade80;',
+    team_member:  'background:rgba(255,255,255,0.1);color:rgba(245,240,232,0.6);',
+    staff:        'background:rgba(255,255,255,0.1);color:rgba(245,240,232,0.6);'
   };
 
   // Inject widget styles once
@@ -194,7 +204,8 @@
             </div>
           </div>
           <a href="/profile.html" class="nu-dd-item">👤 &nbsp;My Profile</a>
-          ${u.role === 'owner' ? `<a href="/ceo" class="nu-dd-item">📊 &nbsp;CEO Dashboard</a>` : ''}
+          ${['super_admin','owner','manager'].includes(u.role) ? `<a href="/ceo" class="nu-dd-item">📊 &nbsp;${u.role === 'super_admin' ? 'TailWag HQ' : 'Overview'}</a>` : ''}
+          ${['super_admin','owner','manager'].includes(u.role) ? `<a href="/billing.html" class="nu-dd-item">💳 &nbsp;Billing</a>` : ''}
           <div class="nu-dd-divider"></div>
           <button class="nu-dd-item danger" onclick="window.__nuLogout()">Sign Out</button>
         </div>
