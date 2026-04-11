@@ -266,65 +266,6 @@
 
     .error-msg { background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; border-radius: 8px; padding: 12px 16px; font-size: 13px; margin-bottom: 16px; display: none; }
 
-    /* ── MESSAGE THREAD ───────────────────────────────── */
-    .thread-modal { max-width: 520px; width: 100%; padding: 0; overflow: hidden; }
-    .thread-header {
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .thread-header h2 { font-size: 16px; font-weight: 700; margin: 0; }
-    .thread-header .thread-name { font-size: 13px; color: rgba(245,240,232,0.5); margin-top: 2px; }
-    .thread-close {
-      background: none; border: none; color: rgba(245,240,232,0.4);
-      font-size: 20px; cursor: pointer; padding: 4px; line-height: 1;
-    }
-    .thread-close:hover { color: var(--linen, #F5F0E8); }
-    .thread-body {
-      height: 380px; overflow-y: auto; padding: 16px 20px;
-      display: flex; flex-direction: column; gap: 10px;
-      background: #1a1f1b;
-    }
-    .thread-empty {
-      text-align: center; color: rgba(245,240,232,0.5);
-      font-size: 13px; margin: auto;
-    }
-    .bubble-wrap { display: flex; flex-direction: column; }
-    .bubble-wrap.out { align-items: flex-end; }
-    .bubble-wrap.in  { align-items: flex-start; }
-    .bubble {
-      max-width: 78%; padding: 10px 14px; border-radius: 16px;
-      font-size: 13px; line-height: 1.6; word-break: break-word;
-    }
-    .bubble.out {
-      background: #1E6B4A; color: #ffffff;
-      border-bottom-right-radius: 4px;
-    }
-    .bubble.in {
-      background: #3a3f3b; color: #F5F0E8;
-      border-bottom-left-radius: 4px;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .bubble-meta {
-      font-size: 10px; color: rgba(245,240,232,0.55);
-      margin-top: 3px; padding: 0 2px;
-    }
-    .bubble-img { max-width: 200px; border-radius: 10px; margin-top: 6px; display: block; }
-    .thread-footer {
-      padding: 14px 20px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      font-size: 11px; color: rgba(245,240,232,0.5);
-      text-align: center;
-    }
-    .unread-badge {
-      display: inline-flex; align-items: center; justify-content: center;
-      background: #C4933F; color: #fff;
-      font-size: 10px; font-weight: 700;
-      width: 18px; height: 18px; border-radius: 50%;
-      margin-left: 5px; vertical-align: middle;
-    }
-    .action-btn.msg-btn { background: rgba(30,107,74,0.15); color: #1E6B4A; }
-    .action-btn.msg-btn:hover { background: rgba(30,107,74,0.3); }
     .action-btn.profile-btn { background: rgba(196,147,63,0.12); color: #9a6f24; }
     .action-btn.profile-btn:hover { background: rgba(196,147,63,0.25); }
 
@@ -549,24 +490,6 @@
   </div>
 </div>
 
-<!-- Message Thread Modal -->
-<div class="modal-overlay" id="threadModal">
-  <div class="modal thread-modal">
-    <div class="thread-header">
-      <div>
-        <div class="modal" style="all:unset;"><h2 id="threadTitle" style="font-family:inherit;font-size:16px;font-weight:700;color:#F5F0E8;margin:0;">Messages</h2></div>
-        <div class="thread-name" id="threadSubtitle"></div>
-      </div>
-      <button class="thread-close" onclick="closeThread()">✕</button>
-    </div>
-    <div class="thread-body" id="threadBody">
-      <div class="thread-empty">Loading…</div>
-    </div>
-    <div class="thread-footer">
-      Replies from pet parents appear here automatically. Send new messages from the Messaging page.
-    </div>
-  </div>
-</div>
 
 <!-- Add Dog Modal -->
 <div class="modal-overlay" id="addDogModal">
@@ -669,7 +592,6 @@
   };
 
   let clients = [];
-  let unreadCounts = {};
   let currentSort = 'owner'; // 'owner' | 'dog'
 
   function setSort(mode) {
@@ -682,14 +604,10 @@
 
   async function loadClients() {
     try {
-      const [clientRes, unreadRes] = await Promise.all([
-        fetch('/api/clients', { headers: authHeaders }),
-        fetch('/api/sms/unread', { headers: authHeaders })
-      ]);
+      const clientRes = await fetch('/api/clients', { headers: authHeaders });
       if (clientRes.status === 401) { localStorage.removeItem('tailwag_session'); window.location.href = '/login.html'; return; }
       if (!clientRes.ok) { const e = await clientRes.json(); throw new Error(e.error || 'Failed to load clients'); }
       clients = await clientRes.json();
-      if (unreadRes.ok) unreadCounts = await unreadRes.json();
       renderClients();
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('pageContent').style.display = 'block';
@@ -698,55 +616,6 @@
     }
   }
 
-  // ── Message Thread ──────────────────────────────────────────
-  async function openThread(clientId, clientName) {
-    document.getElementById('threadTitle').textContent = 'Messages';
-    document.getElementById('threadSubtitle').textContent = clientName;
-    document.getElementById('threadBody').innerHTML = '<div class="thread-empty">Loading…</div>';
-    document.getElementById('threadModal').classList.add('open');
-
-    try {
-      const [threadRes] = await Promise.all([
-        fetch(`/api/sms/thread/${clientId}`, { headers: authHeaders }),
-        fetch(`/api/sms/thread/${clientId}/read`, { method: 'POST', headers: authHeaders })
-      ]);
-
-      // Clear unread badge
-      if (unreadCounts[clientId]) {
-        delete unreadCounts[clientId];
-        renderClients();
-      }
-
-      if (!threadRes.ok) throw new Error('Failed to load messages');
-      const thread = await threadRes.json();
-
-      const body = document.getElementById('threadBody');
-      if (!thread.length) {
-        body.innerHTML = '<div class="thread-empty">No messages yet.<br>Send the first one from the Messaging page.</div>';
-        return;
-      }
-
-      body.innerHTML = thread.map(m => {
-        const dir = m.direction;
-        const time = new Date(m.ts).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-        const label = dir === 'out' ? 'TailWag' : clientName.split(' ')[0];
-        return `
-          <div class="bubble-wrap ${dir}">
-            <div class="bubble ${dir}">${escHtml(m.body)}${m.media_url ? `<img src="${m.media_url}" class="bubble-img" alt="photo">` : ''}</div>
-            <div class="bubble-meta">${label} · ${time}</div>
-          </div>`;
-      }).join('');
-
-      // Scroll to bottom
-      body.scrollTop = body.scrollHeight;
-    } catch (err) {
-      document.getElementById('threadBody').innerHTML = `<div class="thread-empty" style="color:#e53e3e;">${err.message}</div>`;
-    }
-  }
-
-  function closeThread() {
-    document.getElementById('threadModal').classList.remove('open');
-  }
 
   function renderClients() {
     const tbody = document.getElementById('clientsTableBody');
@@ -808,7 +677,6 @@
           <td style="color:#999;">${escHtml(dog.breed || '—')}</td>
           <td>
             <button class="action-btn profile-btn" onclick="window.location.href='/client-profile.html?id=${c.id}'">View Profile</button>
-            <button class="action-btn msg-btn" onclick="openThread('${c.id}', '${escHtml(c.first_name)} ${escHtml(c.last_name)}')">💬${unreadCounts[c.id] ? `<span class="unread-badge">${unreadCounts[c.id]}</span>` : ''}</button>
             <button class="action-btn edit-btn" onclick="openEditDogModal(${JSON.stringify(dog).replace(/"/g,'&quot;')}, '${c.id}')">Edit Dog</button>
             <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit Owner</button>
           </td>
@@ -851,7 +719,6 @@
           <td>${dogsHtml}</td>
           <td>
             <button class="action-btn profile-btn" onclick="window.location.href='/client-profile.html?id=${c.id}'">View Profile</button>
-            <button class="action-btn msg-btn" onclick="openThread('${c.id}', '${escHtml(c.first_name)} ${escHtml(c.last_name)}')">💬${unreadCounts[c.id] ? `<span class="unread-badge">${unreadCounts[c.id]}</span>` : ''}</button>
             <button class="action-btn add-dog-btn" onclick="openAddDogModal('${c.id}')">+ Dog</button>
             <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit</button>
             <button class="action-btn delete-btn" onclick="deleteClient('${c.id}', '${escHtml(c.first_name)} ${escHtml(c.last_name)}')">Delete</button>
