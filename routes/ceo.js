@@ -16,12 +16,12 @@ router.get('/overview', requireAuth, requireRole('super_admin', 'owner', 'manage
     if (req.userRole === 'super_admin') {
       ({ data: daycares, error: dcError } = await supabaseAdmin
         .from('daycares')
-        .select('id, name, address, phone, google_link, owner_id')
+        .select('id, name, street, city, state, zip, phone, google_link, owner_id')
         .order('name'));
     } else if (req.userRole === 'owner') {
       ({ data: daycares, error: dcError } = await supabaseAdmin
         .from('daycares')
-        .select('id, name, address, phone, google_link, owner_id')
+        .select('id, name, street, city, state, zip, phone, google_link, owner_id')
         .eq('owner_id', req.user.id)
         .order('name'));
     } else if (req.userRole === 'manager') {
@@ -34,7 +34,7 @@ router.get('/overview', requireAuth, requireRole('super_admin', 'owner', 'manage
       if (!ids.length) return res.json({ locations: [], totals: { locations: 0, clients: 0, dogs: 0, messages_this_month: 0 } });
       ({ data: daycares, error: dcError } = await supabaseAdmin
         .from('daycares')
-        .select('id, name, address, phone, google_link, owner_id')
+        .select('id, name, street, city, state, zip, phone, google_link, owner_id')
         .in('id', ids)
         .order('name'));
     }
@@ -81,7 +81,10 @@ router.get('/overview', requireAuth, requireRole('super_admin', 'owner', 'manage
         return {
           id: dc.id,
           name: dc.name,
-          address: dc.address,
+          street: dc.street,
+          city: dc.city,
+          state: dc.state,
+          zip: dc.zip,
           phone: dc.phone,
           google_link: dc.google_link,
           owner: {
