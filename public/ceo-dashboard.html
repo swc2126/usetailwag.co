@@ -350,7 +350,7 @@
           <div class="location-card-header">
             <div>
               <div class="location-name">${esc(loc.name)}</div>
-              <div class="location-city">${loc.city ? esc(loc.city) + (loc.state ? ', ' + esc(loc.state) : '') : 'Location not set'}</div>
+              <div class="location-city">${esc(loc.address) || 'Location not set'}</div>
             </div>
             ${planBadge(loc.subscription)}
           </div>
