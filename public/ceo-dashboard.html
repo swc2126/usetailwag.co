@@ -302,6 +302,10 @@
 
     function getToken() {
       try {
+        // Try tailwag_session first (standard app login)
+        const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+        if (session?.access_token) return session.access_token;
+        // Fallback: Supabase native key
         const raw = localStorage.getItem('sb-bixfhpzcqxjtdprjmuhx-auth-token');
         if (!raw) return null;
         return JSON.parse(raw)?.access_token || null;
