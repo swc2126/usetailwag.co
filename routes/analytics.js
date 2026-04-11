@@ -18,10 +18,20 @@ router.get('/overview', requireAuth, async (req, res) => {
       daycareId = req.query.daycareId || req.daycareId;
     } else if (req.userRole === 'super_admin') {
       daycareId = req.query.daycareId;
+      // Auto-pick first daycare if none specified
+      if (!daycareId) {
+        const { data: firstDc } = await supabaseAdmin
+          .from('daycares')
+          .select('id')
+          .order('name')
+          .limit(1)
+          .single();
+        daycareId = firstDc?.id || null;
+      }
     }
 
     if (!daycareId) {
-      return res.status(400).json({ error: 'No daycareId resolved. Please specify ?daycareId=xxx' });
+      return res.status(400).json({ error: 'No daycares found in the system.' });
     }
 
     // Step 2: Validate access
@@ -203,11 +213,19 @@ router.get('/overview', requireAuth, async (req, res) => {
         monthly_cost: PLAN_PRICES[planKey] || 0
       } : null;
 
-      const { data: allDaycares } = await supabaseAdmin
-        .from('daycares')
-        .select('id, name, city, state')
-        .eq('owner_id', ownerId);
-      all_locations = allDaycares || [];
+      if (req.userRole === 'super_admin') {
+        const { data: allDaycares } = await supabaseAdmin
+          .from('daycares')
+          .select('id, name, city, state')
+          .order('name');
+        all_locations = allDaycares || [];
+      } else {
+        const { data: allDaycares } = await supabaseAdmin
+          .from('daycares')
+          .select('id, name, city, state')
+          .eq('owner_id', ownerId);
+        all_locations = allDaycares || [];
+      }
     }
 
     // Step 10: Build and return response
