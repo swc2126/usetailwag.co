@@ -1626,6 +1626,16 @@
       errorEl.classList.add('visible');
     }
 
+    // Pre-select plan from URL parameter e.g. /signup?plan=starter
+    (function() {
+      const planParam = new URLSearchParams(window.location.search).get('plan');
+      if (planParam && pricing[planParam]) {
+        choosePath('new');
+        const el = document.querySelector(`.plan-option[data-plan="${planParam}"]`);
+        if (el) selectPlan(el, planParam);
+      }
+    })();
+
     // Initialize price display
     updatePriceDisplay();
   </script>
