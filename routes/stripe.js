@@ -257,4 +257,76 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   res.json({ received: true });
 });
 
+// GET /api/stripe/billing-info — live subscription dates from Stripe
+router.get('/billing-info', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) return res.status(401).json({ error: 'Not authenticated' });
+    const token = authHeader.split(' ')[1];
+
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: 'Invalid token' });
+
+    const { data: sub } = await supabaseAdmin
+      .from('subscriptions')
+      .select('stripe_subscription_id, stripe_customer_id, status, plan')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!sub?.stripe_subscription_id) {
+      return res.json({ hasSubscription: false });
+    }
+
+    const stripeSub = await stripe.subscriptions.retrieve(sub.stripe_subscription_id);
+
+    res.json({
+      hasSubscription: true,
+      status:               stripeSub.status,
+      current_period_start: stripeSub.current_period_start, // Unix timestamp
+      current_period_end:   stripeSub.current_period_end,   // Unix timestamp
+      cancel_at_period_end: stripeSub.cancel_at_period_end,
+      plan:                 sub.plan
+    });
+  } catch (err) {
+    console.error('Billing info error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch billing info' });
+  }
+});
+
+// POST /api/stripe/portal — create Stripe Customer Portal session
+router.post('/portal', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) return res.status(401).json({ error: 'Not authenticated' });
+    const token = authHeader.split(' ')[1];
+
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: 'Invalid token' });
+
+    const { data: sub } = await supabaseAdmin
+      .from('subscriptions')
+      .select('stripe_customer_id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!sub?.stripe_customer_id) {
+      return res.status(400).json({ error: 'No billing account found. Contact support.' });
+    }
+
+    const baseUrl = process.env.NODE_ENV === 'production'
+      ? `https://${req.get('host')}`
+      : `http://localhost:${process.env.PORT || 3000}`;
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer:   sub.stripe_customer_id,
+      return_url: `${baseUrl}/settings.html`
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('Portal error:', err.message);
+    res.status(500).json({ error: 'Failed to open billing portal' });
+  }
+});
+
 module.exports = router;

@@ -451,13 +451,6 @@
               <a href="/team.html" class="step-link" onclick="event.stopPropagation()">Go to Team →</a>
             </div>
           </div>
-          <div class="checklist-step" data-key="sent_bulk" onclick="toggleStep(this)">
-            <div class="step-check">✓</div>
-            <div class="step-body">
-              <div class="step-text">Send a bulk message</div>
-              <a href="/messaging.html" class="step-link" onclick="event.stopPropagation()">Go to Messaging →</a>
-            </div>
-          </div>
           <div class="checklist-step" data-key="review_setup" onclick="toggleStep(this)">
             <div class="step-check">✓</div>
             <div class="step-body">
@@ -662,16 +655,6 @@
 
         <div class="faq-item">
           <button class="faq-q" onclick="toggleFaq(this)">
-            What is bulk messaging?
-            <span class="faq-caret">▾</span>
-          </button>
-          <div class="faq-a">
-            Bulk messaging lets you send one message to many clients at once — useful for closures, holiday hours, promotions, or policy updates. Go to <a href="/messaging.html">Messaging</a> and select your recipients. Each pet parent receives the message as an individual SMS, not a group text.
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)">
             How do I invite team members?
             <span class="faq-caret">▾</span>
           </button>
@@ -706,7 +689,7 @@
             <span class="faq-caret">▾</span>
           </button>
           <div class="faq-a">
-            Go to <a href="/settings.html">Billing &amp; Plan</a> and click "Manage Subscription." You can upgrade, downgrade, or cancel directly from the billing portal. Need help? <button style="background:none;border:none;color:var(--green);font-weight:500;cursor:pointer;padding:0;font-size:inherit;" onclick="openIntercom()">Chat with us</button> and we'll take care of it.
+            Go to <a href="/settings.html">Settings</a> and click <strong>Manage Subscription</strong> under Your Plan. This opens the Stripe billing portal where you can upgrade, downgrade, update your payment method, or cancel — all without contacting support. If you don't see the button, <button style="background:none;border:none;color:var(--green);font-weight:500;cursor:pointer;padding:0;font-size:inherit;" onclick="openIntercom()">chat with us</button> and we'll help right away.
           </div>
         </div>
 
@@ -763,7 +746,7 @@
     const pct = Math.round((done / total) * 100);
     document.getElementById('progressFill').style.width = pct + '%';
     document.getElementById('progressLabel').textContent =
-      done === total ? '🎉 All done!' : `${done} of ${total} complete`;
+      done === total ? '🎉 All set!' : `${done} of ${total} complete`;
   }
 
   /* ── FAQ ── */

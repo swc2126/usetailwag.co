@@ -192,8 +192,16 @@
         <span class="info-value highlight" id="planStatus">—</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Next Renewal</span>
+        <span class="info-label">Last Billed</span>
+        <span class="info-value" id="planLastBilled">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Next Billing Date</span>
         <span class="info-value" id="planRenewal">—</span>
+      </div>
+      <div style="margin-top:18px;">
+        <button class="btn-primary" id="manageSubBtn" onclick="openBillingPortal()" style="display:none;">Manage Subscription</button>
+        <p id="manageSubNote" style="font-size:12px;color:#aaa;margin-top:8px;display:none;">You can upgrade, downgrade, or cancel from the billing portal.</p>
       </div>
     </div>
 
@@ -396,14 +404,10 @@
       }
 
       const planStatusEl = document.getElementById('planStatus');
-      if (planStatusEl) planStatusEl.textContent = meData?.subscription?.status === 'active' ? 'Active' : 'No active subscription';
+      if (planStatusEl) planStatusEl.textContent = meData?.subscription?.status === 'active' ? 'Active' : (meData?.subscription?.status || 'No active subscription');
 
-      // Renewal date
-      const periodEnd = meData?.subscription?.current_period_end;
-      const planRenewalEl = document.getElementById('planRenewal');
-      if (planRenewalEl) planRenewalEl.textContent = periodEnd
-        ? new Date(periodEnd * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-        : '—';
+      // Load live billing dates + portal button from Stripe
+      loadBillingInfo();
 
       // TailWag number
       await loadTwilioNumber();
@@ -495,6 +499,60 @@
     }
 
     setTimeout(() => { msg.style.display = 'none'; }, 4000);
+  }
+
+  async function loadBillingInfo() {
+    try {
+      const res = await fetch('/api/stripe/billing-info', { headers: authHeaders });
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const fmt = ts => ts
+        ? new Date(ts * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        : '—';
+
+      const lastBilledEl = document.getElementById('planLastBilled');
+      const renewalEl    = document.getElementById('planRenewal');
+      const manageBtn    = document.getElementById('manageSubBtn');
+      const manageNote   = document.getElementById('manageSubNote');
+
+      if (data.hasSubscription) {
+        if (lastBilledEl) lastBilledEl.textContent = fmt(data.current_period_start);
+        if (renewalEl) {
+          renewalEl.textContent = data.cancel_at_period_end
+            ? `${fmt(data.current_period_end)} (cancels)`
+            : fmt(data.current_period_end);
+        }
+        if (manageBtn)  { manageBtn.style.display  = 'inline-flex'; }
+        if (manageNote) { manageNote.style.display = 'block'; }
+      } else {
+        if (lastBilledEl) lastBilledEl.textContent = '—';
+        if (renewalEl)    renewalEl.textContent    = '—';
+      }
+    } catch (e) {
+      console.warn('Billing info fetch failed', e);
+    }
+  }
+
+  async function openBillingPortal() {
+    const btn = document.getElementById('manageSubBtn');
+    if (btn) { btn.textContent = 'Opening…'; btn.disabled = true; }
+    try {
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: authHeaders
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Unable to open billing portal. Please contact support.');
+        if (btn) { btn.textContent = 'Manage Subscription'; btn.disabled = false; }
+      }
+    } catch (e) {
+      alert('Something went wrong. Please try again or contact support.');
+      if (btn) { btn.textContent = 'Manage Subscription'; btn.disabled = false; }
+    }
   }
 
   function handleLogout() {
