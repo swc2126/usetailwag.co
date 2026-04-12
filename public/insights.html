@@ -135,8 +135,26 @@
     .tab-bar {
       max-width: 1200px; margin: 0 auto;
       padding: 0 24px;
-      display: flex; gap: 0;
+      display: flex; gap: 0; align-items: center;
       border-top: 1px solid rgba(168,197,176,0.08);
+    }
+
+    /* ── EXPORT BUTTON ── */
+    #exportBtn {
+      display: none;
+      margin-left: auto;
+      align-items: center; gap: 6px;
+      background: rgba(30,107,74,0.1);
+      border: 1px solid rgba(30,107,74,0.25);
+      color: var(--green);
+      padding: 5px 13px; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    #exportBtn:hover {
+      background: rgba(30,107,74,0.18);
+      border-color: rgba(30,107,74,0.4);
     }
 
     .tab-btn {
@@ -529,6 +547,7 @@
     <button class="tab-btn active" id="tabActivity" onclick="switchTab('activity')">My Activity</button>
     <button class="tab-btn" id="tabLocation" onclick="switchTab('location')">Location</button>
     <button class="tab-btn" id="tabFinancial" onclick="switchTab('financial')" style="display:none">Financial</button>
+    <button id="exportBtn" onclick="exportInsightsPDF()">⬇ Export Report</button>
   </div>
 </nav>
 
@@ -847,6 +866,12 @@
       financialTab.style.display = ROLE_ORDER.indexOf(effectiveRole) >= ROLE_ORDER.indexOf('owner') ? '' : 'none';
     }
 
+    // Export button — visible for manager+
+    const exportBtn = document.getElementById('exportBtn');
+    if (exportBtn) {
+      exportBtn.style.display = ROLE_ORDER.indexOf(effectiveRole) >= ROLE_ORDER.indexOf('manager') ? 'flex' : 'none';
+    }
+
     // data-min-role elements
     document.querySelectorAll('[data-min-role]').forEach(el => {
       const minRole = el.dataset.minRole;
@@ -1130,6 +1155,208 @@
   function esc(s) {
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+
+  // ── Export PDF ───────────────────────────────────────────────────────────────
+  window.exportInsightsPDF = function () {
+    if (!analyticsData) return;
+
+    const { personal, location, financial, daycare } = analyticsData;
+    const tc = location.msg_type_counts || {};
+
+    // User name from nav cache
+    let userName = 'Unknown';
+    try {
+      const u = JSON.parse(localStorage.getItem('tailwag_nav_user') || '{}');
+      userName = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.email || 'Unknown';
+    } catch {}
+
+    // Dates
+    const now           = new Date();
+    const thirtyAgo     = new Date(now - 30 * 86400000);
+    const fmtD = d => d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const exportDate    = fmtD(now);
+    const periodStart   = fmtD(thirtyAgo);
+    const periodEnd     = fmtD(now);
+    const daycareName   = daycare?.name || 'Your Daycare';
+    const isOwner       = ROLE_ORDER.indexOf(effectiveRole) >= ROLE_ORDER.indexOf('owner');
+
+    // Metrics
+    const totalMsgs  = location.msgs_30d || 0;
+    const rcCount    = tc.report_card    || 0;
+    const rmCount    = tc.reminder       || 0;
+    const rvCount    = tc.review_request || 0;
+    const otCount    = (tc.bulk || 0) + (tc.custom || 0);
+    const pct = (n) => totalMsgs ? Math.round(n / totalMsgs * 100) + '%' : '0%';
+
+    // Team rows
+    const teamRows = (location.team || []).map(t => `
+      <tr>
+        <td style="font-weight:600">${esc(t.name)}</td>
+        <td style="color:#666">${fmtRole(t.role)}</td>
+        <td style="text-align:right">${t.msgs_month || 0}</td>
+        <td style="text-align:right">${t.msgs_week  || 0}</td>
+      </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:#bbb;padding:16px">No team data available</td></tr>';
+
+    // Financial section (owner only)
+    const finSection = isOwner && financial ? `
+      <div class="section">
+        <div class="section-head">Subscription</div>
+        <div class="kpi-row">
+          <div class="kpi"><div class="kl">Plan</div><div class="kv">${esc(financial.plan || '—')}</div></div>
+          <div class="kpi"><div class="kl">Status</div><div class="kv">${esc(financial.status || '—')}</div></div>
+          <div class="kpi"><div class="kl">Monthly Cost</div><div class="kv">$${financial.monthly_cost || '—'}</div></div>
+          <div class="kpi"><div class="kl">Billing Cycle</div><div class="kv">${capitalize(financial.billing_cycle || 'monthly')}</div></div>
+        </div>
+      </div>` : '';
+
+    const WAG_SVG = `<svg width="30" height="30" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="56" height="56" fill="#1E6B4A" rx="9"/><path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/><circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/></svg>`;
+    const WAG_SM  = `<svg width="16" height="16" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="56" height="56" fill="#1E6B4A" rx="9"/><path d="M11 50 C5 30,23 4,41 4 C49 4,51 18,45 26" stroke="#F5F0E8" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="45" cy="26" r="3.5" fill="#F5F0E8"/></svg>`;
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>TailWag Insights — ${esc(daycareName)}</title>
+<style>
+  @page { size: letter; margin: 0.7in 0.7in 0.9in 0.7in; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; color: #1a1a1a; line-height: 1.5; background: #fff; }
+
+  /* ── HEADER ── */
+  .rpt-header { display:flex; align-items:flex-start; justify-content:space-between; padding-bottom:14px; border-bottom:2px solid #1E6B4A; margin-bottom:22px; }
+  .rpt-logo   { display:flex; align-items:center; gap:9px; }
+  .rpt-logo-text { font-size:20px; font-weight:800; color:#1E6B4A; letter-spacing:-0.3px; }
+  .rpt-meta   { text-align:right; }
+  .rpt-title  { font-size:15px; font-weight:700; color:#0F1410; margin-bottom:5px; }
+  .rpt-sub    { font-size:10px; color:#666; line-height:1.7; }
+  .rpt-sub strong { color:#333; }
+
+  /* ── SECTIONS ── */
+  .section { margin-bottom:18px; page-break-inside:avoid; }
+  .section-head {
+    font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.7px;
+    color:#1E6B4A; border-bottom:1px solid #cde3d5; padding-bottom:5px; margin-bottom:10px;
+  }
+
+  /* ── KPI ROW ── */
+  .kpi-row { display:flex; gap:8px; }
+  .kpi-row.three .kpi { flex:0 0 calc(33.3% - 6px); }
+  .kpi { flex:1; border:1px solid #e8e8e8; border-radius:6px; padding:10px 12px; background:#fafafa; }
+  .kl  { font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#aaa; margin-bottom:4px; }
+  .kv  { font-size:22px; font-weight:800; color:#0F1410; line-height:1; }
+
+  /* ── BREAKDOWN ── */
+  .breakdown-row { display:flex; gap:8px; margin-top:10px; }
+  .bd { flex:1; border:1px solid #e8e8e8; border-radius:6px; padding:10px 12px; background:#fafafa; }
+  .bd-type { font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+  .bd-type.rc  { color:#1E6B4A; }
+  .bd-type.rm  { color:#3b82f6; }
+  .bd-type.rv  { color:#C4933F; }
+  .bd-type.ot  { color:#999; }
+  .bd-count { font-size:20px; font-weight:800; color:#0F1410; line-height:1; }
+  .bd-pct   { font-size:9px; color:#aaa; margin-top:2px; }
+  .total-line { margin-bottom:2px; }
+  .total-num { font-size:26px; font-weight:800; color:#0F1410; }
+  .total-lbl { font-size:10px; color:#999; margin-left:5px; }
+
+  /* ── TABLE ── */
+  .tbl-wrap { border:1px solid #e8e8e8; border-radius:6px; overflow:hidden; }
+  table   { width:100%; border-collapse:collapse; }
+  thead th { background:#f5f5f5; font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#aaa; padding:7px 10px; border-bottom:1px solid #e8e8e8; text-align:left; }
+  thead th:last-child, thead th:nth-child(3) { text-align:right; }
+  tbody td { padding:8px 10px; font-size:11px; color:#333; border-bottom:1px solid #f0f0f0; }
+  tbody tr:last-child td { border-bottom:none; }
+
+  /* ── FOOTER ── */
+  .rpt-footer {
+    margin-top:28px; padding-top:10px;
+    border-top:1px solid #cde3d5;
+    display:flex; align-items:center; justify-content:space-between;
+    page-break-inside:avoid;
+  }
+  .ft-brand  { display:flex; align-items:center; gap:6px; }
+  .ft-name   { font-size:11px; font-weight:800; color:#1E6B4A; }
+  .ft-contact { font-size:9px; color:#999; }
+  .ft-contact a { color:#1E6B4A; text-decoration:none; }
+  .ft-date   { font-size:9px; color:#bbb; }
+
+  @media print {
+    body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+
+<div class="rpt-header">
+  <div class="rpt-logo">${WAG_SVG}<span class="rpt-logo-text">TailWag</span></div>
+  <div class="rpt-meta">
+    <div class="rpt-title">Insights Report — ${esc(daycareName)}</div>
+    <div class="rpt-sub">
+      <strong>Period:</strong> ${periodStart} – ${periodEnd}<br>
+      <strong>Exported by:</strong> ${esc(userName)}<br>
+      <strong>Generated:</strong> ${exportDate}
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head">Location Overview</div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kl">Active Clients</div><div class="kv">${location.clients || 0}</div></div>
+    <div class="kpi"><div class="kl">Active Dogs</div><div class="kv">${location.dogs || 0}</div></div>
+    <div class="kpi"><div class="kl">Messages This Month</div><div class="kv">${totalMsgs}</div></div>
+    <div class="kpi"><div class="kl">Team Members</div><div class="kv">${location.team_members || 0}</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head">Client Health — Last 30 Days</div>
+  <div class="kpi-row three">
+    <div class="kpi"><div class="kl">New Clients</div><div class="kv">${location.new_clients_30d || 0}</div></div>
+    <div class="kpi"><div class="kl">Inactive Clients</div><div class="kv">${location.inactive_clients_30d || 0}</div></div>
+    <div class="kpi"><div class="kl">Total Active</div><div class="kv">${location.clients || 0}</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head">Message Breakdown — Last 30 Days</div>
+  <div class="total-line"><span class="total-num">${totalMsgs}</span><span class="total-lbl">total messages sent</span></div>
+  <div class="breakdown-row">
+    <div class="bd"><div class="bd-type rc">Report Cards</div><div class="bd-count">${rcCount}</div><div class="bd-pct">${pct(rcCount)} of total</div></div>
+    <div class="bd"><div class="bd-type rm">Reminders</div><div class="bd-count">${rmCount}</div><div class="bd-pct">${pct(rmCount)} of total</div></div>
+    <div class="bd"><div class="bd-type rv">Review Requests</div><div class="bd-count">${rvCount}</div><div class="bd-pct">${pct(rvCount)} of total</div></div>
+    <div class="bd"><div class="bd-type ot">Other / Custom</div><div class="bd-count">${otCount}</div><div class="bd-pct">${pct(otCount)} of total</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head">Team Performance — Last 30 Days</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Team Member</th><th>Role</th><th>Messages This Month</th><th>Messages This Week</th></tr></thead>
+      <tbody>${teamRows}</tbody>
+    </table>
+  </div>
+</div>
+
+${finSection}
+
+<div class="rpt-footer">
+  <div class="ft-brand">${WAG_SM}<span class="ft-name">TailWag</span></div>
+  <div class="ft-contact">
+    <a href="mailto:info@usetailwag.co">info@usetailwag.co</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="https://usetailwag.co">usetailwag.co</a>
+  </div>
+  <div class="ft-date">Generated ${exportDate}</div>
+</div>
+
+<script>window.onload=function(){setTimeout(function(){window.print();},350);};<\/script>
+</body></html>`;
+
+    const win = window.open('', '_blank');
+    if (!win) { alert('Pop-ups are blocked. Please allow pop-ups for this site and try again.'); return; }
+    win.document.write(html);
+    win.document.close();
+  };
 
   // ── Init ─────────────────────────────────────────────────────────────────────
   document.addEventListener('click', function () {
