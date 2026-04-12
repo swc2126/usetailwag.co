@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YFRN3VT005"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YFRN3VT005');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Import from Gingr — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #0F1410; --green: #1E6B4A; --green-dark: #164D35;
+      --linen: #F5F0E8; --gold: #C4933F; --sage: #A8C5B0; --slate: #2D3748;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
+
+    .dashboard-nav {
+      background: var(--black); padding: 0 32px;
+      display: flex; justify-content: space-between; align-items: center; height: 60px;
+    }
+    .nav-left { display: flex; align-items: center; gap: 32px; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-paw { font-size: 22px; }
+    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link { color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 14px; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
+    .nav-link.active { color: var(--linen); background: rgba(255,255,255,0.1); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+
+    .page-container { max-width: 860px; margin: 0 auto; padding: 40px 24px; }
+    .page-header { margin-bottom: 32px; }
+    .page-header h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 30px; color: var(--black); }
+    .page-header p { font-size: 15px; color: #888; margin-top: 6px; }
+
+    /* STEPS */
+    .steps { display: flex; gap: 0; margin-bottom: 32px; }
+    .step { flex: 1; display: flex; align-items: center; gap: 10px; position: relative; }
+    .step:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 50%; width: 100%; height: 2px; background: #e0dbd2; z-index: 0; transform: translateY(-50%); }
+    .step-num { width: 32px; height: 32px; border-radius: 50%; background: #e0dbd2; color: #999; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 1; transition: all 0.2s; }
+    .step.active .step-num { background: var(--green); color: white; }
+    .step.done .step-num { background: var(--green); color: white; }
+    .step-label { font-size: 12px; font-weight: 600; color: #aaa; white-space: nowrap; }
+    .step.active .step-label { color: var(--black); }
+    .step.done .step-label { color: var(--green); }
+
+    /* CARDS */
+    .card { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .card h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 18px; color: var(--black); margin-bottom: 6px; }
+    .card p { font-size: 14px; color: #666; line-height: 1.6; }
+
+    /* COLLAPSIBLE GUIDE */
+    .guide-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    .guide-toggle h2 { margin-bottom: 0; }
+    .guide-chevron { font-size: 13px; color: var(--green); font-weight: 700; transition: transform 0.2s; }
+    .guide-body { margin-top: 20px; display: none; }
+    .guide-body.open { display: block; }
+    .guide-step { margin-bottom: 20px; }
+    .guide-step-title { font-weight: 700; font-size: 14px; color: var(--black); margin-bottom: 6px; }
+    .guide-step-detail { font-size: 13px; color: #555; line-height: 1.7; }
+    .guide-step-detail code { background: var(--linen); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+    .guide-tip { background: #f0f7f3; border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 13px; color: var(--green-dark); margin-top: 16px; }
+
+    /* DROP ZONES */
+    .upload-zones { display: flex; flex-direction: column; gap: 16px; margin: 20px 0; }
+    .upload-zone-wrap { border: 1.5px solid #e0dbd2; border-radius: 12px; overflow: hidden; }
+    .upload-zone-header { background: var(--linen); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .upload-zone-label { font-size: 13px; font-weight: 700; color: var(--black); }
+    .upload-zone-desc { font-size: 12px; color: #888; margin-top: 2px; }
+    .upload-zone-status { font-size: 12px; font-weight: 600; color: #aaa; flex-shrink: 0; }
+    .upload-zone-status.ready { color: #16a34a; }
+    .drop-zone {
+      border: none; border-top: 1.5px dashed #c8c0b4;
+      padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s;
+      background: white;
+    }
+    .drop-zone:hover, .drop-zone.drag-over { background: #f0f7f3; border-color: var(--green); }
+    .drop-icon { font-size: 28px; margin-bottom: 8px; }
+    .drop-title { font-size: 14px; font-weight: 600; color: var(--black); margin-bottom: 4px; }
+    .drop-sub { font-size: 12px; color: #888; }
+    .drop-zone input[type="file"] { display: none; }
+
+    /* TOGGLE */
+    .toggle-row { display: flex; align-items: flex-start; gap: 12px; padding: 16px; background: var(--linen); border-radius: 10px; margin-top: 8px; }
+    .toggle-row input[type="checkbox"] { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--green); flex-shrink: 0; cursor: pointer; }
+    .toggle-label { font-size: 13px; color: var(--black); font-weight: 600; }
+    .toggle-sub { font-size: 12px; color: #666; margin-top: 3px; }
+
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 9px; cursor: pointer; border: none; transition: all 0.15s; text-decoration: none; }
+    .btn-primary { background: var(--green); color: white; }
+    .btn-primary:hover { background: var(--green-dark); }
+    .btn-primary:disabled { background: #a8c5b0; cursor: not-allowed; }
+    .btn-outline { background: white; border: 1.5px solid #e0dbd2; color: var(--slate); }
+    .btn-outline:hover { border-color: var(--slate); }
+    .btn-gold { background: var(--gold); color: white; }
+    .btn-gold:hover { background: #b8832f; }
+    .btn-row { display: flex; gap: 10px; align-items: center; margin-top: 20px; flex-wrap: wrap; }
+
+    /* SUMMARY CARDS */
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .summary-card { border: 1.5px solid #e0dbd2; border-radius: 12px; padding: 16px; text-align: center; }
+    .summary-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 800; color: var(--black); }
+    .summary-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+    .summary-card.warn { background: #fff8e6; border-color: #f0c040; }
+    .summary-card.ok { background: #f0f7f3; border-color: #a8c5b0; }
+
+    /* WARNING */
+    .warning-box { background: #fff8e6; border: 1.5px solid #f0c040; border-radius: 10px; padding: 14px 18px; margin: 16px 0; font-size: 13px; color: #7a5c00; line-height: 1.6; }
+
+    /* PREVIEW TABLE */
+    .preview-scroll-wrap { max-height: 280px; overflow-y: auto; overflow-x: auto; border-radius: 8px; border: 1px solid #e8e3db; margin-top: 16px; }
+    .preview-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .preview-table thead th { position: sticky; top: 0; z-index: 2; background: var(--black); color: var(--linen); padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .preview-table td { padding: 8px 12px; border-bottom: 1px solid #f0ede8; white-space: nowrap; max-width: 180px; overflow: hidden; text-overflow: ellipsis; }
+    .preview-table tr:last-child td { border-bottom: none; }
+    .preview-table tbody tr:hover td { background: var(--linen); }
+    .cell-empty { color: #ccc; font-style: italic; }
+
+    /* RESULTS */
+    .result-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+    .result-card { border-radius: 12px; padding: 18px; }
+    .result-card.green { background: #d4edda; }
+    .result-card.blue  { background: #e8eef9; }
+    .result-card.yellow { background: #fff3cd; }
+    .result-card.red   { background: #fde8e8; }
+    .result-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 800; color: var(--black); }
+    .result-label { font-size: 12px; font-weight: 600; color: #555; margin-top: 4px; }
+    .error-list { font-size: 12px; color: #b91c1c; margin-top: 12px; line-height: 1.8; }
+
+    /* SECTIONS */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* LOADING */
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 640px) {
+      .steps { display: none; }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      .result-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="/dashboard.html" class="logo">
+      <span class="logo-paw">🐾</span>
+      <span class="logo-text">TailWag</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/clients.html" class="nav-link active">Directory</a>
+      <a href="/messaging.html" class="nav-link">Messaging</a>
+      <a href="/schedule.html" class="nav-link">Schedule</a>
+      <a href="/reviews.html" class="nav-link">Reviews</a>
+      <a href="/team.html" class="nav-link">Team</a>
+      <a href="/settings.html" class="nav-link">Settings</a>
+    </nav>
+  </div>
+  <div class="nav-right"><div id="navUserWidget"></div></div>
+</nav>
+
+<div class="page-container">
+
+  <div class="page-header">
+    <h1>Import from Gingr</h1>
+    <p>Bring your owners, pets, and appointment history into TailWag in minutes.</p>
+  </div>
+
+  <!-- STEP PROGRESS BAR -->
+  <div class="steps">
+    <div class="step active" id="stepInd1"><div class="step-num">1</div><div class="step-label">Export from Gingr</div></div>
+    <div class="step" id="stepInd2"><div class="step-num">2</div><div class="step-label">Upload Files</div></div>
+    <div class="step" id="stepInd3"><div class="step-num">3</div><div class="step-label">Preview</div></div>
+    <div class="step" id="stepInd4"><div class="step-num">4</div><div class="step-label">Done</div></div>
+  </div>
+
+  <!-- ── EXPORT GUIDE (always visible, collapsible) ──────────────────────── -->
+  <div class="card">
+    <div class="guide-toggle" onclick="toggleGuide()">
+      <h2>How to export from Gingr</h2>
+      <span class="guide-chevron" id="guideChevron">Show export guide ▾</span>
+    </div>
+    <div class="guide-body" id="guideBody">
+      <div class="guide-step">
+        <div class="guide-step-title">1. Owners Report</div>
+        <div class="guide-step-detail">
+          Admin → Reports → Owner Reports → Export CSV<br>
+          Save as: <code>owners.csv</code><br>
+          Columns you'll see: <code>owner_id, first_name, last_name, email, cell_phone, address</code>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="guide-step-title">2. Animals Report</div>
+        <div class="guide-step-detail">
+          Admin → Reports → Animal Reports → Export CSV<br>
+          Save as: <code>animals.csv</code><br>
+          Columns you'll see: <code>animal_id, a_first, breed, personality, vaccination_records</code>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="guide-step-title">3. Reservations Report (Last 12 months)</div>
+        <div class="guide-step-detail">
+          Admin → Reports → Reservation Reports → set date range to last 12 months → Export CSV<br>
+          Save as: <code>reservations.csv</code><br>
+          Columns you'll see: <code>id, owner_id, animal_id, o_last, a_first, type, check_in_stamp, check_out_stamp, status_string</code>
+        </div>
+      </div>
+      <div class="guide-tip">
+        💡 Tip: The reservations file is what links your animals to their owners. All three files are needed for a complete import.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: UPLOAD ─────────────────────────────────────────────────── -->
+  <div class="section active" id="panelUpload">
+    <div class="card">
+      <h2>Upload Your Gingr Files</h2>
+      <p style="margin-bottom:4px;">Drop each CSV below. TailWag will auto-detect which file is which based on the column headers.</p>
+
+      <div id="uploadError" style="display:none;background:#fff5f5;border:1.5px solid #fed7d7;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:13px;color:#c53030;line-height:1.6;"></div>
+
+      <div class="upload-zones">
+
+        <!-- Owners -->
+        <div class="upload-zone-wrap" id="wrapOwners">
+          <div class="upload-zone-header">
+            <div>
+              <div class="upload-zone-label">Owners CSV</div>
+              <div class="upload-zone-desc">owner_id, first_name, last_name, email, cell_phone, address</div>
+            </div>
+            <div class="upload-zone-status" id="statusOwners">Not uploaded</div>
+          </div>
+          <div class="drop-zone" id="dropOwners"
+               onclick="document.getElementById('fileOwners').click()"
+               ondragover="onDragOver(event,'dropOwners')" ondragleave="onDragLeave('dropOwners')" ondrop="onDrop(event,'dropOwners')">
+            <input type="file" id="fileOwners" accept=".csv,text/csv" onchange="onFileSelect(event)">
+            <div class="drop-icon">📋</div>
+            <div class="drop-title" id="dropTitleOwners">Drop owners.csv here or click to choose</div>
+            <div class="drop-sub">Accepts .csv files</div>
+          </div>
+        </div>
+
+        <!-- Animals -->
+        <div class="upload-zone-wrap" id="wrapAnimals">
+          <div class="upload-zone-header">
+            <div>
+              <div class="upload-zone-label">Animals CSV</div>
+              <div class="upload-zone-desc">animal_id, a_first, breed, personality, vaccination_records</div>
+            </div>
+            <div class="upload-zone-status" id="statusAnimals">Not uploaded</div>
+          </div>
+          <div class="drop-zone" id="dropAnimals"
+               onclick="document.getElementById('fileAnimals').click()"
+               ondragover="onDragOver(event,'dropAnimals')" ondragleave="onDragLeave('dropAnimals')" ondrop="onDrop(event,'dropAnimals')">
+            <input type="file" id="fileAnimals" accept=".csv,text/csv" onchange="onFileSelect(event)">
+            <div class="drop-icon">🐶</div>
+            <div class="drop-title" id="dropTitleAnimals">Drop animals.csv here or click to choose</div>
+            <div class="drop-sub">Accepts .csv files</div>
+          </div>
+        </div>
+
+        <!-- Reservations -->
+        <div class="upload-zone-wrap" id="wrapReservations">
+          <div class="upload-zone-header">
+            <div>
+              <div class="upload-zone-label">Reservations CSV</div>
+              <div class="upload-zone-desc">owner_id, animal_id, check_in_stamp, check_out_stamp, type, status_string</div>
+            </div>
+            <div class="upload-zone-status" id="statusReservations">Not uploaded</div>
+          </div>
+          <div class="drop-zone" id="dropReservations"
+               onclick="document.getElementById('fileReservations').click()"
+               ondragover="onDragOver(event,'dropReservations')" ondragleave="onDragLeave('dropReservations')" ondrop="onDrop(event,'dropReservations')">
+            <input type="file" id="fileReservations" accept=".csv,text/csv" onchange="onFileSelect(event)">
+            <div class="drop-icon">📅</div>
+            <div class="drop-title" id="dropTitleReservations">Drop reservations.csv here or click to choose</div>
+            <div class="drop-sub">Accepts .csv files · Optional but recommended</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="toggle-row">
+        <input type="checkbox" id="importAppts" checked>
+        <div>
+          <div class="toggle-label">Import appointment history (last 12 months)</div>
+          <div class="toggle-sub">Checking this will create appointment records for each reservation. Recommended for daycares that want to track visit history.</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="previewBtn" onclick="goToPreview()" disabled>Preview Import →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: PREVIEW ────────────────────────────────────────────────── -->
+  <div class="section" id="panelPreview">
+    <div class="card">
+      <h2>Preview Import</h2>
+      <p>Review what will be imported before committing.</p>
+
+      <div class="summary-grid" id="summaryGrid" style="margin-top:20px;">
+        <!-- filled by JS -->
+      </div>
+
+      <div id="unlinkedWarning" style="display:none;" class="warning-box"></div>
+
+      <div class="preview-scroll-wrap">
+        <table class="preview-table" id="previewTable">
+          <thead><tr>
+            <th>Owner Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Dog Name</th>
+            <th>Breed</th>
+            <th>Appt History</th>
+          </tr></thead>
+          <tbody id="previewBody"></tbody>
+        </table>
+      </div>
+
+      <p id="importSummaryText" style="font-size:13px;color:#555;margin-top:14px;"></p>
+
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="backToUpload()">← Back</button>
+        <button class="btn btn-gold" id="importBtn" onclick="runImport()">Import Now →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: DONE ───────────────────────────────────────────────────── -->
+  <div class="section" id="panelDone">
+    <div class="card" style="text-align:center;padding:48px;">
+      <div style="font-size:52px;margin-bottom:16px;" id="doneIcon">✅</div>
+      <h2 id="doneTitle" style="font-size:24px;margin-bottom:8px;">Import Complete!</h2>
+      <p id="doneMsg" style="margin-bottom:28px;color:#555;"></p>
+
+      <div class="result-grid" id="resultGrid" style="text-align:left;"></div>
+      <div class="error-list" id="errorList"></div>
+      <div id="errorCollapsible" style="display:none;margin-top:12px;">
+        <button class="btn btn-outline" style="font-size:12px;" onclick="toggleErrors()">Show errors ▾</button>
+        <div id="errorDetails" style="display:none;margin-top:10px;font-size:12px;color:#b91c1c;line-height:1.8;"></div>
+      </div>
+
+      <div class="btn-row" style="justify-content:center;margin-top:28px;">
+        <a href="/clients.html" class="btn btn-primary">View Directory →</a>
+        <button class="btn btn-outline" onclick="resetForm()">Import More</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-container -->
+
+<script>
+  // ── Auth guard ────────────────────────────────────────────────────────────
+  function getToken() {
+    try {
+      const s = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+      if (s?.access_token) return s.access_token;
+      const r = localStorage.getItem('sb-bixfhpzcqxjtdprjmuhx-auth-token');
+      return r ? JSON.parse(r)?.access_token : null;
+    } catch { return null; }
+  }
+  if (!getToken()) window.location.href = '/login.html';
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  const files = { owners: null, animals: null, reservations: null };
+  const parsedData = { owners: [], animals: [], reservations: [] };
+  let previewDataCache = null;
+
+  // ── Guide toggle ──────────────────────────────────────────────────────────
+  function toggleGuide() {
+    const body = document.getElementById('guideBody');
+    const chevron = document.getElementById('guideChevron');
+    const open = body.classList.toggle('open');
+    chevron.textContent = open ? 'Hide guide ▴' : 'Show export guide ▾';
+  }
+
+  // ── Step indicator ────────────────────────────────────────────────────────
+  function setStepActive(n) {
+    [1,2,3,4].forEach(i => {
+      const el = document.getElementById('stepInd' + i);
+      if (!el) return;
+      el.classList.toggle('active', i === n);
+      el.classList.toggle('done', i < n);
+    });
+  }
+
+  // ── CSV parser ────────────────────────────────────────────────────────────
+  function parseCSV(text) {
+    const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+    const rows = [];
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const cols = [];
+      let cur = '', inQuote = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') { inQuote = !inQuote; continue; }
+        if (ch === ',' && !inQuote) { cols.push(cur.trim()); cur = ''; continue; }
+        cur += ch;
+      }
+      cols.push(cur.trim());
+      rows.push(cols);
+    }
+    return rows;
+  }
+
+  function csvRowsToObjects(rows) {
+    if (rows.length < 2) return [];
+    const headers = rows[0].map(h => h.toLowerCase().replace(/[\s\-()\/]+/g, '_').replace(/^_+|_+$/g, ''));
+    return rows.slice(1).filter(r => r.some(c => c.trim())).map(row => {
+      const obj = {};
+      headers.forEach((h, i) => { obj[h] = (row[i] || '').trim(); });
+      return obj;
+    });
+  }
+
+  // ── Auto-detect file type ─────────────────────────────────────────────────
+  function detectFileType(headers) {
+    const h = headers.map(x => x.toLowerCase().replace(/[\s_\-]+/g, ''));
+    if (h.includes('cellphone') || (h.includes('ownerid') && h.includes('firstname') && !h.includes('animalid'))) return 'owners';
+    if (h.includes('animalid') && h.includes('afirst') && !h.includes('ownerid')) return 'animals';
+    if (h.includes('checkinstamp') || h.includes('startdate')) return 'reservations';
+    if (h.includes('ownerid') && h.includes('animalid')) return 'reservations';
+    return null;
+  }
+
+  // ── Drag & drop handlers ──────────────────────────────────────────────────
+  function onDragOver(e, zoneId) {
+    e.preventDefault();
+    document.getElementById(zoneId).classList.add('drag-over');
+  }
+  function onDragLeave(zoneId) {
+    document.getElementById(zoneId).classList.remove('drag-over');
+  }
+  function onDrop(e, zoneId) {
+    e.preventDefault();
+    document.getElementById(zoneId).classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+  }
+  function onFileSelect(e) {
+    if (e.target.files[0]) processFile(e.target.files[0]);
+  }
+
+  // ── Process uploaded file ─────────────────────────────────────────────────
+  function showUploadError(msg) {
+    const el = document.getElementById('uploadError');
+    el.innerHTML = msg;
+    el.style.display = 'block';
+  }
+  function clearUploadError() {
+    document.getElementById('uploadError').style.display = 'none';
+  }
+
+  function processFile(file) {
+    clearUploadError();
+    const name = file.name.toLowerCase();
+    if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
+      showUploadError('<strong>Excel file detected (.xlsx)</strong> — Please save as CSV first: File → Save As → CSV (Comma delimited).');
+      return;
+    }
+    if (!name.endsWith('.csv') && !file.type.includes('csv')) {
+      showUploadError('<strong>Unsupported file type: ' + file.name + '</strong> — Please upload a .csv file.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const text = e.target.result;
+      const rows = parseCSV(text);
+      if (rows.length < 2) { showUploadError('File appears empty or has only a header row.'); return; }
+
+      const detected = detectFileType(rows[0]);
+      if (!detected) {
+        showUploadError('<strong>Could not auto-detect file type for "' + file.name + '"</strong><br>Headers found: <code>' + rows[0].join(', ') + '</code><br>Expected one of: owners.csv, animals.csv, or reservations.csv from Gingr.');
+        return;
+      }
+
+      files[detected] = file;
+      parsedData[detected] = csvRowsToObjects(rows);
+      markZoneReady(detected, file.name, rows.length - 1);
+      updatePreviewBtn();
+    };
+    reader.onerror = () => showUploadError('Could not read file. Please try again.');
+    reader.readAsText(file);
+  }
+
+  function markZoneReady(type, filename, rowCount) {
+    const statusEl = document.getElementById('status' + capitalize(type));
+    const titleEl = document.getElementById('dropTitle' + capitalize(type));
+    if (statusEl) { statusEl.textContent = rowCount + ' rows ready'; statusEl.classList.add('ready'); }
+    if (titleEl) titleEl.textContent = '✓ ' + filename;
+  }
+
+  function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function updatePreviewBtn() {
+    const hasOwners = parsedData.owners.length > 0;
+    const hasAnimals = parsedData.animals.length > 0;
+    document.getElementById('previewBtn').disabled = !(hasOwners && hasAnimals);
+  }
+
+  // ── Build preview data client-side ────────────────────────────────────────
+  function computePreview() {
+    // Build owner map
+    const ownerMap = new Map();
+    for (const row of parsedData.owners) {
+      const id = String(row.owner_id || row.ownerid || '');
+      if (id) ownerMap.set(id, row);
+    }
+
+    // Build animal → owner link from reservations
+    const animalOwnerMap = new Map();
+    for (const row of parsedData.reservations) {
+      const aid = String(row.animal_id || row.animalid || '');
+      const oid = String(row.owner_id || row.ownerid || '');
+      if (aid && oid && !animalOwnerMap.has(aid)) animalOwnerMap.set(aid, oid);
+    }
+
+    // Count linked vs unlinked animals
+    let linked = 0, unlinked = 0;
+    for (const animal of parsedData.animals) {
+      const aid = String(animal.animal_id || animal.animalid || '');
+      animalOwnerMap.has(aid) ? linked++ : unlinked++;
+    }
+
+    // Build appt count per animal
+    const animalApptCount = new Map();
+    for (const r of parsedData.reservations) {
+      const aid = String(r.animal_id || r.animalid || '');
+      if (aid) animalApptCount.set(aid, (animalApptCount.get(aid) || 0) + 1);
+    }
+
+    // Sample rows: join animals to owners via reservations
+    const sampleRows = [];
+    for (const animal of parsedData.animals) {
+      if (sampleRows.length >= 5) break;
+      const aid = String(animal.animal_id || animal.animalid || '');
+      const oid = animalOwnerMap.get(aid);
+      const owner = oid ? ownerMap.get(oid) : null;
+      sampleRows.push({
+        ownerName: owner ? [(owner.first_name || owner.firstname || ''), (owner.last_name || owner.lastname || '')].filter(Boolean).join(' ') : '—',
+        phone: owner ? (owner.cell_phone || owner.cellphone || owner.phone || '') : '',
+        email: owner ? (owner.email || '') : '',
+        dogName: animal.a_first || animal.afirst || animal.first_name || animal.name || '—',
+        breed: animal.breed || '',
+        appts: animalApptCount.get(aid) || 0,
+      });
+    }
+
+    return {
+      ownerCount: parsedData.owners.length,
+      animalCount: parsedData.animals.length,
+      resCount: parsedData.reservations.length,
+      linkedAnimals: linked,
+      unlinkedAnimals: unlinked,
+      sampleRows,
+    };
+  }
+
+  // ── Navigation ────────────────────────────────────────────────────────────
+  function goToPreview() {
+    previewDataCache = computePreview();
+    renderPreview(previewDataCache);
+    document.getElementById('panelUpload').classList.remove('active');
+    document.getElementById('panelPreview').classList.add('active');
+    setStepActive(3);
+  }
+
+  function backToUpload() {
+    document.getElementById('panelPreview').classList.remove('active');
+    document.getElementById('panelUpload').classList.add('active');
+    setStepActive(2);
+  }
+
+  // ── Render preview ────────────────────────────────────────────────────────
+  function renderPreview(data) {
+    // Summary cards
+    const grid = document.getElementById('summaryGrid');
+    const resDisplay = data.resCount > 0 ? data.resCount : '—';
+    grid.innerHTML = `
+      <div class="summary-card ok">
+        <div class="summary-num">${data.ownerCount}</div>
+        <div class="summary-label">Owners found</div>
+      </div>
+      <div class="summary-card ok">
+        <div class="summary-num">${data.animalCount}</div>
+        <div class="summary-label">Animals found</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-num">${resDisplay}</div>
+        <div class="summary-label">Reservations found</div>
+      </div>
+      <div class="summary-card ok">
+        <div class="summary-num">${data.linkedAnimals}</div>
+        <div class="summary-label">Animals auto-linked</div>
+      </div>
+      <div class="summary-card ${data.unlinkedAnimals > 0 ? 'warn' : ''}">
+        <div class="summary-num">${data.unlinkedAnimals}</div>
+        <div class="summary-label">Needing manual review</div>
+      </div>
+    `;
+
+    // Unlinked warning
+    const warn = document.getElementById('unlinkedWarning');
+    if (data.unlinkedAnimals > 0) {
+      warn.innerHTML = `<strong>⚠️ ${data.unlinkedAnimals} animal${data.unlinkedAnimals !== 1 ? 's' : ''} have no reservation history</strong> and can't be automatically linked to an owner. They won't be imported. You can add them manually from the client profile page after import.`;
+      warn.style.display = 'block';
+    } else {
+      warn.style.display = 'none';
+    }
+
+    // Preview table rows
+    const tbody = document.getElementById('previewBody');
+    tbody.innerHTML = data.sampleRows.map(r => `
+      <tr>
+        <td>${r.ownerName || '<span class="cell-empty">—</span>'}</td>
+        <td>${r.phone || '<span class="cell-empty">—</span>'}</td>
+        <td>${r.email || '<span class="cell-empty">—</span>'}</td>
+        <td>${r.dogName || '<span class="cell-empty">—</span>'}</td>
+        <td>${r.breed || '<span class="cell-empty">—</span>'}</td>
+        <td>${r.appts > 0 ? r.appts + ' visits' : '<span class="cell-empty">none</span>'}</td>
+      </tr>
+    `).join('');
+
+    // Summary text
+    const importAppts = document.getElementById('importAppts').checked;
+    const parts = [
+      `Importing ${data.ownerCount} owner${data.ownerCount !== 1 ? 's' : ''}`,
+      `${data.linkedAnimals} dog${data.linkedAnimals !== 1 ? 's' : ''}`,
+    ];
+    if (importAppts && data.resCount > 0) parts.push(`${data.resCount} appointments (last 12 months)`);
+    document.getElementById('importSummaryText').textContent = parts.join(', ') + '.';
+  }
+
+  // ── Run import ────────────────────────────────────────────────────────────
+  async function runImport() {
+    const btn = document.getElementById('importBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Importing…';
+
+    // Normalize owners
+    const owners = parsedData.owners.map(r => ({
+      gingr_owner_id: String(r.owner_id || r.ownerid || ''),
+      first_name: r.first_name || r.firstname || '',
+      last_name:  r.last_name  || r.lastname  || '',
+      email:      r.email || '',
+      phone:      r.cell_phone || r.cellphone || r.phone || '',
+      address:    r.address || '',
+      notes:      r.owner_details || r.ownerdetails || r.details || '',
+    }));
+
+    // Normalize animals
+    const animals = parsedData.animals.map(r => ({
+      gingr_animal_id: String(r.animal_id || r.animalid || ''),
+      name:        r.a_first || r.afirst || r.first_name || r.name || '',
+      breed:       r.breed || '',
+      personality: r.personality || '',
+      vaccinations: r.vaccination_records || r.vaccinationrecords || r.vaccinations || '',
+    }));
+
+    // Normalize reservations
+    const reservations = parsedData.reservations.map(r => ({
+      owner_id:  String(r.owner_id  || r.ownerid  || ''),
+      animal_id: String(r.animal_id || r.animalid || ''),
+      check_in:  r.check_in_stamp || r.checkinstamp  || r.start_date || r.startdate || '',
+      check_out: r.check_out_stamp || r.checkoutstamp || r.end_date   || r.enddate   || '',
+      type:      r.type || r.typename || '',
+      status:    r.status_string || r.statusstring || r.status || '',
+      area_name: r.area_name || r.areaname || '',
+      run_name:  r.run_name  || r.runname  || '',
+    }));
+
+    const importAppointments = document.getElementById('importAppts').checked;
+    const token = getToken();
+
+    let result;
+    try {
+      const response = await fetch('/api/import/gingr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ owners, animals, reservations, import_appointments: importAppointments }),
+      });
+      result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Import failed');
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Import Now →';
+      document.getElementById('unlinkedWarning').innerHTML = '<strong>Import error:</strong> ' + err.message;
+      document.getElementById('unlinkedWarning').style.display = 'block';
+      return;
+    }
+
+    showDone(result);
+  }
+
+  function showDone(result) {
+    document.getElementById('panelPreview').classList.remove('active');
+    document.getElementById('panelDone').classList.add('active');
+    setStepActive(4);
+
+    const skipped = (result.clients_skipped || 0) + (result.dogs_skipped || 0);
+    const hasAppts = result.appointments_created > 0;
+    const hasErrors = result.errors && result.errors.length > 0;
+
+    document.getElementById('doneMsg').textContent =
+      `${result.clients_created} pet parent${result.clients_created !== 1 ? 's' : ''} and ` +
+      `${result.dogs_created} dog${result.dogs_created !== 1 ? 's' : ''} imported successfully.`;
+
+    const grid = document.getElementById('resultGrid');
+    let gridHTML = `
+      <div class="result-card green"><div class="result-num">${result.clients_created}</div><div class="result-label">Pet parents added</div></div>
+      <div class="result-card green"><div class="result-num">${result.dogs_created}</div><div class="result-label">Dogs added</div></div>`;
+    if (hasAppts || document.getElementById('importAppts').checked) {
+      gridHTML += `<div class="result-card blue"><div class="result-num">${result.appointments_created || 0}</div><div class="result-label">Appointments imported</div></div>`;
+    }
+    gridHTML += `<div class="result-card yellow"><div class="result-num">${skipped}</div><div class="result-label">Skipped (already existed)</div></div>`;
+    if (hasErrors) {
+      gridHTML += `<div class="result-card red"><div class="result-num">${result.errors.length}</div><div class="result-label">Errors</div></div>`;
+    }
+    grid.innerHTML = gridHTML;
+
+    if (hasErrors) {
+      document.getElementById('doneIcon').textContent = '⚠️';
+      document.getElementById('doneTitle').textContent = 'Import Complete with Warnings';
+      const collapsible = document.getElementById('errorCollapsible');
+      collapsible.style.display = 'block';
+      document.getElementById('errorDetails').innerHTML = result.errors.join('<br>');
+    }
+  }
+
+  function toggleErrors() {
+    const detail = document.getElementById('errorDetails');
+    const btn = document.querySelector('#errorCollapsible .btn');
+    const open = detail.style.display === 'none';
+    detail.style.display = open ? 'block' : 'none';
+    btn.textContent = open ? 'Hide errors ▴' : 'Show errors ▾';
+  }
+
+  function resetForm() {
+    // Reset state
+    files.owners = files.animals = files.reservations = null;
+    parsedData.owners = parsedData.animals = parsedData.reservations = [];
+    previewDataCache = null;
+
+    // Reset UI
+    ['Owners','Animals','Reservations'].forEach(t => {
+      const key = t.toLowerCase();
+      const status = document.getElementById('status' + t);
+      const title = document.getElementById('dropTitle' + t);
+      if (status) { status.textContent = 'Not uploaded'; status.classList.remove('ready'); }
+      if (title) title.textContent = 'Drop ' + key + '.csv here or click to choose';
+      const fileInput = document.getElementById('file' + t);
+      if (fileInput) fileInput.value = '';
+    });
+
+    document.getElementById('panelDone').classList.remove('active');
+    document.getElementById('panelUpload').classList.add('active');
+    document.getElementById('previewBtn').disabled = true;
+    document.getElementById('doneIcon').textContent = '✅';
+    document.getElementById('doneTitle').textContent = 'Import Complete!';
+    document.getElementById('resultGrid').innerHTML = '';
+    document.getElementById('errorCollapsible').style.display = 'none';
+    document.getElementById('errorDetails').innerHTML = '';
+    clearUploadError();
+    setStepActive(2);
+  }
+
+  // Set initial step
+  setStepActive(2);
+</script>
+<script src="/js/nav-user.js"></script>
+</body>
+</html>

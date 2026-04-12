@@ -63,6 +63,23 @@ const COLUMN_MAP = {
   // Medications
   medications: 'dog_meds', meds: 'dog_meds', medication: 'dog_meds',
   dogmedications: 'dog_meds', vetmeds: 'dog_meds',
+  // Gingr owner fields
+  ownerid: 'gingr_owner_id',
+  cellphone: 'owner_phone', // cell already mapped above
+  ownerdetails: 'owner_notes', details: 'owner_notes',
+  address: 'owner_address',
+  // Gingr animal fields
+  animalid: 'gingr_animal_id',
+  afirst: 'dog_name', animalfirstname: 'dog_name',
+  personality: 'dog_personality',
+  vaccinationrecords: 'dog_vaccinations', vaccinations: 'dog_vaccinations',
+  // Gingr reservation fields
+  checkinstamp: 'appt_checkin', checkoutstamp: 'appt_checkout',
+  startdate: 'appt_start', enddate: 'appt_end',
+  typename: 'appt_type',
+  statusstring: 'appt_status',
+  runname: 'appt_run', areaname: 'appt_area',
+  olast: 'res_owner_last',
 };
 
 function cleanPhone(p) {
@@ -241,6 +258,236 @@ router.post('/clients', requireAuth, async (req, res) => {
   }
 
   res.json({ success: true, ...results });
+});
+
+// POST /api/import/gingr
+// Body: { owners: [], animals: [], reservations: [], import_appointments: boolean }
+router.post('/gingr', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+
+  const { owners = [], animals = [], reservations = [], import_appointments = false } = req.body;
+
+  // ── Step 1: Build lookup maps ─────────────────────────────────────────────
+  const ownerById = new Map(); // gingr_owner_id → owner row
+  for (const o of owners) {
+    if (o.gingr_owner_id) ownerById.set(String(o.gingr_owner_id), o);
+  }
+
+  // From reservations, build animal → owner link
+  const animalOwnerMap = new Map(); // gingr_animal_id → gingr_owner_id
+  for (const r of reservations) {
+    const aid = String(r.animal_id || '');
+    const oid = String(r.owner_id || '');
+    if (aid && oid && !animalOwnerMap.has(aid)) {
+      animalOwnerMap.set(aid, oid);
+    }
+  }
+
+  let clients_created = 0, clients_skipped = 0;
+  let dogs_created = 0, dogs_skipped = 0;
+  let unlinked_animals = 0;
+  let appointments_created = 0, appointments_skipped = 0;
+  const errors = [];
+
+  // ── Step 2: Insert clients (from owners) ──────────────────────────────────
+  const clientIdMap = new Map(); // gingr_owner_id → tailwag_client_id
+
+  for (const owner of owners) {
+    const gingrOwnerId = String(owner.gingr_owner_id || '');
+    if (!gingrOwnerId) continue;
+    if (!owner.first_name && !owner.last_name) {
+      errors.push(`Owner id ${gingrOwnerId}: missing name — skipped`);
+      continue;
+    }
+
+    const phone = cleanPhone(owner.phone);
+    let clientId;
+
+    try {
+      if (phone) {
+        const { data: existing } = await supabaseAdmin
+          .from('clients')
+          .select('id')
+          .eq('daycare_id', req.daycareId)
+          .eq('phone', phone)
+          .single();
+
+        if (existing) {
+          clients_skipped++;
+          clientId = existing.id;
+        }
+      }
+
+      if (!clientId) {
+        // Also try matching by email if no phone match
+        if (!phone && owner.email) {
+          const { data: existingByEmail } = await supabaseAdmin
+            .from('clients')
+            .select('id')
+            .eq('daycare_id', req.daycareId)
+            .eq('email', owner.email)
+            .single();
+          if (existingByEmail) {
+            clients_skipped++;
+            clientId = existingByEmail.id;
+          }
+        }
+      }
+
+      if (!clientId) {
+        const insertData = {
+          daycare_id: req.daycareId,
+          first_name: owner.first_name || '',
+          last_name:  owner.last_name  || '',
+          phone:      phone || null,
+          email:      owner.email || null,
+          active:     true,
+        };
+        if (owner.notes) insertData.notes = owner.notes;
+        if (owner.address) insertData.address = owner.address;
+
+        const { data: created, error } = await supabaseAdmin
+          .from('clients')
+          .insert(insertData)
+          .select('id')
+          .single();
+        if (error) throw error;
+        clientId = created.id;
+        clients_created++;
+      }
+
+      clientIdMap.set(gingrOwnerId, clientId);
+    } catch (err) {
+      errors.push(`Client "${owner.first_name} ${owner.last_name}": ${err.message}`);
+    }
+  }
+
+  // ── Step 3: Insert dogs (from animals) ────────────────────────────────────
+  const dogIdMap = new Map(); // gingr_animal_id → tailwag_dog_id
+
+  for (const animal of animals) {
+    const gingrAnimalId = String(animal.gingr_animal_id || '');
+    if (!gingrAnimalId) continue;
+
+    const gingrOwnerId = animalOwnerMap.get(gingrAnimalId);
+    if (!gingrOwnerId) {
+      unlinked_animals++;
+      continue;
+    }
+
+    const clientId = clientIdMap.get(String(gingrOwnerId));
+    if (!clientId) {
+      unlinked_animals++;
+      continue;
+    }
+
+    const dogName = animal.name || '';
+    if (!dogName) { errors.push(`Animal id ${gingrAnimalId}: no name — skipped`); continue; }
+
+    try {
+      const { data: existingDog } = await supabaseAdmin
+        .from('dogs')
+        .select('id')
+        .eq('client_id', clientId)
+        .eq('daycare_id', req.daycareId)
+        .ilike('name', dogName)
+        .single();
+
+      if (existingDog) {
+        dogs_skipped++;
+        dogIdMap.set(gingrAnimalId, existingDog.id);
+        continue;
+      }
+
+      const dogNotes = [animal.personality, animal.vaccinations].filter(Boolean).join(' · ') || null;
+
+      const { data: created, error } = await supabaseAdmin
+        .from('dogs')
+        .insert({
+          client_id:  clientId,
+          daycare_id: req.daycareId,
+          name:       dogName,
+          breed:      animal.breed || null,
+          notes:      dogNotes,
+          active:     true,
+        })
+        .select('id')
+        .single();
+      if (error) throw error;
+      dogs_created++;
+      dogIdMap.set(gingrAnimalId, created.id);
+    } catch (err) {
+      errors.push(`Dog "${dogName}": ${err.message}`);
+    }
+  }
+
+  // ── Step 4: Insert appointments ───────────────────────────────────────────
+  if (import_appointments) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 365);
+
+    for (const r of reservations) {
+      const rawDate = r.check_in || r.check_out || '';
+      let apptDate;
+      try {
+        apptDate = rawDate ? new Date(rawDate) : null;
+        if (!apptDate || isNaN(apptDate.getTime())) {
+          appointments_skipped++;
+          continue;
+        }
+      } catch {
+        appointments_skipped++;
+        continue;
+      }
+
+      if (apptDate < cutoff) { appointments_skipped++; continue; }
+
+      const clientId = clientIdMap.get(String(r.owner_id || ''));
+      if (!clientId) { appointments_skipped++; continue; }
+
+      const dogId = dogIdMap.get(String(r.animal_id || '')) || null;
+
+      // Map status
+      const rawStatus = (r.status || '').toLowerCase();
+      let status = 'scheduled';
+      if (['checked_out', 'completed', 'checked out'].includes(rawStatus)) status = 'completed';
+      else if (['checked_in', 'checked in', 'in_progress'].includes(rawStatus)) status = 'confirmed';
+      else if (['cancelled', 'canceled'].includes(rawStatus)) status = 'cancelled';
+
+      const notes = [r.type, r.area_name, r.run_name].filter(Boolean).join(' · ') || null;
+
+      try {
+        const { error } = await supabaseAdmin
+          .from('appointments')
+          .insert({
+            daycare_id:       req.daycareId,
+            client_id:        clientId,
+            dog_id:           dogId,
+            appointment_date: apptDate.toISOString(),
+            status,
+            notes,
+            created_by:       req.user.id,
+          });
+        if (error) throw error;
+        appointments_created++;
+      } catch (err) {
+        appointments_skipped++;
+        if (errors.length < 20) errors.push(`Appointment (client ${r.owner_id}): ${err.message}`);
+      }
+    }
+  }
+
+  res.json({
+    success: true,
+    clients_created,
+    clients_skipped,
+    dogs_created,
+    dogs_skipped,
+    unlinked_animals,
+    appointments_created,
+    appointments_skipped,
+    errors: errors.slice(0, 20),
+  });
 });
 
 module.exports = router;

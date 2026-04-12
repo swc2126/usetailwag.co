@@ -76,6 +76,9 @@ app.get('/chew-on-this', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'chew-on-this.html'));
 });
 
+// Gingr import tool
+app.get('/gingr-import', (req, res) => res.sendFile(path.join(__dirname, 'public', 'gingr-import.html')));
+
 // Legal pages
 app.get('/privacy', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
