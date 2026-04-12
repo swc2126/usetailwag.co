@@ -168,6 +168,22 @@
     .rev-action-btn:hover { border-color: var(--green); color: var(--green); background: rgba(30,107,74,0.05); }
     .rev-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .rev-action-btn.sending { opacity: 0.6; cursor: not-allowed; }
+    .rev-action-btn-confirm {
+      background: rgba(30,107,74,0.08); border-color: rgba(30,107,74,0.3); color: var(--green);
+    }
+    .rev-action-btn-confirm:hover { background: rgba(30,107,74,0.15); border-color: var(--green); color: var(--green); }
+    .rev-actions-group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* Filter tabs */
+    .filter-tabs { display: flex; gap: 4px; }
+    .filter-tab {
+      background: none; border: 1px solid #e2e8f0; color: #999;
+      padding: 5px 13px; border-radius: 20px; font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .filter-tab:hover { border-color: var(--green); color: var(--green); }
+    .filter-tab.active { background: var(--green); border-color: var(--green); color: #fff; }
+    .filter-count { font-size: 11px; opacity: 0.75; margin-left: 3px; }
 
     /* PREVIEW MODAL */
     .modal-overlay {
@@ -268,7 +284,7 @@
       <div class="stat-card">
         <div class="stat-label">Reviews Received</div>
         <div class="stat-value" id="statReviewed">—</div>
-        <div class="stat-sub">marked by staff</div>
+        <div class="stat-sub">this month</div>
       </div>
     </div>
 
@@ -317,6 +333,12 @@
     <div class="table-card" id="reviewStatusCard">
       <div class="table-card-header">
         <h2>Review Status</h2>
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="setFilter('all', this)">All <span class="filter-count" id="fc-all"></span></button>
+          <button class="filter-tab" onclick="setFilter('not_requested', this)">Not Requested <span class="filter-count" id="fc-not_requested"></span></button>
+          <button class="filter-tab" onclick="setFilter('requested', this)">Requested <span class="filter-count" id="fc-requested"></span></button>
+          <button class="filter-tab" onclick="setFilter('reviewed', this)">Reviewed <span class="filter-count" id="fc-reviewed"></span></button>
+        </div>
       </div>
       <div id="reviewStatusLoading" style="text-align:center;padding:30px;">
         <div class="loading-spinner" style="width:22px;height:22px;border-width:2px;"></div>
@@ -725,6 +747,15 @@
     }
   }
 
+  let currentFilter = 'all';
+
+  function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    renderReviewStatus();
+  }
+
   function renderReviewStatus() {
     const tbody = document.getElementById('reviewStatusBody');
     document.getElementById('reviewStatusLoading').style.display = 'none';
@@ -741,7 +772,25 @@
       return order[getClientStatus(a)] - order[getClientStatus(b)];
     });
 
-    tbody.innerHTML = sorted.map(c => {
+    // Update filter tab counts
+    const counts = { all: sorted.length, not_requested: 0, requested: 0, reviewed: 0 };
+    sorted.forEach(c => counts[getClientStatus(c)]++);
+    Object.entries(counts).forEach(([key, val]) => {
+      const el = document.getElementById(`fc-${key}`);
+      if (el) el.textContent = val > 0 ? val : '';
+    });
+
+    // Apply filter
+    const visible = currentFilter === 'all' ? sorted : sorted.filter(c => getClientStatus(c) === currentFilter);
+
+    if (!visible.length) {
+      const labels = { not_requested: 'No clients without a request yet.', requested: 'No pending requests.', reviewed: 'No reviews marked yet.' };
+      tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">${labels[currentFilter] || 'No clients found.'}</div></td></tr>`;
+      updateReviewedStat();
+      return;
+    }
+
+    tbody.innerHTML = visible.map(c => {
       const status = getClientStatus(c);
       const dogLabel = (c.dogs && c.dogs.length)
         ? c.dogs.map(d => escHtml(d.name)).join(', ')
@@ -756,7 +805,11 @@
       } else if (status === 'requested') {
         badge = '<span class="rev-badge rev-badge-amber">Requested</span>';
         dateLabel = fmtDate(c.review_requested_at);
-        actionHtml = `<button class="rev-action-btn" id="rev-btn-${c.id}" onclick="markReviewed('${c.id}')">Mark as Reviewed ✓</button>`;
+        actionHtml = `
+          <div class="rev-actions-group">
+            <button class="rev-action-btn" id="rev-remind-btn-${c.id}" onclick="sendReminderForClient('${c.id}')">Send Reminder</button>
+            <button class="rev-action-btn rev-action-btn-confirm" id="rev-btn-${c.id}" onclick="markReviewed('${c.id}')">Mark as Reviewed ✓</button>
+          </div>`;
       } else if (status === 'reviewed') {
         badge = '<span class="rev-badge rev-badge-green">✓ Reviewed</span>';
         dateLabel = `<span title="Requested: ${fmtDate(c.review_requested_at)}">${fmtDate(c.review_received_at)}</span>`;
@@ -775,8 +828,15 @@
         </tr>`;
     }).join('');
 
-    // Update reviewed count stat
-    const reviewedCount = allClients.filter(c => c.review_received_at).length;
+    updateReviewedStat();
+  }
+
+  function updateReviewedStat() {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const reviewedCount = allClients.filter(c =>
+      c.review_received_at && new Date(c.review_received_at) >= startOfMonth
+    ).length;
     document.getElementById('statReviewed').textContent = reviewedCount;
   }
 
@@ -785,6 +845,43 @@
     if (btn) { btn.textContent = 'Saving...'; btn.disabled = true; }
     await stampReceived(clientId);
     renderReviewStatus();
+  }
+
+  async function sendReminderForClient(clientId) {
+    const client = allClients.find(c => c.id === clientId);
+    if (!client || !client.phone) {
+      alert('This client has no phone number on file.');
+      return;
+    }
+
+    const btn = document.getElementById(`rev-remind-btn-${clientId}`);
+    const confirmBtn = document.getElementById(`rev-btn-${clientId}`);
+    if (btn) { btn.textContent = 'Crafting…'; btn.disabled = true; }
+    if (confirmBtn) confirmBtn.disabled = true;
+
+    try {
+      const body = await buildAIMessageForClient(client);
+      if (btn) btn.textContent = 'Sending...';
+
+      const res = await fetch('/api/sms/send', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ client_id: client.id, recipient_phone: client.phone, body })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Send failed');
+
+      // Refresh the requested timestamp
+      await stampRequested(clientId);
+      renderReviewStatus();
+      loadHistory();
+      loadStats();
+
+    } catch (err) {
+      alert('Failed to send reminder: ' + err.message);
+      if (btn) { btn.textContent = 'Send Reminder'; btn.disabled = false; }
+      if (confirmBtn) confirmBtn.disabled = false;
+    }
   }
 
   async function loadStats() {
