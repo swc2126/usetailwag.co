@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/images/tailwag-icon.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resources — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YFRN3VT005"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-YFRN3VT005');</script>
+
+  <!-- Intercom -->
+  <script>
+    window.intercomSettings = { app_id: 'ov6sdlds' };
+    (function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/ov6sdlds';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();
+  </script>
+
+  <style>
+    :root {
+      --black:       #0F1410;
+      --green:       #1E6B4A;
+      --green-dark:  #164D35;
+      --linen:       #F5F0E8;
+      --gold:        #C4933F;
+      --sage:        #A8C5B0;
+      --slate:       #2D3748;
+      --card-bg:     #fff;
+      --card-border: rgba(0,0,0,0.06);
+      --text-dim:    #999;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--linen);
+      color: var(--slate);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    .top-nav {
+      background: rgba(15,20,16,0.97);
+      border-bottom: 1px solid rgba(168,197,176,0.12);
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .nav-main {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; height: 60px;
+    }
+    .nav-left { display: flex; align-items: center; gap: 14px; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo img { height: 28px; width: auto; }
+    .nav-logo-text {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800; font-size: 16px; color: var(--linen);
+    }
+    .nav-sep { color: rgba(168,197,176,0.3); font-size: 18px; font-weight: 300; }
+    .nav-page-title {
+      font-size: 13px; font-weight: 500;
+      color: rgba(245,240,232,0.55);
+    }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+
+    /* ── PAGE ── */
+    .page-content {
+      max-width: 1100px; margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 40px;
+    }
+    .page-header h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 28px; font-weight: 800;
+      color: var(--black); margin-bottom: 6px;
+    }
+    .page-header p {
+      font-size: 15px; color: var(--text-dim);
+    }
+
+    /* ── SECTION ── */
+    .section { margin-bottom: 52px; }
+    .section-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px; font-weight: 700;
+      color: var(--green); letter-spacing: 0.3px;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-title::after {
+      content: ''; flex: 1;
+      height: 1px; background: rgba(0,0,0,0.08);
+    }
+
+    /* ── GETTING STARTED LAYOUT ── */
+    .gs-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .gs-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── CHECKLIST CARD ── */
+    .checklist-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .checklist-header {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .checklist-header h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px; font-weight: 700; color: var(--black);
+    }
+    .checklist-progress-wrap {
+      margin-top: 10px;
+    }
+    .checklist-progress-bar {
+      height: 6px; background: rgba(0,0,0,0.06);
+      border-radius: 4px; overflow: hidden;
+    }
+    .checklist-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--sage));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .checklist-progress-label {
+      font-size: 11px; color: var(--text-dim);
+      margin-top: 6px;
+    }
+    .checklist-steps { padding: 8px 0; }
+    .checklist-step {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .checklist-step:last-child { border-bottom: none; }
+    .checklist-step:hover { background: rgba(30,107,74,0.03); }
+    .checklist-step.done .step-text { color: var(--text-dim); text-decoration: line-through; }
+    .step-check {
+      width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid rgba(0,0,0,0.15);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; margin-top: 1px;
+      font-size: 11px; color: transparent;
+    }
+    .checklist-step.done .step-check {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+    .step-body { flex: 1; min-width: 0; }
+    .step-text {
+      font-size: 13px; font-weight: 600; color: var(--black);
+      line-height: 1.3;
+    }
+    .step-link {
+      font-size: 11px; color: var(--green);
+      text-decoration: none; font-weight: 500;
+      display: inline-block; margin-top: 3px;
+    }
+    .step-link:hover { text-decoration: underline; }
+
+    /* ── VIDEO GRID ── */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 600px) {
+      .video-grid { grid-template-columns: 1fr; }
+    }
+
+    .video-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px; overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s;
+      text-decoration: none;
+    }
+    .video-card:hover {
+      border-color: rgba(30,107,74,0.25);
+      transform: translateY(-2px);
+    }
+    .video-thumb {
+      width: 100%; aspect-ratio: 16/9;
+      background: linear-gradient(135deg, var(--green-dark) 0%, #1E6B4A 100%);
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .video-thumb.coming-soon {
+      background: linear-gradient(135deg, #e8e3db 0%, #d4cfc7 100%);
+    }
+    .play-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.92);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      transition: transform 0.15s;
+    }
+    .video-card:hover .play-btn { transform: scale(1.08); }
+    .play-btn svg { margin-left: 3px; }
+    .coming-soon-label {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      color: #aaa; background: rgba(255,255,255,0.8);
+      padding: 4px 10px; border-radius: 20px;
+    }
+    .video-duration {
+      position: absolute; bottom: 8px; right: 10px;
+      font-size: 10px; font-weight: 700;
+      background: rgba(0,0,0,0.55); color: #fff;
+      padding: 2px 6px; border-radius: 4px;
+    }
+    .video-info { padding: 12px 14px; }
+    .video-tag {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--green);
+      margin-bottom: 4px;
+    }
+    .video-title {
+      font-size: 13px; font-weight: 600; color: var(--black);
+      line-height: 1.3;
+    }
+
+    /* ── DOWNLOADS GRID ── */
+    .downloads-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 860px) {
+      .downloads-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .downloads-grid { grid-template-columns: 1fr; }
+    }
+
+    .download-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px; padding: 20px;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: border-color 0.2s;
+      text-decoration: none;
+    }
+    .download-card:not(.disabled):hover { border-color: rgba(30,107,74,0.25); }
+    .download-card.disabled { opacity: 0.6; cursor: default; }
+
+    .download-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .download-icon.green { background: rgba(30,107,74,0.1); }
+    .download-icon.gold  { background: rgba(196,147,63,0.1); }
+    .download-icon.blue  { background: rgba(74,158,255,0.1); }
+    .download-icon.sage  { background: rgba(168,197,176,0.15); }
+
+    .download-body { flex: 1; }
+    .download-title {
+      font-size: 14px; font-weight: 700; color: var(--black);
+      margin-bottom: 4px;
+    }
+    .download-desc {
+      font-size: 12px; color: var(--text-dim); line-height: 1.5;
+    }
+    .download-footer {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .download-badge {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.4px; padding: 3px 8px; border-radius: 8px;
+    }
+    .download-badge.pdf  { background: rgba(229,62,62,0.1); color: #c53030; }
+    .download-badge.csv  { background: rgba(30,107,74,0.1); color: var(--green); }
+    .download-badge.xlsx { background: rgba(30,107,74,0.1); color: var(--green); }
+    .download-badge.soon { background: rgba(0,0,0,0.06); color: #888; }
+
+    .download-arrow {
+      font-size: 16px; color: var(--text-dim);
+      transition: transform 0.15s;
+    }
+    .download-card:not(.disabled):hover .download-arrow { transform: translateX(3px); color: var(--green); }
+
+    /* ── HELP GRID ── */
+    .help-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .help-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── HELP BUTTONS ── */
+    .help-buttons { display: flex; flex-direction: column; gap: 12px; }
+
+    .help-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px; padding: 18px 20px;
+      display: flex; align-items: center; gap: 14px;
+      cursor: pointer; text-decoration: none;
+      transition: border-color 0.2s, transform 0.15s;
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+    }
+    .help-btn:hover {
+      border-color: rgba(30,107,74,0.25);
+      transform: translateY(-1px);
+    }
+    .help-btn-icon {
+      width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .help-btn-icon.green { background: rgba(30,107,74,0.1); }
+    .help-btn-icon.blue  { background: rgba(74,158,255,0.1); }
+    .help-btn-icon.gold  { background: rgba(196,147,63,0.1); }
+    .help-btn-body { flex: 1; text-align: left; }
+    .help-btn-title {
+      font-size: 13px; font-weight: 700; color: var(--black);
+      margin-bottom: 2px;
+    }
+    .help-btn-sub {
+      font-size: 11px; color: var(--text-dim);
+    }
+    .help-btn-arrow { font-size: 14px; color: var(--text-dim); }
+
+    /* ── FAQ ACCORDION ── */
+    .faq-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px; overflow: hidden;
+    }
+    .faq-item {
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q {
+      width: 100%; padding: 16px 20px;
+      background: none; border: none; text-align: left;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 600; color: var(--black);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px;
+      transition: background 0.12s;
+    }
+    .faq-q:hover { background: rgba(30,107,74,0.03); }
+    .faq-caret {
+      font-size: 11px; color: var(--text-dim);
+      flex-shrink: 0; transition: transform 0.2s;
+    }
+    .faq-item.open .faq-caret { transform: rotate(180deg); }
+    .faq-a {
+      display: none;
+      padding: 0 20px 16px;
+      font-size: 13px; color: #555; line-height: 1.7;
+    }
+    .faq-item.open .faq-a { display: block; }
+    .faq-a a { color: var(--green); text-decoration: none; font-weight: 500; }
+    .faq-a a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="top-nav">
+  <div class="nav-main">
+    <div class="nav-left">
+      <a href="/dashboard.html" class="nav-logo">
+        <img src="/images/tailwag-icon.svg" alt="TailWag" />
+        <span class="nav-logo-text">TailWag</span>
+      </a>
+      <span class="nav-sep">|</span>
+      <span class="nav-page-title">Resources</span>
+    </div>
+    <div class="nav-right">
+      <div id="navUserWidget"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── PAGE ── -->
+<main class="page-content">
+
+  <div class="page-header">
+    <h1>Resources</h1>
+    <p>Everything you need to get the most out of TailWag — for you and your team</p>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 1 — GETTING STARTED
+  ══════════════════════════════════ -->
+  <section class="section">
+    <h2 class="section-title">🚀 Getting Started</h2>
+    <div class="gs-grid">
+
+      <!-- Checklist -->
+      <div class="checklist-card">
+        <div class="checklist-header">
+          <h3>Setup Checklist</h3>
+          <div class="checklist-progress-wrap">
+            <div class="checklist-progress-bar">
+              <div class="checklist-progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+            <div class="checklist-progress-label" id="progressLabel">0 of 5 complete</div>
+          </div>
+        </div>
+        <div class="checklist-steps" id="checklistSteps">
+          <div class="checklist-step" data-key="added_client" onclick="toggleStep(this)">
+            <div class="step-check">✓</div>
+            <div class="step-body">
+              <div class="step-text">Add your first client</div>
+              <a href="/clients.html" class="step-link" onclick="event.stopPropagation()">Go to Directory →</a>
+            </div>
+          </div>
+          <div class="checklist-step" data-key="sent_report_card" onclick="toggleStep(this)">
+            <div class="step-check">✓</div>
+            <div class="step-body">
+              <div class="step-text">Send your first report card</div>
+              <a href="/clients.html" class="step-link" onclick="event.stopPropagation()">Open a client profile →</a>
+            </div>
+          </div>
+          <div class="checklist-step" data-key="invited_team" onclick="toggleStep(this)">
+            <div class="step-check">✓</div>
+            <div class="step-body">
+              <div class="step-text">Invite a team member</div>
+              <a href="/team.html" class="step-link" onclick="event.stopPropagation()">Go to Team →</a>
+            </div>
+          </div>
+          <div class="checklist-step" data-key="sent_bulk" onclick="toggleStep(this)">
+            <div class="step-check">✓</div>
+            <div class="step-body">
+              <div class="step-text">Send a bulk message</div>
+              <a href="/messaging.html" class="step-link" onclick="event.stopPropagation()">Go to Messaging →</a>
+            </div>
+          </div>
+          <div class="checklist-step" data-key="review_setup" onclick="toggleStep(this)">
+            <div class="step-check">✓</div>
+            <div class="step-body">
+              <div class="step-text">Set up review requests</div>
+              <a href="/settings.html" class="step-link" onclick="event.stopPropagation()">Go to Settings →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video walkthroughs -->
+      <div class="video-grid">
+        <a class="video-card" href="https://youtu.be/placeholder-overview" target="_blank" rel="noopener" data-coming-soon="true">
+          <div class="video-thumb coming-soon">
+            <span class="coming-soon-label">Coming soon</span>
+          </div>
+          <div class="video-info">
+            <div class="video-tag">Overview</div>
+            <div class="video-title">Platform walkthrough</div>
+          </div>
+        </a>
+        <a class="video-card" href="https://youtu.be/placeholder-reportcard" target="_blank" rel="noopener" data-coming-soon="true">
+          <div class="video-thumb coming-soon">
+            <span class="coming-soon-label">Coming soon</span>
+          </div>
+          <div class="video-info">
+            <div class="video-tag">Feature</div>
+            <div class="video-title">Sending your first report card</div>
+          </div>
+        </a>
+        <a class="video-card" href="https://youtu.be/placeholder-team" target="_blank" rel="noopener" data-coming-soon="true">
+          <div class="video-thumb coming-soon">
+            <span class="coming-soon-label">Coming soon</span>
+          </div>
+          <div class="video-info">
+            <div class="video-tag">Feature</div>
+            <div class="video-title">Inviting &amp; managing your team</div>
+          </div>
+        </a>
+        <a class="video-card" href="https://youtu.be/placeholder-import" target="_blank" rel="noopener" data-coming-soon="true">
+          <div class="video-thumb coming-soon">
+            <span class="coming-soon-label">Coming soon</span>
+          </div>
+          <div class="video-info">
+            <div class="video-tag">Setup</div>
+            <div class="video-title">Importing clients from another system</div>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SECTION 2 — DOWNLOADS
+  ══════════════════════════════════ -->
+  <section class="section">
+    <h2 class="section-title">📄 Downloads</h2>
+    <div class="downloads-grid">
+
+      <a href="/tailwag_import_template.xlsx" download class="download-card">
+        <div class="download-icon green">📥</div>
+        <div class="download-body">
+          <div class="download-title">Client Import Template</div>
+          <div class="download-desc">Spreadsheet to bulk-import your existing clients and dogs into TailWag.</div>
+        </div>
+        <div class="download-footer">
+          <span class="download-badge xlsx">XLSX</span>
+          <span class="download-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="/tailwag_import_template.csv" download class="download-card">
+        <div class="download-icon green">📥</div>
+        <div class="download-body">
+          <div class="download-title">Client Import Template</div>
+          <div class="download-desc">CSV version of the import template — use this if you prefer plain text / Excel.</div>
+        </div>
+        <div class="download-footer">
+          <span class="download-badge csv">CSV</span>
+          <span class="download-arrow">→</span>
+        </div>
+      </a>
+
+      <div class="download-card disabled">
+        <div class="download-icon gold">📋</div>
+        <div class="download-body">
+          <div class="download-title">Pet Parent Welcome Card</div>
+          <div class="download-desc">A one-pager to share with new clients explaining what TailWag messages look like.</div>
+        </div>
+        <div class="download-footer">
+          <span class="download-badge soon">Coming soon</span>
+        </div>
+      </div>
+
+      <div class="download-card disabled">
+        <div class="download-icon blue">✉️</div>
+        <div class="download-body">
+          <div class="download-title">SMS Best Practices Guide</div>
+          <div class="download-desc">Tips for your team on writing great report cards and when to send review requests.</div>
+        </div>
+        <div class="download-footer">
+          <span class="download-badge soon">Coming soon</span>
+        </div>
+      </div>
+
+      <div class="download-card disabled">
+        <div class="download-icon sage">📊</div>
+        <div class="download-body">
+          <div class="download-title">Report Card Writing Guide</div>
+          <div class="download-desc">Templates and examples for daily updates that pet parents love to receive.</div>
+        </div>
+        <div class="download-footer">
+          <span class="download-badge soon">Coming soon</span>
+        </div>
+      </div>
+
+      <a href="/gingr-import" class="download-card">
+        <div class="download-icon green">🔄</div>
+        <div class="download-body">
+          <div class="download-title">Migrate from Gingr</div>
+          <div class="download-desc">Step-by-step import tool to bring your clients and dogs over from Gingr.</div>
+        </div>
+        <div class="download-footer">
+          <span class="download-badge csv">Import Tool</span>
+          <span class="download-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SECTION 3 — GET HELP
+  ══════════════════════════════════ -->
+  <section class="section">
+    <h2 class="section-title">💬 Get Help</h2>
+    <div class="help-grid">
+
+      <!-- Help CTAs -->
+      <div class="help-buttons">
+        <button class="help-btn" onclick="openIntercom()">
+          <div class="help-btn-icon green">💬</div>
+          <div class="help-btn-body">
+            <div class="help-btn-title">Chat with Support</div>
+            <div class="help-btn-sub">We typically reply within a few minutes</div>
+          </div>
+          <span class="help-btn-arrow">→</span>
+        </button>
+
+        <a href="sms:+1TAILWAGNUMBER" class="help-btn">
+          <div class="help-btn-icon blue">📱</div>
+          <div class="help-btn-body">
+            <div class="help-btn-title">Text TailWag</div>
+            <div class="help-btn-sub">Send us a message the same way your clients message you</div>
+          </div>
+          <span class="help-btn-arrow">→</span>
+        </a>
+
+        <a href="mailto:hello@usetailwag.co" class="help-btn">
+          <div class="help-btn-icon gold">✉️</div>
+          <div class="help-btn-body">
+            <div class="help-btn-title">Email Us</div>
+            <div class="help-btn-sub">hello@usetailwag.co</div>
+          </div>
+          <span class="help-btn-arrow">→</span>
+        </a>
+      </div>
+
+      <!-- FAQ Accordion -->
+      <div class="faq-card">
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            How do I send a report card?
+            <span class="faq-caret">▾</span>
+          </button>
+          <div class="faq-a">
+            Go to <a href="/clients.html">Directory</a>, search for a client, and click their name to open their profile. From there, select a template or write a custom message, optionally add a photo, and hit Send. The message is delivered as an SMS to the pet parent's phone number on file.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Can pet parents reply to messages?
+            <span class="faq-caret">▾</span>
+          </button>
+          <div class="faq-a">
+            Yes — replies come into your TailWag inbox and are visible to your whole team. You'll see an unread indicator on the messaging page. Each client has their own thread.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            How does the review request work?
+            <span class="faq-caret">▾</span>
+          </button>
+          <div class="faq-a">
+            After sending a report card, you can optionally follow up with a review request SMS that includes your Google review link. Set your Google review URL in <a href="/settings.html">Settings</a> and TailWag will handle the timing and message formatting automatically.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            What is bulk messaging?
+            <span class="faq-caret">▾</span>
+          </button>
+          <div class="faq-a">
+            Bulk messaging lets you send one message to many clients at once — useful for closures, holiday hours, promotions, or policy updates. Go to <a href="/messaging.html">Messaging</a> and select your recipients. Each pet parent receives the message as an individual SMS, not a group text.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            How do I invite team members?
+            <span class="faq-caret">▾</span>
+          </button>
+          <div class="faq-a">
+            Go to <a href="/team.html">Team</a> and click "Invite Team Member." Enter their email address and assign a role — Manager or Team Member. They'll receive an email invite to create their account and will have access to your daycare's clients.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            How do I import clients from another system?
+            <span class="faq-caret">▾</span>
+          </button>
+          <div class="faq-a">
+            Download the <a href="/tailwag_import_template.xlsx" download>import template</a>, fill in your client and dog information, and upload it on the <a href="/import.html">Import page</a>. Coming from Gingr? Use the <a href="/gingr-import">Gingr import tool</a> to automatically map your existing data.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Is there a message limit?
+            <span class="faq-caret">▾</span>
+          </button>
+          <div class="faq-a">
+            Message limits depend on your plan. Check your current usage and plan details in <a href="/settings.html">Billing &amp; Plan</a>. If you're running into limits, upgrading your plan takes effect immediately.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            How do I change or cancel my subscription?
+            <span class="faq-caret">▾</span>
+          </button>
+          <div class="faq-a">
+            Go to <a href="/settings.html">Billing &amp; Plan</a> and click "Manage Subscription." You can upgrade, downgrade, or cancel directly from the billing portal. Need help? <button style="background:none;border:none;color:var(--green);font-weight:500;cursor:pointer;padding:0;font-size:inherit;" onclick="openIntercom()">Chat with us</button> and we'll take care of it.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Do you have a mobile app?
+            <span class="faq-caret">▾</span>
+          </button>
+          <div class="faq-a">
+            TailWag is a web app that works great on mobile browsers — just visit usetailwag.co on your phone and add it to your home screen for a near-native experience. A dedicated iOS and Android app is on the roadmap.
+          </div>
+        </div>
+
+      </div><!-- /faq-card -->
+
+    </div><!-- /help-grid -->
+  </section>
+
+</main>
+
+<script src="/js/nav-user.js"></script>
+<script>
+  /* ── CHECKLIST ── */
+  const STEPS_KEY = 'tw_checklist';
+
+  function loadChecklist() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(STEPS_KEY) || '{}'); } catch {}
+    const steps = document.querySelectorAll('.checklist-step');
+    let done = 0;
+    steps.forEach(step => {
+      const key = step.dataset.key;
+      if (saved[key]) { step.classList.add('done'); done++; }
+    });
+    updateProgress(done, steps.length);
+  }
+
+  function toggleStep(el) {
+    el.classList.toggle('done');
+    saveChecklist();
+  }
+
+  function saveChecklist() {
+    const steps = document.querySelectorAll('.checklist-step');
+    let saved = {}, done = 0;
+    steps.forEach(step => {
+      if (step.classList.contains('done')) { saved[step.dataset.key] = true; done++; }
+    });
+    localStorage.setItem(STEPS_KEY, JSON.stringify(saved));
+    updateProgress(done, steps.length);
+  }
+
+  function updateProgress(done, total) {
+    const pct = Math.round((done / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent =
+      done === total ? '🎉 All done!' : `${done} of ${total} complete`;
+  }
+
+  /* ── FAQ ── */
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const wasOpen = item.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    // Toggle current
+    if (!wasOpen) item.classList.add('open');
+  }
+
+  /* ── VIDEO CARDS ── */
+  // Disable click on "coming soon" video cards
+  document.querySelectorAll('.video-card[data-coming-soon]').forEach(card => {
+    card.addEventListener('click', e => e.preventDefault());
+    card.style.cursor = 'default';
+  });
+
+  /* ── INTERCOM ── */
+  function openIntercom() {
+    if (typeof window.Intercom === 'function') {
+      window.Intercom('show');
+    } else {
+      window.location.href = 'mailto:hello@usetailwag.co';
+    }
+  }
+
+  /* ── INIT ── */
+  loadChecklist();
+</script>
+</body>
+</html>

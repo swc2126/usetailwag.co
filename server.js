@@ -97,6 +97,11 @@ app.get('/insights', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'insights.html'));
 });
 
+// Resources hub — help, downloads, onboarding
+app.get('/resources', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'resources.html'));
+});
+
 // CEO dashboard — protected route, redirects to login if no token present
 app.get('/ceo', (req, res) => {
   const token = req.headers.authorization?.split(' ')[1] || req.cookies?.tailwag_token;
