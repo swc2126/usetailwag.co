@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TailWag — Primary Logo
+  Full Color | Light Background
+  Use on: white or Warm Linen (#F5F0E8) backgrounds only
+  Colors: Daycare Green (#1E6B4A) icon | Kennel Black (#0F1410) wordmark
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 56" width="420" height="112" role="img" aria-label="TailWag">
+  <title>TailWag</title>
+  <defs>
+    <style>
+      .tw-wm {
+        font-family: 'Neue Montreal', 'DM Sans', 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        font-size: 30px;
+        letter-spacing: -0.5px;
+      }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="210" height="56" fill="#FFFFFF"/>
+
+  <!-- Wag Mark — the flowing arc of a happy dog tail in motion -->
+  <!-- First curve: base sweeps up and to the right -->
+  <!-- Second curve: tip curls back — the characteristic happy wag -->
+  <path d="M 10 50 C 4 30, 22 4, 40 4 C 48 4, 50 18, 44 26"
+        stroke="#1E6B4A"
+        stroke-width="5.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"/>
+  <!-- Tail tip dot — the period on the happy day -->
+  <circle cx="44" cy="26" r="3.2" fill="#1E6B4A"/>
+
+  <!-- Wordmark: TailWag -->
+  <text x="64" y="38" class="tw-wm" fill="#0F1410">TailWag</text>
+</svg>
