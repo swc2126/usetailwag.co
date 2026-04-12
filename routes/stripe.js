@@ -26,7 +26,7 @@ async function ensureStripeProducts() {
         const key = `${price.metadata.plan}_${price.metadata.billing}`;
         PRICE_MAP[key] = price.id;
       }
-      if (Object.keys(PRICE_MAP).length >= 6) return; // All prices exist
+      if (Object.keys(PRICE_MAP).length >= 8) return; // All prices exist
     } else {
       product = await stripe.products.create({
         name: 'TailWag SMS Platform',
@@ -34,20 +34,23 @@ async function ensureStripeProducts() {
       });
     }
 
-    // Define plans: monthly price, then quarterly = monthly*3, annual = monthly*12*0.9
+    // Plans: monthly price, billing options
+    // quarterlyOnly: true  → only create quarterly price (no annual option)
     const plans = {
-      starter: { monthly: 189, name: 'Starter — Up to 25 dogs' },
-      growth:  { monthly: 249, name: 'Growth — Up to 60 dogs' },
-      pro:     { monthly: 329, name: 'Pro — 60+ dogs' }
+      starter:       { monthly: 189, name: 'Starter — Up to 25 dogs' },
+      growth:        { monthly: 249, name: 'Growth — Up to 60 dogs' },
+      pro:           { monthly: 329, name: 'Pro — 60+ dogs' },
+      fc_essentials: { monthly: 109, name: "Founder's Circle — Essentials",       quarterlyOnly: true },
+      fc_strategic:  { monthly: 159, name: "Founder's Circle — Strategic Partner", quarterlyOnly: true }
     };
 
     for (const [planKey, plan] of Object.entries(plans)) {
-      // Quarterly price
+      // Quarterly price (all plans)
       const qKey = `${planKey}_quarterly`;
       if (!PRICE_MAP[qKey]) {
         const qPrice = await stripe.prices.create({
           product: product.id,
-          unit_amount: plan.monthly * 3 * 100, // in cents
+          unit_amount: plan.monthly * 3 * 100, // monthly × 3, no discount
           currency: 'usd',
           recurring: { interval: 'month', interval_count: 3 },
           nickname: `${plan.name} (Quarterly)`,
@@ -56,18 +59,20 @@ async function ensureStripeProducts() {
         PRICE_MAP[qKey] = qPrice.id;
       }
 
-      // Annual price (10% off)
-      const aKey = `${planKey}_annual`;
-      if (!PRICE_MAP[aKey]) {
-        const aPrice = await stripe.prices.create({
-          product: product.id,
-          unit_amount: Math.round(plan.monthly * 12 * 0.9) * 100, // in cents
-          currency: 'usd',
-          recurring: { interval: 'year' },
-          nickname: `${plan.name} (Annual)`,
-          metadata: { plan: planKey, billing: 'annual' }
-        });
-        PRICE_MAP[aKey] = aPrice.id;
+      // Annual price (10% off) — standard plans only
+      if (!plan.quarterlyOnly) {
+        const aKey = `${planKey}_annual`;
+        if (!PRICE_MAP[aKey]) {
+          const aPrice = await stripe.prices.create({
+            product: product.id,
+            unit_amount: Math.round(plan.monthly * 12 * 0.9) * 100,
+            currency: 'usd',
+            recurring: { interval: 'year' },
+            nickname: `${plan.name} (Annual)`,
+            metadata: { plan: planKey, billing: 'annual' }
+          });
+          PRICE_MAP[aKey] = aPrice.id;
+        }
       }
     }
 

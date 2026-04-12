@@ -1142,7 +1142,7 @@
                   <div class="fc-bullet">✓ Up to 5 user accounts</div>
                   <div class="fc-bullet">✓ Full setup support</div>
                 </div>
-                <div class="plan-total fc-plan-total">Billed monthly</div>
+                <div class="plan-total fc-plan-total">$327 billed quarterly</div>
               </div>
               <div class="plan-option fc-plan" data-plan="fc_strategic" onclick="selectPlan(this, 'fc_strategic')">
                 <div class="fc-badge">⭐ Founder's Circle</div>
@@ -1155,7 +1155,7 @@
                   <div class="fc-bullet">✓ Opportunities for custom solutions</div>
                   <div class="fc-bullet fc-highlight">✓ Founding rate locked in for 18 months</div>
                 </div>
-                <div class="plan-total fc-plan-total">Billed monthly</div>
+                <div class="plan-total fc-plan-total">$477 billed quarterly</div>
               </div>
             </div>
 
@@ -1365,7 +1365,7 @@
 
     function getTotal(plan, billing) {
       const base = pricing[plan].monthly;
-      if (isFC(plan)) return base; // FC plans are always monthly
+      if (isFC(plan)) return base * 3; // FC plans are always quarterly (monthly × 3)
       if (billing === 'quarterly') return base * 3;
       return Math.round(base * 12 * 0.9);
     }
@@ -1410,10 +1410,10 @@
       const reportRow = document.getElementById('reportRow');
 
       if (isFC(currentPlan)) {
-        document.getElementById('summaryBilling').textContent = 'Monthly';
+        document.getElementById('summaryBilling').textContent = 'Quarterly';
         savingsRow.style.display = 'none';
-        document.getElementById('btnMainText').textContent = `Get started — ${formatCurrency(total)}/mo`;
-        document.getElementById('btnSubText').textContent = `${pricing[currentPlan].name}, billed monthly`;
+        document.getElementById('btnMainText').textContent = `Get started — ${formatCurrency(total)} / quarter`;
+        document.getElementById('btnSubText').textContent = `${pricing[currentPlan].name}, billed every 3 months`;
         // Dim billing toggle — not applicable for FC plans
         document.getElementById('billingToggleWrap').classList.add('fc-active');
       } else {
@@ -1447,6 +1447,11 @@
       document.querySelectorAll('.plan-option').forEach(opt => opt.classList.remove('selected'));
       el.classList.add('selected');
       document.getElementById('selectedPlan').value = plan;
+      // FC plans are always quarterly — lock billing
+      if (isFC(plan)) {
+        currentBilling = 'quarterly';
+        document.getElementById('selectedBilling').value = 'quarterly';
+      }
       if (isFC(plan)) {
         document.getElementById('selectedBilling').value = 'monthly';
       } else {
