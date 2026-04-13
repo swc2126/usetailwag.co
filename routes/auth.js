@@ -192,6 +192,22 @@ router.post('/me', async (req, res) => {
       .eq('owner_id', user.id)
       .single();
 
+    // Determine role
+    let role = 'team_member';
+    if (profile?.is_super_admin) {
+      role = 'super_admin';
+    } else if (daycare) {
+      role = 'owner';
+    } else {
+      const { data: member } = await supabaseAdmin
+        .from('team_members')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+      if (member?.role) role = member.role;
+    }
+
     res.json({
       user: {
         id: user.id,
@@ -200,7 +216,8 @@ router.post('/me', async (req, res) => {
       },
       profile,
       subscription,
-      daycare
+      daycare,
+      role
     });
   } catch (err) {
     console.error('Me error:', err);
