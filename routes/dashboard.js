@@ -37,15 +37,29 @@ router.put('/daycare', requireAuth, async (req, res) => {
     try { new URL(google_link); } catch { return res.status(400).json({ error: 'Invalid URL' }); }
   }
 
+  // Handle messaging_style separately — JSONB column added post-deploy;
+  // update without .select() to avoid PostgREST schema cache conflicts
+  if (messaging_style !== undefined) {
+    const { error: msError } = await supabaseAdmin
+      .from('daycares')
+      .update({ messaging_style })
+      .eq('id', req.daycareId);
+    if (msError) return res.status(500).json({ error: msError.message });
+  }
+
   const updates = {};
-  if (name             !== undefined) updates.name             = name.trim();
-  if (phone            !== undefined) updates.phone            = phone.trim();
-  if (street           !== undefined) updates.street           = street.trim();
-  if (city             !== undefined) updates.city             = city.trim();
-  if (state            !== undefined) updates.state            = state.trim();
-  if (zip              !== undefined) updates.zip              = zip.trim();
-  if (google_link      !== undefined) updates.google_link      = google_link.trim() || null;
-  if (messaging_style  !== undefined) updates.messaging_style  = messaging_style;
+  if (name        !== undefined) updates.name        = name.trim();
+  if (phone       !== undefined) updates.phone       = phone.trim();
+  if (street      !== undefined) updates.street      = street.trim();
+  if (city        !== undefined) updates.city        = city.trim();
+  if (state       !== undefined) updates.state       = state.trim();
+  if (zip         !== undefined) updates.zip         = zip.trim();
+  if (google_link !== undefined) updates.google_link = google_link.trim() || null;
+
+  // If only messaging_style was sent, return success now
+  if (Object.keys(updates).length === 0) {
+    return res.json({ ok: true });
+  }
 
   const { data, error } = await supabaseAdmin
     .from('daycares')
