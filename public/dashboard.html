@@ -331,18 +331,18 @@
       const headingEl = document.getElementById('welcomeHeading');
       const subEl     = document.getElementById('welcomeText');
 
-      if (greetName) {
-        headingEl.textContent = `${timeGreeting}, ${greetName}! 👋`;
+      if (headingEl) {
+        headingEl.textContent = greetName ? `${timeGreeting}, ${greetName}! 👋` : `${timeGreeting}! 👋`;
+      }
+      if (subEl) {
         subEl.textContent = daycareName && firstName ? daycareName : '';
-      } else {
-        headingEl.textContent = `${timeGreeting}! 👋`;
-        subEl.textContent = '';
       }
 
       // Stats
-      document.getElementById('statClients').textContent = stats.clients != null ? stats.clients : 0;
-      document.getElementById('statDogs').textContent = stats.dogs != null ? stats.dogs : 0;
-      document.getElementById('statMsgUsage').textContent = usage.usage != null ? usage.usage : 0;
+      const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setVal('statClients', stats.clients != null ? stats.clients : 0);
+      setVal('statDogs',    stats.dogs    != null ? stats.dogs    : 0);
+      setVal('statMsgUsage', usage.usage  != null ? usage.usage   : 0);
 
 
       // Onboarding checklist — show only when no clients yet
