@@ -2,12 +2,62 @@ const express = require('express');
 const router = express.Router();
 const { supabaseAdmin } = require('../config/supabase');
 const { requireAuth } = require('../middleware/auth');
+const https = require('https');
+
+// ── Brevo: add contact to Chew on This newsletter list ──
+async function addToBrevoNewsletter({ email, first_name, last_name, daycare_name }) {
+  return new Promise((resolve) => {
+    const body = JSON.stringify({
+      email,
+      attributes: {
+        FIRSTNAME: first_name || '',
+        LASTNAME:  last_name  || '',
+        COMPANY:   daycare_name || ''
+      },
+      listIds: [parseInt(process.env.BREVO_NEWSLETTER_LIST_ID || '7', 10)],
+      updateEnabled: true
+    });
+
+    const options = {
+      hostname: 'api.brevo.com',
+      path: '/v3/contacts',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'Content-Length': Buffer.byteLength(body)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log(`[Brevo] Added ${email} to newsletter list`);
+        } else {
+          console.error(`[Brevo] Failed for ${email}: ${res.statusCode} ${data}`);
+        }
+        resolve(); // always resolve — non-fatal
+      });
+    });
+
+    req.on('error', (err) => {
+      console.error('[Brevo] Request error:', err.message);
+      resolve(); // non-fatal
+    });
+
+    req.write(body);
+    req.end();
+  });
+}
 
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {
   try {
     const { email, password, first_name, last_name, daycare_name, phone, city, state, google_link,
-            opened_month, opened_year, dogs_served, staff_count, role, role_other } = req.body;
+            opened_month, opened_year, dogs_served, staff_count, role, role_other,
+            newsletter_opt_in } = req.body;
 
     // Create user in Supabase Auth
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
@@ -50,6 +100,11 @@ router.post('/signup', async (req, res) => {
       user_id: userId,
       status: 'inactive'
     });
+
+    // Add to Brevo newsletter if opted in
+    if (newsletter_opt_in) {
+      await addToBrevoNewsletter({ email, first_name, last_name, daycare_name });
+    }
 
     // Sign the user in to get a session
     const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
