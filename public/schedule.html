@@ -160,7 +160,7 @@
     .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 20px; }
     .week-col {
       background: white; border-radius: 12px; overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-height: 130px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-height: 130px; max-height: 380px;
     }
     .week-col.today-col { border: 2px solid var(--green); }
     .week-col-header {
@@ -170,7 +170,11 @@
     .week-col-dayname { font-size: 10px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.04em; }
     .week-col-datenum { font-size: 17px; font-weight: 800; color: var(--black); margin-top: 1px; }
     .week-col-datenum.today { color: var(--green); }
-    .week-col-body { padding: 6px; display: flex; flex-direction: column; gap: 3px; }
+    .week-col-body { padding: 6px; display: flex; flex-direction: column; gap: 3px; max-height: 320px; overflow-y: auto; }
+    .week-col-body::-webkit-scrollbar { width: 3px; }
+    .week-col-body::-webkit-scrollbar-track { background: transparent; }
+    .week-col-body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 99px; }
+    .week-col-body::-webkit-scrollbar-thumb:hover { background: #bbb; }
     .week-chip {
       font-size: 10px; font-weight: 600; padding: 3px 6px; border-radius: 5px;
       background: rgba(30,107,74,0.1); color: var(--green-dark);
@@ -835,7 +839,7 @@
       const isToday = dateStr === today;
       const appts   = calendarData[dateStr] || [];
 
-      const chips = appts.slice(0, 4).map(a => {
+      const chips = appts.map(a => {
         const name = a.dogs?.name || a.clients?.first_name || '?';
         const sc = a.status === 'cancelled' ? 'status-cancelled' :
                    a.status === 'pending'   ? 'status-pending'   :
@@ -843,7 +847,6 @@
         return `<div class="week-chip ${sc}" onclick="drillToDay('${dateStr}')" title="${name} — ${a.clients?.first_name||''} ${a.clients?.last_name||''}">${escHtml(name)}</div>`;
       }).join('');
 
-      const more = appts.length > 4 ? `<div class="week-more" onclick="drillToDay('${dateStr}')">+${appts.length-4} more</div>` : '';
       const addBtn = `<button class="week-add-btn" onclick="openAddModalForDate('${dateStr}')">+ Add</button>`;
 
       html += `<div class="week-col${isToday?' today-col':''}">
@@ -851,7 +854,7 @@
           <div class="week-col-dayname">${dayAbbr}</div>
           <div class="week-col-datenum${isToday?' today':''}">${dayNum}</div>
         </div>
-        <div class="week-col-body">${chips}${more}${addBtn}</div>
+        <div class="week-col-body">${chips}${addBtn}</div>
       </div>`;
     }
     grid.innerHTML = html;
