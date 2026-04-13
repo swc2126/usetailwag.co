@@ -28,7 +28,7 @@ router.get('/stats', requireAuth, async (req, res) => {
 // PUT /api/dashboard/daycare — update daycare settings
 router.put('/daycare', requireAuth, async (req, res) => {
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
-  if (!['owner', 'admin'].includes(req.userRole)) return res.status(403).json({ error: 'Insufficient permissions' });
+  if (!['owner', 'manager', 'super_admin', 'admin'].includes(req.userRole)) return res.status(403).json({ error: 'Insufficient permissions' });
 
   const { name, phone, street, city, state, zip, google_link, messaging_style } = req.body;
 
@@ -51,11 +51,11 @@ router.put('/daycare', requireAuth, async (req, res) => {
     .from('daycares')
     .update(updates)
     .eq('id', req.daycareId)
-    .select('name, phone, street, city, state, zip, google_link, messaging_style')
-    .single();
+    .select('name, phone, street, city, state, zip, google_link, messaging_style');
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  if (!data || data.length === 0) return res.status(404).json({ error: 'Daycare not found or no rows updated' });
+  res.json(data[0]);
 });
 
 module.exports = router;
