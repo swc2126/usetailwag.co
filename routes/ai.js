@@ -6,6 +6,40 @@ const { supabaseAdmin } = require('../config/supabase');
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+const TONE_DESCRIPTIONS = {
+  warm_playful: 'warm and playful — friendly, fun, feels like a neighbor who genuinely loves dogs',
+  professional: 'professional and polished — confident, clear, premium service feel',
+  casual_fun:   'casual and fun — laid-back, upbeat, like texting a friend',
+  calm_caring:  'calm and caring — gentle, reassuring, emphasizes trust and safety'
+};
+
+async function getMessagingStyle(daycareId) {
+  if (!daycareId) return null;
+  try {
+    const { data } = await supabaseAdmin
+      .from('daycares')
+      .select('messaging_style')
+      .eq('id', daycareId)
+      .single();
+    return data?.messaging_style || null;
+  } catch { return null; }
+}
+
+function buildVoiceInstruction(style) {
+  if (!style) return '';
+  const lines = ['BRAND VOICE FOR THIS DAYCARE:'];
+  const tone = TONE_DESCRIPTIONS[style.tone] || TONE_DESCRIPTIONS.warm_playful;
+  lines.push(`- Tone: ${tone}`);
+  const emojiMap = { always: 'always use at least one emoji', sometimes: 'use an emoji only if it fits naturally', never: 'never use any emoji' };
+  lines.push(`- Emoji: ${emojiMap[style.emoji] || emojiMap.sometimes}`);
+  if (style.personality) lines.push(`- Personality: ${style.personality}`);
+  if (style.phrases)     lines.push(`- Preferred phrases/words: ${style.phrases}`);
+  if (style.avoid)       lines.push(`- NEVER use these words or phrases: ${style.avoid}`);
+  if (style.signature)   lines.push(`- End every message with this sign-off: ${style.signature}`);
+  lines.push('Match this voice precisely. It must feel like it came from this specific business.');
+  return '\n\n' + lines.join('\n');
+}
+
 // POST /api/ai/report-card — generate a personalized report card message
 router.post('/report-card', requireAuth, async (req, res) => {
   const { dog_name, owner_first_name, breed, notes, daycare_name } = req.body;
@@ -13,6 +47,9 @@ router.post('/report-card', requireAuth, async (req, res) => {
   if (!dog_name || !owner_first_name) {
     return res.status(400).json({ error: 'dog_name and owner_first_name required' });
   }
+
+  const style = await getMessagingStyle(req.daycareId);
+  const voiceInstruction = buildVoiceInstruction(style);
 
   const prompt = `You are writing a personalized dog daycare report card SMS message.
 
@@ -31,7 +68,7 @@ Rules:
 - End with at most ONE casual emoji, only if it feels natural
 - STRICT LIMIT: message must be 160 characters or fewer — count carefully before responding
 - Sound like a real person wrote it, not a template
-- Be specific to the notes provided — no generic openers
+- Be specific to the notes provided — no generic openers${voiceInstruction}
 
 Write ONLY the SMS message text. No quotes, no explanation.`;
 
@@ -57,6 +94,9 @@ router.post('/review-request', requireAuth, async (req, res) => {
   if (!owner_first_name || !dog_name) {
     return res.status(400).json({ error: 'owner_first_name and dog_name required' });
   }
+
+  const style = await getMessagingStyle(req.daycareId);
+  const voiceInstruction = buildVoiceInstruction(style);
 
   // Build rich dog context
   const dogDetails = [
@@ -89,7 +129,7 @@ RULES (all are mandatory):
 ${google_link ? `8. Ask them to leave a Google review (link will be appended automatically)` : `8. Ask them to search for ${daycare_name || 'the daycare'} on Google to leave a review`}
 9. STRICT LIMIT: total message (including link if present) must be 175 characters or fewer — count carefully
 10. At most one emoji — only if it genuinely fits. No forced emoji.
-11. Sound like a real, warm human wrote it — not a bot, not marketing copy
+11. Sound like a real, warm human wrote it — not a bot, not marketing copy${voiceInstruction}
 
 Write ONLY the message text (no link). No quotes. No explanation. No labels.`;
 

@@ -30,18 +30,28 @@ router.put('/daycare', requireAuth, async (req, res) => {
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
   if (!['owner', 'admin'].includes(req.userRole)) return res.status(403).json({ error: 'Insufficient permissions' });
 
-  const { google_link } = req.body;
+  const { name, phone, street, city, state, zip, google_link, messaging_style } = req.body;
 
   // Validate URL if provided
   if (google_link) {
     try { new URL(google_link); } catch { return res.status(400).json({ error: 'Invalid URL' }); }
   }
 
+  const updates = {};
+  if (name             !== undefined) updates.name             = name.trim();
+  if (phone            !== undefined) updates.phone            = phone.trim();
+  if (street           !== undefined) updates.street           = street.trim();
+  if (city             !== undefined) updates.city             = city.trim();
+  if (state            !== undefined) updates.state            = state.trim();
+  if (zip              !== undefined) updates.zip              = zip.trim();
+  if (google_link      !== undefined) updates.google_link      = google_link.trim() || null;
+  if (messaging_style  !== undefined) updates.messaging_style  = messaging_style;
+
   const { data, error } = await supabaseAdmin
     .from('daycares')
-    .update({ google_link: google_link || null })
+    .update(updates)
     .eq('id', req.daycareId)
-    .select('name, city, state, google_link')
+    .select('name, phone, street, city, state, zip, google_link, messaging_style')
     .single();
 
   if (error) return res.status(500).json({ error: error.message });

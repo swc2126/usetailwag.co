@@ -140,6 +140,24 @@
     .delay-option:has(input:checked) { border-color: var(--green); background: #f0fff4; color: var(--green); font-weight: 600; }
     .delay-option input { accent-color: var(--green); }
 
+    /* Brand Voice */
+    .voice-option {
+      cursor: pointer; border: 1.5px solid #e2e8f0; border-radius: 10px;
+      transition: border-color 0.15s, background 0.15s; display: block;
+    }
+    .voice-option:has(input:checked) { border-color: var(--green); background: rgba(30,107,74,0.04); }
+    .voice-option-inner { padding: 13px 15px; }
+    .voice-option-title { font-size: 13px; font-weight: 700; color: #0F1410; }
+    .voice-option-desc { font-size: 12px; color: #999; margin-top: 3px; line-height: 1.4; }
+    .voice-option:has(input:checked) .voice-option-title { color: var(--green); }
+
+    .emoji-option {
+      cursor: pointer; border: 1.5px solid #e2e8f0; border-radius: 20px;
+      padding: 6px 18px; font-size: 13px; font-weight: 600; color: #666;
+      transition: border-color 0.15s, background 0.15s, color 0.15s; display: inline-block;
+    }
+    .emoji-option:has(input:checked) { border-color: var(--green); background: rgba(30,107,74,0.07); color: var(--green); }
+
     @media (max-width: 640px) {
       .dashboard-nav { padding: 0 16px; }
       .nav-links { display: none; }
@@ -279,6 +297,100 @@
 
       <button class="btn-primary" onclick="saveDaycareInfo()" id="saveDaycareBtn" style="margin-top:20px;">Save Daycare Info</button>
       <div id="daycareInfoMsg" class="msg" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- Brand Voice Card -->
+    <div class="settings-card" id="brandVoiceCard" style="display:none;">
+      <h2>Brand Voice</h2>
+      <p style="font-size:13px;color:#888;margin-bottom:24px;line-height:1.6;">Customize how TailWag writes automated messages on your behalf — report cards, review requests, and follow-ups. The AI will match your style on every message.</p>
+
+      <div style="display:grid;gap:20px;">
+
+        <!-- Tone -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:10px;">Tone</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="toneOptions">
+            <label class="voice-option" data-val="warm_playful">
+              <input type="radio" name="voiceTone" value="warm_playful" style="display:none;">
+              <div class="voice-option-inner">
+                <div class="voice-option-title">Warm &amp; Playful</div>
+                <div class="voice-option-desc">Friendly, fun, feels like a neighbor who loves dogs</div>
+              </div>
+            </label>
+            <label class="voice-option" data-val="professional">
+              <input type="radio" name="voiceTone" value="professional" style="display:none;">
+              <div class="voice-option-inner">
+                <div class="voice-option-title">Professional &amp; Polished</div>
+                <div class="voice-option-desc">Confident, clear, premium service feel</div>
+              </div>
+            </label>
+            <label class="voice-option" data-val="casual_fun">
+              <input type="radio" name="voiceTone" value="casual_fun" style="display:none;">
+              <div class="voice-option-inner">
+                <div class="voice-option-title">Casual &amp; Fun</div>
+                <div class="voice-option-desc">Laid-back, upbeat, feels like texting a friend</div>
+              </div>
+            </label>
+            <label class="voice-option" data-val="calm_caring">
+              <input type="radio" name="voiceTone" value="calm_caring" style="display:none;">
+              <div class="voice-option-inner">
+                <div class="voice-option-title">Calm &amp; Caring</div>
+                <div class="voice-option-desc">Gentle, reassuring, emphasizes trust and safety</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Emoji preference -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:10px;">Emoji Use</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <label class="emoji-option" data-val="always"><input type="radio" name="voiceEmoji" value="always" style="display:none;"> Always</label>
+            <label class="emoji-option" data-val="sometimes"><input type="radio" name="voiceEmoji" value="sometimes" style="display:none;"> Sometimes</label>
+            <label class="emoji-option" data-val="never"><input type="radio" name="voiceEmoji" value="never" style="display:none;"> Never</label>
+          </div>
+        </div>
+
+        <!-- Signature -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">Sign-off / Signature <span style="font-weight:400;text-transform:none;font-size:11px;">(optional)</span></label>
+          <input type="text" id="voiceSignature" placeholder="e.g. — The Barkhaus Team 🐾"
+            style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'">
+          <p style="font-size:12px;color:#aaa;margin-top:5px;">Appended to the end of messages. Keep it short.</p>
+        </div>
+
+        <!-- Custom phrases -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">Phrases you like <span style="font-weight:400;text-transform:none;font-size:11px;">(optional)</span></label>
+          <input type="text" id="voicePhrases" placeholder="e.g. pack, crew, wag-worthy"
+            style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'">
+          <p style="font-size:12px;color:#aaa;margin-top:5px;">Words or phrases that feel on-brand for you. Comma-separated.</p>
+        </div>
+
+        <!-- Avoid -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">Words to avoid <span style="font-weight:400;text-transform:none;font-size:11px;">(optional)</span></label>
+          <input type="text" id="voiceAvoid" placeholder="e.g. fur baby, pup, pooch"
+            style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;"
+            onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'">
+          <p style="font-size:12px;color:#aaa;margin-top:5px;">Words or phrases the AI should never use. Comma-separated.</p>
+        </div>
+
+        <!-- Personality blurb -->
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">Describe your daycare's personality <span style="font-weight:400;text-transform:none;font-size:11px;">(optional)</span></label>
+          <textarea id="voicePersonality" rows="3" placeholder="e.g. We're a small, family-owned daycare that treats every dog like our own. We're known for being attentive and detail-oriented."
+            style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;resize:vertical;line-height:1.5;"
+            onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'"></textarea>
+          <p style="font-size:12px;color:#aaa;margin-top:5px;">The AI uses this to match your overall vibe. 1–2 sentences works best.</p>
+        </div>
+
+      </div>
+
+      <button class="btn-primary" onclick="saveBrandVoice()" id="saveBrandVoiceBtn" style="margin-top:20px;">Save Brand Voice</button>
+      <div id="brandVoiceMsg" class="msg" style="margin-top:10px;"></div>
     </div>
 
     <!-- Sentiment & Reviews Card -->
@@ -423,6 +535,12 @@
         setVal('dcState',       dc.state);
         setVal('dcZip',         dc.zip);
         setVal('googleLinkInput', dc.google_link);
+
+        // Brand Voice — show for owner/manager only
+        if (['owner', 'manager', 'super_admin'].includes(meData.role)) {
+          document.getElementById('brandVoiceCard').style.display = 'block';
+          loadBrandVoice(dc.messaging_style || {});
+        }
       }
 
       // Account
@@ -498,6 +616,64 @@
       msg.className = 'msg msg-error';
     }
 
+    setTimeout(() => { msg.style.display = 'none'; }, 4000);
+  }
+
+  function loadBrandVoice(style) {
+    // Tone
+    const tone = style.tone || 'warm_playful';
+    const toneInput = document.querySelector(`input[name="voiceTone"][value="${tone}"]`);
+    if (toneInput) toneInput.checked = true;
+
+    // Emoji
+    const emoji = style.emoji || 'sometimes';
+    const emojiInput = document.querySelector(`input[name="voiceEmoji"][value="${emoji}"]`);
+    if (emojiInput) emojiInput.checked = true;
+
+    // Text fields
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    setVal('voiceSignature',   style.signature);
+    setVal('voicePhrases',     style.phrases);
+    setVal('voiceAvoid',       style.avoid);
+    setVal('voicePersonality', style.personality);
+  }
+
+  async function saveBrandVoice() {
+    const btn = document.getElementById('saveBrandVoiceBtn');
+    const msg = document.getElementById('brandVoiceMsg');
+
+    btn.disabled = true; btn.textContent = 'Saving…';
+    msg.style.display = 'none';
+
+    const tone      = document.querySelector('input[name="voiceTone"]:checked')?.value  || 'warm_playful';
+    const emoji     = document.querySelector('input[name="voiceEmoji"]:checked')?.value || 'sometimes';
+    const signature = document.getElementById('voiceSignature').value.trim();
+    const phrases   = document.getElementById('voicePhrases').value.trim();
+    const avoid     = document.getElementById('voiceAvoid').value.trim();
+    const personality = document.getElementById('voicePersonality').value.trim();
+
+    const messaging_style = { tone, emoji };
+    if (signature)   messaging_style.signature   = signature;
+    if (phrases)     messaging_style.phrases     = phrases;
+    if (avoid)       messaging_style.avoid       = avoid;
+    if (personality) messaging_style.personality = personality;
+
+    const res = await fetch('/api/dashboard/daycare', {
+      method: 'PUT', headers: authHeaders,
+      body: JSON.stringify({ messaging_style })
+    });
+    const data = await res.json();
+
+    btn.disabled = false; btn.textContent = 'Save Brand Voice';
+    msg.style.display = 'block';
+
+    if (res.ok) {
+      msg.textContent = '✅ Brand voice saved.';
+      msg.className = 'msg msg-success';
+    } else {
+      msg.textContent = '❌ ' + (data.error || 'Failed to save.');
+      msg.className = 'msg msg-error';
+    }
     setTimeout(() => { msg.style.display = 'none'; }, 4000);
   }
 
