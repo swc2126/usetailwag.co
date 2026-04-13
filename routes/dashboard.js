@@ -51,7 +51,7 @@ router.put('/daycare', requireAuth, async (req, res) => {
     .from('daycares')
     .update(updates)
     .eq('id', req.daycareId)
-    .select('name, phone, street, city, state, zip, google_link, messaging_style');
+    .select('name, phone, street, city, state, zip, google_link');
 
   if (error) return res.status(500).json({ error: error.message });
   if (!data || data.length === 0) return res.status(404).json({ error: 'Daycare not found or no rows updated' });
