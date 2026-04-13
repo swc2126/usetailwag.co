@@ -344,12 +344,6 @@
       document.getElementById('statDogs').textContent = stats.dogs != null ? stats.dogs : 0;
       document.getElementById('statMsgUsage').textContent = usage.usage != null ? usage.usage : 0;
 
-      const remaining = (usage.limit || 0) - (usage.usage || 0);
-      const remainingEl = document.getElementById('statMsgRemaining');
-      remainingEl.textContent = remaining;
-      const pctRemaining = usage.limit > 0 ? remaining / usage.limit : 1;
-      if (pctRemaining < 0.2) remainingEl.classList.add('danger');
-      document.getElementById('statMsgLimit').textContent = `of ${usage.limit || 0} monthly`;
 
       // Onboarding checklist — show only when no clients yet
       if ((stats.clients || 0) === 0) {
