@@ -314,7 +314,6 @@
       <label for="heroEmail">Your email address</label>
       <div class="signup-input-row" style="margin-bottom:20px;">
         <input type="email" id="heroEmail" class="signup-input" placeholder="you@yourdaycare.com" autocomplete="email">
-        <button class="signup-btn" id="heroBtn" onclick="heroSubscribe()">Subscribe →</button>
       </div>
 
       <div class="signup-mini-divider">About your daycare</div>
@@ -354,6 +353,7 @@
       <input type="text" id="heroRoleOther" class="signup-input" placeholder="Describe your role" style="display:none;margin-top:8px;margin-bottom:14px;">
 
       <div class="signup-error" id="heroError" style="margin-top:10px;"></div>
+      <button class="signup-btn" id="heroBtn" onclick="heroSubscribe()" style="width:100%;margin-top:20px;padding:16px;">Subscribe →</button>
       <p class="signup-fine" style="margin-top:14px;">No spam. Unsubscribe anytime. We publish every two weeks.</p>
     </div>
 
@@ -395,32 +395,6 @@
       </div>
     </div>
   </div>
-</section>
-
-<!-- ABOUT -->
-<section class="about-section">
-  <div class="about-inner">
-    <div class="about-avatar">S</div>
-    <div class="about-name">Summer</div>
-    <div class="about-role">Founder, TailWag</div>
-    <p class="about-quote">
-      I started Chew on This because independent daycares deserve better information than what's floating around in Facebook groups. This is the newsletter I wish existed when I started talking to daycare owners.
-    </p>
-  </div>
-</section>
-
-<!-- BOTTOM CTA -->
-<section class="bottom-cta">
-  <h2>Join the pack.</h2>
-  <p>Free. Bi-monthly. Worth the two minutes it takes to read.</p>
-  <div class="bottom-form">
-    <input type="text" id="bottomFirstName" class="bottom-input" placeholder="First name" autocomplete="given-name" style="max-width:160px;">
-    <input type="text" id="bottomLastName" class="bottom-input" placeholder="Last name" autocomplete="family-name" style="max-width:160px;">
-    <input type="email" id="bottomEmail" class="bottom-input" placeholder="your@email.com" autocomplete="email">
-    <button class="bottom-btn" id="bottomBtn" onclick="bottomSubscribe()">Count me in</button>
-  </div>
-  <div class="bottom-success" id="bottomSuccess">🐾 You're subscribed! Talk soon.</div>
-  <div class="bottom-error" id="bottomError"></div>
 </section>
 
 <!-- FOOTER -->
@@ -501,22 +475,7 @@
     );
   }
 
-  function bottomSubscribe() {
-    subscribe(
-      document.getElementById('bottomEmail').value,
-      {
-        first_name: document.getElementById('bottomFirstName').value.trim() || null,
-        last_name:  document.getElementById('bottomLastName').value.trim()  || null,
-      },
-      document.getElementById('bottomBtn'),
-      document.getElementById('bottomSuccess'),
-      document.getElementById('bottomError'),
-      document.querySelector('.bottom-form')
-    );
-  }
-
   document.getElementById('heroEmail').addEventListener('keydown', e => { if (e.key === 'Enter') heroSubscribe(); });
-  document.getElementById('bottomEmail').addEventListener('keydown', e => { if (e.key === 'Enter') bottomSubscribe(); });
 </script>
 
 </body>

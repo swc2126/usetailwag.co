@@ -5,7 +5,7 @@ const { supabaseAdmin } = require('../config/supabase');
 // Sync subscriber to Brevo contact list (fire and forget)
 async function syncToBrevo(email, attrs = {}) {
   const apiKey = process.env.BREVO_API_KEY;
-  const listId = process.env.BREVO_LIST_ID;
+  const listId = process.env.BREVO_NEWSLETTER_LIST_ID || process.env.BREVO_LIST_ID;
   if (!apiKey) return;
 
   const headers = { 'api-key': apiKey, 'Content-Type': 'application/json' };
