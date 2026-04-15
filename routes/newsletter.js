@@ -157,9 +157,8 @@ router.post('/subscribe', async (req, res) => {
     return res.status(500).json({ error: 'Could not subscribe. Please try again.' });
   }
 
-  // Sync to Brevo contact list + send welcome email (fire and forget)
+  // Sync to Brevo contact list (automation handles welcome email)
   syncToBrevo(normalizedEmail, { first_name, last_name, opened_month, opened_year, dogs_served, staff_count, role, role_other });
-  sendBrevoWelcome(normalizedEmail, first_name);
 
   return res.json({ ok: true });
 });
