@@ -181,6 +181,76 @@ router.post('/signup', async (req, res) => {
   }
 });
 
+// GET /api/auth/daycares — returns daycare list for new-account dropdown
+router.get('/daycares', async (req, res) => {
+  const { data, error } = await supabaseAdmin
+    .from('daycares')
+    .select('id, name, city, state')
+    .order('name', { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+// POST /api/auth/new-account — create profile for a paying customer, linked to existing daycare
+router.post('/new-account', async (req, res) => {
+  try {
+    const { first_name, last_name, email, password, phone,
+            street, city, state, zip, daycare_id, role } = req.body;
+
+    if (!first_name || !email || !password || !daycare_id || !role) {
+      return res.status(400).json({ error: 'First name, email, password, daycare, and role are required.' });
+    }
+
+    // Create Supabase auth user
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { first_name, last_name }
+    });
+    if (authError) return res.status(400).json({ error: authError.message });
+
+    const userId = authData.user.id;
+
+    // Create profile
+    await supabaseAdmin.from('profiles').insert({
+      id: userId,
+      email,
+      phone: phone || null
+    });
+
+    // Link to daycare via team_members
+    await supabaseAdmin.from('team_members').insert({
+      user_id: userId,
+      daycare_id,
+      role,
+      status: 'active',
+      first_name,
+      last_name,
+      email
+    });
+
+    // If owner, also set owner_id on the daycare and create active subscription
+    if (role === 'owner') {
+      await supabaseAdmin.from('daycares')
+        .update({ owner_id: userId, phone: phone || null, street: street || null, city: city || null, state: state || null, zip: zip || null })
+        .eq('id', daycare_id);
+      await supabaseAdmin.from('subscriptions').insert({ user_id: userId, status: 'active' });
+    } else {
+      await supabaseAdmin.from('subscriptions').insert({ user_id: userId, status: 'active' });
+    }
+
+    // Sign user in
+    const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({ email, password });
+    if (signInError) return res.json({ success: true, userId, session: null });
+
+    res.json({ success: true, userId, session: signInData.session });
+  } catch (err) {
+    console.error('New account error:', err);
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  }
+});
+
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {

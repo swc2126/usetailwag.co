@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/images/tailwag-icon.svg" type="image/svg+xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Your Account — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #0F1410; --green: #1E6B4A; --green-dark: #164D35;
+      --linen: #F5F0E8; --gold: #C4933F; --sage: #A8C5B0;
+      --border: rgba(255,255,255,0.08);
+    }
+    body {
+      font-family: 'Inter', sans-serif; background: var(--black);
+      color: var(--linen); min-height: 100vh; display: flex; flex-direction: column;
+    }
+
+    /* NAV */
+    .nav {
+      padding: 20px 40px; display: flex; align-items: center;
+      justify-content: space-between; border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .nav-logo span { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
+
+    /* MAIN */
+    .main {
+      flex: 1; display: flex; align-items: flex-start;
+      justify-content: center; padding: 52px 20px 80px;
+    }
+    .page-wrap { width: 100%; max-width: 520px; }
+
+    .page-header { text-align: center; margin-bottom: 36px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(196,147,63,0.1); border: 1px solid rgba(196,147,63,0.25);
+      color: var(--gold); font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 5px 14px; border-radius: 20px; margin-bottom: 18px;
+    }
+    .eyebrow-dot { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; }
+    .page-title {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+      font-size: 32px; letter-spacing: -0.5px; color: var(--linen); margin-bottom: 8px;
+    }
+    .page-sub { font-size: 15px; color: rgba(245,240,232,0.5); line-height: 1.6; }
+
+    /* FORM CARD */
+    .form-card {
+      background: rgba(245,240,232,0.04); border: 1px solid rgba(245,240,232,0.1);
+      border-radius: 18px; padding: 36px 32px;
+    }
+    .section-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--sage); margin: 24px 0 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: rgba(245,240,232,0.08); }
+    .section-label:first-child { margin-top: 0; }
+
+    .form-row { display: flex; gap: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; flex: 1; }
+
+    label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: rgba(245,240,232,0.4);
+    }
+    input, select {
+      width: 100%; padding: 13px 16px; border-radius: 10px;
+      border: 1px solid rgba(245,240,232,0.12);
+      background: rgba(255,255,255,0.05); color: var(--linen);
+      font-family: 'Inter', sans-serif; font-size: 15px; outline: none;
+      transition: border-color 0.2s; -webkit-appearance: none;
+    }
+    input::placeholder { color: rgba(245,240,232,0.25); }
+    input:focus, select:focus { border-color: var(--green); }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='rgba(245,240,232,0.35)' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center;
+      cursor: pointer; padding-right: 36px;
+    }
+    select option { background: #1a2b1f; }
+
+    /* Password wrap */
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 46px; }
+    .pw-toggle {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 4px;
+      color: rgba(245,240,232,0.4); transition: color 0.2s;
+    }
+    .pw-toggle:hover { color: rgba(245,240,232,0.8); }
+
+    .submit-btn {
+      width: 100%; padding: 15px; border-radius: 10px; border: none;
+      background: var(--green); color: var(--linen);
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+      font-size: 16px; cursor: pointer; transition: background 0.2s; margin-top: 8px;
+    }
+    .submit-btn:hover { background: var(--green-dark); }
+    .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .form-error {
+      font-size: 13px; color: #fc8181; text-align: center;
+      margin-top: 12px; display: none; line-height: 1.5;
+    }
+    .form-fine {
+      font-size: 12px; color: rgba(245,240,232,0.3);
+      text-align: center; margin-top: 14px; line-height: 1.6;
+    }
+
+    /* Loading state for daycare dropdown */
+    .daycare-loading { font-size: 13px; color: rgba(245,240,232,0.35); padding: 8px 0; }
+
+    /* Success */
+    .success-state { display: none; text-align: center; padding: 16px 0; }
+    .success-icon { font-size: 48px; margin-bottom: 18px; }
+    .success-title {
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+      font-size: 24px; color: var(--linen); margin-bottom: 10px;
+    }
+    .success-desc { font-size: 15px; color: rgba(245,240,232,0.6); line-height: 1.7; margin-bottom: 24px; }
+    .go-btn {
+      display: inline-block; padding: 14px 32px; border-radius: 10px;
+      background: var(--green); color: var(--linen); text-decoration: none;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px;
+      transition: background 0.2s;
+    }
+    .go-btn:hover { background: var(--green-dark); }
+
+    @media (max-width: 560px) {
+      .nav { padding: 16px 20px; }
+      .form-card { padding: 28px 20px; }
+      .form-row { flex-direction: column; gap: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/tailwag-icon.svg" alt="TailWag" style="height:28px;width:auto;">
+    <span>TailWag</span>
+  </a>
+</nav>
+
+<main class="main">
+  <div class="page-wrap">
+
+    <div class="page-header">
+      <div class="eyebrow"><span class="eyebrow-dot"></span> Welcome to TailWag</div>
+      <h1 class="page-title">Set up your account</h1>
+      <p class="page-sub">You're almost in. Fill out your profile to get started.</p>
+    </div>
+
+    <div class="form-card">
+      <div id="formWrap">
+
+        <div class="section-label">Your info</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First name</label>
+            <input type="text" id="firstName" placeholder="Jane" autocomplete="given-name">
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last name</label>
+            <input type="text" id="lastName" placeholder="Smith" autocomplete="family-name">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="jane@happypawsdaycare.com" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone number</label>
+          <input type="tel" id="phone" placeholder="(512) 555-0100" autocomplete="tel">
+        </div>
+
+        <div class="section-label">Your address</div>
+
+        <div class="form-group">
+          <label for="street">Street address</label>
+          <input type="text" id="street" placeholder="123 Main St" autocomplete="street-address">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex:2;">
+            <label for="city">City</label>
+            <input type="text" id="city" placeholder="Austin" autocomplete="address-level2">
+          </div>
+          <div class="form-group">
+            <label for="state">State</label>
+            <input type="text" id="state" placeholder="TX" maxlength="2" autocomplete="address-level1">
+          </div>
+          <div class="form-group">
+            <label for="zip">Zip</label>
+            <input type="text" id="zip" placeholder="78701" maxlength="10" autocomplete="postal-code">
+          </div>
+        </div>
+
+        <div class="section-label">Daycare & role</div>
+
+        <div class="form-group">
+          <label for="daycareSelect">Your daycare</label>
+          <p class="daycare-loading" id="daycareLoading">Loading daycares…</p>
+          <select id="daycareSelect" style="display:none;">
+            <option value="">Select your daycare</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="role">Your role</label>
+          <select id="role">
+            <option value="">Select your role</option>
+            <option value="owner">Owner</option>
+            <option value="manager">Manager</option>
+            <option value="team_member">Team Member</option>
+          </select>
+        </div>
+
+        <div class="section-label">Create a password</div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="password" placeholder="Min 8 characters" minlength="8" autocomplete="new-password">
+            <button type="button" class="pw-toggle" onclick="togglePw('password', this)" tabindex="-1">
+              <svg id="password-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm password</label>
+          <div class="pw-wrap">
+            <input type="password" id="confirmPassword" placeholder="Re-enter password" autocomplete="new-password">
+            <button type="button" class="pw-toggle" onclick="togglePw('confirmPassword', this)" tabindex="-1">
+              <svg id="confirmPassword-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-error" id="formError"></div>
+        <button class="submit-btn" id="submitBtn" onclick="createAccount()">Create Account →</button>
+        <p class="form-fine">By creating an account you agree to TailWag's Terms of Service.</p>
+      </div>
+
+      <div class="success-state" id="successState">
+        <div class="success-icon">🐾</div>
+        <h3 class="success-title">You're in!</h3>
+        <p class="success-desc">Your account is set up and ready to go. Head to your dashboard to get started.</p>
+        <a href="/dashboard.html" class="go-btn">Go to Dashboard →</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  // Load daycares into dropdown
+  async function loadDaycares() {
+    try {
+      const res = await fetch('/api/auth/daycares');
+      const daycares = await res.json();
+      const sel = document.getElementById('daycareSelect');
+      daycares.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.id;
+        const location = [d.city, d.state].filter(Boolean).join(', ');
+        opt.textContent = location ? `${d.name} — ${location}` : d.name;
+        sel.appendChild(opt);
+      });
+      document.getElementById('daycareLoading').style.display = 'none';
+      sel.style.display = 'block';
+    } catch (err) {
+      document.getElementById('daycareLoading').textContent = 'Could not load daycares. Please refresh.';
+    }
+  }
+
+  function togglePw(id, btn) {
+    const input = document.getElementById(id);
+    const eye = document.getElementById(id + '-eye');
+    if (input.type === 'password') {
+      input.type = 'text';
+      eye.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+      input.type = 'password';
+      eye.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('formError');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  async function createAccount() {
+    const btn = document.getElementById('submitBtn');
+    document.getElementById('formError').style.display = 'none';
+
+    const firstName       = document.getElementById('firstName').value.trim();
+    const lastName        = document.getElementById('lastName').value.trim();
+    const email           = document.getElementById('email').value.trim();
+    const phone           = document.getElementById('phone').value.trim();
+    const street          = document.getElementById('street').value.trim();
+    const city            = document.getElementById('city').value.trim();
+    const state           = document.getElementById('state').value.trim();
+    const zip             = document.getElementById('zip').value.trim();
+    const daycare_id      = document.getElementById('daycareSelect').value;
+    const role            = document.getElementById('role').value;
+    const password        = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (!firstName)       return showError('First name is required.');
+    if (!email || !email.includes('@')) return showError('A valid email address is required.');
+    if (!daycare_id)      return showError('Please select your daycare.');
+    if (!role)            return showError('Please select your role.');
+    if (!password || password.length < 8) return showError('Password must be at least 8 characters.');
+    if (password !== confirmPassword) return showError('Passwords do not match.');
+
+    btn.disabled = true;
+    btn.textContent = 'Creating account…';
+
+    try {
+      const res = await fetch('/api/auth/new-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ first_name: firstName, last_name: lastName, email, password, phone, street, city, state, zip, daycare_id, role })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+
+      if (data.session) {
+        localStorage.setItem('tailwag_session', JSON.stringify(data.session));
+      }
+
+      document.getElementById('formWrap').style.display = 'none';
+      document.getElementById('successState').style.display = 'block';
+    } catch (err) {
+      showError(err.message);
+      btn.disabled = false;
+      btn.textContent = 'Create Account →';
+    }
+  }
+
+  loadDaycares();
+</script>
+
+</body>
+</html>

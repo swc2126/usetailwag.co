@@ -97,6 +97,11 @@ app.get('/create-account', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'create-account.html'));
 });
 
+// New account setup page — for paying customers linked to existing daycare
+app.get('/new-account', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'new-account.html'));
+});
+
 // Insights dashboard — role-based analytics for all users
 app.get('/insights', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'insights.html'));
