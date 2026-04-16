@@ -52,6 +52,58 @@ async function addToBrevoNewsletter({ email, first_name, last_name, daycare_name
   });
 }
 
+// POST /api/auth/request-access — notifies Summer via Brevo transactional email
+router.post('/request-access', async (req, res) => {
+  try {
+    const { firstName, lastName, daycareName, email, phone, city, state, dogsPerDay, message } = req.body;
+    if (!firstName || !email || !daycareName) {
+      return res.status(400).json({ error: 'Name, daycare name, and email are required.' });
+    }
+
+    const apiKey = process.env.BREVO_API_KEY;
+    if (apiKey) {
+      const location = [city, state].filter(Boolean).join(', ');
+      const html = `
+        <div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;background:#F5F0E8;border-radius:12px;overflow:hidden;">
+          <div style="background:#0F1410;padding:24px 32px;">
+            <span style="color:#F5F0E8;font-weight:800;font-size:18px;">🐾 TailWag — New Access Request</span>
+          </div>
+          <div style="padding:28px 32px;">
+            <table style="width:100%;border-collapse:collapse;font-size:15px;">
+              <tr><td style="padding:8px 0;color:#888;width:140px;">Name</td><td style="padding:8px 0;color:#0F1410;font-weight:600;">${firstName} ${lastName || ''}</td></tr>
+              <tr><td style="padding:8px 0;color:#888;">Daycare</td><td style="padding:8px 0;color:#0F1410;font-weight:600;">${daycareName}</td></tr>
+              ${location ? `<tr><td style="padding:8px 0;color:#888;">Location</td><td style="padding:8px 0;color:#0F1410;">${location}</td></tr>` : ''}
+              <tr><td style="padding:8px 0;color:#888;">Email</td><td style="padding:8px 0;"><a href="mailto:${email}" style="color:#1E6B4A;">${email}</a></td></tr>
+              ${phone ? `<tr><td style="padding:8px 0;color:#888;">Phone</td><td style="padding:8px 0;color:#0F1410;">${phone}</td></tr>` : ''}
+              ${dogsPerDay ? `<tr><td style="padding:8px 0;color:#888;">Dogs/day</td><td style="padding:8px 0;color:#0F1410;">${dogsPerDay}</td></tr>` : ''}
+              ${message ? `<tr><td style="padding:8px 0;color:#888;vertical-align:top;">Message</td><td style="padding:8px 0;color:#0F1410;">${message}</td></tr>` : ''}
+            </table>
+            <div style="margin-top:24px;padding-top:20px;border-top:1px solid #ddd;">
+              <a href="mailto:${email}?subject=Your TailWag Access Request" style="display:inline-block;background:#1E6B4A;color:#F5F0E8;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">Reply to ${firstName} →</a>
+            </div>
+          </div>
+        </div>`;
+
+      await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sender: { name: 'TailWag Requests', email: 'info@usetailwag.co' },
+          to: [{ email: 'info@usetailwag.co', name: 'Summer' }],
+          replyTo: { email, name: `${firstName} ${lastName || ''}`.trim() },
+          subject: `New Access Request — ${daycareName} (${firstName} ${lastName || ''})`,
+          htmlContent: html
+        })
+      });
+    }
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('Request access error:', err);
+    return res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  }
+});
+
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {
   try {

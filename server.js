@@ -87,9 +87,14 @@ app.get('/terms', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'terms.html'));
 });
 
-// Signup clean URL (preserves ?plan= query param)
+// Signup → request access page
 app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+});
+
+// Private account creation link (sent to paying customers only)
+app.get('/create-account', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'create-account.html'));
 });
 
 // Insights dashboard — role-based analytics for all users

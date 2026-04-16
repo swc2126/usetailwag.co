@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/images/tailwag-icon.svg" type="image/svg+xml" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YFRN3VT005"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YFRN3VT005');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get Started — TailWag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --black: #0F1410;
+      --green: #1E6B4A;
+      --green-dark: #164D35;
+      --linen: #F5F0E8;
+      --gold: #C4933F;
+      --sage: #A8C5B0;
+      --slate: #2D3748;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --green-15: rgba(30, 107, 74, 0.15);
+      --green-10: rgba(30, 107, 74, 0.1);
+      --red-alert: #C44A3F;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--black);
+      color: var(--linen);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ─────────────────────────────────────────────── */
+    .nav {
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .nav-logo span {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--linen);
+    }
+
+    .nav-link {
+      font-size: 14px;
+      color: var(--sage);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover { color: var(--linen); }
+
+    /* ── MAIN ────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 48px 20px 60px;
+    }
+
+    .signup-wrapper {
+      display: flex;
+      gap: 60px;
+      max-width: 1020px;
+      width: 100%;
+      align-items: flex-start;
+    }
+
+    /* ── LEFT COLUMN — VALUE + GUARANTEE ──────────────────── */
+    .value-col {
+      flex: 1;
+      padding-top: 20px;
+      max-width: 380px;
+    }
+
+    .value-col h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 32px;
+      color: var(--linen);
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .value-col .subtitle {
+      font-size: 15px;
+      color: rgba(245, 240, 232, 0.6);
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    .value-item {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .value-icon {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      background: var(--green-15);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .value-text h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--linen);
+      margin-bottom: 4px;
+    }
+
+    .value-text p {
+      font-size: 13px;
+      color: rgba(245, 240, 232, 0.5);
+      line-height: 1.5;
+    }
+
+    /* ── GUARANTEE BOX ────────────────────────────────────── */
+    .guarantee-box {
+      margin-top: 32px;
+      padding: 20px 22px;
+      background: var(--green-15);
+      border-radius: 14px;
+      border-left: 3px solid var(--green);
+    }
+
+    .guarantee-box h4 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--linen);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .guarantee-box p {
+      font-size: 13px;
+      color: var(--sage);
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .guarantee-box p:last-child { margin-bottom: 0; }
+
+    .guarantee-box strong { color: var(--linen); }
+
+    /* ── SUPPORT NOTE ─────────────────────────────────────── */
+    .support-note {
+      margin-top: 20px;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .support-note .support-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .support-note p {
+      font-size: 13px;
+      color: rgba(245, 240, 232, 0.5);
+      line-height: 1.5;
+    }
+
+    .support-note a {
+      color: var(--green);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .support-note a:hover { color: var(--sage); }
+
+    /* ── RIGHT COLUMN — FORM ──────────────────────────────── */
+    .form-col {
+      flex: 1;
+      max-width: 500px;
+    }
+
+    .signup-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 36px 32px;
+    }
+
+    .card-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--linen);
+      margin-bottom: 6px;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: rgba(245, 240, 232, 0.5);
+      margin-bottom: 28px;
+    }
+
+    .section-divider {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 18px;
+      margin-top: 8px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+      flex: 1;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sage);
+      margin-bottom: 7px;
+      letter-spacing: 0.3px;
+    }
+
+    .form-group label .required {
+      color: var(--gold);
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 13px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      color: var(--linen);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      transition: border-color 0.2s, background 0.2s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .form-group select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%23A8C5B0' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+
+    .form-group select option {
+      background: var(--black);
+      color: var(--linen);
+    }
+
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 46px; }
+    .pw-toggle {
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: rgba(245,240,232,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+    .pw-toggle:hover { color: rgba(245,240,232,0.75); }
+
+    .form-group input::placeholder {
+      color: rgba(245, 240, 232, 0.25);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--green);
+      background: rgba(30, 107, 74, 0.08);
+    }
+
+    .form-group .helper {
+      font-size: 12px;
+      color: rgba(245, 240, 232, 0.35);
+      margin-top: 5px;
+    }
+
+    /* ── BILLING TOGGLE ───────────────────────────────────── */
+    .billing-toggle {
+      display: flex;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+
+    .billing-btn {
+      flex: 1;
+      padding: 12px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.25s, color 0.25s;
+      border: none;
+      background: transparent;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(245, 240, 232, 0.45);
+      position: relative;
+    }
+
+    .billing-btn.active {
+      background: var(--green);
+      color: #FFFFFF;
+    }
+
+    .billing-btn .save-tag {
+      display: inline-block;
+      margin-left: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--gold);
+      background: rgba(196, 147, 63, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      vertical-align: middle;
+    }
+
+    .billing-btn.active .save-tag {
+      color: #FFF;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ── REPORT ADD-ON ────────────────────────────────────── */
+    .add-on-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      transition: border-color 0.2s;
+    }
+    .add-on-box:has(input:checked) {
+      border-color: var(--green);
+      background: rgba(74, 176, 98, 0.06);
+    }
+    .add-on-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+    }
+    .add-on-label input[type="checkbox"] {
+      margin-top: 2px;
+      accent-color: var(--green);
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    .add-on-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .add-on-price {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--green);
+      margin-left: 6px;
+    }
+    .add-on-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ── PLAN SELECTOR ────────────────────────────────────── */
+    .plan-options {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .plan-option {
+      flex: 1;
+      padding: 16px 12px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+
+    .plan-option:hover {
+      border-color: rgba(30, 107, 74, 0.4);
+    }
+
+    .plan-option.selected {
+      border-color: var(--green);
+      background: var(--green-15);
+    }
+
+    .plan-option .plan-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--linen);
+      margin-bottom: 4px;
+    }
+
+    .plan-option .plan-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1.2;
+    }
+
+    .plan-option .plan-price span {
+      font-size: 12px;
+      font-weight: 400;
+      color: rgba(245, 240, 232, 0.4);
+    }
+
+    .plan-option .plan-desc {
+      font-size: 11px;
+      color: rgba(245, 240, 232, 0.4);
+      margin-top: 3px;
+    }
+
+    .plan-option .plan-total {
+      font-size: 11px;
+      color: rgba(245, 240, 232, 0.3);
+      margin-top: 4px;
+    }
+
+    .plan-option .popular-badge {
+      position: absolute;
+      top: -9px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--green);
+      background: var(--black);
+      padding: 2px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--green);
+      white-space: nowrap;
+    }
+
+    .plan-features {
+      font-size: 11px;
+      color: rgba(245, 240, 232, 0.4);
+      line-height: 1.5;
+      margin-top: 5px;
+    }
+
+    /* ── FOUNDER'S CIRCLE ─────────────────────────────── */
+    .fc-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 22px 0 14px;
+      font-size: 11px;
+      color: rgba(245, 240, 232, 0.3);
+      text-align: center;
+    }
+
+    .fc-divider::before, .fc-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    .fc-intro {
+      font-size: 12px;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+
+    .fc-plans {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .fc-plan {
+      border-color: rgba(196, 147, 63, 0.25) !important;
+      padding: 14px 12px 12px;
+    }
+
+    .fc-plan:hover {
+      border-color: var(--gold) !important;
+      background: rgba(196, 147, 63, 0.06) !important;
+    }
+
+    .fc-plan.selected {
+      border-color: var(--gold) !important;
+      background: rgba(196, 147, 63, 0.1) !important;
+    }
+
+    .fc-badge {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.3px;
+      margin-bottom: 6px;
+    }
+
+    .fc-bullets {
+      margin-top: 10px;
+      text-align: left;
+    }
+
+    .fc-bullet {
+      font-size: 11px;
+      color: rgba(245, 240, 232, 0.55);
+      line-height: 1.6;
+    }
+
+    .fc-highlight {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .fc-plan-total {
+      font-size: 10px;
+      color: var(--gold);
+      margin-top: 8px;
+      opacity: 0.7;
+    }
+
+    .billing-toggle.fc-active {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    /* ── ORDER SUMMARY ────────────────────────────────────── */
+    .order-summary {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 22px;
+    }
+
+    .order-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      padding: 4px 0;
+    }
+
+    .order-row .label {
+      color: rgba(245, 240, 232, 0.6);
+    }
+
+    .order-row .value {
+      color: var(--linen);
+      font-weight: 600;
+    }
+
+    .order-row.total {
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 8px;
+      padding-top: 10px;
+    }
+
+    .order-row.total .label {
+      font-weight: 700;
+      color: var(--linen);
+    }
+
+    .order-row.total .value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .order-row .savings {
+      font-size: 11px;
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    /* ── STRIPE CARD ELEMENTS ─────────────────────────────── */
+    .stripe-field {
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      transition: border-color 0.2s, background 0.2s;
+      min-height: 46px;
+    }
+
+    .stripe-field.focused {
+      border-color: var(--green);
+      background: rgba(30, 107, 74, 0.08);
+    }
+
+    .stripe-field.error {
+      border-color: var(--red-alert);
+    }
+
+    .card-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .card-errors {
+      font-size: 12px;
+      color: var(--red-alert);
+      margin-top: 6px;
+      min-height: 18px;
+    }
+
+    .secure-note {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: rgba(245, 240, 232, 0.35);
+      margin-top: 8px;
+      margin-bottom: 4px;
+    }
+
+    .secure-note svg {
+      flex-shrink: 0;
+    }
+
+    /* ── BUTTON ───────────────────────────────────────────── */
+    .btn-signup {
+      width: 100%;
+      padding: 16px;
+      background: var(--green);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.2px;
+      margin-top: 12px;
+    }
+
+    .btn-signup:hover { background: var(--green-dark); }
+    .btn-signup:active { transform: scale(0.99); }
+    .btn-signup:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-text-sub {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+
+    .terms {
+      font-size: 12px;
+      color: rgba(245, 240, 232, 0.35);
+      text-align: center;
+      margin-top: 14px;
+      line-height: 1.5;
+    }
+
+    .terms a {
+      color: var(--sage);
+      text-decoration: none;
+    }
+
+    .login-prompt {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: rgba(245, 240, 232, 0.5);
+    }
+
+    .login-prompt a {
+      color: var(--green);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .login-prompt a:hover { color: var(--sage); }
+
+    /* ── ERROR STATE ──────────────────────────────────────── */
+    .form-error {
+      background: rgba(196, 74, 63, 0.12);
+      border: 1px solid rgba(196, 74, 63, 0.3);
+      color: #E87C73;
+      font-size: 13px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      display: none;
+      line-height: 1.5;
+    }
+
+    .form-error.visible { display: block; }
+
+    /* ── SUCCESS STATE ────────────────────────────────────── */
+    .success-msg {
+      display: none;
+      text-align: center;
+      padding: 48px 32px;
+    }
+
+    .success-msg.visible { display: block; }
+
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--green-15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 28px;
+    }
+
+    .success-msg h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      color: var(--linen);
+      margin-bottom: 8px;
+    }
+
+    .success-msg p {
+      font-size: 14px;
+      color: rgba(245, 240, 232, 0.6);
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+
+    .success-msg .success-email {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    /* ── FOOTER ───────────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .footer p {
+      font-size: 12px;
+      color: rgba(245, 240, 232, 0.3);
+    }
+
+    /* ── PATH CHOOSER ─────────────────────────────────── */
+    .path-chooser {
+      max-width: 660px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .path-chooser h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 34px;
+      color: var(--linen);
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+
+    .path-chooser > p {
+      font-size: 16px;
+      color: rgba(245, 240, 232, 0.55);
+      margin-bottom: 36px;
+    }
+
+    .path-cards {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .path-card {
+      flex: 1;
+      max-width: 290px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 32px 24px 28px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+
+    .path-card:hover {
+      border-color: var(--green);
+      background: rgba(30, 107, 74, 0.08);
+      transform: translateY(-3px);
+    }
+
+    .path-icon {
+      font-size: 34px;
+      margin-bottom: 16px;
+    }
+
+    .path-card h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--linen);
+      margin-bottom: 8px;
+    }
+
+    .path-card p {
+      font-size: 13px;
+      color: rgba(245, 240, 232, 0.5);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .path-arrow {
+      font-size: 16px;
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .path-login {
+      margin-top: 28px;
+      font-size: 14px;
+      color: rgba(245, 240, 232, 0.5);
+    }
+
+    .path-login a {
+      color: var(--green);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .path-login a:hover { color: var(--sage); }
+
+    /* ── JOIN SECTION ─────────────────────────────────── */
+    .join-section {
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .join-back {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: rgba(245, 240, 232, 0.5);
+      cursor: pointer;
+      margin-bottom: 24px;
+      transition: color 0.2s;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .join-back:hover { color: var(--linen); }
+
+    .join-success {
+      text-align: center;
+      padding: 48px 32px;
+      display: none;
+    }
+
+    .join-success.visible { display: block; }
+
+    /* ── RESPONSIVE ───────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .signup-wrapper {
+        flex-direction: column;
+        gap: 32px;
+      }
+      .value-col { max-width: 100%; }
+      .form-col { max-width: 100%; }
+      .nav { padding: 16px 20px; }
+      .signup-card { padding: 28px 20px; }
+      .plan-options { flex-direction: column; }
+      .form-row { flex-direction: column; gap: 0; }
+      .path-cards { flex-direction: column; align-items: center; }
+      .path-card { max-width: 100%; }
+      .path-chooser h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ NAV ═══ -->
+  <nav class="nav">
+    <a href="https://usetailwag.co" class="nav-logo">
+      <img src="/images/tailwag-icon.svg" alt="TailWag" style="height:32px;width:auto;" />
+      <span>TailWag</span>
+    </a>
+    <a href="https://usetailwag.co" class="nav-link">← Back to site</a>
+  </nav>
+
+  <!-- ═══ SIGNUP FORM ═══ -->
+  <main class="main">
+
+    <!-- ── PATH CHOOSER (shown first) ── -->
+    <div class="path-chooser" id="pathChooser">
+      <h1>Get started with TailWag 🐾</h1>
+      <p>How would you like to proceed?</p>
+
+      <div class="path-cards">
+        <div class="path-card" onclick="choosePath('new')">
+          <div class="path-icon">🏪</div>
+          <h3>Start a New Account</h3>
+          <p>Set up TailWag for your dog daycare business. Choose a plan and get up and running today.</p>
+          <div class="path-arrow">Get started →</div>
+        </div>
+        <div class="path-card" onclick="choosePath('join')">
+          <div class="path-icon">🤝</div>
+          <h3>Join an Existing Daycare</h3>
+          <p>Your daycare is already on TailWag. Request access and your manager will send you an invite.</p>
+          <div class="path-arrow">Request access →</div>
+        </div>
+      </div>
+
+      <div class="path-login">Already have an account? <a href="login.html">Sign in</a></div>
+    </div>
+
+    <!-- ── JOIN AN EXISTING DAYCARE ── -->
+    <div class="join-section" id="joinSection" style="display:none;">
+      <button class="join-back" onclick="showChooser()">← Back</button>
+
+      <div class="signup-card">
+
+        <!-- Success state -->
+        <div class="join-success" id="joinSuccess">
+          <div class="success-icon">✉️</div>
+          <h2>Request sent!</h2>
+          <p>We've notified the manager at <strong id="joinDaycareName"></strong>. They'll send you an invite link when they're ready to add you.</p>
+          <p style="margin-top: 12px; font-size: 13px; color: rgba(245,240,232,0.5);">Didn't hear back after a few days? Ask your manager to go to <strong>Settings → Team</strong> in TailWag to send an invite directly.</p>
+        </div>
+
+        <!-- Form state -->
+        <div id="joinFormInner">
+          <div class="card-title">Join an existing daycare</div>
+          <div class="card-subtitle">Tell us where you work and we'll send your manager a request.</div>
+
+          <div class="form-error" id="joinError"></div>
+
+          <div class="form-group">
+            <label>Daycare name <span class="required">*</span></label>
+            <input type="text" id="joinDaycareInput" placeholder="e.g. Paws & Play Daycare" onkeydown="if(event.key==='Enter')requestAccess()">
+            <div class="helper">Enter the name as best you know it — we'll find the right match.</div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Your first name <span class="required">*</span></label>
+              <input type="text" id="joinFirstName" placeholder="e.g. Jamie">
+            </div>
+            <div class="form-group">
+              <label>Last name</label>
+              <input type="text" id="joinLastName" placeholder="e.g. Rivera">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Your email <span class="required">*</span></label>
+            <input type="email" id="joinEmail" placeholder="you@example.com" onkeydown="if(event.key==='Enter')requestAccess()">
+            <div class="helper">Your manager will use this to send your invite.</div>
+          </div>
+
+          <button class="btn-signup" id="joinSubmitBtn" onclick="requestAccess()">
+            <span id="joinBtnText">Send Request</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="login-prompt">Already have an account? <a href="login.html">Sign in</a></div>
+    </div>
+
+    <!-- ── NEW ACCOUNT SIGNUP (hidden until path chosen) ── -->
+    <div class="signup-wrapper" id="signupWrapper" style="display:none;">
+
+      <!-- Left — Value + Guarantee -->
+      <div class="value-col">
+        <h1>Get started with TailWag</h1>
+        <p class="subtitle">Simple setup, real results. We'll walk you through everything so you're up and running fast.</p>
+
+        <div class="value-item">
+          <div class="value-icon">📱</div>
+          <div class="value-text">
+            <h3>Personalized report cards</h3>
+            <p>AI turns staff notes into messages pet parents love — sent the same afternoon.</p>
+          </div>
+        </div>
+
+        <div class="value-item">
+          <div class="value-icon">📅</div>
+          <div class="value-text">
+            <h3>Appointment reminders</h3>
+            <p>Automated YES/NO confirmations. No-shows flagged before the slot is lost.</p>
+          </div>
+        </div>
+
+        <div class="value-item">
+          <div class="value-icon">⭐</div>
+          <div class="value-text">
+            <h3>Smart review requests</h3>
+            <p>Happy clients go to Google. Unhappy clients come directly to you.</p>
+          </div>
+        </div>
+
+        <!-- Satisfaction Guarantee -->
+        <div class="guarantee-box">
+          <h4>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E6B4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            Satisfaction guaranteed
+          </h4>
+          <p>We stand behind TailWag completely. If something isn't working the way you expected, <strong>our team will work with you one-on-one until it does.</strong> From onboarding to implementation to troubleshooting — we're hands-on every step of the way.</p>
+          <p>You're not just getting software. You're getting a support team that treats your daycare like their own.</p>
+        </div>
+
+      </div>
+
+      <!-- Right — Form -->
+      <div class="form-col">
+        <button class="join-back" onclick="showChooser()" style="margin-bottom:20px;">← Back to options</button>
+        <div class="signup-card">
+          <div class="card-title">Create your account</div>
+          <div class="card-subtitle">Pick your plan, set up your daycare, and you're live.</div>
+
+          <!-- Success state (hidden by default) -->
+          <div class="success-msg" id="successMsg">
+            <div class="success-icon">🐾</div>
+            <h2>Welcome to TailWag!</h2>
+            <p>Your dashboard is ready. Check <span class="success-email" id="successEmail">your email</span> for login instructions and next steps.</p>
+            <p style="margin-top: 16px; font-size: 13px;">Need help getting started? Our team will reach out to walk you through everything.</p>
+          </div>
+
+          <form id="signupForm" onsubmit="handleSignup(event)">
+
+            <!-- ── PLAN & BILLING ── -->
+            <div class="section-divider">Choose Your Plan</div>
+
+            <div class="billing-toggle" id="billingToggleWrap">
+              <button type="button" class="billing-btn active" onclick="setBilling('quarterly')">Quarterly</button>
+              <button type="button" class="billing-btn" onclick="setBilling('annual')">Annual <span class="save-tag">Save 10%</span></button>
+            </div>
+
+            <div class="plan-options" id="planOptions">
+              <div class="plan-option" data-plan="starter" onclick="selectPlan(this, 'starter')">
+                <div class="plan-name">Starter</div>
+                <div class="plan-price">$99<span>/mo</span></div>
+                <div class="plan-desc">Up to 30 dogs/day</div>
+                <div class="plan-features">AI report cards · Appointment reminders · Basic analytics</div>
+                <div class="plan-total"></div>
+              </div>
+              <div class="plan-option selected" data-plan="growth" onclick="selectPlan(this, 'growth')">
+                <div class="popular-badge">Most Popular</div>
+                <div class="plan-name">Growth</div>
+                <div class="plan-price">$179<span>/mo</span></div>
+                <div class="plan-desc">Unlimited dogs</div>
+                <div class="plan-features">Unlimited AI report cards · Reminders · Google review requests · Performance dashboard · Priority support</div>
+                <div class="plan-total"></div>
+              </div>
+              <div class="plan-option" data-plan="partner" onclick="selectPlan(this, 'partner')">
+                <div class="plan-name">Partner</div>
+                <div class="plan-price">$249<span>/mo</span></div>
+                <div class="plan-desc">Multi-location</div>
+                <div class="plan-features">Everything in Growth + multi-location, custom branding, dedicated onboarding, quarterly strategy reviews</div>
+                <div class="plan-total"></div>
+              </div>
+            </div>
+
+            <!-- ── FOUNDER'S CIRCLE ── -->
+            <div class="fc-divider">
+              <span>— or join as a Founding Member —</span>
+            </div>
+
+            <div class="fc-intro">
+              Lock in a founding rate before general availability. These spots are limited.
+            </div>
+
+            <div class="fc-plans" id="fcPlans">
+              <div class="plan-option fc-plan" data-plan="fc_essentials" onclick="selectPlan(this, 'fc_essentials')">
+                <div class="fc-badge">🏅 Founder's Circle</div>
+                <div class="plan-name">Essentials</div>
+                <div class="plan-price">$109<span>/mo</span></div>
+                <div class="fc-bullets">
+                  <div class="fc-bullet">✓ Personalized report cards after every visit</div>
+                  <div class="fc-bullet">✓ Easy-setup appointment reminders</div>
+                  <div class="fc-bullet">✓ Photos included in messages</div>
+                  <div class="fc-bullet">✓ Up to 5 user accounts</div>
+                  <div class="fc-bullet">✓ Full setup support</div>
+                </div>
+                <div class="plan-total fc-plan-total">$327 billed quarterly</div>
+              </div>
+              <div class="plan-option fc-plan" data-plan="fc_strategic" onclick="selectPlan(this, 'fc_strategic')">
+                <div class="fc-badge">⭐ Founder's Circle</div>
+                <div class="plan-name">Strategic Partner</div>
+                <div class="plan-price">$159<span>/mo</span></div>
+                <div class="fc-bullets">
+                  <div class="fc-bullet">✓ Everything in Essentials, plus:</div>
+                  <div class="fc-bullet">✓ Up to 10 user accounts</div>
+                  <div class="fc-bullet">✓ Automated Google review requests</div>
+                  <div class="fc-bullet">✓ Opportunities for custom solutions</div>
+                  <div class="fc-bullet fc-highlight">✓ Founding rate locked in for 18 months</div>
+                </div>
+                <div class="plan-total fc-plan-total">$477 billed quarterly</div>
+              </div>
+            </div>
+
+            <input type="hidden" name="plan" id="selectedPlan" value="growth">
+            <input type="hidden" name="billing" id="selectedBilling" value="quarterly">
+
+            <!-- ── REPORT ADD-ON ── -->
+            <div class="add-on-box" id="reportAddon">
+              <label class="add-on-label">
+                <input type="checkbox" id="addReportCheckbox" onchange="updatePriceDisplay()">
+                <div class="add-on-content">
+                  <div class="add-on-title">📊 Customer Analysis Report <span class="add-on-price">+$150</span></div>
+                  <div class="add-on-desc">One-time deep-dive: Google &amp; social review analysis, online reputation audit, geographic reach assessment, and a clear action plan with prioritized growth recommendations — specific to your business.</div>
+                </div>
+              </label>
+            </div>
+
+            <!-- ── ORDER SUMMARY ── -->
+            <div class="order-summary" id="orderSummary">
+              <div class="order-row">
+                <span class="label">Plan</span>
+                <span class="value" id="summaryPlan">Growth</span>
+              </div>
+              <div class="order-row">
+                <span class="label">Billing</span>
+                <span class="value" id="summaryBilling">Quarterly</span>
+              </div>
+              <div class="order-row" id="savingsRow" style="display: none;">
+                <span class="label">Annual discount</span>
+                <span class="savings" id="summarySavings"></span>
+              </div>
+              <div class="order-row" id="reportRow" style="display: none;">
+                <span class="label">Customer Analysis Report</span>
+                <span class="value">$150</span>
+              </div>
+              <div class="order-row total">
+                <span class="label">Due today</span>
+                <span class="value" id="summaryTotal">$747</span>
+              </div>
+            </div>
+
+            <!-- ── DAYCARE INFO ── -->
+            <div class="section-divider" style="margin-top: 24px;">Your Daycare</div>
+
+            <div class="form-group">
+              <label>Daycare name <span class="required">*</span></label>
+              <input type="text" name="daycare_name" placeholder="e.g. Paws & Play Daycare" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>City <span class="required">*</span></label>
+                <input type="text" name="city" placeholder="e.g. Irving" required>
+              </div>
+              <div class="form-group">
+                <label>State <span class="required">*</span></label>
+                <input type="text" name="state" placeholder="e.g. TX" maxlength="2" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Google Business review link</label>
+              <input type="url" name="google_link" placeholder="https://g.page/r/...">
+              <div class="helper">We'll use this to route review requests. You can add it later.</div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Month opened</label>
+                <select name="opened_month">
+                  <option value="">Month (optional)</option>
+                  <option>January</option><option>February</option><option>March</option>
+                  <option>April</option><option>May</option><option>June</option>
+                  <option>July</option><option>August</option><option>September</option>
+                  <option>October</option><option>November</option><option>December</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Year opened</label>
+                <select name="opened_year" id="signupYearSelect">
+                  <option value="">Year (optional)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Dogs you serve per day</label>
+              <select name="dogs_served">
+                <option value="">Select a range (optional)</option>
+                <option>1–10</option><option>11–25</option><option>26–50</option>
+                <option>51–100</option><option>100+</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Team size (including yourself)</label>
+              <select name="staff_count">
+                <option value="">Select a range (optional)</option>
+                <option>Just me</option><option>2–3</option><option>4–6</option>
+                <option>7–10</option><option>11–20</option><option>20+</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Your role</label>
+              <select name="role" id="signupRole" onchange="signupRoleChange()">
+                <option value="">Select your role (optional)</option>
+                <option>Owner</option><option>General Manager</option>
+                <option>Operations Manager</option><option>Staff Member</option><option>Other</option>
+              </select>
+            </div>
+            <div class="form-group" id="signupRoleOtherGroup" style="display:none;margin-top:-12px;">
+              <input type="text" name="role_other" placeholder="Describe your role">
+            </div>
+
+            <!-- ── ACCOUNT INFO ── -->
+            <div class="section-divider" style="margin-top: 24px;">Your Account</div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>First name <span class="required">*</span></label>
+                <input type="text" name="first_name" placeholder="e.g. Sarah" required>
+              </div>
+              <div class="form-group">
+                <label>Last name <span class="required">*</span></label>
+                <input type="text" name="last_name" placeholder="e.g. Johnson" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Email <span class="required">*</span></label>
+              <input type="email" name="email" id="emailInput" placeholder="you@yourdaycare.com" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+              <label>Password <span class="required">*</span></label>
+              <div class="pw-wrap">
+                <input type="password" id="signupPassword" name="password" placeholder="Min 8 characters" minlength="8" required autocomplete="new-password">
+                <button type="button" class="pw-toggle" onclick="togglePw('signupPassword', this)" aria-label="Show password" tabindex="-1">
+                  <svg id="signupPassword-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Phone number</label>
+              <input type="tel" name="phone" placeholder="+1 555 000 0000">
+              <div class="helper">So we can reach you during onboarding if needed.</div>
+            </div>
+
+            <!-- Newsletter opt-in -->
+            <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-top:20px;margin-bottom:4px;">
+              <input type="checkbox" id="newsletterOptIn" name="newsletter_opt_in" checked
+                style="margin-top:3px;width:15px;height:15px;accent-color:var(--green);flex-shrink:0;">
+              <span style="font-size:13px;color:rgba(245,240,232,0.65);line-height:1.5;">
+                Subscribe me to <strong style="color:rgba(245,240,232,0.85);">Chew on This</strong> — TailWag's newsletter with tips, trends, and insights for dog daycare owners.
+              </span>
+            </label>
+
+            <div class="secure-note" style="margin-top: 20px; margin-bottom: 8px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(245,240,232,0.35)" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Payment is handled securely by Stripe after account creation.
+            </div>
+
+            <div class="form-error" id="formError"></div>
+
+            <button type="submit" class="btn-signup" id="submitBtn">
+              <span id="btnMainText">Get started — $747</span>
+              <span class="btn-text-sub" id="btnSubText">Growth plan, billed quarterly</span>
+            </button>
+
+            <div class="terms">
+              By signing up you agree to our <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a>.<br>
+              Cancel anytime from your dashboard — we'll never make it hard to leave.
+            </div>
+          </form>
+        </div>
+
+        <div class="login-prompt">
+          Already have an account? <a href="login.html">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="footer">
+    <p>&copy; 2026 TailWag. Built for dog people by dog people.</p>
+  </footer>
+
+  <script>
+    // ── Year dropdown + role toggle ──
+    (function() {
+      const sel = document.getElementById('signupYearSelect');
+      if (!sel) return;
+      const cur = new Date().getFullYear();
+      for (let y = cur; y >= 1990; y--) {
+        const o = document.createElement('option');
+        o.value = y; o.textContent = y; sel.appendChild(o);
+      }
+    })();
+
+    function signupRoleChange() {
+      const v = document.getElementById('signupRole').value;
+      document.getElementById('signupRoleOtherGroup').style.display = v === 'Other' ? 'block' : 'none';
+    }
+
+    // ── Pricing data ──
+    const pricing = {
+      starter:       { monthly: 99,  name: 'Starter',              fcPlan: false },
+      growth:        { monthly: 179, name: 'Growth',               fcPlan: false },
+      partner:       { monthly: 249, name: 'Partner',              fcPlan: false },
+      fc_essentials: { monthly: 109, name: "Founder's Essentials", fcPlan: true  },
+      fc_strategic:  { monthly: 159, name: 'Strategic Partner',    fcPlan: true  }
+    };
+
+    let currentPlan = 'growth';
+    let currentBilling = 'quarterly';
+
+    function isFC(plan) { return pricing[plan]?.fcPlan === true; }
+
+    function getTotal(plan, billing) {
+      const base = pricing[plan].monthly;
+      if (isFC(plan)) return base * 3; // FC plans are always quarterly (monthly × 3)
+      if (billing === 'quarterly') return base * 3;
+      return Math.round(base * 12 * 0.9);
+    }
+
+    function getSavings(plan) {
+      if (isFC(plan)) return 0;
+      const base = pricing[plan].monthly;
+      return Math.round(base * 12 * 0.1);
+    }
+
+    function formatCurrency(n) {
+      return '$' + n.toLocaleString();
+    }
+
+    function updatePriceDisplay() {
+      // Only update price totals for standard plans (FC plans show fixed price)
+      document.querySelectorAll('#planOptions .plan-option').forEach(opt => {
+        const plan = opt.dataset.plan;
+        const priceEl = opt.querySelector('.plan-price');
+        const totalEl = opt.querySelector('.plan-total');
+        if (!priceEl || !pricing[plan]) return;
+        const monthlyPrice = currentBilling === 'quarterly'
+          ? pricing[plan].monthly
+          : Math.round(pricing[plan].monthly * 0.9);
+        priceEl.innerHTML = `$${monthlyPrice}<span>/mo</span>`;
+        if (totalEl) {
+          if (currentBilling === 'quarterly') {
+            totalEl.textContent = `$${(pricing[plan].monthly * 3).toLocaleString()} / quarter`;
+          } else {
+            totalEl.textContent = `$${Math.round(pricing[plan].monthly * 12 * 0.9).toLocaleString()} / year`;
+          }
+        }
+      });
+
+      const addReport = document.getElementById('addReportCheckbox')?.checked || false;
+      const planTotal = getTotal(currentPlan, currentBilling);
+      const total = planTotal + (addReport ? 150 : 0);
+
+      document.getElementById('summaryPlan').textContent = pricing[currentPlan].name;
+
+      const savingsRow = document.getElementById('savingsRow');
+      const reportRow = document.getElementById('reportRow');
+
+      if (isFC(currentPlan)) {
+        document.getElementById('summaryBilling').textContent = 'Quarterly';
+        savingsRow.style.display = 'none';
+        document.getElementById('btnMainText').textContent = `Get started — ${formatCurrency(total)} / quarter`;
+        document.getElementById('btnSubText').textContent = `${pricing[currentPlan].name}, billed every 3 months`;
+        // Dim billing toggle — not applicable for FC plans
+        document.getElementById('billingToggleWrap').classList.add('fc-active');
+      } else {
+        const billingLabel = currentBilling === 'quarterly' ? 'billed quarterly' : 'billed annually';
+        document.getElementById('summaryBilling').textContent = currentBilling === 'quarterly' ? 'Quarterly' : 'Annual';
+        document.getElementById('btnMainText').textContent = `Get started — ${formatCurrency(total)}`;
+        document.getElementById('btnSubText').textContent = `${pricing[currentPlan].name} plan, ${billingLabel}`;
+        document.getElementById('billingToggleWrap').classList.remove('fc-active');
+        if (currentBilling === 'annual') {
+          savingsRow.style.display = 'flex';
+          document.getElementById('summarySavings').textContent = '-' + formatCurrency(getSavings(currentPlan));
+        } else {
+          savingsRow.style.display = 'none';
+        }
+      }
+
+      document.getElementById('summaryTotal').textContent = formatCurrency(total);
+      if (reportRow) reportRow.style.display = addReport ? 'flex' : 'none';
+    }
+
+    function setBilling(billing) {
+      currentBilling = billing;
+      document.getElementById('selectedBilling').value = billing;
+      document.querySelectorAll('.billing-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.closest('.billing-btn').classList.add('active');
+      updatePriceDisplay();
+    }
+
+    function selectPlan(el, plan) {
+      currentPlan = plan;
+      document.querySelectorAll('.plan-option').forEach(opt => opt.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('selectedPlan').value = plan;
+      // FC plans are always quarterly — lock billing
+      if (isFC(plan)) {
+        currentBilling = 'quarterly';
+        document.getElementById('selectedBilling').value = 'quarterly';
+      }
+      if (isFC(plan)) {
+        document.getElementById('selectedBilling').value = 'monthly';
+      } else {
+        document.getElementById('selectedBilling').value = currentBilling;
+      }
+      updatePriceDisplay();
+    }
+
+    // ── Form Submit: Create account → Redirect to Stripe Checkout ──
+    async function handleSignup(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const errorEl = document.getElementById('formError');
+      errorEl.classList.remove('visible');
+
+      btn.querySelector('#btnMainText').textContent = 'Creating your account…';
+      btn.querySelector('#btnSubText').textContent = '';
+      btn.disabled = true;
+
+      try {
+        const form = e.target;
+        const formData = {
+          email: form.email.value,
+          password: form.password.value,
+          first_name: form.first_name.value,
+          last_name: form.last_name.value,
+          daycare_name: form.daycare_name.value,
+          phone: form.phone?.value || '',
+          city: form.city.value,
+          state: form.state.value,
+          google_link: form.google_link?.value || '',
+          opened_month: form.opened_month?.value || '',
+          opened_year:  form.opened_year?.value  ? parseInt(form.opened_year.value, 10) : null,
+          dogs_served:  form.dogs_served?.value  || '',
+          staff_count:  form.staff_count?.value  || '',
+          role:         form.role?.value          || '',
+          role_other:   form.role_other?.value    || '',
+          newsletter_opt_in: document.getElementById('newsletterOptIn')?.checked || false
+        };
+
+        // Step 1: Create account in Supabase
+        const signupRes = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        const signupData = await signupRes.json();
+
+        if (!signupRes.ok) {
+          throw new Error(signupData.error || 'Failed to create account.');
+        }
+
+        // Store session if available
+        if (signupData.session) {
+          localStorage.setItem('tailwag_session', JSON.stringify(signupData.session));
+        }
+
+        // Step 2: Redirect to Stripe Checkout
+        btn.querySelector('#btnMainText').textContent = 'Redirecting to payment…';
+
+        const addReport = document.getElementById('addReportCheckbox')?.checked || false;
+
+        const checkoutRes = await fetch('/api/stripe/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            plan: currentPlan,
+            billing: currentBilling,
+            userId: signupData.userId,
+            email: formData.email,
+            addReport
+          })
+        });
+
+        const checkoutData = await checkoutRes.json();
+
+        if (!checkoutRes.ok) {
+          throw new Error(checkoutData.error || 'Failed to start payment.');
+        }
+
+        // Redirect to Stripe Checkout
+        window.location.href = checkoutData.url;
+
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.classList.add('visible');
+        updatePriceDisplay();
+        btn.disabled = false;
+      }
+    }
+
+    // ── Path chooser ──
+    function choosePath(path) {
+      document.getElementById('pathChooser').style.display = 'none';
+      if (path === 'new') {
+        document.getElementById('signupWrapper').style.display = 'flex';
+      } else {
+        document.getElementById('joinSection').style.display = 'block';
+      }
+    }
+
+    function showChooser() {
+      document.getElementById('pathChooser').style.display = 'block';
+      document.getElementById('signupWrapper').style.display = 'none';
+      document.getElementById('joinSection').style.display = 'none';
+    }
+
+    // ── Request access to an existing daycare ──
+    async function requestAccess() {
+      const btn = document.getElementById('joinSubmitBtn');
+      const btnText = document.getElementById('joinBtnText');
+      const errorEl = document.getElementById('joinError');
+      errorEl.classList.remove('visible');
+
+      const daycareInput = document.getElementById('joinDaycareInput').value.trim();
+      const firstName = document.getElementById('joinFirstName').value.trim();
+      const lastName = document.getElementById('joinLastName').value.trim();
+      const email = document.getElementById('joinEmail').value.trim();
+
+      if (!daycareInput || !firstName || !email) {
+        errorEl.textContent = 'Please fill in all required fields.';
+        errorEl.classList.add('visible');
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errorEl.textContent = 'Please enter a valid email address.';
+        errorEl.classList.add('visible');
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.textContent = 'Sending request…';
+
+      try {
+        const res = await fetch('/api/auth/request-access', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ daycare_name: daycareInput, first_name: firstName, last_name: lastName, email })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          if (data.error === 'no_match') {
+            errorEl.textContent = "We couldn't find a daycare with that name. Double-check the spelling, or ask your manager to send an invite directly from their Settings → Team page.";
+          } else {
+            errorEl.textContent = data.error || 'Something went wrong. Please try again.';
+          }
+          errorEl.classList.add('visible');
+          btn.disabled = false;
+          btnText.textContent = 'Send Request';
+          return;
+        }
+
+        // Success — show confirmation
+        document.getElementById('joinDaycareName').textContent = data.daycare_name;
+        document.getElementById('joinFormInner').style.display = 'none';
+        document.getElementById('joinSuccess').classList.add('visible');
+
+      } catch (err) {
+        errorEl.textContent = 'Something went wrong. Please try again.';
+        errorEl.classList.add('visible');
+        btn.disabled = false;
+        btnText.textContent = 'Send Request';
+      }
+    }
+
+    // Check if user returned from cancelled checkout — auto-open the new account form
+    if (new URLSearchParams(window.location.search).get('cancelled')) {
+      choosePath('new');
+      const errorEl = document.getElementById('formError');
+      errorEl.textContent = 'Payment was cancelled. Your account has been created — you can try again or contact info@usetailwag.com.';
+      errorEl.classList.add('visible');
+    }
+
+    // Pre-select plan from URL parameter e.g. /signup?plan=starter
+    (function() {
+      const planParam = new URLSearchParams(window.location.search).get('plan');
+      if (planParam && pricing[planParam]) {
+        choosePath('new');
+        const el = document.querySelector(`.plan-option[data-plan="${planParam}"]`);
+        if (el) selectPlan(el, planParam);
+      }
+    })();
+
+    // Initialize price display
+    updatePriceDisplay();
+
+    function togglePw(id, btn) {
+      const input = document.getElementById(id);
+      const eye = document.getElementById(id + '-eye');
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      eye.innerHTML = show
+        ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>'
+        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+  </script>
+  <script>
+    window.intercomSettings = { api_base: "https://api-iam.intercom.io", app_id: "ov6sdlds" };
+    (function(){var w=document,ic=w.createElement('script');ic.type='text/javascript';ic.async=true;ic.src='https://widget.intercom.io/widget/ov6sdlds';var s=w.getElementsByTagName('script')[0];s.parentNode.insertBefore(ic,s);})();
+  </script>
+</body>
+</html>
