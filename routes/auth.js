@@ -52,7 +52,7 @@ async function addToBrevoNewsletter({ email, first_name, last_name, daycare_name
   });
 }
 
-// POST /api/auth/request-access — notifies Summer via Brevo transactional email
+// POST /api/auth/request-access — logs to Supabase, notifies Summer, adds to Brevo prospects list
 router.post('/request-access', async (req, res) => {
   try {
     const { firstName, lastName, daycareName, email, phone, city, state, dogsPerDay, numLocations, message } = req.body;
@@ -60,9 +60,54 @@ router.post('/request-access', async (req, res) => {
       return res.status(400).json({ error: 'Name, daycare name, and email are required.' });
     }
 
+    // 1. Log to Supabase access_requests table
+    const { error: dbError } = await supabaseAdmin.from('access_requests').insert({
+      first_name:    firstName,
+      last_name:     lastName   || null,
+      daycare_name:  daycareName,
+      email:         email.toLowerCase().trim(),
+      phone:         phone       || null,
+      city:          city        || null,
+      state:         state       || null,
+      dogs_per_day:  dogsPerDay  || null,
+      num_locations: numLocations || null,
+      message:       message     || null
+    });
+    if (dbError) console.error('access_requests insert error:', dbError.message);
+
     const apiKey = process.env.BREVO_API_KEY;
     if (apiKey) {
       const location = [city, state].filter(Boolean).join(', ');
+
+      // 2. Add to Brevo prospects list (fire and forget)
+      const prospectsListId = process.env.BREVO_PROSPECTS_LIST_ID;
+      (async () => {
+        try {
+          const headers = { 'api-key': apiKey, 'Content-Type': 'application/json' };
+          // Create/update contact with attributes
+          await fetch('https://api.brevo.com/v3/contacts', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              email: email.toLowerCase().trim(),
+              updateEnabled: true,
+              attributes: {
+                FIRSTNAME:     firstName,
+                LASTNAME:      lastName  || '',
+                COMPANY:       daycareName,
+                ...(city  && { CITY: city }),
+                ...(state && { STATE_REGION: state }),
+                ...(phone && { SMS: phone }),
+                ...(dogsPerDay  && { DOGS_PER_DAY: dogsPerDay }),
+                ...(numLocations && { NUM_LOCATIONS: numLocations })
+              },
+              ...(prospectsListId && { listIds: [parseInt(prospectsListId, 10)] })
+            })
+          });
+        } catch (e) { console.error('Brevo prospect sync error:', e.message); }
+      })();
+
+      // 3. Send notification email to Summer
       const html = `
         <div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;background:#F5F0E8;border-radius:12px;overflow:hidden;">
           <div style="background:#0F1410;padding:24px 32px;">
