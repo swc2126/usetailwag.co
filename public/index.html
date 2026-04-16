@@ -1165,9 +1165,10 @@
             }
 
             h2 {
-                font-size: 32px;
+                font-size: 30px;
             }
 
+            /* Navbar */
             .navbar {
                 padding: 16px 20px;
             }
@@ -1200,11 +1201,13 @@
                 left: 0;
                 right: 0;
                 background-color: var(--black);
-                padding: 20px 40px;
+                padding: 20px 24px;
                 gap: 20px;
                 border-bottom: 1px solid var(--border-light);
+                z-index: 100;
             }
 
+            /* Hero */
             .hero {
                 padding: 60px 20px;
             }
@@ -1215,11 +1218,33 @@
             }
 
             .hero-left h1 {
-                font-size: 44px;
+                font-size: 38px;
             }
 
             .hero-subhead {
                 font-size: 16px;
+                white-space: normal !important;
+            }
+
+            .hero-ctas {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .hero-ctas .btn {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+            }
+
+            .hero-right {
+                display: flex;
+                justify-content: center;
+            }
+
+            /* Stat bar */
+            .stat-bar {
+                padding: 40px 20px;
             }
 
             .stat-grid {
@@ -1227,15 +1252,30 @@
                 gap: 20px;
             }
 
+            /* Problem section */
+            .problem-section {
+                padding: 60px 20px;
+            }
+
             .problem-cards {
                 grid-template-columns: 1fr;
             }
 
-            .steps-grid {
-                grid-template-columns: 1fr;
-                gap: 30px;
+            /* How it works */
+            .how-it-works {
+                padding: 60px 20px;
             }
 
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .steps-subhead {
+                white-space: normal !important;
+            }
+
+            /* Features */
             .feature-section {
                 grid-template-columns: 1fr;
                 gap: 40px;
@@ -1246,20 +1286,112 @@
                 direction: ltr;
             }
 
+            .feature-phone {
+                margin: 0 auto;
+            }
+
+            /* ROI */
+            .roi-section {
+                padding: 60px 20px;
+            }
+
+            .roi-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            /* Pricing */
+            .pricing-section {
+                padding: 60px 20px;
+            }
+
             .pricing-cards {
                 grid-template-columns: 1fr;
+                max-width: 420px;
+                margin-left: auto;
+                margin-right: auto;
             }
 
             .pricing-card.featured {
                 transform: scale(1);
             }
 
+            /* Testimonials */
+            .testimonials-section {
+                padding: 60px 20px;
+            }
+
             .testimonials-grid {
                 grid-template-columns: 1fr;
             }
 
-            .roi-grid {
+            /* FAQ */
+            .faq-section {
+                padding: 60px 20px;
+            }
+
+            /* About */
+            .about-section {
+                padding: 60px 20px;
+            }
+
+            .about-origin {
+                font-size: 32px;
+            }
+
+            .about-pullquote {
+                font-size: 20px;
+                padding-left: 18px;
+            }
+
+            .about-body {
+                font-size: 16px;
+            }
+
+            /* CTA */
+            .cta-section {
+                padding: 60px 20px;
+            }
+
+            .cta-headline {
+                font-size: 26px;
+            }
+
+            .cta-contact {
+                font-size: 14px;
+            }
+
+            /* Newsletter */
+            .newsletter-section {
+                padding: 60px 20px;
+            }
+
+            .newsletter-name-row {
+                flex-direction: column;
+            }
+
+            .newsletter-submit-row {
+                flex-direction: column;
+            }
+
+            .newsletter-submit {
+                width: 100%;
+            }
+
+            /* Footer */
+            .footer-grid {
                 grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .footer-nav {
+                flex-wrap: wrap;
+                gap: 12px;
+                justify-content: center;
+            }
+
+            footer {
+                padding: 40px 20px 24px;
             }
         }
 
@@ -1375,7 +1507,7 @@
 
         @media (max-width: 480px) {
             h1 {
-                font-size: 32px;
+                font-size: 30px;
             }
 
             h2 {
@@ -1392,24 +1524,79 @@
             }
 
             .hero-left h1 {
-                font-size: 32px;
+                font-size: 28px;
             }
 
-            .hero-ctas {
-                flex-direction: column;
-            }
-
-            .btn {
+            .hero-ctas .btn {
                 width: 100%;
+                text-align: center;
+                justify-content: center;
             }
 
             .stat-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+
+            .stat-bar {
+                padding: 32px 16px;
             }
 
             .feature-phone {
                 width: 240px;
                 height: 480px;
+            }
+
+            .step-card {
+                padding: 24px 20px;
+            }
+
+            .about-section {
+                padding: 48px 16px;
+            }
+
+            .about-origin {
+                font-size: 26px;
+            }
+
+            .about-pullquote {
+                font-size: 18px;
+            }
+
+            .pricing-section {
+                padding: 48px 16px;
+            }
+
+            .pricing-cards {
+                max-width: 100%;
+            }
+
+            .pricing-card {
+                padding: 28px 20px;
+            }
+
+            .cta-section {
+                padding: 48px 16px;
+            }
+
+            .newsletter-section {
+                padding: 48px 16px;
+            }
+
+            .newsletter-headline {
+                font-size: 22px;
+            }
+
+            .faq-section {
+                padding: 48px 16px;
+            }
+
+            .roi-section {
+                padding: 48px 16px;
+            }
+
+            footer {
+                padding: 32px 16px 20px;
             }
         }
     </style>
@@ -1455,7 +1642,7 @@
             <div class="hero-left fade-in-up">
                 <span class="hero-label">Smart Client Communication</span>
                 <h1>You take care of the dogs.<br>TailWag takes care of the parents.</h1>
-                <p class="hero-subhead" style="font-family:var(--font-display);font-style:italic;font-size:20px;color:var(--gold);margin-bottom:12px;white-space:nowrap;">Every visit, a message no other daycare sends.</p>
+                <p class="hero-subhead hero-tagline" style="font-family:var(--font-display);font-style:italic;font-size:20px;color:var(--gold);margin-bottom:12px;white-space:nowrap;">Every visit, a message no other daycare sends.</p>
                 <p class="hero-subhead">Personalized report cards, appointment reminders, and review requests — sent automatically, built from what your staff actually sees every day.</p>
                 <div class="hero-ctas">
                     <a href="/signup" class="btn btn-primary">Request Access →</a>
