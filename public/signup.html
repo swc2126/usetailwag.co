@@ -176,7 +176,7 @@
     <div class="value-col">
       <div class="eyebrow"><span class="eyebrow-dot"></span> Built for independent daycares</div>
       <h1 class="value-title">Run your daycare.<br><span>We'll handle</span> the follow-up.</h1>
-      <p class="value-desc">TailWag sends AI-powered SMS messages — report cards, review requests, and reminders — so you can focus on the dogs, not the inbox.</p>
+      <p class="value-desc">TailWag sends personalized SMS messages — report cards, review requests, and reminders — so you can focus on the dogs, not the inbox.</p>
       <div class="value-points">
         <div class="value-point">
           <div class="value-point-icon">🐾</div>
@@ -192,7 +192,7 @@
         </div>
         <div class="value-point">
           <div class="value-point-icon">✍️</div>
-          <div class="value-point-text"><strong>Your voice, not a robot's</strong> — customize the tone and style for your brand.</div>
+          <div class="value-point-text"><strong>Your voice, your community</strong> — every message sounds like it came from you, not a template.</div>
         </div>
       </div>
     </div>
@@ -254,6 +254,18 @@
           </div>
 
           <div class="form-group">
+            <label for="numLocations">Number of locations requesting access for</label>
+            <select id="numLocations">
+              <option value="">Select</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5+</option>
+            </select>
+          </div>
+
+          <div class="form-group">
             <label for="message">Anything else you'd like us to know? (optional)</label>
             <textarea id="message" placeholder="How you heard about us, questions you have, etc."></textarea>
           </div>
@@ -288,8 +300,9 @@
     const phone      = document.getElementById('phone').value.trim();
     const city       = document.getElementById('city').value.trim();
     const state      = document.getElementById('state').value.trim();
-    const dogsPerDay = document.getElementById('dogsPerDay').value;
-    const message    = document.getElementById('message').value.trim();
+    const dogsPerDay   = document.getElementById('dogsPerDay').value;
+    const numLocations = document.getElementById('numLocations').value;
+    const message      = document.getElementById('message').value.trim();
 
     errorEl.style.display = 'none';
 
@@ -304,7 +317,7 @@
       const res = await fetch('/api/auth/request-access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, daycareName, email, phone, city, state, dogsPerDay, message })
+        body: JSON.stringify({ firstName, lastName, daycareName, email, phone, city, state, dogsPerDay, numLocations, message })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');

@@ -55,7 +55,7 @@ async function addToBrevoNewsletter({ email, first_name, last_name, daycare_name
 // POST /api/auth/request-access — notifies Summer via Brevo transactional email
 router.post('/request-access', async (req, res) => {
   try {
-    const { firstName, lastName, daycareName, email, phone, city, state, dogsPerDay, message } = req.body;
+    const { firstName, lastName, daycareName, email, phone, city, state, dogsPerDay, numLocations, message } = req.body;
     if (!firstName || !email || !daycareName) {
       return res.status(400).json({ error: 'Name, daycare name, and email are required.' });
     }
@@ -76,6 +76,7 @@ router.post('/request-access', async (req, res) => {
               <tr><td style="padding:8px 0;color:#888;">Email</td><td style="padding:8px 0;"><a href="mailto:${email}" style="color:#1E6B4A;">${email}</a></td></tr>
               ${phone ? `<tr><td style="padding:8px 0;color:#888;">Phone</td><td style="padding:8px 0;color:#0F1410;">${phone}</td></tr>` : ''}
               ${dogsPerDay ? `<tr><td style="padding:8px 0;color:#888;">Dogs/day</td><td style="padding:8px 0;color:#0F1410;">${dogsPerDay}</td></tr>` : ''}
+              ${numLocations ? `<tr><td style="padding:8px 0;color:#888;">Locations</td><td style="padding:8px 0;color:#0F1410;font-weight:600;">${numLocations}</td></tr>` : ''}
               ${message ? `<tr><td style="padding:8px 0;color:#888;vertical-align:top;">Message</td><td style="padding:8px 0;color:#0F1410;">${message}</td></tr>` : ''}
             </table>
             <div style="margin-top:24px;padding-top:20px;border-top:1px solid #ddd;">
