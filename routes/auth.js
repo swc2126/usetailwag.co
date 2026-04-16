@@ -181,14 +181,17 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// GET /api/auth/daycares — returns daycare list for new-account dropdown
-router.get('/daycares', async (req, res) => {
+// GET /api/auth/daycare-info?id=UUID — returns single daycare name for new-account invite link
+router.get('/daycare-info', async (req, res) => {
+  const { id } = req.query;
+  if (!id) return res.status(400).json({ error: 'Daycare ID required.' });
   const { data, error } = await supabaseAdmin
     .from('daycares')
     .select('id, name, city, state')
-    .order('name', { ascending: true });
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data || []);
+    .eq('id', id)
+    .single();
+  if (error || !data) return res.status(404).json({ error: 'Daycare not found.' });
+  res.json(data);
 });
 
 // POST /api/auth/new-account — create profile for a paying customer, linked to existing daycare

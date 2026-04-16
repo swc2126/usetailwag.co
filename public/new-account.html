@@ -114,8 +114,18 @@
       text-align: center; margin-top: 14px; line-height: 1.6;
     }
 
-    /* Loading state for daycare dropdown */
-    .daycare-loading { font-size: 13px; color: rgba(245,240,232,0.35); padding: 8px 0; }
+    /* Daycare locked field */
+    .daycare-locked {
+      width: 100%; padding: 13px 16px; border-radius: 10px;
+      border: 1px solid rgba(245,240,232,0.12);
+      background: rgba(255,255,255,0.03); color: rgba(245,240,232,0.5);
+      font-family: 'Inter', sans-serif; font-size: 15px;
+    }
+    /* Invalid link state */
+    .invalid-state { display: none; text-align: center; padding: 24px 0; }
+    .invalid-icon { font-size: 40px; margin-bottom: 14px; }
+    .invalid-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 20px; color: var(--linen); margin-bottom: 8px; }
+    .invalid-desc { font-size: 14px; color: rgba(245,240,232,0.5); line-height: 1.6; }
 
     /* Success */
     .success-state { display: none; text-align: center; padding: 16px 0; }
@@ -184,7 +194,7 @@
           <input type="tel" id="phone" placeholder="(512) 555-0100" autocomplete="tel">
         </div>
 
-        <div class="section-label">Your address</div>
+        <div class="section-label">Daycare address</div>
 
         <div class="form-group">
           <label for="street">Street address</label>
@@ -209,11 +219,8 @@
         <div class="section-label">Daycare & role</div>
 
         <div class="form-group">
-          <label for="daycareSelect">Your daycare</label>
-          <p class="daycare-loading" id="daycareLoading">Loading daycares…</p>
-          <select id="daycareSelect" style="display:none;">
-            <option value="">Select your daycare</option>
-          </select>
+          <label>Your daycare</label>
+          <div class="daycare-locked" id="daycareName">Loading…</div>
         </div>
 
         <div class="form-group">
@@ -253,6 +260,12 @@
         <p class="form-fine">By creating an account you agree to TailWag's Terms of Service.</p>
       </div>
 
+      <div class="invalid-state" id="invalidState">
+        <div class="invalid-icon">🔗</div>
+        <h3 class="invalid-title">Invalid invite link</h3>
+        <p class="invalid-desc">This link doesn't look right. Please check the link you received or contact <a href="mailto:info@usetailwag.co" style="color:var(--sage);">info@usetailwag.co</a> for help.</p>
+      </div>
+
       <div class="success-state" id="successState">
         <div class="success-icon">🐾</div>
         <h3 class="success-title">You're in!</h3>
@@ -265,24 +278,33 @@
 </main>
 
 <script>
-  // Load daycares into dropdown
-  async function loadDaycares() {
-    try {
-      const res = await fetch('/api/auth/daycares');
-      const daycares = await res.json();
-      const sel = document.getElementById('daycareSelect');
-      daycares.forEach(d => {
-        const opt = document.createElement('option');
-        opt.value = d.id;
-        const location = [d.city, d.state].filter(Boolean).join(', ');
-        opt.textContent = location ? `${d.name} — ${location}` : d.name;
-        sel.appendChild(opt);
-      });
-      document.getElementById('daycareLoading').style.display = 'none';
-      sel.style.display = 'block';
-    } catch (err) {
-      document.getElementById('daycareLoading').textContent = 'Could not load daycares. Please refresh.';
+  // Read daycare ID from ?d= param and fetch its name
+  let assignedDaycareId = null;
+
+  async function loadDaycareFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('d');
+
+    if (!id) {
+      showInvalidLink();
+      return;
     }
+
+    try {
+      const res = await fetch(`/api/auth/daycare-info?id=${encodeURIComponent(id)}`);
+      if (!res.ok) { showInvalidLink(); return; }
+      const data = await res.json();
+      assignedDaycareId = data.id;
+      const location = [data.city, data.state].filter(Boolean).join(', ');
+      document.getElementById('daycareName').textContent = location ? `${data.name} — ${location}` : data.name;
+    } catch (err) {
+      showInvalidLink();
+    }
+  }
+
+  function showInvalidLink() {
+    document.getElementById('formWrap').style.display = 'none';
+    document.getElementById('invalidState').style.display = 'block';
   }
 
   function togglePw(id, btn) {
@@ -315,14 +337,14 @@
     const city            = document.getElementById('city').value.trim();
     const state           = document.getElementById('state').value.trim();
     const zip             = document.getElementById('zip').value.trim();
-    const daycare_id      = document.getElementById('daycareSelect').value;
+    const daycare_id      = assignedDaycareId;
     const role            = document.getElementById('role').value;
     const password        = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
     if (!firstName)       return showError('First name is required.');
     if (!email || !email.includes('@')) return showError('A valid email address is required.');
-    if (!daycare_id)      return showError('Please select your daycare.');
+    if (!daycare_id)      return showError('No daycare assigned. Please use the invite link provided.');
     if (!role)            return showError('Please select your role.');
     if (!password || password.length < 8) return showError('Password must be at least 8 characters.');
     if (password !== confirmPassword) return showError('Passwords do not match.');
@@ -352,7 +374,7 @@
     }
   }
 
-  loadDaycares();
+  loadDaycareFromUrl();
 </script>
 
 </body>
