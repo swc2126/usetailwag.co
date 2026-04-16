@@ -79,33 +79,46 @@ router.post('/request-access', async (req, res) => {
     if (apiKey) {
       const location = [city, state].filter(Boolean).join(', ');
 
-      // 2. Add to Brevo prospects list (fire and forget)
-      const prospectsListId = process.env.BREVO_PROSPECTS_LIST_ID;
-      (async () => {
-        try {
-          const headers = { 'api-key': apiKey, 'Content-Type': 'application/json' };
-          // Create/update contact with attributes
-          await fetch('https://api.brevo.com/v3/contacts', {
+      // 2. Add to Brevo prospects list
+      const prospectsListId = parseInt(process.env.BREVO_PROSPECTS_LIST_ID || '8', 10);
+      try {
+        const brevoHeaders = { 'api-key': apiKey, 'Content-Type': 'application/json' };
+        const contactEmail = email.toLowerCase().trim();
+
+        // Step 1: Create/update contact
+        const createRes = await fetch('https://api.brevo.com/v3/contacts', {
+          method: 'POST',
+          headers: brevoHeaders,
+          body: JSON.stringify({
+            email: contactEmail,
+            updateEnabled: true,
+            attributes: {
+              FIRSTNAME: firstName,
+              LASTNAME:  lastName  || '',
+              COMPANY:   daycareName
+            }
+          })
+        });
+        const createBody = await createRes.text();
+        if (!createRes.ok && createRes.status !== 204) {
+          console.error(`[Brevo] Contact create failed (${createRes.status}):`, createBody);
+        } else {
+          console.log(`[Brevo] Contact created/updated: ${contactEmail}`);
+
+          // Step 2: Add to prospects list
+          const listRes = await fetch(`https://api.brevo.com/v3/contacts/lists/${prospectsListId}/contacts/add`, {
             method: 'POST',
-            headers,
-            body: JSON.stringify({
-              email: email.toLowerCase().trim(),
-              updateEnabled: true,
-              attributes: {
-                FIRSTNAME:     firstName,
-                LASTNAME:      lastName  || '',
-                COMPANY:       daycareName,
-                ...(city  && { CITY: city }),
-                ...(state && { STATE_REGION: state }),
-                ...(phone && { SMS: phone }),
-                ...(dogsPerDay  && { DOGS_PER_DAY: dogsPerDay }),
-                ...(numLocations && { NUM_LOCATIONS: numLocations })
-              },
-              ...(prospectsListId && { listIds: [parseInt(prospectsListId, 10)] })
-            })
+            headers: brevoHeaders,
+            body: JSON.stringify({ emails: [contactEmail] })
           });
-        } catch (e) { console.error('Brevo prospect sync error:', e.message); }
-      })();
+          const listBody = await listRes.text();
+          if (!listRes.ok) {
+            console.error(`[Brevo] List add failed (${listRes.status}):`, listBody);
+          } else {
+            console.log(`[Brevo] Added ${contactEmail} to list ${prospectsListId}`);
+          }
+        }
+      } catch (e) { console.error('Brevo prospect sync error:', e.message); }
 
       // 3. Send notification email to Summer
       const html = `
