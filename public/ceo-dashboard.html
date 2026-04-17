@@ -705,6 +705,23 @@
       document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
     }
 
+    function copyInviteLink(daycareId, btn) {
+      const url = `${window.location.origin}/new-account?d=${daycareId}`;
+      navigator.clipboard.writeText(url).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.style.background = '#1E6B4A';
+        btn.style.color = '#fff';
+        btn.style.borderColor = '#1E6B4A';
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }, 2000);
+      });
+    }
+
     function logout() {
       localStorage.removeItem('tailwag_session');
       localStorage.removeItem('sb-bixfhpzcqxjtdprjmuhx-auth-token');
@@ -874,6 +891,7 @@
               <span class="loc-mrr">${mrrLabel}</span>
               <div class="loc-actions">
                 ${loc.google_link ? `<a href="${esc(loc.google_link)}" target="_blank" class="loc-btn secondary">Reviews ↗</a>` : ''}
+                <button class="loc-btn secondary" onclick="copyInviteLink('${esc(loc.id)}', this)">Copy Invite Link</button>
               </div>
             </div>
           </div>`;
