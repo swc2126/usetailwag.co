@@ -8,8 +8,9 @@ const PORT = process.env.PORT || 3000;
 // Stripe webhook needs raw body — must be registered before express.json()
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
-// Twilio status callback uses urlencoded
-app.use('/api/sms/status', express.urlencoded({ extended: false }));
+// Telnyx webhooks need raw body for Ed25519 signature verification
+app.use('/api/sms/telnyx/status', express.raw({ type: 'application/json' }));
+app.use('/api/sms/telnyx/inbound', express.raw({ type: 'application/json' }));
 
 // Parse JSON bodies
 app.use(express.json());
@@ -131,38 +132,35 @@ app.listen(PORT, () => {
 
 // ─── CRON: Send pending sentiment follow-ups every 10 minutes ───────────────
 const cron = require('node-cron');
-const twilio = require('twilio');
 const { supabaseAdmin } = require('./config/supabase');
+const { sendSms } = require('./utils/telnyx');
 
 cron.schedule('*/10 * * * *', async () => {
   try {
     const { data: pending } = await supabaseAdmin
       .from('pending_followups')
-      .select('*, twilio_config:daycares(twilio_config(phone_number))')
+      .select('*')
       .eq('sent', false)
       .lte('send_at', new Date().toISOString())
       .limit(50);
 
     if (!pending?.length) return;
 
-    const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-
     for (const followup of pending) {
       try {
-        // Get the TailWag number for this daycare
-        const { data: twilioConfig } = await supabaseAdmin
-          .from('twilio_config')
+        const { data: config } = await supabaseAdmin
+          .from('messaging_config')
           .select('phone_number')
           .eq('daycare_id', followup.daycare_id)
           .eq('status', 'active')
           .single();
 
-        if (!twilioConfig?.phone_number) continue;
+        if (!config?.phone_number) continue;
 
-        await twilioClient.messages.create({
-          from: twilioConfig.phone_number,
+        await sendSms({
+          from: config.phone_number,
           to: followup.recipient_phone,
-          body: followup.followup_body
+          text: followup.followup_body
         });
 
         await supabaseAdmin

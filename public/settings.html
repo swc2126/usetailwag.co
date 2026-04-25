@@ -522,7 +522,7 @@
       loadBillingInfo();
 
       // TailWag number
-      await loadTwilioNumber();
+      await loadDaycareNumber();
 
       // Daycare info — populate editable fields
       if (meData?.daycare) {
@@ -557,7 +557,7 @@
     }
   }
 
-  async function loadTwilioNumber() {
+  async function loadDaycareNumber() {
     const numDiv = document.getElementById('numberDisplay');
     try {
       const res = await fetch('/api/sms/number', { headers: authHeaders });

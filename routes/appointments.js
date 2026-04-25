@@ -1,15 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const twilio = require('twilio');
 const { supabaseAdmin } = require('../config/supabase');
 const { requireAuth } = require('../middleware/auth');
+const { sendSms } = require('../utils/telnyx');
 
-const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-
-// Helper: get Twilio number for daycare
-async function getTwilioNumber(daycareId) {
+// Helper: get the daycare's assigned phone number
+async function getDaycareNumber(daycareId) {
   const { data } = await supabaseAdmin
-    .from('twilio_config')
+    .from('messaging_config')
     .select('phone_number')
     .eq('daycare_id', daycareId)
     .eq('status', 'active')
@@ -31,9 +29,9 @@ async function getDaycareInfo(daycareId) {
 async function sendReminderSms(fromNumber, toPhone, firstName, dogName, daycareName, appointmentDate) {
   const date = new Date(appointmentDate + 'T12:00:00');
   const dayName = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  const body = `Hi ${firstName}! Just a reminder that ${dogName} is scheduled at ${daycareName} on ${dayName}. Reply YES to confirm or NO to cancel.`;
+  const text = `Hi ${firstName}! Just a reminder that ${dogName} is scheduled at ${daycareName} on ${dayName}. Reply YES to confirm or NO to cancel.`;
   try {
-    await twilioClient.messages.create({ from: fromNumber, to: toPhone, body });
+    await sendSms({ from: fromNumber, to: toPhone, text });
     return true;
   } catch (err) {
     console.error('Reminder SMS error:', err.message);
@@ -220,8 +218,8 @@ router.post('/send-reminders', requireAuth, async (req, res) => {
   if (!date) return res.status(400).json({ error: 'date required (YYYY-MM-DD)' });
 
   const daycare = await getDaycareInfo(req.daycareId);
-  const fromNumber = await getTwilioNumber(req.daycareId);
-  if (!fromNumber) return res.status(400).json({ error: 'No Twilio number assigned.' });
+  const fromNumber = await getDaycareNumber(req.daycareId);
+  if (!fromNumber) return res.status(400).json({ error: 'No phone number assigned.' });
 
   // Get all pending appointments for this date
   const { data: appts, error } = await supabaseAdmin
@@ -264,9 +262,9 @@ router.post('/morning-summary', requireAuth, async (req, res) => {
   const { date, manager_phone } = req.body;
   if (!date || !manager_phone) return res.status(400).json({ error: 'date and manager_phone required' });
 
-  const fromNumber = await getTwilioNumber(req.daycareId);
+  const fromNumber = await getDaycareNumber(req.daycareId);
   const daycare = await getDaycareInfo(req.daycareId);
-  if (!fromNumber) return res.status(400).json({ error: 'No Twilio number assigned.' });
+  if (!fromNumber) return res.status(400).json({ error: 'No phone number assigned.' });
 
   const { data: appts } = await supabaseAdmin
     .from('appointments')
@@ -280,11 +278,11 @@ router.post('/morning-summary', requireAuth, async (req, res) => {
 
   const date2 = new Date(date + 'T12:00:00');
   const dayName = date2.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-  const body = `${daycare.name} — ${dayName} schedule: ${total} total · ${counts.confirmed} confirmed ✓ · ${counts.pending} no reply · ${counts.cancelled} cancelled. Have a great day!`;
+  const summary = `${daycare.name} — ${dayName} schedule: ${total} total · ${counts.confirmed} confirmed ✓ · ${counts.pending} no reply · ${counts.cancelled} cancelled. Have a great day!`;
 
   try {
-    await twilioClient.messages.create({ from: fromNumber, to: manager_phone, body });
-    res.json({ success: true, summary: body });
+    await sendSms({ from: fromNumber, to: manager_phone, text: summary });
+    res.json({ success: true, summary });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -338,99 +336,6 @@ router.delete('/recurring/:id', requireAuth, async (req, res) => {
   res.json({ success: true });
 });
 
-// ─── INBOUND SMS HANDLER ─────────────────────────────────────────────────────
-// POST /api/appointments/inbound — called from Twilio webhook for incoming SMS
-// Also handles generic inbound (registered in server.js)
-router.post('/inbound', express.urlencoded({ extended: false }), async (req, res) => {
-  const { From, To, Body, MessageSid } = req.body;
-  const reply = (Body || '').trim().toUpperCase();
-
-  // Find the daycare that owns this Twilio number
-  const { data: config } = await supabaseAdmin
-    .from('twilio_config')
-    .select('daycare_id')
-    .eq('phone_number', To)
-    .eq('status', 'active')
-    .single();
-
-  if (!config) return res.sendStatus(200);
-
-  // Find the client by phone number
-  const phone = From.replace(/\s/g, '');
-  const { data: client } = await supabaseAdmin
-    .from('clients')
-    .select('id, first_name')
-    .eq('daycare_id', config.daycare_id)
-    .eq('phone', phone)
-    .eq('active', true)
-    .single();
-
-  // Always save inbound message to history (for all replies, not just YES/NO)
-  await supabaseAdmin.from('inbound_messages').insert({
-    daycare_id: config.daycare_id,
-    client_id: client?.id || null,
-    from_number: From,
-    to_number: To,
-    body: Body || '',
-    twilio_sid: MessageSid || null,
-    read: false,
-    received_at: new Date().toISOString()
-  });
-
-  // Only process YES/NO for appointment confirmation logic
-  if (!['YES', 'NO', 'Y', 'N'].includes(reply)) {
-    return res.sendStatus(200);
-  }
-
-  const isConfirm = reply === 'YES' || reply === 'Y';
-
-  if (!client) return res.sendStatus(200);
-
-  // Find their most recent pending appointment with a reminder sent
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-  const { data: appt } = await supabaseAdmin
-    .from('appointments')
-    .select('id, appointment_date, dogs(name)')
-    .eq('daycare_id', config.daycare_id)
-    .eq('client_id', client.id)
-    .eq('status', 'pending')
-    .not('reminder_sent_at', 'is', null)
-    .gte('appointment_date', new Date().toISOString().split('T')[0])
-    .order('appointment_date', { ascending: true })
-    .limit(1)
-    .single();
-
-  if (!appt) return res.sendStatus(200);
-
-  const newStatus = isConfirm ? 'confirmed' : 'cancelled';
-  await supabaseAdmin
-    .from('appointments')
-    .update({ status: newStatus, confirmed_at: new Date().toISOString() })
-    .eq('id', appt.id);
-
-  // Send acknowledgement
-  const { data: daycare } = await supabaseAdmin
-    .from('daycares')
-    .select('name')
-    .eq('id', config.daycare_id)
-    .single();
-
-  const fromNumber = To;
-  const dogName = appt.dogs?.name || 'your pup';
-  const apptDate = new Date(appt.appointment_date + 'T12:00:00');
-  const dayStr = apptDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-
-  const ackBody = isConfirm
-    ? `Got it, ${client.first_name}! We've confirmed ${dogName} for ${dayStr}. See you then! 🐾`
-    : `No problem, ${client.first_name}! We've cancelled ${dogName}'s appointment on ${dayStr}. See you next time!`;
-
-  try {
-    await twilioClient.messages.create({ from: fromNumber, to: From, body: ackBody });
-  } catch (err) {
-    console.error('Ack SMS error:', err.message);
-  }
-
-  res.sendStatus(200);
-});
+// Inbound SMS handling lives in routes/sms.js (POST /api/sms/telnyx/inbound)
 
 module.exports = router;

@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const twilio = require('twilio');
 const multer = require('multer');
 const { supabaseAdmin } = require('../config/supabase');
 const { requireAuth } = require('../middleware/auth');
+const { sendSms, verifyWebhook, purchaseLocalNumber } = require('../utils/telnyx');
 
 // Multer: store in memory for Supabase upload (5MB max, images only)
 const upload = multer({
@@ -16,8 +16,6 @@ const upload = multer({
     cb(null, true);
   }
 });
-
-const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 // Plan limits
 const MESSAGE_LIMITS = { starter: 500, growth: 1500, pro: 5000 };
@@ -49,10 +47,10 @@ async function getDaycarePlan(daycareId) {
   return data?.plan || 'starter';
 }
 
-// Helper: get Twilio number for daycare
-async function getTwilioNumber(daycareId) {
+// Helper: get the daycare's assigned phone number
+async function getDaycareNumber(daycareId) {
   const { data } = await supabaseAdmin
-    .from('twilio_config')
+    .from('messaging_config')
     .select('phone_number')
     .eq('daycare_id', daycareId)
     .eq('status', 'active')
@@ -80,24 +78,21 @@ router.post('/send', requireAuth, async (req, res) => {
     return res.status(403).json({ error: 'Image/video messaging requires Growth or Pro plan.' });
   }
 
-  const fromNumber = await getTwilioNumber(req.daycareId);
-  if (!fromNumber) return res.status(400).json({ error: 'No Twilio number assigned. Contact support.' });
+  const fromNumber = await getDaycareNumber(req.daycareId);
+  if (!fromNumber) return res.status(400).json({ error: 'No phone number assigned. Contact support.' });
 
-  const messageParams = {
-    from: fromNumber,
-    to: recipient_phone,
-    body,
-    statusCallback: `${process.env.BASE_URL || 'https://usetailwag.co'}/api/sms/status`
-  };
-  if (media_url) messageParams.mediaUrl = [media_url];
-
-  let twilioSid, status;
+  let providerMessageId, status;
   try {
-    const msg = await twilioClient.messages.create(messageParams);
-    twilioSid = msg.sid;
+    const sendRes = await sendSms({
+      from: fromNumber,
+      to: recipient_phone,
+      text: body,
+      mediaUrls: media_url ? [media_url] : undefined
+    });
+    providerMessageId = sendRes.id;
     status = 'sent';
   } catch (err) {
-    console.error('Twilio send error:', err.message);
+    console.error('Telnyx send error:', err.message);
     status = 'failed';
   }
 
@@ -112,7 +107,7 @@ router.post('/send', requireAuth, async (req, res) => {
       body,
       media_url: media_url || null,
       media_type: media_type || 'none',
-      twilio_sid: twilioSid || null,
+      provider_message_id: providerMessageId || null,
       status,
       message_type: staff_notes ? 'report_card' : 'custom'
     })
@@ -126,8 +121,6 @@ router.post('/send', requireAuth, async (req, res) => {
     setImmediate(async () => {
       try {
         const { supabaseAdmin: sb } = require('../config/supabase');
-        const sentimentRoute = require('./sentiment');
-        // Call the score logic directly by importing shared helper
         const Anthropic = require('@anthropic-ai/sdk');
         const { sendEmail } = require('../utils/email');
         const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -184,7 +177,7 @@ router.post('/send', requireAuth, async (req, res) => {
     });
   }
 
-  if (status === 'failed') return res.status(502).json({ error: 'Message failed to send via Twilio.' });
+  if (status === 'failed') return res.status(502).json({ error: 'Message failed to send.' });
   res.json({ success: true, message: logged, usage: usage + 1, limit });
 });
 
@@ -209,24 +202,21 @@ router.post('/bulk', requireAuth, async (req, res) => {
     return res.status(403).json({ error: 'Image/video messaging requires Growth or Pro plan.' });
   }
 
-  const fromNumber = await getTwilioNumber(req.daycareId);
-  if (!fromNumber) return res.status(400).json({ error: 'No Twilio number assigned.' });
+  const fromNumber = await getDaycareNumber(req.daycareId);
+  if (!fromNumber) return res.status(400).json({ error: 'No phone number assigned.' });
 
   const results = { sent: 0, failed: 0, messages: [] };
 
   for (const recipient of recipients) {
-    const messageParams = {
-      from: fromNumber,
-      to: recipient.phone,
-      body,
-      statusCallback: `${process.env.BASE_URL || 'https://usetailwag.co'}/api/sms/status`
-    };
-    if (media_url) messageParams.mediaUrl = [media_url];
-
-    let twilioSid, status;
+    let providerMessageId, status;
     try {
-      const msg = await twilioClient.messages.create(messageParams);
-      twilioSid = msg.sid;
+      const sendRes = await sendSms({
+        from: fromNumber,
+        to: recipient.phone,
+        text: body,
+        mediaUrls: media_url ? [media_url] : undefined
+      });
+      providerMessageId = sendRes.id;
       status = 'sent';
       results.sent++;
     } catch (err) {
@@ -242,7 +232,7 @@ router.post('/bulk', requireAuth, async (req, res) => {
       body,
       media_url: media_url || null,
       media_type: media_type || 'none',
-      twilio_sid: twilioSid || null,
+      provider_message_id: providerMessageId || null,
       status,
       is_bulk: true,
       message_type: 'bulk'
@@ -333,23 +323,11 @@ router.get('/usage', requireAuth, async (req, res) => {
   res.json({ usage, limit, plan, remaining: limit - usage });
 });
 
-// GET /api/sms/number — return assigned Twilio number for this daycare
+// GET /api/sms/number — return assigned number for this daycare
 router.get('/number', requireAuth, async (req, res) => {
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
-  const number = await getTwilioNumber(req.daycareId);
+  const number = await getDaycareNumber(req.daycareId);
   res.json({ phone_number: number || null });
-});
-
-// POST /api/sms/status — Twilio status callback (no auth — Twilio posts here)
-router.post('/status', express.urlencoded({ extended: false }), async (req, res) => {
-  const { MessageSid, MessageStatus } = req.body;
-  if (MessageSid && MessageStatus) {
-    await supabaseAdmin
-      .from('messages')
-      .update({ status: MessageStatus })
-      .eq('twilio_sid', MessageSid);
-  }
-  res.sendStatus(200);
 });
 
 // POST /api/sms/upload-media — upload image to Supabase Storage, return public URL
@@ -389,43 +367,178 @@ router.post('/upload-media', requireAuth, upload.single('file'), async (req, res
   res.json({ url: urlData.publicUrl, filename });
 });
 
-// POST /api/sms/provision — provision a Twilio number for a daycare
+// POST /api/sms/provision — provision a Telnyx number for a daycare
 router.post('/provision', requireAuth, async (req, res) => {
   if (req.userRole !== 'owner') return res.status(403).json({ error: 'Only owners can provision numbers' });
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
 
-  // Check if already has a number
-  const existing = await getTwilioNumber(req.daycareId);
-  if (existing) return res.status(400).json({ error: 'Daycare already has a Twilio number', number: existing });
+  const existing = await getDaycareNumber(req.daycareId);
+  if (existing) return res.status(400).json({ error: 'Daycare already has a number', number: existing });
 
   const { areaCode } = req.body;
   try {
-    // Search for available numbers
-    const searchParams = { limit: 1 };
-    if (areaCode) searchParams.areaCode = areaCode;
-
-    const available = await twilioClient.availablePhoneNumbers('US').local.list(searchParams);
-    if (!available.length) return res.status(404).json({ error: 'No numbers available in that area code.' });
-
-    // Purchase the number
-    const purchased = await twilioClient.incomingPhoneNumbers.create({
-      phoneNumber: available[0].phoneNumber,
-      friendlyName: `TailWag - ${req.daycareId}`
+    const { phone_number, provider_id } = await purchaseLocalNumber({
+      areaCode,
+      label: `TailWag - ${req.daycareId}`
     });
 
-    // Save to DB
-    await supabaseAdmin.from('twilio_config').upsert({
+    await supabaseAdmin.from('messaging_config').upsert({
       daycare_id: req.daycareId,
-      phone_number: purchased.phoneNumber,
-      twilio_sid: purchased.sid,
+      phone_number,
+      provider_id,
+      provider: 'telnyx',
       status: 'active'
     });
 
-    res.json({ success: true, phone_number: purchased.phoneNumber });
+    res.json({ success: true, phone_number });
   } catch (err) {
     console.error('Provision error:', err.message);
+    if (err.code === 'NO_NUMBERS') return res.status(404).json({ error: err.message });
     res.status(500).json({ error: 'Failed to provision number: ' + err.message });
   }
+});
+
+// ─── TELNYX WEBHOOKS ───────────────────────────────────────────────────────────
+// These routes expect raw body (registered in server.js before express.json()).
+
+// POST /api/sms/telnyx/status — delivery receipts
+router.post('/telnyx/status', async (req, res) => {
+  let event;
+  try {
+    event = verifyWebhook(
+      req.body,
+      req.header('telnyx-signature-ed25519'),
+      req.header('telnyx-timestamp')
+    );
+  } catch (err) {
+    console.error('Telnyx status signature failed:', err.message);
+    return res.sendStatus(400);
+  }
+
+  const eventType = event?.data?.event_type;
+  const payload = event?.data?.payload;
+  if (!payload?.id) return res.sendStatus(200);
+
+  // Map Telnyx event types to our internal status strings
+  const statusMap = {
+    'message.sent': 'sent',
+    'message.finalized': payload?.to?.[0]?.status === 'delivered' ? 'delivered' : 'sent',
+    'message.failed': 'failed'
+  };
+  const status = statusMap[eventType];
+  if (!status) return res.sendStatus(200);
+
+  await supabaseAdmin
+    .from('messages')
+    .update({ status })
+    .eq('provider_message_id', payload.id);
+
+  res.sendStatus(200);
+});
+
+// POST /api/sms/telnyx/inbound — inbound messages (replies, STOP, HELP, YES/NO)
+router.post('/telnyx/inbound', async (req, res) => {
+  let event;
+  try {
+    event = verifyWebhook(
+      req.body,
+      req.header('telnyx-signature-ed25519'),
+      req.header('telnyx-timestamp')
+    );
+  } catch (err) {
+    console.error('Telnyx inbound signature failed:', err.message);
+    return res.sendStatus(400);
+  }
+
+  if (event?.data?.event_type !== 'message.received') return res.sendStatus(200);
+
+  const payload = event.data.payload;
+  const from = payload?.from?.phone_number;
+  const to = payload?.to?.[0]?.phone_number;
+  const body = payload?.text || '';
+  const messageId = payload?.id;
+  if (!from || !to) return res.sendStatus(200);
+
+  // Find the daycare that owns the receiving number
+  const { data: config } = await supabaseAdmin
+    .from('messaging_config')
+    .select('daycare_id')
+    .eq('phone_number', to)
+    .eq('status', 'active')
+    .single();
+  if (!config) return res.sendStatus(200);
+
+  // Find the client by phone number
+  const phone = from.replace(/\s/g, '');
+  const { data: client } = await supabaseAdmin
+    .from('clients')
+    .select('id, first_name')
+    .eq('daycare_id', config.daycare_id)
+    .eq('phone', phone)
+    .eq('active', true)
+    .single();
+
+  // Always save inbound message to history
+  await supabaseAdmin.from('inbound_messages').insert({
+    daycare_id: config.daycare_id,
+    client_id: client?.id || null,
+    from_number: from,
+    to_number: to,
+    body,
+    provider_message_id: messageId || null,
+    read: false,
+    received_at: new Date().toISOString()
+  });
+
+  // Process YES/NO for appointment confirmation
+  const reply = body.trim().toUpperCase();
+  if (!['YES', 'NO', 'Y', 'N'].includes(reply)) return res.sendStatus(200);
+  if (!client) return res.sendStatus(200);
+
+  const isConfirm = reply === 'YES' || reply === 'Y';
+
+  // Find the most recent pending appointment with a reminder sent
+  const { data: appt } = await supabaseAdmin
+    .from('appointments')
+    .select('id, appointment_date, dogs(name)')
+    .eq('daycare_id', config.daycare_id)
+    .eq('client_id', client.id)
+    .eq('status', 'pending')
+    .not('reminder_sent_at', 'is', null)
+    .gte('appointment_date', new Date().toISOString().split('T')[0])
+    .order('appointment_date', { ascending: true })
+    .limit(1)
+    .single();
+
+  if (!appt) return res.sendStatus(200);
+
+  const newStatus = isConfirm ? 'confirmed' : 'cancelled';
+  await supabaseAdmin
+    .from('appointments')
+    .update({ status: newStatus, confirmed_at: new Date().toISOString() })
+    .eq('id', appt.id);
+
+  // Send acknowledgement
+  const { data: daycare } = await supabaseAdmin
+    .from('daycares')
+    .select('name')
+    .eq('id', config.daycare_id)
+    .single();
+
+  const dogName = appt.dogs?.name || 'your pup';
+  const apptDate = new Date(appt.appointment_date + 'T12:00:00');
+  const dayStr = apptDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  const ackBody = isConfirm
+    ? `Got it, ${client.first_name}! We've confirmed ${dogName} for ${dayStr}. See you then! 🐾`
+    : `No problem, ${client.first_name}! We've cancelled ${dogName}'s appointment on ${dayStr}. See you next time!`;
+
+  try {
+    await sendSms({ from: to, to: from, text: ackBody });
+  } catch (err) {
+    console.error('Ack SMS error:', err.message);
+  }
+
+  res.sendStatus(200);
 });
 
 module.exports = router;

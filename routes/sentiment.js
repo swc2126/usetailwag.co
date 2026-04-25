@@ -20,7 +20,15 @@ router.get('/config', requireAuth, async (req, res) => {
     .single();
 
   if (error && error.code !== 'PGRST116') return res.status(500).json({ error: error.message });
-  res.json(data || {});
+
+  // Return defaults when no config row exists yet — both toggles default ON
+  res.json(data || {
+    enabled:            true,
+    auto_send_review:   true,
+    review_delay_hours: 2,
+    sentiment_threshold: 'unhappy_only',
+    notification_email: null
+  });
 });
 
 // PUT /api/sentiment/config
@@ -69,6 +77,7 @@ router.post('/score', requireAuth, async (req, res) => {
     .eq('daycare_id', req.daycareId)
     .single();
 
+  // Off by default until the daycare opts in via the settings page
   if (!config?.enabled) return res.json({ sentiment: null, action: 'disabled' });
 
   // Score sentiment via Claude Haiku on the staff notes
