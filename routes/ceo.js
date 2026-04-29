@@ -546,6 +546,31 @@ router.post('/onboard-daycare', requireAuth, requireRole('super_admin'), async (
       }
     }
 
+    // ── 10. Insert audit record (non-fatal — log warns on failure) ───────────
+    try {
+      await supabaseAdmin.from('onboarding_records').insert({
+        daycare_id: daycare.id,
+        daycare_name: dc.name,
+        owner_email: owner.email,
+        owner_name: `${owner.first_name} ${owner.last_name}`,
+        owner_phone: owner.phone,
+        assigned_phone: phone.phone_number,
+        plan: sub.plan,
+        billing_cycle: sub.billing_cycle,
+        founders_circle_member: !!tracking.founders_circle_member || sub.plan === 'founders',
+        referral_source: tracking.referral_source || null,
+        onboarded_by: req.user.id,
+        go_live_date: tracking.go_live_at || tracking.onboarded_at || new Date().toISOString().split('T')[0],
+        full_payload: body,
+        email_sent: emailSent,
+        sms_sent: smsSent,
+        invite_url: inviteUrl,
+        notes: tracking.internal_notes || null
+      });
+    } catch (auditErr) {
+      console.warn('Onboarding audit log insert failed:', auditErr.message);
+    }
+
     res.json({
       success: true,
       daycare_id: daycare.id,
@@ -562,6 +587,23 @@ router.post('/onboard-daycare', requireAuth, requireRole('super_admin'), async (
     for (const fn of cleanup.reverse()) {
       try { await fn(); } catch (e) { console.warn('Rollback step failed:', e.message); }
     }
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/ceo/onboarding-history — frozen audit log of every onboarding event
+router.get('/onboarding-history', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const { data, error } = await supabaseAdmin
+      .from('onboarding_records')
+      .select('id, daycare_id, daycare_name, owner_email, owner_name, assigned_phone, plan, billing_cycle, founders_circle_member, referral_source, onboarded_at, go_live_date, email_sent, sms_sent, notes')
+      .order('onboarded_at', { ascending: false })
+      .limit(limit);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ records: data || [], count: (data || []).length });
+  } catch (err) {
+    console.error('Onboarding history error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });

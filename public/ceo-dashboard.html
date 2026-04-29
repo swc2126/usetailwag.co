@@ -736,6 +736,17 @@
         <p>Activate a new daycare in one shot — creates the account, assigns a phone number, and sends the welcome email + SMS.</p>
       </div>
 
+      <!-- Onboarding history (collapsible) -->
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleHistory()">
+          <h2 style="margin:0;">Onboarding History</h2>
+          <button type="button" class="logout-btn" id="historyToggleBtn" style="font-size:12px;padding:6px 12px;">Show</button>
+        </div>
+        <div id="onboardHistoryBody" style="display:none;margin-top:16px;">
+          <div id="historyContent"><div class="loading"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+
       <!-- Success state (shown after successful submit) -->
       <div class="card" id="onboardSuccess" style="display:none;background:#E8F5E9;border-left:4px solid #1E6B4A;margin-bottom:24px;">
         <div class="card-header"><h2 style="color:#1E6B4A;">✅ Onboarded successfully</h2></div>
@@ -889,10 +900,23 @@
         <div class="card" style="background:#FEF6E7;border-left:4px solid #C4933F;">
           <div class="card-header"><h2 style="color:#7A5C00;">8. Welcome SMS</h2></div>
           <p style="font-size:14px;color:#5C4400;margin:0 0 12px;">Send a one-time welcome text from the assigned TailWag number to the owner's cell. This proves the SMS line is live AND gives them the setup link via text.</p>
-          <label style="display:flex;align-items:center;gap:8px;font-size:14px;">
-            <input type="checkbox" name="send_welcome_sms" checked>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:14px;">
+            <input type="checkbox" name="send_welcome_sms" id="sendWelcomeSmsCheckbox" checked onchange="updateSmsPreview()">
             <strong>Send welcome SMS to owner</strong>
           </label>
+          <div id="smsPreviewContainer" style="background:#fff;border-radius:12px;padding:16px;border:1px solid #E8DCBF;">
+            <div style="font-size:12px;color:#888;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Preview</div>
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:#1E6B4A;display:flex;align-items:center;justify-content:center;color:#F5F0E8;font-size:14px;font-weight:700;">🐾</div>
+              <div style="flex:1;">
+                <div style="font-size:11px;color:#999;margin-bottom:4px;">From: <span id="smsPreviewFrom">[assigned number]</span></div>
+                <div id="smsPreviewBubble" style="background:#E8F0EA;border-radius:14px;border-bottom-left-radius:4px;padding:10px 14px;font-size:14px;color:#0F1410;line-height:1.5;display:inline-block;max-width:100%;">
+                  <span id="smsPreviewBody">Hi [first_name]! Welcome to TailWag — your account is ready. Set your password and log in here: [setup_link]. Excited to have [daycare_name] with us! — Summer</span>
+                </div>
+                <div style="font-size:11px;color:#bbb;margin-top:6px;">Character count: <span id="smsPreviewLength">—</span></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Submit -->
@@ -992,12 +1016,100 @@
       if (tab === 'inventory') loadInventory();
       if (tab === 'onboard') {
         loadAvailableNumbers();
+        wireSmsPreviewListeners();
+        updateSmsPreview();
         // default the date fields to today
         const today = new Date().toISOString().split('T')[0];
         const onboardedAt = document.querySelector('[name="track_onboarded_at"]');
         const goLiveAt = document.querySelector('[name="track_go_live_at"]');
         if (onboardedAt && !onboardedAt.value) onboardedAt.value = today;
         if (goLiveAt && !goLiveAt.value) goLiveAt.value = today;
+      }
+    }
+
+    function wireSmsPreviewListeners() {
+      if (window._smsPreviewWired) return;
+      window._smsPreviewWired = true;
+      ['ow_first_name', 'dc_name', 'phone_number'].forEach(name => {
+        const el = document.querySelector(`[name="${name}"]`);
+        if (el) el.addEventListener('input', updateSmsPreview);
+        if (el && el.tagName === 'SELECT') el.addEventListener('change', updateSmsPreview);
+      });
+    }
+
+    function updateSmsPreview() {
+      const firstName = document.querySelector('[name="ow_first_name"]')?.value.trim() || '[first_name]';
+      const daycareName = document.querySelector('[name="dc_name"]')?.value.trim() || '[daycare_name]';
+      const phoneVal = document.querySelector('[name="phone_number"]')?.value || '';
+      const [phoneNumber] = phoneVal.split('|');
+
+      const body = `Hi ${firstName}! Welcome to TailWag — your account is ready. Set your password and log in here: [setup_link]. Excited to have ${daycareName} with us! — Summer`;
+      document.getElementById('smsPreviewBody').textContent = body;
+      document.getElementById('smsPreviewFrom').textContent = phoneNumber ? formatPhoneDisplay(phoneNumber) : '[assigned number]';
+      // Approximate length: replace [setup_link] with a typical Supabase recovery URL (~140 chars)
+      const approxLength = body.replace('[setup_link]', 'https://bixfhpzcqxjtdprjmuhx.supabase.co/auth/v1/verify?token=...&type=recovery&redirect_to=https://usetailwag.co/new-account?d=...').length;
+      const segments = Math.ceil(approxLength / 160);
+      document.getElementById('smsPreviewLength').textContent = `~${approxLength} chars (${segments} SMS segment${segments > 1 ? 's' : ''})`;
+
+      // Visual state when toggle is off
+      const checkbox = document.getElementById('sendWelcomeSmsCheckbox');
+      const container = document.getElementById('smsPreviewContainer');
+      if (checkbox && container) {
+        container.style.opacity = checkbox.checked ? '1' : '0.4';
+      }
+    }
+
+    function toggleHistory() {
+      const body = document.getElementById('onboardHistoryBody');
+      const btn = document.getElementById('historyToggleBtn');
+      if (body.style.display === 'none') {
+        body.style.display = '';
+        btn.textContent = 'Hide';
+        loadHistory();
+      } else {
+        body.style.display = 'none';
+        btn.textContent = 'Show';
+      }
+    }
+
+    async function loadHistory() {
+      const content = document.getElementById('historyContent');
+      content.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      try {
+        const res = await authFetch('/api/ceo/onboarding-history');
+        const json = await res.json();
+        if (!res.ok) {
+          content.innerHTML = `<p style="color:#e53e3e;">Error: ${esc(json.error || res.statusText)}</p>`;
+          return;
+        }
+        if (!json.records?.length) {
+          content.innerHTML = '<p style="color:#bbb;text-align:center;padding:24px;">No onboardings yet — submit your first one below.</p>';
+          return;
+        }
+        const rows = json.records.map(r => {
+          const date = new Date(r.onboarded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const fcBadge = r.founders_circle_member ? ' <span style="background:#C4933F;color:#fff;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">FC</span>' : '';
+          return `<tr>
+            <td>${esc(date)}</td>
+            <td><strong>${esc(r.daycare_name)}</strong>${fcBadge}</td>
+            <td>${esc(r.owner_email)}</td>
+            <td>${formatPhoneDisplay(r.assigned_phone)}</td>
+            <td>${esc(r.plan)} · ${esc(r.billing_cycle)}</td>
+            <td>${esc(r.referral_source || '—')}</td>
+            <td style="font-size:12px;">${r.email_sent ? '✉️' : '·'} ${r.sms_sent ? '📱' : '·'}</td>
+          </tr>`;
+        }).join('');
+        content.innerHTML = `
+          <p class="card-subtitle">${json.count} onboarding record${json.count === 1 ? '' : 's'}, newest first.</p>
+          <table>
+            <thead><tr>
+              <th>Date</th><th>Daycare</th><th>Owner Email</th><th>Phone</th><th>Plan</th><th>Source</th><th>Sent</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+      } catch (err) {
+        content.innerHTML = `<p style="color:#e53e3e;">Error loading: ${esc(err.message)}</p>`;
       }
     }
 
