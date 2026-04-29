@@ -5,6 +5,94 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 
 const PLAN_MRR = { starter: 99, growth: 179, partner: 249 };
 
+// Phone number inventory config
+const TARGET_AREA_CODES = ['469', '972', '214', '682', '817', '940'];
+const INVENTORY_THRESHOLD = 3;
+
+// Pulls all Telnyx numbers + cross-references with messaging_config to categorize
+// each number into one of four buckets per area code:
+//   purchased  → on Telnyx, not yet attached to messaging profile
+//   on_profile → on profile, not yet on campaign (carriers haven't accepted)
+//   available  → on campaign and unassigned (ready to hand to a daycare)
+//   in_use     → assigned to a daycare via messaging_config
+async function getNumberInventory() {
+  if (!process.env.TELNYX_API_KEY) {
+    throw new Error('TELNYX_API_KEY not configured');
+  }
+
+  // 1. Fetch all numbers from Telnyx
+  const telnyxRes = await fetch('https://api.telnyx.com/v2/phone_numbers?page[size]=250', {
+    headers: { Authorization: `Bearer ${process.env.TELNYX_API_KEY}` }
+  });
+  if (!telnyxRes.ok) {
+    throw new Error(`Telnyx API error ${telnyxRes.status}`);
+  }
+  const telnyxData = await telnyxRes.json();
+  const numbers = telnyxData.data || [];
+
+  // 2. Find which numbers are currently assigned to a daycare
+  const { data: configs } = await supabaseAdmin
+    .from('messaging_config')
+    .select('phone_number, daycare_id')
+    .eq('status', 'active');
+  const assignedSet = new Set((configs || []).map(c => c.phone_number));
+
+  // 3. Initialize buckets for each target area code
+  const emptyBucket = () => ({ purchased: 0, on_profile: 0, available: 0, in_use: 0, total: 0 });
+  const byAreaCode = {};
+  TARGET_AREA_CODES.forEach(ac => { byAreaCode[ac] = emptyBucket(); });
+  const otherAreaCodes = {};
+
+  // 4. Categorize each number
+  for (const num of numbers) {
+    const phone = num.phone_number;
+    if (!phone) continue;
+    const areaCode = phone.replace(/^\+1/, '').substring(0, 3);
+
+    let bucket;
+    if (TARGET_AREA_CODES.includes(areaCode)) {
+      bucket = byAreaCode[areaCode];
+    } else {
+      if (!otherAreaCodes[areaCode]) otherAreaCodes[areaCode] = emptyBucket();
+      bucket = otherAreaCodes[areaCode];
+    }
+
+    bucket.total++;
+    if (assignedSet.has(phone)) {
+      bucket.in_use++;
+    } else if (num.messaging_campaign_id) {
+      bucket.available++;
+    } else if (num.messaging_profile_id) {
+      bucket.on_profile++;
+    } else {
+      bucket.purchased++;
+    }
+  }
+
+  const lowAreaCodes = TARGET_AREA_CODES.filter(ac => byAreaCode[ac].available < INVENTORY_THRESHOLD);
+
+  // Aggregate totals across target area codes
+  const totals = TARGET_AREA_CODES.reduce((acc, ac) => {
+    const b = byAreaCode[ac];
+    acc.purchased += b.purchased;
+    acc.on_profile += b.on_profile;
+    acc.available += b.available;
+    acc.in_use += b.in_use;
+    acc.total += b.total;
+    return acc;
+  }, { purchased: 0, on_profile: 0, available: 0, in_use: 0, total: 0 });
+
+  return {
+    by_area_code: byAreaCode,
+    other_area_codes: otherAreaCodes,
+    target_area_codes: TARGET_AREA_CODES,
+    threshold: INVENTORY_THRESHOLD,
+    low_area_codes: lowAreaCodes,
+    totals,
+    fetched_at: new Date().toISOString()
+  };
+}
+
 // GET /api/ceo/overview
 router.get('/overview', requireAuth, requireRole('super_admin', 'owner', 'manager'), async (req, res) => {
   try {
@@ -222,6 +310,17 @@ router.get('/overview', requireAuth, requireRole('super_admin', 'owner', 'manage
   }
 });
 
+// GET /api/ceo/number-inventory — phone number inventory by area code
+router.get('/number-inventory', requireAuth, requireRole('super_admin'), async (req, res) => {
+  try {
+    const inventory = await getNumberInventory();
+    res.json(inventory);
+  } catch (err) {
+    console.error('Number inventory error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/ceo/whoami — debug endpoint to check role
 router.get('/whoami', requireAuth, async (req, res) => {
   res.json({ userId: req.user?.id, email: req.user?.email, role: req.userRole, daycareId: req.daycareId });
@@ -257,3 +356,6 @@ router.get('/accounts', requireAuth, requireRole('super_admin'), async (req, res
 });
 
 module.exports = router;
+module.exports.getNumberInventory = getNumberInventory;
+module.exports.TARGET_AREA_CODES = TARGET_AREA_CODES;
+module.exports.INVENTORY_THRESHOLD = INVENTORY_THRESHOLD;

@@ -436,7 +436,8 @@ router.post('/telnyx/status', async (req, res) => {
   res.sendStatus(200);
 });
 
-// POST /api/sms/telnyx/inbound — inbound messages (replies, STOP, HELP, YES/NO)
+// POST /api/sms/telnyx/inbound — Telnyx posts ALL message events here
+// (inbound replies + outbound delivery receipts). Dispatches on event_type.
 router.post('/telnyx/inbound', async (req, res) => {
   let event;
   try {
@@ -450,9 +451,29 @@ router.post('/telnyx/inbound', async (req, res) => {
     return res.sendStatus(400);
   }
 
-  if (event?.data?.event_type !== 'message.received') return res.sendStatus(200);
+  const eventType = event?.data?.event_type;
+  const payload = event?.data?.payload;
 
-  const payload = event.data.payload;
+  // Outbound delivery status updates
+  if (['message.sent', 'message.finalized', 'message.failed'].includes(eventType)) {
+    if (!payload?.id) return res.sendStatus(200);
+    const statusMap = {
+      'message.sent': 'sent',
+      'message.finalized': payload?.to?.[0]?.status === 'delivered' ? 'delivered' : 'sent',
+      'message.failed': 'failed'
+    };
+    const status = statusMap[eventType];
+    if (status) {
+      await supabaseAdmin
+        .from('messages')
+        .update({ status })
+        .eq('provider_message_id', payload.id);
+    }
+    return res.sendStatus(200);
+  }
+
+  // Anything other than an actual inbound message — ack and move on
+  if (eventType !== 'message.received') return res.sendStatus(200);
   const from = payload?.from?.phone_number;
   const to = payload?.to?.[0]?.phone_number;
   const body = payload?.text || '';

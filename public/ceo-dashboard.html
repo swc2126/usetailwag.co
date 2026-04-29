@@ -402,6 +402,7 @@
         <button class="nav-tab active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
         <button class="nav-tab" data-tab="accounts" onclick="switchTab('accounts')">Accounts</button>
         <button class="nav-tab" data-tab="churn" onclick="switchTab('churn')">Churn Risk</button>
+        <button class="nav-tab" data-tab="inventory" onclick="switchTab('inventory')">Phone Inventory</button>
       </div>
     </div>
     <div class="nav-right">
@@ -619,6 +620,100 @@
     </div>
   </div>
 
+  <!-- ===================== TAB 4: PHONE INVENTORY ===================== -->
+  <div id="tab-inventory" class="tab-panel">
+    <div class="page-container">
+
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+        <div>
+          <h1>Phone Inventory</h1>
+          <p>Live status of every Telnyx number, grouped by area code.</p>
+        </div>
+        <button onclick="loadInventory()" class="logout-btn" style="background:#1E6B4A;color:#F5F0E8;border-color:#1E6B4A;">Refresh</button>
+      </div>
+
+      <!-- Top KPI row -->
+      <div class="kpi-row kpi-row-4" id="invKpis" style="margin-bottom:24px;">
+        <div class="stat-card accent">
+          <div class="stat-label">Available</div>
+          <div class="stat-value" id="invAvail">—</div>
+          <div class="stat-sub">ready to assign</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">In Use</div>
+          <div class="stat-value" id="invInUse">—</div>
+          <div class="stat-sub">assigned to daycares</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">On Profile</div>
+          <div class="stat-value" id="invOnProfile">—</div>
+          <div class="stat-sub">awaiting campaign add</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Purchased</div>
+          <div class="stat-value" id="invPurchased">—</div>
+          <div class="stat-sub">awaiting profile assign</div>
+        </div>
+      </div>
+
+      <!-- Action checklist (only visible when something needs doing) -->
+      <div class="card" id="invActionsCard" style="margin-bottom:24px;display:none;background:#FEF6E7;border-left:4px solid #C4933F;">
+        <div class="card-header">
+          <h2 style="color:#7A5C00;">Action Required</h2>
+        </div>
+        <div id="invActionsBody" style="font-size:14px;line-height:1.6;color:#5C4400;"></div>
+      </div>
+
+      <!-- Per area code table -->
+      <div class="card" style="margin-bottom:28px;">
+        <div class="card-header">
+          <h2>Inventory by Area Code</h2>
+        </div>
+        <p class="card-subtitle">Threshold for "low stock" alert: <strong>3 available per area code</strong>. Rows below threshold flagged in yellow; zero-availability rows flagged in red.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Area Code</th>
+              <th>Purchased</th>
+              <th>On Profile</th>
+              <th>Available</th>
+              <th>In Use</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="invByAreaBody">
+            <tr><td colspan="7" style="text-align:center;color:#bbb;padding:32px;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Other (non-target) area codes, if any -->
+      <div class="card" id="invOtherCard" style="margin-bottom:28px;display:none;">
+        <div class="card-header">
+          <h2>Other Area Codes</h2>
+        </div>
+        <p class="card-subtitle">Numbers on your account in area codes outside the DFW target list.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Area Code</th>
+              <th>Purchased</th>
+              <th>On Profile</th>
+              <th>Available</th>
+              <th>In Use</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="invOtherBody"></tbody>
+        </table>
+      </div>
+
+      <p id="invFetchedAt" style="font-size:12px;color:#999;text-align:right;margin-top:-8px;"></p>
+
+    </div>
+  </div>
+
   <!-- DRAWER -->
   <div id="drawerOverlay" class="drawer-overlay" onclick="closeDrawer()"></div>
   <div id="drawer" class="drawer">
@@ -703,6 +798,101 @@
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
       document.getElementById('tab-' + tab).classList.add('active');
       document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+      if (tab === 'inventory') loadInventory();
+    }
+
+    async function loadInventory() {
+      const tbody = document.getElementById('invByAreaBody');
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#bbb;padding:32px;">Loading from Telnyx...</td></tr>';
+
+      try {
+        const res = await authFetch('/api/ceo/number-inventory');
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#e53e3e;padding:32px;">Failed to load: ${esc(err.error || res.statusText)}</td></tr>`;
+          return;
+        }
+        const inv = await res.json();
+
+        // KPI totals
+        document.getElementById('invAvail').textContent = inv.totals.available;
+        document.getElementById('invInUse').textContent = inv.totals.in_use;
+        document.getElementById('invOnProfile').textContent = inv.totals.on_profile;
+        document.getElementById('invPurchased').textContent = inv.totals.purchased;
+
+        // Per-area-code table
+        const rows = inv.target_area_codes.map(ac => {
+          const b = inv.by_area_code[ac];
+          let statusBadge, rowStyle = '';
+          if (b.available === 0) {
+            statusBadge = '<span style="color:#e53e3e;font-weight:700;">Out of stock</span>';
+            rowStyle = 'background:#FEE7E7;';
+          } else if (b.available < inv.threshold) {
+            statusBadge = `<span style="color:#C4933F;font-weight:700;">Low (need ${inv.threshold - b.available} more)</span>`;
+            rowStyle = 'background:#FEF6E7;';
+          } else {
+            statusBadge = '<span style="color:#1E6B4A;font-weight:600;">Healthy</span>';
+          }
+          return `<tr style="${rowStyle}">
+            <td><strong>${ac}</strong></td>
+            <td>${b.purchased}</td>
+            <td>${b.on_profile}</td>
+            <td><strong>${b.available}</strong></td>
+            <td>${b.in_use}</td>
+            <td>${b.total}</td>
+            <td>${statusBadge}</td>
+          </tr>`;
+        });
+        tbody.innerHTML = rows.join('');
+
+        // Action checklist — only show if something is stuck or low
+        const actions = [];
+        if (inv.totals.purchased > 0) {
+          actions.push(`<li><strong>${inv.totals.purchased}</strong> number${inv.totals.purchased === 1 ? '' : 's'} purchased but not on profile — Telnyx Portal → Numbers → My Numbers → assign messaging profile <em>TailWag</em>.</li>`);
+        }
+        if (inv.totals.on_profile > 0) {
+          actions.push(`<li><strong>${inv.totals.on_profile}</strong> number${inv.totals.on_profile === 1 ? '' : 's'} on profile but not on campaign — Telnyx Portal → Messaging → 10DLC → campaign <code>C4FBXUV</code> → "Add Phone Numbers". 24h carrier review after adding.</li>`);
+        }
+        if (inv.low_area_codes.length) {
+          const lowList = inv.low_area_codes.map(ac => {
+            const b = inv.by_area_code[ac];
+            return `${ac} (${b.available} available)`;
+          }).join(', ');
+          actions.push(`<li><strong>Low stock</strong> in: ${lowList}. Buy more numbers in these area codes to stay above ${inv.threshold}.</li>`);
+        }
+        const actionsCard = document.getElementById('invActionsCard');
+        if (actions.length) {
+          document.getElementById('invActionsBody').innerHTML = `<ul style="margin:0;padding-left:20px;">${actions.join('')}</ul>`;
+          actionsCard.style.display = '';
+        } else {
+          actionsCard.style.display = 'none';
+        }
+
+        // Other area codes (non-DFW)
+        const otherKeys = Object.keys(inv.other_area_codes || {}).sort();
+        const otherCard = document.getElementById('invOtherCard');
+        if (otherKeys.length) {
+          const otherRows = otherKeys.map(ac => {
+            const b = inv.other_area_codes[ac];
+            return `<tr>
+              <td><strong>${ac}</strong></td>
+              <td>${b.purchased}</td>
+              <td>${b.on_profile}</td>
+              <td>${b.available}</td>
+              <td>${b.in_use}</td>
+              <td>${b.total}</td>
+            </tr>`;
+          });
+          document.getElementById('invOtherBody').innerHTML = otherRows.join('');
+          otherCard.style.display = '';
+        } else {
+          otherCard.style.display = 'none';
+        }
+
+        document.getElementById('invFetchedAt').textContent = `Last refreshed: ${new Date(inv.fetched_at).toLocaleString()}`;
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#e53e3e;padding:32px;">Error: ${esc(err.message || 'Failed to load')}</td></tr>`;
+      }
     }
 
     function copyInviteLink(daycareId, btn) {

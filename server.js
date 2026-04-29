@@ -177,3 +177,96 @@ cron.schedule('*/10 * * * *', async () => {
     console.error('Cron follow-up error:', err.message);
   }
 });
+
+
+// ─── CRON: Daily phone inventory check at 8am CT (13:00 UTC) ─────────────────
+const { getNumberInventory, INVENTORY_THRESHOLD } = require('./routes/ceo');
+const { sendEmail } = require('./utils/email');
+const INVENTORY_ALERT_TO = 'summer@usetailwag.co';
+
+cron.schedule('0 13 * * *', async () => {
+  try {
+    const inv = await getNumberInventory();
+    if (!inv.low_area_codes.length) {
+      console.log('[inventory-cron] All area codes healthy — no alert sent');
+      return;
+    }
+
+    const lowRows = inv.low_area_codes.map(ac => {
+      const b = inv.by_area_code[ac];
+      const flag = b.available === 0 ? '🚨' : '⚠️';
+      return `<tr>
+        <td style="padding:8px 12px;border-bottom:1px solid #eee;"><strong>${ac}</strong> ${flag}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${b.available}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;color:#888;">${b.in_use}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;color:#888;">${b.on_profile}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;color:#888;">${b.purchased}</td>
+      </tr>`;
+    }).join('');
+
+    const allRows = inv.target_area_codes.map(ac => {
+      const b = inv.by_area_code[ac];
+      const isLow = b.available < INVENTORY_THRESHOLD;
+      const bgColor = b.available === 0 ? '#FEE7E7' : isLow ? '#FEF6E7' : 'transparent';
+      return `<tr style="background:${bgColor};">
+        <td style="padding:8px 12px;border-bottom:1px solid #eee;"><strong>${ac}</strong></td>
+        <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;"><strong>${b.available}</strong></td>
+        <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;color:#888;">${b.in_use}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;color:#888;">${b.on_profile}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;color:#888;">${b.purchased}</td>
+      </tr>`;
+    }).join('');
+
+    const subject = `TailWag — phone inventory low: ${inv.low_area_codes.length} area code${inv.low_area_codes.length === 1 ? '' : 's'} need attention`;
+    const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#F5F0E8;font-family:Inter,Arial,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px;"><tr><td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+          <tr><td style="background:#0F1410;padding:24px 32px;color:#F5F0E8;">
+            <span style="font-weight:800;font-size:20px;">🐾 TailWag</span>
+            <div style="font-size:13px;color:#A8C5B0;margin-top:4px;">Phone Inventory Alert</div>
+          </td></tr>
+          <tr><td style="padding:32px;">
+            <h2 style="margin:0 0 8px;color:#0F1410;font-size:18px;">Inventory needs topping up</h2>
+            <p style="color:#555;font-size:14px;margin:0 0 24px;">Below threshold of ${INVENTORY_THRESHOLD} available numbers per area code:</p>
+
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13px;margin-bottom:24px;">
+              <thead><tr style="background:#FEF6E7;">
+                <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #C4933F;">Area Code</th>
+                <th style="padding:10px 12px;text-align:center;border-bottom:2px solid #C4933F;">Available</th>
+                <th style="padding:10px 12px;text-align:center;border-bottom:2px solid #C4933F;color:#888;">In Use</th>
+                <th style="padding:10px 12px;text-align:center;border-bottom:2px solid #C4933F;color:#888;">On Profile</th>
+                <th style="padding:10px 12px;text-align:center;border-bottom:2px solid #C4933F;color:#888;">Purchased</th>
+              </tr></thead>
+              <tbody>${lowRows}</tbody>
+            </table>
+
+            <h3 style="margin:24px 0 8px;color:#0F1410;font-size:15px;">Full inventory snapshot</h3>
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13px;margin-bottom:24px;">
+              <thead><tr style="background:#f5f0e8;">
+                <th style="padding:10px 12px;text-align:left;border-bottom:1px solid #ddd;">Area Code</th>
+                <th style="padding:10px 12px;text-align:center;border-bottom:1px solid #ddd;">Available</th>
+                <th style="padding:10px 12px;text-align:center;border-bottom:1px solid #ddd;">In Use</th>
+                <th style="padding:10px 12px;text-align:center;border-bottom:1px solid #ddd;">On Profile</th>
+                <th style="padding:10px 12px;text-align:center;border-bottom:1px solid #ddd;">Purchased</th>
+              </tr></thead>
+              <tbody>${allRows}</tbody>
+            </table>
+
+            <p style="font-size:13px;color:#555;line-height:1.6;margin:0 0 16px;">
+              <strong>To replenish:</strong> Buy numbers in Telnyx Portal → Numbers → Search & Buy. Then (1) attach to messaging profile <em>TailWag</em>, and (2) add to campaign <code>C4FBXUV</code>. Carriers take ~24h to approve.
+            </p>
+
+            <table cellpadding="0" cellspacing="0"><tr><td style="background:#1E6B4A;border-radius:8px;">
+              <a href="https://usetailwag.co/ceo" style="display:inline-block;padding:12px 24px;color:#F5F0E8;text-decoration:none;font-size:14px;font-weight:600;">Open CEO Dashboard →</a>
+            </td></tr></table>
+          </td></tr>
+        </table>
+      </td></tr></table>
+    </body></html>`;
+
+    await sendEmail({ to: INVENTORY_ALERT_TO, subject, html });
+    console.log(`[inventory-cron] Alert sent — low: ${inv.low_area_codes.join(', ')}`);
+  } catch (err) {
+    console.error('[inventory-cron] Error:', err.message);
+  }
+});
