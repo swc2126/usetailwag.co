@@ -317,6 +317,18 @@
       .location-info { grid-template-columns: 1fr; }
     }
 
+    /* ONBOARDING FORM */
+    .ob-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #555; }
+    .ob-field input, .ob-field select, .ob-field textarea {
+      font-family: inherit; font-size: 14px; font-weight: normal; color: #0F1410;
+      padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .ob-field input:focus, .ob-field select:focus, .ob-field textarea:focus {
+      outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(30,107,74,0.1);
+    }
+    .ob-field textarea { resize: vertical; min-height: 60px; }
+
     /* DRAWER */
     .kpi-clickable { cursor: pointer; transition: box-shadow 0.18s, transform 0.18s; }
     .kpi-clickable:hover { box-shadow: 0 4px 20px rgba(30,107,74,0.18); transform: translateY(-1px); }
@@ -403,6 +415,7 @@
         <button class="nav-tab" data-tab="accounts" onclick="switchTab('accounts')">Accounts</button>
         <button class="nav-tab" data-tab="churn" onclick="switchTab('churn')">Churn Risk</button>
         <button class="nav-tab" data-tab="inventory" onclick="switchTab('inventory')">Phone Inventory</button>
+        <button class="nav-tab" data-tab="onboard" onclick="switchTab('onboard')">Onboard Daycare</button>
       </div>
     </div>
     <div class="nav-right">
@@ -714,6 +727,184 @@
     </div>
   </div>
 
+  <!-- ===================== TAB 5: ONBOARD DAYCARE ===================== -->
+  <div id="tab-onboard" class="tab-panel">
+    <div class="page-container">
+
+      <div class="page-header">
+        <h1>Onboard Daycare</h1>
+        <p>Activate a new daycare in one shot — creates the account, assigns a phone number, and sends the welcome email + SMS.</p>
+      </div>
+
+      <!-- Success state (shown after successful submit) -->
+      <div class="card" id="onboardSuccess" style="display:none;background:#E8F5E9;border-left:4px solid #1E6B4A;margin-bottom:24px;">
+        <div class="card-header"><h2 style="color:#1E6B4A;">✅ Onboarded successfully</h2></div>
+        <div id="onboardSuccessBody"></div>
+      </div>
+
+      <!-- Error state -->
+      <div class="card" id="onboardError" style="display:none;background:#FEE7E7;border-left:4px solid #e53e3e;margin-bottom:24px;">
+        <div class="card-header"><h2 style="color:#e53e3e;">Onboarding failed</h2></div>
+        <div id="onboardErrorBody" style="color:#7A0F0F;font-size:14px;"></div>
+      </div>
+
+      <form id="onboardForm" onsubmit="submitOnboard(event)" style="display:flex;flex-direction:column;gap:24px;">
+
+        <!-- Section 1: Daycare info -->
+        <div class="card">
+          <div class="card-header"><h2>1. Daycare Info</h2></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <label class="ob-field" style="grid-column:1/-1;">Business name *<input name="dc_name" required></label>
+            <label class="ob-field" style="grid-column:1/-1;">Street *<input name="dc_street" required></label>
+            <label class="ob-field">City *<input name="dc_city" required></label>
+            <label class="ob-field">State *<input name="dc_state" required maxlength="2" style="text-transform:uppercase;"></label>
+            <label class="ob-field">Zip *<input name="dc_zip" required></label>
+            <label class="ob-field">Business phone *<input name="dc_phone" required placeholder="+12145551111"></label>
+            <label class="ob-field">Website<input name="dc_website" placeholder="https://..."></label>
+            <label class="ob-field">Time zone<select name="dc_timezone">
+              <option value="America/Chicago" selected>America/Chicago (CT)</option>
+              <option value="America/New_York">America/New_York (ET)</option>
+              <option value="America/Denver">America/Denver (MT)</option>
+              <option value="America/Los_Angeles">America/Los_Angeles (PT)</option>
+              <option value="America/Phoenix">America/Phoenix (AZ)</option>
+            </select></label>
+            <label class="ob-field" style="grid-column:1/-1;">Google review link *<input name="dc_google_link" required placeholder="https://g.page/r/..."></label>
+          </div>
+        </div>
+
+        <!-- Section 2: Owner / admin -->
+        <div class="card">
+          <div class="card-header"><h2>2. Owner / Primary Admin</h2></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <label class="ob-field">First name *<input name="ow_first_name" required></label>
+            <label class="ob-field">Last name *<input name="ow_last_name" required></label>
+            <label class="ob-field">Email *<input name="ow_email" type="email" required></label>
+            <label class="ob-field">Personal cell *<input name="ow_phone" required placeholder="+12145552222"></label>
+          </div>
+        </div>
+
+        <!-- Section 3: Subscription -->
+        <div class="card">
+          <div class="card-header"><h2>3. Subscription</h2></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+            <label class="ob-field">Plan *<select name="sub_plan" required onchange="onPlanChange()">
+              <option value="">Select plan...</option>
+              <option value="starter">Starter — $99/mo</option>
+              <option value="growth">Growth — $179/mo</option>
+              <option value="partner">Partner — $249/mo</option>
+              <option value="founders">Founders Circle — $109/mo equiv</option>
+            </select></label>
+            <label class="ob-field">Billing cycle *<select name="sub_billing_cycle" required>
+              <option value="">Select...</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="annual">Annual</option>
+            </select></label>
+            <label class="ob-field" style="display:flex;align-items:center;gap:8px;font-weight:normal;padding-top:24px;">
+              <input type="checkbox" name="founders_circle_member" id="foundersCheckbox">
+              Founders Circle member
+            </label>
+          </div>
+        </div>
+
+        <!-- Section 4: Phone number -->
+        <div class="card">
+          <div class="card-header"><h2>4. Phone Number Assignment</h2></div>
+          <p class="card-subtitle">Pulls from numbers that are on the campaign and unassigned. If the dropdown is empty, you need to add more inventory (Phone Inventory tab).</p>
+          <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;">
+            <label class="ob-field">Preferred area code<select name="phone_area_code" onchange="loadAvailableNumbers()">
+              <option value="">Any</option>
+              <option value="469">469</option>
+              <option value="972">972</option>
+              <option value="214">214</option>
+              <option value="682">682</option>
+              <option value="817">817</option>
+              <option value="940">940</option>
+            </select></label>
+            <label class="ob-field">Assigned number *<select name="phone_number" id="phoneNumberSelect" required>
+              <option value="">Loading available numbers...</option>
+            </select></label>
+          </div>
+        </div>
+
+        <!-- Section 5: Messaging style -->
+        <div class="card">
+          <div class="card-header"><h2>5. Messaging Style</h2></div>
+          <p class="card-subtitle">Initial brand voice settings. The daycare can refine these later in their settings.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <label class="ob-field">Tone preset<select name="ms_tone">
+              <option value="warm_playful">Warm &amp; Playful</option>
+              <option value="professional">Professional</option>
+              <option value="casual_fun">Casual &amp; Fun</option>
+              <option value="calm_caring">Calm &amp; Caring</option>
+            </select></label>
+            <label class="ob-field">Emoji preference<select name="ms_emoji">
+              <option value="sometimes">Sometimes (default)</option>
+              <option value="always">Always</option>
+              <option value="never">Never</option>
+            </select></label>
+            <label class="ob-field" style="grid-column:1/-1;">Personality<input name="ms_personality" placeholder="e.g. Playful and observant — like a really attentive babysitter"></label>
+            <label class="ob-field">Preferred phrases<input name="ms_phrases" placeholder="pup, fur baby, etc."></label>
+            <label class="ob-field">Words to avoid<input name="ms_avoid" placeholder="e.g. boarding, kennel"></label>
+            <label class="ob-field" style="grid-column:1/-1;">Sign-off<input name="ms_signature" placeholder="e.g. — The Paws &amp; Play crew 🐾"></label>
+          </div>
+        </div>
+
+        <!-- Section 6: Sentiment / review settings -->
+        <div class="card">
+          <div class="card-header"><h2>6. Sentiment &amp; Review Settings</h2></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <label class="ob-field" style="display:flex;align-items:center;gap:8px;font-weight:normal;padding-top:24px;">
+              <input type="checkbox" name="sent_auto_send_review" checked>
+              Auto-send review request on happy visit
+            </label>
+            <label class="ob-field">Review delay (hours)<input name="sent_review_delay_hours" type="number" value="2" min="0" max="48"></label>
+            <label class="ob-field">Sentiment threshold<select name="sent_sentiment_threshold">
+              <option value="unhappy_only">Unhappy only</option>
+              <option value="neutral_and_unhappy">Neutral and Unhappy</option>
+            </select></label>
+            <label class="ob-field">Notification email<input name="sent_notification_email" type="email" placeholder="(default: owner email)"></label>
+          </div>
+        </div>
+
+        <!-- Section 7: Tracking -->
+        <div class="card">
+          <div class="card-header"><h2>7. Tracking</h2></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+            <label class="ob-field">Onboarded date<input name="track_onboarded_at" type="date"></label>
+            <label class="ob-field">Go-live date<input name="track_go_live_at" type="date"></label>
+            <label class="ob-field">Referral source<select name="track_referral_source">
+              <option value="">Select...</option>
+              <option value="cold_outreach">Cold outreach</option>
+              <option value="referral">Referral</option>
+              <option value="inbound">Inbound</option>
+              <option value="conference">Conference</option>
+              <option value="founders_circle_launch">Founders Circle launch</option>
+              <option value="other">Other</option>
+            </select></label>
+            <label class="ob-field" style="grid-column:1/-1;">Internal notes<textarea name="track_internal_notes" rows="3" placeholder="Anything quirky about this account, special arrangements, etc."></textarea></label>
+          </div>
+        </div>
+
+        <!-- Section 8: Welcome SMS toggle -->
+        <div class="card" style="background:#FEF6E7;border-left:4px solid #C4933F;">
+          <div class="card-header"><h2 style="color:#7A5C00;">8. Welcome SMS</h2></div>
+          <p style="font-size:14px;color:#5C4400;margin:0 0 12px;">Send a one-time welcome text from the assigned TailWag number to the owner's cell. This proves the SMS line is live AND gives them the setup link via text.</p>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;">
+            <input type="checkbox" name="send_welcome_sms" checked>
+            <strong>Send welcome SMS to owner</strong>
+          </label>
+        </div>
+
+        <!-- Submit -->
+        <div style="display:flex;justify-content:flex-end;gap:12px;">
+          <button type="button" onclick="resetOnboardForm()" class="logout-btn">Reset</button>
+          <button type="submit" class="logout-btn" id="onboardSubmitBtn" style="background:#1E6B4A;color:#F5F0E8;border-color:#1E6B4A;font-weight:700;padding:12px 32px;">Onboard Daycare →</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
   <!-- DRAWER -->
   <div id="drawerOverlay" class="drawer-overlay" onclick="closeDrawer()"></div>
   <div id="drawer" class="drawer">
@@ -799,6 +990,179 @@
       document.getElementById('tab-' + tab).classList.add('active');
       document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
       if (tab === 'inventory') loadInventory();
+      if (tab === 'onboard') {
+        loadAvailableNumbers();
+        // default the date fields to today
+        const today = new Date().toISOString().split('T')[0];
+        const onboardedAt = document.querySelector('[name="track_onboarded_at"]');
+        const goLiveAt = document.querySelector('[name="track_go_live_at"]');
+        if (onboardedAt && !onboardedAt.value) onboardedAt.value = today;
+        if (goLiveAt && !goLiveAt.value) goLiveAt.value = today;
+      }
+    }
+
+    function onPlanChange() {
+      const plan = document.querySelector('[name="sub_plan"]').value;
+      const fcCheckbox = document.getElementById('foundersCheckbox');
+      if (plan === 'founders') fcCheckbox.checked = true;
+    }
+
+    async function loadAvailableNumbers() {
+      const select = document.getElementById('phoneNumberSelect');
+      if (!select) return;
+      const areaCode = document.querySelector('[name="phone_area_code"]')?.value || '';
+      select.innerHTML = '<option value="">Loading...</option>';
+      try {
+        const url = '/api/ceo/available-numbers' + (areaCode ? `?area_code=${areaCode}` : '');
+        const res = await authFetch(url);
+        const json = await res.json();
+        if (!res.ok) {
+          select.innerHTML = `<option value="">Error: ${esc(json.error || res.statusText)}</option>`;
+          return;
+        }
+        if (!json.available?.length) {
+          select.innerHTML = '<option value="">No available numbers — check Phone Inventory tab</option>';
+          return;
+        }
+        select.innerHTML = '<option value="">Select a number...</option>' + json.available.map(n =>
+          `<option value="${n.phone_number}|${n.provider_id}">${formatPhoneDisplay(n.phone_number)} — area code ${n.area_code}</option>`
+        ).join('');
+      } catch (err) {
+        select.innerHTML = `<option value="">Error loading: ${esc(err.message)}</option>`;
+      }
+    }
+
+    function formatPhoneDisplay(p) {
+      const digits = (p || '').replace(/\D/g, '').replace(/^1/, '');
+      if (digits.length !== 10) return p;
+      return `+1 (${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+    }
+
+    function resetOnboardForm() {
+      document.getElementById('onboardForm').reset();
+      document.getElementById('onboardSuccess').style.display = 'none';
+      document.getElementById('onboardError').style.display = 'none';
+      loadAvailableNumbers();
+    }
+
+    async function submitOnboard(e) {
+      e.preventDefault();
+      const f = e.target;
+      const btn = document.getElementById('onboardSubmitBtn');
+      const successCard = document.getElementById('onboardSuccess');
+      const errorCard = document.getElementById('onboardError');
+      successCard.style.display = 'none';
+      errorCard.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Onboarding...';
+
+      const phoneVal = f.phone_number.value;
+      const [phoneNumber, providerId] = phoneVal.split('|');
+
+      const payload = {
+        daycare: {
+          name: f.dc_name.value.trim(),
+          street: f.dc_street.value.trim(),
+          city: f.dc_city.value.trim(),
+          state: f.dc_state.value.trim().toUpperCase(),
+          zip: f.dc_zip.value.trim(),
+          phone: f.dc_phone.value.trim(),
+          website: f.dc_website.value.trim() || null,
+          google_link: f.dc_google_link.value.trim(),
+          time_zone: f.dc_timezone.value
+        },
+        owner: {
+          first_name: f.ow_first_name.value.trim(),
+          last_name: f.ow_last_name.value.trim(),
+          email: f.ow_email.value.trim(),
+          phone: f.ow_phone.value.trim()
+        },
+        subscription: {
+          plan: f.sub_plan.value,
+          billing_cycle: f.sub_billing_cycle.value
+        },
+        phone: { phone_number: phoneNumber, provider_id: providerId },
+        messaging_style: {
+          tone: f.ms_tone.value,
+          emoji: f.ms_emoji.value,
+          personality: f.ms_personality.value.trim() || null,
+          phrases: f.ms_phrases.value.trim() || null,
+          avoid: f.ms_avoid.value.trim() || null,
+          signature: f.ms_signature.value.trim() || null
+        },
+        sentiment: {
+          auto_send_review: f.sent_auto_send_review.checked,
+          review_delay_hours: parseInt(f.sent_review_delay_hours.value) || 2,
+          sentiment_threshold: f.sent_sentiment_threshold.value,
+          notification_email: f.sent_notification_email.value.trim() || null
+        },
+        tracking: {
+          founders_circle_member: f.founders_circle_member.checked,
+          onboarded_at: f.track_onboarded_at.value || null,
+          go_live_at: f.track_go_live_at.value || null,
+          referral_source: f.track_referral_source.value || null,
+          internal_notes: f.track_internal_notes.value.trim() || null
+        },
+        send_welcome_sms: f.send_welcome_sms.checked
+      };
+
+      try {
+        const res = await authFetch('/api/ceo/onboard-daycare', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          document.getElementById('onboardErrorBody').textContent = json.error || res.statusText;
+          errorCard.style.display = '';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
+        // Success
+        document.getElementById('onboardSuccessBody').innerHTML = `
+          <p style="font-size:15px;color:#1E6B4A;margin:0 0 16px;"><strong>${esc(payload.daycare.name)}</strong> is now live on TailWag.</p>
+          <table style="width:100%;font-size:14px;margin-bottom:16px;">
+            <tr><td style="padding:6px 12px;color:#888;">Owner</td><td style="padding:6px 12px;">${esc(payload.owner.first_name)} ${esc(payload.owner.last_name)} &lt;${esc(payload.owner.email)}&gt;</td></tr>
+            <tr><td style="padding:6px 12px;color:#888;">Plan</td><td style="padding:6px 12px;">${esc(payload.subscription.plan)} · ${esc(payload.subscription.billing_cycle)}</td></tr>
+            <tr><td style="padding:6px 12px;color:#888;">Assigned phone</td><td style="padding:6px 12px;">${formatPhoneDisplay(json.assigned_phone)}</td></tr>
+            <tr><td style="padding:6px 12px;color:#888;">Welcome email</td><td style="padding:6px 12px;">${json.email_sent ? '✅ Sent' : '⚠️ Failed (check copy-paste link below)'}</td></tr>
+            <tr><td style="padding:6px 12px;color:#888;">Welcome SMS</td><td style="padding:6px 12px;">${json.sms_sent ? '✅ Sent' : (payload.send_welcome_sms ? '⚠️ Failed' : 'Skipped')}</td></tr>
+          </table>
+          <div style="background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;">
+            <div style="font-size:12px;color:#888;margin-bottom:6px;">Setup link (copy if needed):</div>
+            <code id="inviteUrlCode" style="font-size:12px;word-break:break-all;color:#1E6B4A;">${esc(json.invite_url)}</code>
+          </div>
+          <div style="background:#fff;border-radius:8px;padding:16px;margin-bottom:16px;">
+            <div style="font-size:12px;color:#888;margin-bottom:6px;">Pre-written message to copy/send:</div>
+            <p id="copyMsg" style="font-size:14px;margin:0;line-height:1.5;">${esc(json.copy_paste_message)}</p>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="copyToClipboard('inviteUrlCode', this)" class="logout-btn">Copy Setup Link</button>
+            <button onclick="copyToClipboard('copyMsg', this)" class="logout-btn">Copy Welcome Message</button>
+            <button onclick="resetOnboardForm()" class="logout-btn">Onboard another</button>
+          </div>
+        `;
+        successCard.style.display = '';
+        f.reset();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        document.getElementById('onboardErrorBody').textContent = err.message || 'Network error';
+        errorCard.style.display = '';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Onboard Daycare →';
+      }
+    }
+
+    function copyToClipboard(elementId, btn) {
+      const text = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = original; }, 1500);
+      });
     }
 
     async function loadInventory() {
