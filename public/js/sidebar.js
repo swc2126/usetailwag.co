@@ -197,7 +197,7 @@
   const fabStyle = document.createElement('style');
   fabStyle.textContent = `
     .tw-fab {
-      position: fixed; right: 24px; bottom: 24px; z-index: 115;
+      position: fixed; right: 24px; bottom: 24px; z-index: 90;
       width: 56px; height: 56px; border-radius: 50%;
       background: #1E6B4A; color: #F5F0E8; border: none;
       display: flex; align-items: center; justify-content: center;
@@ -207,9 +207,12 @@
     .tw-fab:hover { background: #164D35; box-shadow: 0 8px 22px rgba(15,20,16,0.28); }
     .tw-fab.open { transform: rotate(45deg); background: #0F1410; }
     .tw-fab svg { width: 26px; height: 26px; transition: transform 0.18s; }
+    /* Hide FAB when any modal is open so it can't intercept modal clicks */
+    body:has(.modal-overlay.open) .tw-fab,
+    body:has(.modal-overlay.open) .tw-fab-sheet { display: none !important; }
 
     .tw-fab-sheet {
-      position: fixed; right: 24px; bottom: 92px; z-index: 114;
+      position: fixed; right: 24px; bottom: 92px; z-index: 91;
       background: #fff; border-radius: 14px;
       box-shadow: 0 12px 32px rgba(15,20,16,0.18);
       min-width: 220px; padding: 6px;
