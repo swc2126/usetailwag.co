@@ -204,10 +204,7 @@
             </div>
           </div>
           <a href="/profile.html" class="nu-dd-item">👤 &nbsp;My Profile</a>
-          <a href="/insights" class="nu-dd-item">📈 &nbsp;Insights</a>
-          <a href="/resources" class="nu-dd-item">📚 &nbsp;Resources</a>
           ${['super_admin','owner','manager'].includes(u.role) ? `<a href="/ceo" class="nu-dd-item">📊 &nbsp;${u.role === 'super_admin' ? 'TailWag HQ' : 'Overview'}</a>` : ''}
-          ${['super_admin','owner','manager'].includes(u.role) ? `<a href="/settings.html" class="nu-dd-item">💳 &nbsp;Billing & Plan</a>` : ''}
           <div class="nu-dd-divider"></div>
           <button class="nu-dd-item danger" onclick="window.__nuLogout()">Sign Out</button>
         </div>
