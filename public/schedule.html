@@ -81,11 +81,39 @@
 
     /* ── STATS ── */
     .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
-    .stat-card { background: white; border-radius: 12px; padding: 14px 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .stat-card {
+      background: white; border-radius: 12px; padding: 14px 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.06s;
+    }
+    .stat-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-color: rgba(0,0,0,0.06); }
+    .stat-card:active { transform: translateY(1px); }
+    .stat-card.active { border-color: var(--black); box-shadow: 0 2px 12px rgba(0,0,0,0.10); }
+    .stat-card.confirmed.active { border-color: var(--green); }
+    .stat-card.pending.active { border-color: #d69e2e; }
+    .stat-card.cancelled.active { border-color: #e74c3c; }
     .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #999; }
     .stat-val { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 800; color: var(--black); margin-top: 4px; }
     .stat-card.confirmed .stat-val { color: var(--green); }
     .stat-card.cancelled .stat-val { color: #e74c3c; }
+
+    /* ── FILTER INDICATOR (above appt list) ── */
+    .filter-indicator {
+      display: none; align-items: center; gap: 8px;
+      background: rgba(15,20,16,0.04); border-radius: 8px;
+      padding: 8px 12px; margin-bottom: 10px;
+      font-size: 13px; color: #555;
+    }
+    .filter-indicator.visible { display: flex; }
+    .filter-indicator strong { color: var(--black); font-weight: 700; }
+    .filter-indicator-clear {
+      margin-left: auto; background: none; border: 1px solid #ccc; color: #555;
+      font-size: 12px; padding: 3px 9px; border-radius: 6px; cursor: pointer;
+      font-family: inherit; font-weight: 600;
+    }
+    .filter-indicator-clear:hover { border-color: var(--black); color: var(--black); }
 
     /* ── ACTION BAR ── */
     .action-bar {
@@ -455,19 +483,19 @@
 
   <!-- STATS ROW -->
   <div class="stats-row">
-    <div class="stat-card">
+    <div class="stat-card" data-filter="all" onclick="setStatusFilter('all')" title="Show all dogs">
       <div class="stat-label">Scheduled</div>
       <div class="stat-val" id="statTotal">—</div>
     </div>
-    <div class="stat-card confirmed">
+    <div class="stat-card confirmed" data-filter="confirmed" onclick="setStatusFilter('confirmed')" title="Show only confirmed dogs">
       <div class="stat-label">Confirmed ✓</div>
       <div class="stat-val" id="statConfirmed">—</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card pending" data-filter="pending" onclick="setStatusFilter('pending')" title="Show only pending dogs">
       <div class="stat-label">Pending</div>
       <div class="stat-val" id="statPending">—</div>
     </div>
-    <div class="stat-card cancelled">
+    <div class="stat-card cancelled" data-filter="cancelled" onclick="setStatusFilter('cancelled')" title="Show only cancelled dogs">
       <div class="stat-label">Cancelled</div>
       <div class="stat-val" id="statCancelled">—</div>
     </div>
@@ -482,6 +510,10 @@
         <button class="btn btn-gold btn-sm" id="sendRemindersBtn" onclick="sendReminders()">📨 Send Reminders</button>
         <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Dog</button>
       </div>
+    </div>
+    <div class="filter-indicator" id="filterIndicator">
+      Showing only <strong id="filterIndicatorLabel"></strong> · <span id="filterIndicatorCount"></span>
+      <button type="button" class="filter-indicator-clear" onclick="setStatusFilter('all')">Clear ×</button>
     </div>
     <div id="apptList" class="appt-list">
       <div class="empty-state">
@@ -712,6 +744,7 @@
   let allClients = [];
   let calendarData = {};         // date → appointments[], for week/month views
   let currentAppointments = [];  // day view appointments
+  let activeStatusFilter = 'all'; // 'all' | 'confirmed' | 'pending' | 'cancelled'
   let selectedClientId = null;
   let selectedDogId    = null;
   let recurSelectedClientId = null;
@@ -792,6 +825,7 @@
       document.getElementById(v+'View').style.display = v === mode ? 'block' : 'none';
     });
     updateDateDisplay();
+    applyFilterUI();
     loadCurrentView();
   }
 
@@ -868,6 +902,55 @@
     document.getElementById('statConfirmed').textContent = appts.filter(a => a.status === 'confirmed').length;
     document.getElementById('statPending').textContent = appts.filter(a => ['pending','recurring_pending'].includes(a.status)).length;
     document.getElementById('statCancelled').textContent = appts.filter(a => a.status === 'cancelled').length;
+    applyFilterUI();
+  }
+
+  // ── Status filter (click stat cards to filter the day list) ────────────
+  const FILTER_LABELS = {
+    confirmed: 'Confirmed',
+    pending:   'Pending',
+    cancelled: 'Cancelled'
+  };
+
+  function filterAppts(appts, filter) {
+    if (!filter || filter === 'all') return appts;
+    if (filter === 'pending') return appts.filter(a => a.status === 'pending' || a.status === 'recurring_pending');
+    return appts.filter(a => a.status === filter);
+  }
+
+  function setStatusFilter(filter) {
+    // Toggle off when clicking the active card; "all" always clears
+    if (filter === activeStatusFilter && filter !== 'all') filter = 'all';
+    activeStatusFilter = filter;
+
+    // If user clicks a status card while in week/month, switch to day view
+    // so the filter has a list to act on.
+    if (filter !== 'all' && viewMode !== 'day') {
+      switchView('day');
+      return; // switchView will trigger a re-render via loadCurrentView
+    }
+
+    if (viewMode === 'day') renderAppointments(currentAppointments);
+    applyFilterUI();
+  }
+
+  function applyFilterUI() {
+    // Filter visuals only apply in day view (week/month don't filter visibly).
+    const showActive = viewMode === 'day' && activeStatusFilter !== 'all';
+    document.querySelectorAll('.stat-card[data-filter]').forEach(c => {
+      c.classList.toggle('active', showActive && c.dataset.filter === activeStatusFilter);
+    });
+
+    const indicator = document.getElementById('filterIndicator');
+    if (!indicator) return;
+    if (!showActive) {
+      indicator.classList.remove('visible');
+    } else {
+      indicator.classList.add('visible');
+      document.getElementById('filterIndicatorLabel').textContent = FILTER_LABELS[activeStatusFilter] || activeStatusFilter;
+      const count = filterAppts(currentAppointments, activeStatusFilter).length;
+      document.getElementById('filterIndicatorCount').textContent = count + (count === 1 ? ' dog' : ' dogs');
+    }
   }
 
   function sessionBadge(notes) {
@@ -878,17 +961,29 @@
 
   function renderAppointments(appts) {
     const el = document.getElementById('apptList');
-    if (!appts.length) {
-      el.innerHTML = `<div class="empty-state">
-        <div class="empty-icon">🐶</div>
-        <h3>No dogs scheduled</h3>
-        <p>Add dogs from the Directory, or set up recurring schedules below.</p>
-        <button class="btn btn-primary" onclick="openAddModal()">+ Add Dog</button>
-      </div>`;
+    const filtered = filterAppts(appts, activeStatusFilter);
+
+    if (!filtered.length) {
+      if (activeStatusFilter !== 'all') {
+        const label = (FILTER_LABELS[activeStatusFilter] || activeStatusFilter).toLowerCase();
+        el.innerHTML = `<div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <h3>No ${label} dogs</h3>
+          <p>None of today's dogs match this filter.</p>
+          <button class="btn btn-outline" onclick="setStatusFilter('all')">Show all</button>
+        </div>`;
+      } else {
+        el.innerHTML = `<div class="empty-state">
+          <div class="empty-icon">🐶</div>
+          <h3>No dogs scheduled</h3>
+          <p>Add dogs from the Directory, or set up recurring schedules below.</p>
+          <button class="btn btn-primary" onclick="openAddModal()">+ Add Dog</button>
+        </div>`;
+      }
       return;
     }
     const order = { confirmed: 0, pending: 1, recurring_pending: 2, cancelled: 3 };
-    const sorted = [...appts].sort((a,b) => (order[a.status]??9) - (order[b.status]??9));
+    const sorted = [...filtered].sort((a,b) => (order[a.status]??9) - (order[b.status]??9));
 
     el.innerHTML = sorted.map(appt => {
       const dogName  = appt.dogs?.name || '—';
