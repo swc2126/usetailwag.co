@@ -86,6 +86,51 @@
     .sort-btn.active { background: var(--black); color: var(--linen); }
     .sort-btn:not(.active):hover { background: rgba(0,0,0,0.04); color: var(--slate); }
 
+    /* ── SEARCH + FILTER BAR ── */
+    .filter-bar {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .search-wrap { position: relative; flex: 1; min-width: 240px; }
+    .search-wrap::before {
+      content: '';
+      position: absolute; top: 50%; left: 14px; transform: translateY(-50%);
+      width: 14px; height: 14px;
+      background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>") no-repeat center / 14px;
+      pointer-events: none;
+    }
+    #clientSearch {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      border: 1px solid #ddd; border-radius: 10px;
+      font-family: inherit; font-size: 14px;
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+      background: #fff; color: var(--slate);
+    }
+    #clientSearch:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(30,107,74,0.10);
+    }
+    .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-chip {
+      padding: 7px 13px;
+      border: 1.5px solid #e0dbd2;
+      background: #fff;
+      border-radius: 18px;
+      font-size: 12px; font-weight: 600;
+      color: #2D3748;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .filter-chip:hover { border-color: var(--green); color: var(--green); }
+    .filter-chip.active {
+      background: var(--green); border-color: var(--green); color: #fff;
+    }
+    .filter-chip-clear { color: #999; font-weight: 500; }
+    .filter-chip-clear:hover { border-color: #e53e3e; color: #e53e3e; }
+
     /* ── CONTAINER ── */
     .page-container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
 
@@ -307,6 +352,18 @@
         </div>
         <a href="/import.html" class="btn-outline" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;padding:7px 14px;border-radius:8px;border:1.5px solid #e0dbd2;color:#2D3748;background:white;">⬆ Import</a>
         <button class="btn-primary" id="addRecordBtn" onclick="openAddRecord()">+ Add Pet Parent</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <input type="search" id="clientSearch" placeholder="Search by owner, dog, phone, or email…" autocomplete="off" />
+      </div>
+      <div class="filter-chips">
+        <button type="button" class="filter-chip" data-filter="missing_email" onclick="onChipClick('missing_email')">No email</button>
+        <button type="button" class="filter-chip" data-filter="active_month" onclick="onChipClick('active_month')">Active this month</button>
+        <button type="button" class="filter-chip" data-filter="no_recent_visit" onclick="onChipClick('no_recent_visit')">No recent visit</button>
+        <button type="button" class="filter-chip filter-chip-clear" id="clearFiltersBtn" onclick="onClearFilters()" style="display:none;">Clear ✕</button>
       </div>
     </div>
 
@@ -573,6 +630,14 @@
 
   let clients = [];
   let currentSort = 'owner'; // 'owner' | 'dog'
+  let activeFilter = '';     // '' | 'missing_email' | 'active_month' | 'no_recent_visit'
+  let searchDebounceTimer;
+
+  const CHIP_LABELS = {
+    missing_email:    'No email',
+    active_month:     'Active this month',
+    no_recent_visit:  'No recent visit'
+  };
 
   function setSort(mode) {
     currentSort = mode;
@@ -582,9 +647,74 @@
     renderClients();
   }
 
+  function readFiltersFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q') || '';
+    activeFilter = params.get('filter') || '';
+    const input = document.getElementById('clientSearch');
+    if (input) input.value = q;
+    syncChipUI();
+  }
+
+  function writeFiltersToURL() {
+    const q = document.getElementById('clientSearch').value.trim();
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (activeFilter) params.set('filter', activeFilter);
+    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    window.history.replaceState(null, '', newUrl);
+    syncChipUI();
+  }
+
+  function syncChipUI() {
+    document.querySelectorAll('.filter-chip[data-filter]').forEach(c => {
+      c.classList.toggle('active', c.dataset.filter === activeFilter);
+    });
+    const q = document.getElementById('clientSearch').value.trim();
+    document.getElementById('clearFiltersBtn').style.display = (q || activeFilter) ? '' : 'none';
+  }
+
+  function onSearchInput() {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+      writeFiltersToURL();
+      loadClients();
+    }, 200);
+  }
+
+  function onChipClick(filterValue) {
+    activeFilter = (activeFilter === filterValue) ? '' : filterValue;
+    writeFiltersToURL();
+    loadClients();
+  }
+
+  function onClearFilters() {
+    document.getElementById('clientSearch').value = '';
+    activeFilter = '';
+    writeFiltersToURL();
+    loadClients();
+  }
+
+  function getEmptyStateHTML(colspan) {
+    const q = document.getElementById('clientSearch').value.trim();
+    if (q || activeFilter) {
+      const removeHint = activeFilter
+        ? `Try removing the "${CHIP_LABELS[activeFilter]}" filter`
+        : 'Try a different search';
+      return `<tr><td colspan="${colspan}"><div class="empty-state">No matches. ${removeHint} or <a href="javascript:void(0)" onclick="onClearFilters()" style="color:var(--green);text-decoration:underline;">clear all</a>.</div></td></tr>`;
+    }
+    return `<tr><td colspan="${colspan}"><div class="empty-state">No pet parents yet. Add your first pet parent above.</div></td></tr>`;
+  }
+
   async function loadClients() {
     try {
-      const clientRes = await fetch('/api/clients', { headers: authHeaders });
+      const params = new URLSearchParams();
+      const q = document.getElementById('clientSearch')?.value.trim() || '';
+      if (q) params.set('q', q);
+      if (activeFilter) params.set('filter', activeFilter);
+      const url = '/api/clients' + (params.toString() ? '?' + params.toString() : '');
+
+      const clientRes = await fetch(url, { headers: authHeaders });
       if (clientRes.status === 401) { localStorage.removeItem('tailwag_session'); window.location.href = '/login.html'; return; }
       if (!clientRes.ok) { const e = await clientRes.json(); throw new Error(e.error || 'Failed to load clients'); }
       clients = await clientRes.json();
@@ -631,7 +761,7 @@
         `${rows.filter(r => r.dog).length} dog${rows.filter(r => r.dog).length !== 1 ? 's' : ''} · ${total} pet parent${total !== 1 ? 's' : ''}`;
 
       if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No entries yet.</div></td></tr>';
+        tbody.innerHTML = getEmptyStateHTML(5);
         return;
       }
 
@@ -682,7 +812,7 @@
         `${total} pet parent${total !== 1 ? 's' : ''}`;
 
       if (!sorted.length) {
-        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No pet parents yet. Add your first pet parent above.</div></td></tr>';
+        tbody.innerHTML = getEmptyStateHTML(5);
         return;
       }
 
@@ -1179,6 +1309,10 @@
   document.getElementById('editDogModal').addEventListener('click', function(e) {
     if (e.target === this) closeEditDogModal();
   });
+
+  // Wire search + filter UI
+  document.getElementById('clientSearch').addEventListener('input', onSearchInput);
+  readFiltersFromURL();
 
   loadClients();
 </script>

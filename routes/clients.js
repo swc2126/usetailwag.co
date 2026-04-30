@@ -4,14 +4,74 @@ const { supabaseAdmin } = require('../config/supabase');
 const { requireAuth } = require('../middleware/auth');
 
 // GET /api/clients — list all clients for the daycare
+//   ?q=...        substring search across first_name, last_name, phone, email, dog name
+//   ?filter=...   one of: missing_email | active_month | no_recent_visit
+//   filters and search compose (AND).
 router.get('/', requireAuth, async (req, res) => {
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
-  const { data, error } = await supabaseAdmin
+
+  const q = (req.query.q || '').trim();
+  const filter = (req.query.filter || '').trim();
+
+  // ── Pre-compute auxiliary id sets used by some filters/searches ──────
+  let dogMatchClientIds = null;
+  if (q) {
+    // Strip chars that break PostgREST .or() syntax (comma, parens) and escape LIKE wildcards
+const escaped = q.replace(/[,()]/g, ' ').replace(/[%_\\]/g, m => '\\' + m);
+    const { data: dogMatches } = await supabaseAdmin
+      .from('dogs')
+      .select('client_id')
+      .eq('daycare_id', req.daycareId)
+      .ilike('name', `%${escaped}%`);
+    dogMatchClientIds = [...new Set((dogMatches || []).map(d => d.client_id).filter(Boolean))];
+  }
+
+  let activeMonthClientIds = null;
+  if (filter === 'active_month' || filter === 'no_recent_visit') {
+    const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+    const { data: recent } = await supabaseAdmin
+      .from('messages')
+      .select('client_id')
+      .eq('daycare_id', req.daycareId)
+      .gte('created_at', since)
+      .not('client_id', 'is', null);
+    activeMonthClientIds = [...new Set((recent || []).map(m => m.client_id))];
+  }
+
+  // ── Build the main clients query ─────────────────────────────────────
+  let query = supabaseAdmin
     .from('clients')
     .select('*, dogs(id, name, breed)')
     .eq('daycare_id', req.daycareId)
-    .eq('active', true)
-    .order('last_name');
+    .eq('active', true);
+
+  if (q) {
+    // Strip chars that break PostgREST .or() syntax (comma, parens) and escape LIKE wildcards
+const escaped = q.replace(/[,()]/g, ' ').replace(/[%_\\]/g, m => '\\' + m);
+    const orParts = [
+      `first_name.ilike.%${escaped}%`,
+      `last_name.ilike.%${escaped}%`,
+      `phone.ilike.%${escaped}%`,
+      `email.ilike.%${escaped}%`
+    ];
+    if (dogMatchClientIds && dogMatchClientIds.length) {
+      orParts.push(`id.in.(${dogMatchClientIds.join(',')})`);
+    }
+    query = query.or(orParts.join(','));
+  }
+
+  if (filter === 'missing_email') {
+    query = query.or('email.is.null,email.eq.');
+  } else if (filter === 'active_month') {
+    if (!activeMonthClientIds.length) return res.json([]);
+    query = query.in('id', activeMonthClientIds);
+  } else if (filter === 'no_recent_visit') {
+    if (activeMonthClientIds.length) {
+      query = query.not('id', 'in', `(${activeMonthClientIds.join(',')})`);
+    }
+  }
+
+  const { data, error } = await query.order('last_name');
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
