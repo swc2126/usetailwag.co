@@ -186,6 +186,101 @@
     }
   } catch {}
 
+  // ── FAB (Floating Action Button) — global quick-create ───────────────
+  const FAB_ACTIONS = [
+    { label: 'New Pet Parent',  href: '/clients.html?action=add',  fn: 'openAddRecord', icon: iconPaw() },
+    { label: 'New Appointment', href: '/schedule.html?action=add', fn: 'openAddModal',  icon: iconCalendar() },
+    { label: 'Send Message',    href: '/messaging.html',           fn: null,            icon: iconMessage() },
+    { label: 'Request Review',  href: '/reviews.html',             fn: null,            icon: iconStar() }
+  ];
+
+  const fabStyle = document.createElement('style');
+  fabStyle.textContent = `
+    .tw-fab {
+      position: fixed; right: 24px; bottom: 24px; z-index: 115;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: #1E6B4A; color: #F5F0E8; border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 6px 18px rgba(15,20,16,0.22);
+      transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+    }
+    .tw-fab:hover { background: #164D35; box-shadow: 0 8px 22px rgba(15,20,16,0.28); }
+    .tw-fab.open { transform: rotate(45deg); background: #0F1410; }
+    .tw-fab svg { width: 26px; height: 26px; transition: transform 0.18s; }
+
+    .tw-fab-sheet {
+      position: fixed; right: 24px; bottom: 92px; z-index: 114;
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 12px 32px rgba(15,20,16,0.18);
+      min-width: 220px; padding: 6px;
+      opacity: 0; transform: translateY(8px) scale(0.96);
+      pointer-events: none;
+      transition: opacity 0.16s, transform 0.16s;
+    }
+    .tw-fab-sheet.open {
+      opacity: 1; transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    .tw-fab-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; border-radius: 8px;
+      color: #2D3748; font-size: 14px; font-weight: 500;
+      text-decoration: none; cursor: pointer;
+      background: none; border: none; width: 100%; text-align: left;
+      font-family: inherit;
+      transition: background 0.12s, color 0.12s;
+    }
+    .tw-fab-item:hover { background: rgba(30,107,74,0.08); color: #1E6B4A; }
+    .tw-fab-item svg { color: #1E6B4A; flex-shrink: 0; }
+
+    @media (max-width: 899px) {
+      .tw-fab        { right: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
+      .tw-fab-sheet  { right: 18px; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
+    }
+  `;
+  document.head.appendChild(fabStyle);
+
+  const fab = document.createElement('button');
+  fab.className = 'tw-fab';
+  fab.setAttribute('aria-label', 'Quick create');
+  fab.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  document.body.appendChild(fab);
+
+  const fabSheet = document.createElement('div');
+  fabSheet.className = 'tw-fab-sheet';
+  fabSheet.innerHTML = FAB_ACTIONS.map((a, i) =>
+    `<button type="button" class="tw-fab-item" data-fab-i="${i}">${a.icon}<span>${a.label}</span></button>`
+  ).join('');
+  document.body.appendChild(fabSheet);
+
+  function setFabOpen(open) {
+    fab.classList.toggle('open', open);
+    fabSheet.classList.toggle('open', open);
+  }
+  fab.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setFabOpen(!fabSheet.classList.contains('open'));
+  });
+  document.addEventListener('click', (e) => {
+    if (!fabSheet.contains(e.target) && !fab.contains(e.target)) setFabOpen(false);
+  });
+  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setFabOpen(false); });
+
+  fabSheet.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-fab-i]');
+    if (!btn) return;
+    const action = FAB_ACTIONS[+btn.dataset.fabI];
+    setFabOpen(false);
+
+    const targetPath = action.href.split('?')[0];
+    const onTargetPage = window.location.pathname === targetPath;
+    if (onTargetPage && action.fn && typeof window[action.fn] === 'function') {
+      window[action.fn]();
+    } else {
+      window.location.href = action.href;
+    }
+  });
+
   // ── Inline SVG icons ──────────────────────────────────────────────────
   function svg(d) {
     return `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;

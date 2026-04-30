@@ -1314,6 +1314,16 @@
   document.getElementById('clientSearch').addEventListener('input', onSearchInput);
   readFiltersFromURL();
 
+  // Honor ?action=add (e.g. from FAB on another page)
+  if (new URLSearchParams(window.location.search).get('action') === 'add') {
+    setTimeout(() => {
+      try { openAddRecord(); } catch {}
+      const url = new URL(window.location.href);
+      url.searchParams.delete('action');
+      window.history.replaceState(null, '', url.pathname + (url.search ? url.search : ''));
+    }, 0);
+  }
+
   loadClients();
 </script>
 

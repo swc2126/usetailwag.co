@@ -1277,6 +1277,14 @@
     await loadClients();
     loadCurrentView();
     loadRecurring();
+
+    // Honor ?action=add (e.g. from FAB on another page)
+    if (new URLSearchParams(window.location.search).get('action') === 'add') {
+      try { openAddModal(); } catch {}
+      const url = new URL(window.location.href);
+      url.searchParams.delete('action');
+      window.history.replaceState(null, '', url.pathname + (url.search ? url.search : ''));
+    }
   }
 
   init();
