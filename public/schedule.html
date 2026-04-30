@@ -99,6 +99,49 @@
     .stat-card.confirmed .stat-val { color: var(--green); }
     .stat-card.cancelled .stat-val { color: #e74c3c; }
 
+    /* Filter dimming for week/month chips */
+    .week-chip.dimmed, .month-chip.dimmed {
+      opacity: 0.18;
+      transition: opacity 0.15s;
+    }
+
+    /* ── BULK-CONFIRM BANNER (day view) ── */
+    .bulk-confirm-banner {
+      display: none;
+      align-items: center; gap: 12px;
+      background: rgba(196,147,63,0.12);
+      border: 1px solid rgba(196,147,63,0.32);
+      border-radius: 10px;
+      padding: 10px 14px; margin-bottom: 12px;
+      font-size: 13px; color: #6b4d1a;
+    }
+    .bulk-confirm-banner.visible { display: flex; }
+    .bulk-confirm-banner-text { flex: 1; }
+    .bulk-confirm-banner-text strong { color: var(--black); font-weight: 700; }
+    .bulk-confirm-btn {
+      background: var(--green); color: white; border: none;
+      padding: 7px 14px; border-radius: 7px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: inherit; white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .bulk-confirm-btn:hover { background: var(--green-dark); }
+
+    /* ── BULK-CONFIRM (week view per-day) ── */
+    .week-bulk-add {
+      display: flex; align-items: center; justify-content: center;
+      gap: 4px;
+      width: 100%; margin-top: 4px;
+      background: rgba(30,107,74,0.08); color: var(--green);
+      border: 1px dashed rgba(30,107,74,0.4);
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 11px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      transition: background 0.12s;
+    }
+    .week-bulk-add:hover { background: rgba(30,107,74,0.18); }
+
     /* ── FILTER INDICATOR (above appt list) ── */
     .filter-indicator {
       display: none; align-items: center; gap: 8px;
@@ -510,6 +553,12 @@
         <button class="btn btn-gold btn-sm" id="sendRemindersBtn" onclick="sendReminders()">📨 Send Reminders</button>
         <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Dog</button>
       </div>
+    </div>
+    <div class="bulk-confirm-banner" id="bulkConfirmBanner">
+      <div class="bulk-confirm-banner-text">
+        <strong id="bulkConfirmCount"></strong> recurring dogs awaiting confirmation today
+      </div>
+      <button type="button" class="bulk-confirm-btn" onclick="confirmAllRecurringForToday()">Confirm all</button>
     </div>
     <div class="filter-indicator" id="filterIndicator">
       Showing only <strong id="filterIndicatorLabel"></strong> · <span id="filterIndicatorCount"></span>
@@ -923,34 +972,69 @@
     if (filter === activeStatusFilter && filter !== 'all') filter = 'all';
     activeStatusFilter = filter;
 
-    // If user clicks a status card while in week/month, switch to day view
-    // so the filter has a list to act on.
-    if (filter !== 'all' && viewMode !== 'day') {
-      switchView('day');
-      return; // switchView will trigger a re-render via loadCurrentView
-    }
-
+    // Re-render the current view so filter takes effect (chip dimming or list filter)
     if (viewMode === 'day') renderAppointments(currentAppointments);
     applyFilterUI();
   }
 
   function applyFilterUI() {
-    // Filter visuals only apply in day view (week/month don't filter visibly).
-    const showActive = viewMode === 'day' && activeStatusFilter !== 'all';
+    const filterActive = activeStatusFilter !== 'all';
+
+    // Active stat-card highlight shows in ALL views (filter affects week/month chips too)
     document.querySelectorAll('.stat-card[data-filter]').forEach(c => {
-      c.classList.toggle('active', showActive && c.dataset.filter === activeStatusFilter);
+      c.classList.toggle('active', filterActive && c.dataset.filter === activeStatusFilter);
     });
 
+    // Filter indicator (above appt list) is only meaningful in day view
     const indicator = document.getElementById('filterIndicator');
-    if (!indicator) return;
-    if (!showActive) {
-      indicator.classList.remove('visible');
-    } else {
-      indicator.classList.add('visible');
-      document.getElementById('filterIndicatorLabel').textContent = FILTER_LABELS[activeStatusFilter] || activeStatusFilter;
-      const count = filterAppts(currentAppointments, activeStatusFilter).length;
-      document.getElementById('filterIndicatorCount').textContent = count + (count === 1 ? ' dog' : ' dogs');
+    if (indicator) {
+      if (!filterActive || viewMode !== 'day') {
+        indicator.classList.remove('visible');
+      } else {
+        indicator.classList.add('visible');
+        document.getElementById('filterIndicatorLabel').textContent = FILTER_LABELS[activeStatusFilter] || activeStatusFilter;
+        const count = filterAppts(currentAppointments, activeStatusFilter).length;
+        document.getElementById('filterIndicatorCount').textContent = count + (count === 1 ? ' dog' : ' dogs');
+      }
     }
+
+    // Dim non-matching chips in week and month views
+    document.querySelectorAll('.week-chip[data-status], .month-chip[data-status]').forEach(chip => {
+      if (!filterActive) { chip.classList.remove('dimmed'); return; }
+      const status = chip.dataset.status;
+      const matches = activeStatusFilter === 'pending'
+        ? (status === 'pending' || status === 'recurring_pending')
+        : status === activeStatusFilter;
+      chip.classList.toggle('dimmed', !matches);
+    });
+  }
+
+  // ── Bulk-confirm recurring placeholders for a given date ────────────────
+  async function confirmAllRecurringForDate(dateStr, count) {
+    const dateLabel = fmtDate(dateStr, { weekday: 'long', month: 'short', day: 'numeric' });
+    if (!confirm(`Add all ${count} recurring dog${count===1?'':'s'} to ${dateLabel}?`)) return;
+
+    // Source the placeholders from the right place depending on view
+    let placeholders;
+    if (viewMode === 'day' && dateStr === currentDate) {
+      placeholders = currentAppointments.filter(a => !a.id && a.is_recurring);
+    } else {
+      placeholders = (calendarData[dateStr] || []).filter(a => !a.id && a.is_recurring);
+    }
+    if (!placeholders.length) { showToast('Nothing to add', 'error'); return; }
+
+    let added = 0, failed = 0;
+    for (const p of placeholders) {
+      const res = await fetch('/api/appointments', {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ client_id: p.client_id, dog_id: p.dog_id || null, appointment_date: dateStr })
+      });
+      if (res.ok) added++; else failed++;
+    }
+
+    if (added > 0) showToast(`Added ${added} dog${added===1?'':'s'} ✓`, 'success');
+    if (failed > 0) showToast(`${failed} couldn't be added`, 'error');
+    loadCurrentView();
   }
 
   function sessionBadge(notes) {
@@ -959,9 +1043,27 @@
     return '';
   }
 
+  function confirmAllRecurringForToday() {
+    const placeholders = currentAppointments.filter(a => !a.id && a.is_recurring);
+    if (!placeholders.length) return;
+    confirmAllRecurringForDate(currentDate, placeholders.length);
+  }
+
   function renderAppointments(appts) {
     const el = document.getElementById('apptList');
     const filtered = filterAppts(appts, activeStatusFilter);
+
+    // Bulk-confirm banner: only when there are recurring placeholders today
+    const banner = document.getElementById('bulkConfirmBanner');
+    if (banner) {
+      const placeholderCount = appts.filter(a => !a.id && a.is_recurring).length;
+      if (placeholderCount > 0 && activeStatusFilter === 'all') {
+        banner.classList.add('visible');
+        document.getElementById('bulkConfirmCount').textContent = placeholderCount;
+      } else {
+        banner.classList.remove('visible');
+      }
+    }
 
     if (!filtered.length) {
       if (activeStatusFilter !== 'all') {
@@ -993,7 +1095,7 @@
         confirmed:         '<span class="badge badge-confirmed">✓ Confirmed</span>',
         pending:           '<span class="badge badge-pending">Pending</span>',
         cancelled:         '<span class="badge badge-cancelled">Cancelled</span>',
-        recurring_pending: '<span class="badge badge-recurring">Recurring</span>'
+        recurring_pending: '<span class="badge badge-pending">Pending</span> <span class="badge badge-recurring">↻ Recurring</span>'
       };
       const reminderBadge = appt.reminder_sent_at ? '<span class="badge badge-reminder">Reminded</span>' : '';
 
@@ -1052,17 +1154,21 @@
         const sc = a.status === 'cancelled' ? 'status-cancelled' :
                    a.status === 'pending'   ? 'status-pending'   :
                    a.is_recurring           ? 'status-recurring' : '';
-        return `<div class="week-chip ${sc}" onclick="drillToDay('${dateStr}')" title="${name} — ${a.clients?.first_name||''} ${a.clients?.last_name||''}">${escHtml(name)}</div>`;
+        return `<div class="week-chip ${sc}" data-status="${a.status||''}" onclick="drillToDay('${dateStr}')" title="${name} — ${a.clients?.first_name||''} ${a.clients?.last_name||''}">${escHtml(name)}</div>`;
       }).join('');
 
-      const addBtn = `<button class="week-add-btn" onclick="openAddModalForDate('${dateStr}')">+ Add</button>`;
+      const recurringPlaceholderCount = appts.filter(a => !a.id && a.is_recurring).length;
+      const bulkBtn = recurringPlaceholderCount > 0
+        ? `<button class="week-bulk-add" onclick="event.stopPropagation();confirmAllRecurringForDate('${dateStr}', ${recurringPlaceholderCount})" title="Add all recurring dogs to ${dateStr}">↻ Add all ${recurringPlaceholderCount}</button>`
+        : '';
+      const addBtn = `<button class="week-add-btn" onclick="event.stopPropagation();openAddModalForDate('${dateStr}')">+ Add</button>`;
 
       html += `<div class="week-col${isToday?' today-col':''}">
         <div class="week-col-header" onclick="drillToDay('${dateStr}')">
           <div class="week-col-dayname">${dayAbbr}</div>
           <div class="week-col-datenum${isToday?' today':''}">${dayNum}</div>
         </div>
-        <div class="week-col-body">${chips}${addBtn}</div>
+        <div class="week-col-body">${chips}${bulkBtn}${addBtn}</div>
       </div>`;
     }
     grid.innerHTML = html;
@@ -1120,7 +1226,7 @@
       const chips = appts.slice(0,3).map(a => {
         const name = a.dogs?.name || a.clients?.first_name || '?';
         const sc = a.status==='cancelled' ? 'status-cancelled' : a.status==='pending' ? 'status-pending' : a.is_recurring ? 'status-recurring' : '';
-        return `<span class="month-chip ${sc}">${escHtml(name)}</span>`;
+        return `<span class="month-chip ${sc}" data-status="${a.status||''}">${escHtml(name)}</span>`;
       }).join('');
       const more = appts.length > 3 ? `<span class="month-more">+${appts.length-3}</span>` : '';
 
