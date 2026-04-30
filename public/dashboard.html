@@ -172,6 +172,96 @@
       .nav-links { display: none; }
       .page-container { padding: 24px 16px; }
     }
+
+    /* ── DASHBOARD GRID (wireframe redesign) ── */
+    .dash-two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+      gap: var(--tw-space-4, 16px);
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .dash-two-col { grid-template-columns: 1fr; }
+    }
+    .dash-left, .dash-right { display: flex; flex-direction: column; gap: var(--tw-space-4, 16px); min-width: 0; }
+
+    .dash-card {
+      background: var(--tw-color-card, #fff);
+      border: 1px solid var(--tw-color-border, rgba(0,0,0,0.06));
+      border-radius: var(--tw-radius-lg, 14px);
+      box-shadow: var(--tw-shadow-1, 0 1px 3px rgba(15,20,16,0.06));
+      overflow: hidden;
+    }
+    .dash-card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 20px 14px;
+    }
+    .dash-card-header h2 {
+      font-family: var(--tw-font-display, 'Plus Jakarta Sans'), sans-serif;
+      font-weight: 800; font-size: 16px; color: var(--tw-color-ink, #0F1410);
+      margin: 0;
+    }
+    .dash-card-link {
+      font-size: 13px; color: var(--tw-color-green, #1E6B4A);
+      text-decoration: none; font-weight: 600;
+    }
+    .dash-card-link:hover { text-decoration: underline; }
+
+    /* Today mini-stat grid (4 small cards inside the "Today" card) */
+    .today-mini-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 10px; padding: 0 20px 20px;
+    }
+    .today-mini {
+      background: var(--tw-color-linen, #F5F0E8);
+      border-radius: var(--tw-radius-md, 10px);
+      padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .today-mini-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      color: var(--tw-color-muted, #888); text-transform: uppercase;
+    }
+    .today-mini-value {
+      font-family: var(--tw-font-display, 'Plus Jakarta Sans'), sans-serif;
+      font-weight: 800; font-size: 22px; color: var(--tw-color-ink, #0F1410);
+      line-height: 1;
+    }
+    .today-mini-confirmed .today-mini-value { color: var(--tw-color-green, #1E6B4A); }
+    .today-mini-pending .today-mini-value   { color: var(--tw-color-warning, #d69e2e); }
+    .today-mini-cancelled .today-mini-value { color: var(--tw-color-error, #c0392b); }
+
+    /* Tomorrow list — appointment rows inside the "Coming up tomorrow" card */
+    #tomorrowList { padding: 0 20px 20px; }
+    .tomorrow-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-top: 1px solid var(--tw-color-divider, rgba(0,0,0,0.05));
+    }
+    .tomorrow-row:first-child { border-top: none; }
+    .tomorrow-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(168,197,176,0.30);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .tomorrow-info { flex: 1; min-width: 0; }
+    .tomorrow-dog {
+      font-size: 14px; font-weight: 700; color: var(--tw-color-ink, #0F1410);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tomorrow-owner {
+      font-size: 12px; color: var(--tw-color-muted, #888); margin-top: 1px;
+    }
+
+    .dash-empty {
+      text-align: center; padding: 32px 16px;
+      color: var(--tw-color-muted, #888); font-size: 13px;
+    }
+
+    /* Recent messages table tweaks (uses .tw-table base) */
+    .dash-card .tw-table { border-radius: 0; box-shadow: none; }
+    .dash-card .tw-table tbody td { padding: 12px 20px; font-size: 13px; }
+    .dash-card .tw-table thead th { padding: 12px 20px; }
   </style>
 </head>
 <body>
@@ -189,80 +279,105 @@
   <!-- Page content -->
   <div id="pageContent" style="display:none;">
 
-    <div class="page-header">
-      <h1 id="welcomeHeading">Welcome back!</h1>
-      <p id="welcomeText"></p>
-    </div>
-
-    <!-- Onboarding checklist (only shown if 0 clients) -->
-    <div class="onboarding-card" id="onboardingCard" style="display:none;">
-      <h2>Get started with TailWag</h2>
-      <ul class="checklist">
-        <li>
-          <span class="check-done">&#10003;</span>
-          <span>Account created</span>
-        </li>
-        <li>
-          <div class="check-todo"></div>
-          <span><a href="/clients.html">Add your first pet parent</a></span>
-        </li>
-        <li>
-          <div class="check-todo"></div>
-          <span><a href="/messaging.html">Send your first message</a></span>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Stats row -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Total Pet Parents</div>
-        <div class="stat-value" id="statClients">—</div>
-        <div class="stat-sub">active pet parents</div>
+    <header class="tw-page-header">
+      <div class="tw-page-header-left">
+        <h1 id="welcomeHeading">Welcome back!</h1>
+        <p class="tw-page-header-sub" id="welcomeText"></p>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Total Dogs</div>
-        <div class="stat-value" id="statDogs">—</div>
-        <div class="stat-sub">registered dogs</div>
+      <div class="tw-page-header-actions">
+        <a href="/clients.html?action=add" class="tw-btn tw-btn-secondary">+ Add client</a>
+        <a href="/messaging.html" class="tw-btn tw-btn-primary">✉ Send message</a>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Messages This Month</div>
-        <div class="stat-value" id="statMsgUsage">—</div>
-        <div class="stat-sub">messages sent</div>
+    </header>
+
+    <!-- 4 top-level stat cards -->
+    <div class="tw-stat-card-grid" style="margin-bottom: var(--tw-space-6);">
+      <div class="tw-stat-card">
+        <div class="tw-stat-card-label">Active Pet Parents</div>
+        <div class="tw-stat-card-value" id="statClients">—</div>
+        <div class="tw-stat-card-sub" id="statClientsSub">&nbsp;</div>
+      </div>
+      <div class="tw-stat-card">
+        <div class="tw-stat-card-label">Dogs on File</div>
+        <div class="tw-stat-card-value" id="statDogs">—</div>
+        <div class="tw-stat-card-sub" id="statDogsSub">&nbsp;</div>
+      </div>
+      <div class="tw-stat-card">
+        <div class="tw-stat-card-label">Messages This Month</div>
+        <div class="tw-stat-card-value" id="statMsgUsage">—</div>
+        <div class="tw-stat-card-sub" id="statMsgSub">&nbsp;</div>
+      </div>
+      <div class="tw-stat-card">
+        <div class="tw-stat-card-label">Reviews Requested</div>
+        <div class="tw-stat-card-value" id="statReviews">—</div>
+        <div class="tw-stat-card-sub" id="statReviewsSub">&nbsp;</div>
       </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="section-title">Quick Actions</div>
-    <div class="quick-actions">
-      <a href="/clients.html" class="action-btn">&#10010; Add Client</a>
-      <a href="/messaging.html" class="action-btn">&#9993; Send Message</a>
-      <a href="/team.html" class="action-btn secondary">&#128101; Manage Team</a>
-    </div>
+    <!-- Two-column: today/tomorrow on the left, recent messages on the right -->
+    <div class="dash-two-col">
+      <div class="dash-left">
 
-    <!-- Recent Messages -->
-    <div class="card">
-      <div class="card-header">
-        <h2>Recent Messages</h2>
-        <a href="/messaging.html" class="card-link">View all messages &rarr;</a>
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h2>Today at the daycare</h2>
+            <a href="/schedule.html" class="dash-card-link">Schedule →</a>
+          </div>
+          <div class="today-mini-grid">
+            <div class="today-mini">
+              <div class="today-mini-label">Total</div>
+              <div class="today-mini-value" id="todayTotal">—</div>
+            </div>
+            <div class="today-mini today-mini-confirmed">
+              <div class="today-mini-label">Confirmed</div>
+              <div class="today-mini-value" id="todayConfirmed">—</div>
+            </div>
+            <div class="today-mini today-mini-pending">
+              <div class="today-mini-label">Pending</div>
+              <div class="today-mini-value" id="todayPending">—</div>
+            </div>
+            <div class="today-mini today-mini-cancelled">
+              <div class="today-mini-label">Cancelled</div>
+              <div class="today-mini-value" id="todayCancelled">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h2>Coming up tomorrow</h2>
+            <a href="/schedule.html" class="dash-card-link">View schedule →</a>
+          </div>
+          <div id="tomorrowList">
+            <div class="dash-empty">Loading tomorrow's lineup…</div>
+          </div>
+        </div>
+
       </div>
-      <div id="messagesLoading" style="text-align:center;padding:30px;">
-        <div class="loading-spinner" style="width:22px;height:22px;border-width:2px;"></div>
-      </div>
-      <div id="messagesContent" style="display:none;">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Recipient</th>
-              <th>Message</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="messagesTableBody">
-            <tr><td colspan="4"><div class="empty-state">No messages yet.</div></td></tr>
-          </tbody>
-        </table>
+
+      <div class="dash-right">
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <h2>Recent messages</h2>
+            <a href="/messaging.html" class="dash-card-link">View all →</a>
+          </div>
+          <div id="messagesContent">
+            <table class="tw-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Recipient</th>
+                  <th>Dog</th>
+                  <th>Message</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="messagesTableBody">
+                <tr><td colspan="5"><div class="dash-empty">Loading…</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -298,15 +413,15 @@
         return;
       }
 
-      const stats    = statsRes.ok    ? await statsRes.json()    : { clients: 0, dogs: 0 };
+      const stats    = statsRes.ok    ? await statsRes.json()    : {};
       const usage    = usageRes.ok    ? await usageRes.json()    : { usage: 0, limit: 500 };
       const messages = historyRes.ok  ? await historyRes.json()  : [];
       const meData   = meRes.ok       ? await meRes.json()       : {};
 
-      // Personalized greeting — prefer first name, fall back to daycare name
-      const firstName  = meData.profile?.first_name || '';
+      // ── Greeting ──
+      const firstName   = meData.profile?.first_name || '';
       const daycareName = meData.daycare?.name || stats.daycare?.name || '';
-      const greetName  = firstName || daycareName;
+      const greetName   = firstName || daycareName;
 
       const hour = new Date().getHours();
       const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -315,25 +430,63 @@
       const subEl     = document.getElementById('welcomeText');
 
       if (headingEl) {
-        headingEl.textContent = greetName ? `${timeGreeting}, ${greetName}! 👋` : `${timeGreeting}! 👋`;
+        headingEl.textContent = greetName ? `${timeGreeting}, ${greetName}` : `${timeGreeting}`;
       }
       if (subEl) {
-        subEl.textContent = daycareName && firstName ? daycareName : '';
+        const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        const cityState = [stats.daycare?.city, stats.daycare?.state].filter(Boolean).join(', ');
+        const locationBits = [daycareName, cityState].filter(Boolean).join(' · ');
+        subEl.textContent = locationBits ? `${dateStr} · ${locationBits}` : dateStr;
       }
 
-      // Stats
+      // ── Top stat cards ──
       const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      const setHtml = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+
       setVal('statClients', stats.clients != null ? stats.clients : 0);
-      setVal('statDogs',    stats.dogs    != null ? stats.dogs    : 0);
-      setVal('statMsgUsage', usage.usage  != null ? usage.usage   : 0);
+      const addedThisWeek = stats.clients_added_this_week || 0;
+      setHtml('statClientsSub',
+        addedThisWeek > 0
+          ? `<span class="delta-up">+${addedThisWeek}</span> this week`
+          : 'no new pet parents this week');
 
+      setVal('statDogs', stats.dogs != null ? stats.dogs : 0);
+      const recurringCount = stats.dogs_with_recurring || 0;
+      const totalDogs = stats.dogs || 0;
+      setHtml('statDogsSub',
+        totalDogs > 0
+          ? `${recurringCount} on recurring · ${totalDogs} total`
+          : 'no dogs yet');
 
-      // Onboarding checklist — show only when no clients yet
-      if ((stats.clients || 0) === 0) {
-        document.getElementById('onboardingCard').style.display = 'block';
+      setVal('statMsgUsage', usage.usage != null ? usage.usage : (stats.messages_this_month || 0));
+      const mom = stats.messages_mom_pct;
+      if (mom == null) {
+        setHtml('statMsgSub', 'first month');
+      } else if (mom >= 0) {
+        setHtml('statMsgSub', `<span class="delta-up">+${mom}%</span> vs. last month`);
+      } else {
+        setHtml('statMsgSub', `<span class="delta-down">${mom}%</span> vs. last month`);
       }
 
-      // Messages table
+      const reviewsThisMonth = stats.reviews_this_month || 0;
+      const reviewsPending   = stats.reviews_pending_response || 0;
+      setVal('statReviews', reviewsThisMonth);
+      setHtml('statReviewsSub',
+        reviewsPending > 0
+          ? `${reviewsPending} pending response`
+          : reviewsThisMonth > 0 ? 'all responded' : 'none requested yet');
+
+      // ── Today at the daycare ──
+      const today = stats.today_appointments || { total: 0, confirmed: 0, pending: 0, cancelled: 0 };
+      setVal('todayTotal',     today.total);
+      setVal('todayConfirmed', today.confirmed);
+      setVal('todayPending',   today.pending);
+      setVal('todayCancelled', today.cancelled);
+
+      // ── Coming up tomorrow ──
+      renderTomorrow(stats.tomorrow_pending || []);
+
+      // ── Messages table ──
       renderMessages(messages);
 
       // Show content
@@ -345,13 +498,38 @@
     }
   }
 
-  function renderMessages(messages) {
-    document.getElementById('messagesLoading').style.display = 'none';
-    document.getElementById('messagesContent').style.display = 'block';
+  function sessionBadge(notes) {
+    if (notes === 'am') return '<span class="tw-pill tw-pill-warning">AM</span>';
+    if (notes === 'pm') return '<span class="tw-pill tw-pill-info">PM</span>';
+    return '';
+  }
 
+  function renderTomorrow(appts) {
+    const el = document.getElementById('tomorrowList');
+    if (!appts.length) {
+      el.innerHTML = '<div class="dash-empty">Nothing pending for tomorrow.</div>';
+      return;
+    }
+    el.innerHTML = appts.map(function(a) {
+      var dog   = (a.dogs && a.dogs.name) || 'Dog';
+      var owner = a.clients
+        ? ((a.clients.first_name || '') + ' ' + (a.clients.last_name || '')).trim()
+        : '—';
+      return '<div class="tomorrow-row">'
+        + '<div class="tomorrow-avatar">🐕</div>'
+        + '<div class="tomorrow-info">'
+        +   '<div class="tomorrow-dog">' + escHtml(dog) + '</div>'
+        +   '<div class="tomorrow-owner">' + escHtml(owner) + '</div>'
+        + '</div>'
+        + sessionBadge(a.notes)
+        + '</div>';
+    }).join('');
+  }
+
+  function renderMessages(messages) {
     const tbody = document.getElementById('messagesTableBody');
     if (!messages.length) {
-      tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">No messages yet. <a href="/messaging.html" style="color:var(--green);font-weight:600;">Send your first message</a></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5"><div class="dash-empty">No messages yet. <a href="/messaging.html" style="color:var(--tw-color-green, #1E6B4A);font-weight:600;">Send your first message</a></div></td></tr>';
       return;
     }
 
@@ -362,13 +540,19 @@
       var date = new Date(m.created_at).toLocaleString('en-US', {
         month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
       });
+      var dogName = (m.dogs && m.dogs.name) || '\u2014';
       var preview = (m.body || '').length > 60 ? m.body.substring(0, 60) + '\u2026' : (m.body || '');
       var status = m.status || 'queued';
+      var pillClass = status === 'delivered' ? 'tw-pill-success'
+                    : status === 'failed'    ? 'tw-pill-error'
+                    : status === 'sent'      ? 'tw-pill-info'
+                    :                          'tw-pill-neutral';
       return '<tr>' +
         '<td style="white-space:nowrap;color:#999">' + date + '</td>' +
         '<td style="font-weight:600">' + escHtml(clientName) + '</td>' +
+        '<td style="color:#666">' + escHtml(dogName) + '</td>' +
         '<td style="color:#666">' + escHtml(preview) + '</td>' +
-        '<td><span class="status-badge status-' + status + '">' + status + '</span></td>' +
+        '<td><span class="tw-pill ' + pillClass + ' tw-pill-dot">' + escHtml(status) + '</span></td>' +
         '</tr>';
     }).join('');
   }

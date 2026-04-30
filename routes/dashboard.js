@@ -6,22 +6,81 @@ const { requireAuth } = require('../middleware/auth');
 router.get('/stats', requireAuth, async (req, res) => {
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
 
-  const start = new Date();
-  start.setDate(1);
-  start.setHours(0, 0, 0, 0);
+  // ── Time anchors (local-date for today/tomorrow, UTC ms for ranges) ──
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-  const [clientsRes, dogsRes, messagesRes, daycareRes] = await Promise.all([
+  // Start of this week (Mon=0)
+  const weekStart = new Date(now);
+  const dow = (weekStart.getDay() + 6) % 7; // 0..6 with Mon=0
+  weekStart.setDate(weekStart.getDate() - dow);
+  weekStart.setHours(0, 0, 0, 0);
+
+  const _ld = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const todayLocal = _ld(now);
+  const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowLocal = _ld(tomorrow);
+
+  const [
+    clientsRes, dogsRes, messagesRes, daycareRes,
+    clientsThisWeekRes, messagesLastMonthRes,
+    recurringRes,
+    todayApptsRes, tomorrowApptsRes,
+    reviewsRequestedRes, reviewsPendingRes
+  ] = await Promise.all([
+    // Existing fields
     supabaseAdmin.from('clients').select('id', { count: 'exact', head: true }).eq('daycare_id', req.daycareId).eq('active', true),
     supabaseAdmin.from('dogs').select('id', { count: 'exact', head: true }).eq('daycare_id', req.daycareId).eq('active', true),
-    supabaseAdmin.from('messages').select('id', { count: 'exact', head: true }).eq('daycare_id', req.daycareId).gte('created_at', start.toISOString()),
-    supabaseAdmin.from('daycares').select('name, city, state, google_link').eq('id', req.daycareId).single()
+    supabaseAdmin.from('messages').select('id', { count: 'exact', head: true }).eq('daycare_id', req.daycareId).gte('created_at', monthStart.toISOString()),
+    supabaseAdmin.from('daycares').select('name, city, state, google_link').eq('id', req.daycareId).single(),
+    // Deltas
+    supabaseAdmin.from('clients').select('id', { count: 'exact', head: true }).eq('daycare_id', req.daycareId).eq('active', true).gte('created_at', weekStart.toISOString()),
+    supabaseAdmin.from('messages').select('id', { count: 'exact', head: true }).eq('daycare_id', req.daycareId).gte('created_at', lastMonthStart.toISOString()).lt('created_at', monthStart.toISOString()),
+    // Distinct dog_ids on active recurring schedules — used for "X with recurring schedule"
+    supabaseAdmin.from('recurring_schedules').select('dog_id').eq('daycare_id', req.daycareId).eq('active', true).not('dog_id', 'is', null),
+    // Today's appointments — fetch full status list to bucket client-side (cheaper than 4 round-trips)
+    supabaseAdmin.from('appointments').select('id, status').eq('daycare_id', req.daycareId).eq('appointment_date', todayLocal),
+    // Tomorrow's pending appointments — used to populate "Coming up tomorrow"
+    supabaseAdmin.from('appointments').select('id, status, notes, clients(first_name, last_name), dogs(name, breed)').eq('daycare_id', req.daycareId).eq('appointment_date', tomorrowLocal).eq('status', 'pending').order('id'),
+    // Reviews (this month) + still awaiting parent action
+    supabaseAdmin.from('review_requests').select('id', { count: 'exact', head: true }).eq('daycare_id', req.daycareId).gte('created_at', monthStart.toISOString()),
+    supabaseAdmin.from('review_requests').select('id', { count: 'exact', head: true }).eq('daycare_id', req.daycareId).eq('status', 'requested')
   ]);
 
+  // Bucket today's appointments by status
+  const todayCounts = { total: 0, confirmed: 0, pending: 0, cancelled: 0 };
+  (todayApptsRes.data || []).forEach(a => {
+    todayCounts.total++;
+    if (a.status === 'confirmed')                                 todayCounts.confirmed++;
+    else if (a.status === 'cancelled')                            todayCounts.cancelled++;
+    else if (a.status === 'pending' || a.status === 'recurring_pending') todayCounts.pending++;
+  });
+
+  // Distinct dogs on a recurring schedule
+  const dogsWithRecurring = new Set((recurringRes.data || []).map(r => r.dog_id)).size;
+
+  // MoM message delta (percentage)
+  const mLast = messagesLastMonthRes.count || 0;
+  const mThis = messagesRes.count || 0;
+  const messages_mom_pct = mLast > 0 ? Math.round(((mThis - mLast) / mLast) * 100) : null;
+
   res.json({
+    // Existing keys (kept for backward compat)
     clients: clientsRes.count || 0,
     dogs: dogsRes.count || 0,
-    messages_this_month: messagesRes.count || 0,
-    daycare: daycareRes.data
+    messages_this_month: mThis,
+    daycare: daycareRes.data,
+
+    // New keys (all additive — old dashboards ignore these)
+    clients_added_this_week: clientsThisWeekRes.count || 0,
+    dogs_with_recurring: dogsWithRecurring,
+    messages_last_month: mLast,
+    messages_mom_pct,
+    today_appointments: todayCounts,
+    tomorrow_pending: tomorrowApptsRes.data || [],
+    reviews_this_month: reviewsRequestedRes.count || 0,
+    reviews_pending_response: reviewsPendingRes.count || 0
   });
 });
 
