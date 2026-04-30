@@ -16,6 +16,15 @@
   const mount = document.getElementById('tw-sidebar');
   if (!mount) return;
 
+  // Inject global design tokens once per page (idempotent)
+  if (!document.getElementById('tw-tokens-css')) {
+    const link = document.createElement('link');
+    link.id = 'tw-tokens-css';
+    link.rel = 'stylesheet';
+    link.href = '/css/tokens.css';
+    document.head.appendChild(link);
+  }
+
   // Lazy-load the global toast system once per page (idempotent)
   if (!window.tw || !window.tw.toast) {
     const ts = document.createElement('script');
@@ -56,11 +65,12 @@
     /* Hamburger (mobile only) */
     .tw-burger {
       display: none;
-      position: fixed; top: 14px; left: 14px; z-index: 130;
-      width: 40px; height: 40px; border-radius: 10px;
-      background: #0F1410; color: #F5F0E8; border: 1px solid rgba(245,240,232,0.12);
+      position: fixed; top: 14px; left: 14px; z-index: var(--tw-z-burger, 130);
+      width: 40px; height: 40px; border-radius: var(--tw-radius-md, 10px);
+      background: var(--tw-color-ink, #0F1410); color: var(--tw-color-on-dark, #F5F0E8);
+      border: 1px solid var(--tw-color-on-dark-border, rgba(245,240,232,0.12));
       align-items: center; justify-content: center;
-      cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+      cursor: pointer; box-shadow: var(--tw-shadow-2, 0 4px 14px rgba(0,0,0,0.18));
     }
     @media (max-width: 899px) {
       .tw-burger { display: flex; }
@@ -68,7 +78,7 @@
 
     /* Backdrop (mobile drawer) */
     .tw-backdrop {
-      display: none; position: fixed; inset: 0; z-index: 110;
+      display: none; position: fixed; inset: 0; z-index: var(--tw-z-drawer-bg, 110);
       background: rgba(15,20,16,0.55); backdrop-filter: blur(2px);
     }
     .tw-backdrop.open { display: block; }
@@ -77,11 +87,11 @@
     .tw-sidebar {
       position: fixed; top: 0; left: 0; height: 100vh;
       width: var(--tw-sidebar-w);
-      background: #0F1410; color: #F5F0E8;
+      background: var(--tw-color-ink, #0F1410); color: var(--tw-color-on-dark, #F5F0E8);
       display: flex; flex-direction: column;
-      border-right: 1px solid rgba(245,240,232,0.06);
-      z-index: 120;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      border-right: 1px solid var(--tw-color-on-dark-border, rgba(245,240,232,0.06));
+      z-index: var(--tw-z-sidebar, 120);
+      font-family: var(--tw-font-body, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
     }
     @media (max-width: 899px) {
       .tw-sidebar {
@@ -205,7 +215,7 @@
   const fabStyle = document.createElement('style');
   fabStyle.textContent = `
     .tw-fab {
-      position: fixed; right: 24px; bottom: 24px; z-index: 90;
+      position: fixed; right: 24px; bottom: 24px; z-index: var(--tw-z-fab, 90);
       width: 56px; height: 56px; border-radius: 50%;
       background: #1E6B4A; color: #F5F0E8; border: none;
       display: flex; align-items: center; justify-content: center;
@@ -220,7 +230,7 @@
     body:has(.modal-overlay.open) .tw-fab-sheet { display: none !important; }
 
     .tw-fab-sheet {
-      position: fixed; right: 24px; bottom: 92px; z-index: 91;
+      position: fixed; right: 24px; bottom: 92px; z-index: calc(var(--tw-z-fab, 90) + 1);
       background: #fff; border-radius: 14px;
       box-shadow: 0 12px 32px rgba(15,20,16,0.18);
       min-width: 220px; padding: 6px;
@@ -296,13 +306,13 @@
   const cmdkStyle = document.createElement('style');
   cmdkStyle.textContent = `
     .tw-cmdk-backdrop {
-      position: fixed; inset: 0; z-index: 300;
+      position: fixed; inset: 0; z-index: var(--tw-z-cmdk, 300);
       background: rgba(15,20,16,0.45); backdrop-filter: blur(2px);
       display: none;
     }
     .tw-cmdk-backdrop.open { display: block; }
     .tw-cmdk {
-      position: fixed; z-index: 301;
+      position: fixed; z-index: calc(var(--tw-z-cmdk, 300) + 1);
       top: 12vh; left: 50%; transform: translateX(-50%);
       width: min(560px, calc(100vw - 32px));
       background: #fff; border-radius: 14px;

@@ -435,18 +435,18 @@
     .appt-card.clickable:active { transform: translateY(1px); }
 
     .appt-popover-backdrop {
-      position: fixed; inset: 0; z-index: 200;
+      position: fixed; inset: 0; z-index: var(--tw-z-popover, 200);
       background: transparent;
       display: none;
     }
     .appt-popover-backdrop.open { display: block; }
 
     .appt-popover {
-      position: fixed; z-index: 201;
-      background: #fff; border-radius: 14px;
-      box-shadow: 0 14px 36px rgba(15,20,16,0.18);
-      border: 1px solid rgba(0,0,0,0.06);
-      width: 300px; padding: 16px;
+      position: fixed; z-index: calc(var(--tw-z-popover, 200) + 1);
+      background: var(--tw-color-card, #fff); border-radius: var(--tw-radius-lg, 14px);
+      box-shadow: var(--tw-shadow-3, 0 14px 36px rgba(15,20,16,0.18));
+      border: 1px solid var(--tw-color-border, rgba(0,0,0,0.06));
+      width: 300px; padding: var(--tw-space-4, 16px);
       display: none;
     }
     .appt-popover.open { display: block; }

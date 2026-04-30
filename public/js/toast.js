@@ -31,7 +31,7 @@
   const style = document.createElement('style');
   style.textContent = `
     .tw-toast-host {
-      position: fixed; right: 20px; bottom: 20px; z-index: 400;
+      position: fixed; right: 20px; bottom: 20px; z-index: var(--tw-z-toast, 400);
       display: flex; flex-direction: column-reverse; gap: 10px;
       pointer-events: none;
       max-width: min(380px, calc(100vw - 32px));
