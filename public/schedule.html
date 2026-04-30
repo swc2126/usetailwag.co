@@ -799,7 +799,7 @@
       const weD = new Date(we + 'T12:00:00');
       const sameMonth = wsD.getMonth() === weD.getMonth();
       label = sameMonth
-        ? fmtDate(ws, { month: 'long', day: 'numeric' }) + ' – ' + fmtDate(we, { day: 'numeric', year: 'numeric' })
+        ? fmtDate(ws, { month: 'long', day: 'numeric' }) + ' – ' + weD.getDate() + ', ' + weD.getFullYear()
         : fmtDate(ws, { month: 'short', day: 'numeric' }) + ' – ' + fmtDate(we, { month: 'short', day: 'numeric', year: 'numeric' });
       const titleEl = document.getElementById('weekTitle');
       if (titleEl) titleEl.textContent = label;
