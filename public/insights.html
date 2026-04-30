@@ -516,31 +516,22 @@
 <body>
 
 <!-- Nav -->
-<nav class="top-nav">
-  <div class="nav-main">
-    <div class="nav-left">
-      <a href="/dashboard.html" class="nav-logo">
-        <img src="/images/tailwag-icon.svg" alt="TailWag" />
-        <span class="nav-logo-text">TailWag</span>
-      </a>
-      <span class="nav-sep">|</span>
-      <span class="nav-daycare-name" id="navDaycareName">Loading...</span>
+<div id="tw-sidebar"></div>
+
+<div class="page-toolbar">
+  <div class="toolbar-left">
+    <div id="locationSelectWrap">
+      <select id="locationSelect" onchange="switchLocation(this.value)"></select>
     </div>
-    <div class="nav-right">
-      <div id="locationSelectWrap">
-        <select id="locationSelect" onchange="switchLocation(this.value)"></select>
+    <div id="viewAsWrap">
+      <button id="viewAsBtn" onclick="toggleViewAsDropdown(event)">
+        <span id="viewAsLabel">Owner View</span> ▾
+      </button>
+      <div class="viewas-dropdown" id="viewAsDropdown">
+        <div class="viewas-opt" data-role="owner" onclick="setViewAs('owner')">Owner View</div>
+        <div class="viewas-opt" data-role="manager" onclick="setViewAs('manager')">Manager View</div>
+        <div class="viewas-opt" data-role="team_member" onclick="setViewAs('team_member')">Team Member View</div>
       </div>
-      <div id="viewAsWrap">
-        <button id="viewAsBtn" onclick="toggleViewAsDropdown(event)">
-          <span id="viewAsLabel">Owner View</span> ▾
-        </button>
-        <div class="viewas-dropdown" id="viewAsDropdown">
-          <div class="viewas-opt" data-role="owner" onclick="setViewAs('owner')">Owner View</div>
-          <div class="viewas-opt" data-role="manager" onclick="setViewAs('manager')">Manager View</div>
-          <div class="viewas-opt" data-role="team_member" onclick="setViewAs('team_member')">Team Member View</div>
-        </div>
-      </div>
-      <div id="navUserWidget"></div>
     </div>
   </div>
   <div class="tab-bar">
@@ -549,7 +540,7 @@
     <button class="tab-btn" id="tabFinancial" onclick="switchTab('financial')" style="display:none">Financial</button>
     <button id="exportBtn" onclick="exportInsightsPDF()">⬇ Export Report</button>
   </div>
-</nav>
+</div>
 
 <!-- Loading -->
 <div id="loadingState">
@@ -799,6 +790,7 @@
   </div>
 </div>
 
+<script src="/js/sidebar.js"></script>
 <script src="/js/nav-user.js"></script>
 <script>
 (function () {

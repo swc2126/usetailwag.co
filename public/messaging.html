@@ -284,24 +284,7 @@
 </head>
 <body>
 
-<nav class="dashboard-nav">
-  <div class="nav-left">
-    <a href="/" class="logo">
-      <img src="/images/tailwag-icon.svg" alt="TailWag" style="height:26px;width:auto;" />
-      <span class="logo-text">TailWag</span>
-    </a>
-    <nav class="nav-links">
-      <a href="/dashboard.html" class="nav-link">Dashboard</a>
-      <a href="/clients.html" class="nav-link">Directory</a>
-      <a href="/messaging.html" class="nav-link active">Messaging</a>
-      <a href="/schedule.html" class="nav-link">Schedule</a>
-      <a href="/reviews.html" class="nav-link">Reviews</a>
-      <a href="/team.html" class="nav-link">Team</a>
-      <a href="/settings.html" class="nav-link">Settings</a>
-    </nav>
-  </div>
-  <div class="nav-right"><div id="navUserWidget"></div></div>
-</nav>
+<div id="tw-sidebar"></div>
 
 <div class="page-container">
 
@@ -1033,6 +1016,7 @@
 
 <script>window.intercomSettings={app_id:"ov6sdlds"};</script>
 <script>(function(){var w=window;var ic=w.Intercom;if(typeof ic==="function"){ic('reattach_activator');ic('update',w.intercomSettings);}else{var d=document;var i=function(){i.c(arguments);};i.q=[];i.c=function(args){i.q.push(args);};w.Intercom=i;var l=function(){var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://widget.intercom.io/widget/ov6sdlds';var x=d.getElementsByTagName('script')[0];x.parentNode.insertBefore(s,x);};if(document.readyState==='complete'){l();}else if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();</script>
+<script src="/js/sidebar.js"></script>
 <script src="/js/nav-user.js"></script>
 </body>
 </html>

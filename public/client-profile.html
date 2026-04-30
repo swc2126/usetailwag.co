@@ -343,26 +343,7 @@
 <body>
 
 <!-- NAV -->
-<nav class="dashboard-nav">
-  <div class="nav-left">
-    <a href="/dashboard.html" class="logo">
-      <img src="/images/tailwag-icon.svg" alt="TailWag" style="height:28px;width:auto;" />
-      <span class="logo-text">TailWag</span>
-    </a>
-    <nav class="nav-links">
-      <a href="/dashboard.html" class="nav-link">Dashboard</a>
-      <a href="/clients.html" class="nav-link active">Directory</a>
-      <a href="/messaging.html" class="nav-link">Messaging</a>
-      <a href="/schedule.html" class="nav-link">Schedule</a>
-      <a href="/reviews.html" class="nav-link">Reviews</a>
-      <a href="/team.html" class="nav-link">Team</a>
-      <a href="/settings.html" class="nav-link">Settings</a>
-    </nav>
-  </div>
-  <div class="nav-right">
-    <div id="navUserWidget"></div>
-  </div>
-</nav>
+<div id="tw-sidebar"></div>
 
 <!-- PAGE -->
 <div class="page-container">
@@ -606,6 +587,7 @@
   </div><!-- end pageContent -->
 </div><!-- end page-container -->
 
+<script src="/js/sidebar.js"></script>
 <script src="/js/nav-user.js"></script>
 <script>
   // ── Auth ──────────────────────────────────────────────────────────

@@ -403,12 +403,10 @@
 </head>
 <body>
 
-  <nav class="dashboard-nav">
-    <div class="nav-left">
-      <a href="/ceo-dashboard.html" class="logo">
-        <img src="/images/tailwag-icon.svg" alt="TailWag" style="height:30px;width:auto;" />
-        <span class="logo-text">TailWag</span>
-      </a>
+  <div id="tw-sidebar"></div>
+
+  <div class="page-toolbar">
+    <div class="toolbar-left">
       <span class="nav-badge">HQ</span>
       <div class="nav-tabs">
         <button class="nav-tab active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
@@ -418,11 +416,7 @@
         <button class="nav-tab" data-tab="onboard" onclick="switchTab('onboard')">Onboard Daycare</button>
       </div>
     </div>
-    <div class="nav-right">
-      <div id="navUserWidget"></div>
-      <button class="logout-btn" onclick="logout()">Log out</button>
-    </div>
-  </nav>
+  </div>
 
   <!-- ===================== TAB 1: OVERVIEW ===================== -->
   <div id="tab-overview" class="tab-panel active">
@@ -942,7 +936,8 @@
     <div class="drawer-body" id="drawerBody"></div>
   </div>
 
-  <script src="/js/nav-user.js"></script>
+  <script src="/js/sidebar.js"></script>
+<script src="/js/nav-user.js"></script>
   <script>
     // Global data store for drawer access
     let data = null;
