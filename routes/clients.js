@@ -141,4 +141,15 @@ router.delete('/:id', requireAuth, async (req, res) => {
   res.json({ success: true });
 });
 
+// POST /api/clients/:id/restore — undo a soft-delete
+router.post('/:id/restore', requireAuth, async (req, res) => {
+  const { error } = await supabaseAdmin
+    .from('clients')
+    .update({ active: true })
+    .eq('id', req.params.id)
+    .eq('daycare_id', req.daycareId);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
 module.exports = router;

@@ -1259,20 +1259,77 @@
 
   // ── Actions ────────────────────────────────────────────────────────────
   async function removeAppointment(id) {
+    // Capture a snapshot for Undo before the delete
+    const cur = currentAppointments.find(a => String(a.id) === String(id));
+    const snapshot = cur ? {
+      client_id: cur.client_id, dog_id: cur.dog_id,
+      appointment_date: cur.appointment_date, notes: cur.notes,
+      status: cur.status, dogName: cur.dogs?.name || 'Appointment'
+    } : null;
+
     const res = await fetch('/api/appointments/' + id, { method: 'DELETE', headers: authHeaders() });
-    if (res.ok) { showToast('Removed from schedule'); loadCurrentView(); }
-    else showToast('Error removing', 'error');
+    if (!res.ok) { (window.tw ? tw.toast : showToast)('Error removing', { type: 'error' }); return; }
+
+    if (window.tw && snapshot) {
+      tw.toast(`${snapshot.dogName}: removed`, {
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            const cr = await fetch('/api/appointments', {
+              method: 'POST', headers: authHeaders(),
+              body: JSON.stringify({
+                client_id: snapshot.client_id,
+                dog_id: snapshot.dog_id || null,
+                appointment_date: snapshot.appointment_date,
+                notes: snapshot.notes
+              })
+            });
+            if (!cr.ok) { tw.toast("Couldn't restore", { type: 'error' }); return; }
+            const data = await cr.json().catch(() => ({}));
+            if (snapshot.status && snapshot.status !== 'pending' && data?.id) {
+              await fetch('/api/appointments/' + data.id + '/status', {
+                method: 'PATCH', headers: authHeaders(),
+                body: JSON.stringify({ status: snapshot.status })
+              });
+            }
+            tw.toast(`${snapshot.dogName}: restored`);
+            loadCurrentView();
+          }
+        }
+      });
+    } else {
+      showToast('Removed from schedule');
+    }
+    loadCurrentView();
   }
 
-  async function markStatus(id, status) {
+  async function markStatus(id, status, opts) {
+    const cur = currentAppointments.find(a => String(a.id) === String(id));
+    const prev = (opts && opts.prevStatus) || cur?.status;
+    const isUndo = !!(opts && opts.suppressUndo);
+
     const res = await fetch('/api/appointments/' + id + '/status', {
       method: 'PATCH', headers: authHeaders(), body: JSON.stringify({ status })
     });
-    if (res.ok) {
-      const msg = status === 'confirmed' ? '✓ Confirmed!' : status === 'cancelled' ? 'Marked cancelled' : 'Marked pending';
+    if (!res.ok) { (window.tw ? tw.toast : showToast)('Error updating', { type: 'error' }); return; }
+
+    const dogName = cur?.dogs?.name || 'Dog';
+    const labelMap = { confirmed: '✓ Confirmed', cancelled: 'Cancelled', pending: 'Pending' };
+    const msg = `${dogName}: ${labelMap[status] || status}`;
+
+    if (window.tw && prev && prev !== status && !isUndo) {
+      tw.toast(msg, {
+        action: {
+          label: 'Undo',
+          onClick: () => markStatus(id, prev, { suppressUndo: true })
+        }
+      });
+    } else if (window.tw) {
+      tw.toast(msg);
+    } else {
       showToast(msg);
-      loadCurrentView();
-    } else showToast('Error updating', 'error');
+    }
+    loadCurrentView();
   }
 
   async function confirmRecurring(clientId, dogId) {
@@ -1817,9 +1874,29 @@
   }
 
   async function deleteRecurring(id) {
+    const card = document.querySelector(`.recurring-card[data-recurring-id="${id}"]`);
+    const dogName = card?.querySelector('.appt-dog')?.textContent?.trim() || 'Recurring schedule';
+
     const res = await fetch('/api/appointments/recurring/' + id, { method: 'DELETE', headers: authHeaders() });
-    if (res.ok) { showToast('Recurring schedule removed'); loadRecurring(); loadCurrentView(); }
-    else showToast('Error deleting', 'error');
+    if (!res.ok) { (window.tw ? tw.toast : showToast)('Error deleting', { type: 'error' }); return; }
+
+    if (window.tw) {
+      tw.toast(`${dogName}: recurring removed`, {
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            const r = await fetch('/api/appointments/recurring/' + id + '/restore', {
+              method: 'POST', headers: authHeaders()
+            });
+            if (r.ok) { tw.toast(`${dogName}: restored`); loadRecurring(); loadCurrentView(); }
+            else tw.toast("Couldn't restore", { type: 'error' });
+          }
+        }
+      });
+    } else {
+      showToast('Recurring schedule removed');
+    }
+    loadRecurring(); loadCurrentView();
   }
 
   // ── Summary modal ──────────────────────────────────────────────────────
@@ -1846,11 +1923,8 @@
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  function showToast(msg, type = '') {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.className = 'toast show ' + type;
-    setTimeout(() => { t.className = 'toast'; }, 3200);
-  }
+  // showToast is now provided globally by /js/toast.js (see sidebar.js bootstrap).
+  // Backward-compat wrapper there forwards (msg, type) → tw.toast(msg, { type }).
 
   // Close modals on overlay click
   document.querySelectorAll('.modal-overlay').forEach(overlay => {

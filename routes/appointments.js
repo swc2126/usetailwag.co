@@ -554,6 +554,17 @@ router.delete('/recurring/:id', requireAuth, async (req, res) => {
   res.json({ success: true });
 });
 
+// POST /api/appointments/recurring/:id/restore — undo soft-delete
+router.post('/recurring/:id/restore', requireAuth, async (req, res) => {
+  const { error } = await supabaseAdmin
+    .from('recurring_schedules')
+    .update({ active: true })
+    .eq('id', req.params.id)
+    .eq('daycare_id', req.daycareId);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
 // Inbound SMS handling lives in routes/sms.js (POST /api/sms/telnyx/inbound)
 
 module.exports = router;

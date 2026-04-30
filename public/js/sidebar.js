@@ -16,6 +16,14 @@
   const mount = document.getElementById('tw-sidebar');
   if (!mount) return;
 
+  // Lazy-load the global toast system once per page (idempotent)
+  if (!window.tw || !window.tw.toast) {
+    const ts = document.createElement('script');
+    ts.src = '/js/toast.js';
+    ts.async = false;
+    document.head.appendChild(ts);
+  }
+
   const NAV_ITEMS = [
     { href: '/dashboard.html',  label: 'Dashboard', icon: iconHome() },
     { href: '/clients.html',    label: 'Directory', icon: iconPaw(),     match: ['/clients', '/client-profile'] },
