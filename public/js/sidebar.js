@@ -174,7 +174,7 @@
   burger.addEventListener('click', openDrawer);
   backdrop.addEventListener('click', closeDrawer);
   sidebar.addEventListener('click', (e) => {
-    if (e.target.closest('.tw-link, .tw-brand')) closeDrawer();
+    if (e.target.closest('.tw-link, .tw-brand, .tw-search-btn')) closeDrawer();
   });
   window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 
@@ -280,6 +280,298 @@
       window.location.href = action.href;
     }
   });
+
+  // ── Cmd+K / Ctrl+K / "/" command palette ─────────────────────────────
+  const cmdkStyle = document.createElement('style');
+  cmdkStyle.textContent = `
+    .tw-cmdk-backdrop {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(15,20,16,0.45); backdrop-filter: blur(2px);
+      display: none;
+    }
+    .tw-cmdk-backdrop.open { display: block; }
+    .tw-cmdk {
+      position: fixed; z-index: 301;
+      top: 12vh; left: 50%; transform: translateX(-50%);
+      width: min(560px, calc(100vw - 32px));
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 24px 60px rgba(15,20,16,0.30);
+      overflow: hidden;
+      display: none;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .tw-cmdk.open { display: block; }
+    .tw-cmdk-input-wrap {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .tw-cmdk-input-wrap svg { color: #999; flex-shrink: 0; }
+    .tw-cmdk-input {
+      flex: 1; border: none; outline: none;
+      font-size: 16px; color: #2D3748;
+      font-family: inherit; background: transparent;
+    }
+    .tw-cmdk-hint {
+      font-size: 11px; color: #aaa;
+      padding: 3px 7px; border: 1px solid #e0dbd2;
+      border-radius: 5px; flex-shrink: 0;
+    }
+    .tw-cmdk-results { max-height: 50vh; overflow-y: auto; padding: 6px 0; }
+    .tw-cmdk-section-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #aaa; padding: 8px 16px 4px;
+    }
+    .tw-cmdk-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 9px 16px; cursor: pointer;
+      color: #2D3748; font-size: 14px;
+      border: none; background: none; width: 100%; text-align: left;
+      font-family: inherit;
+    }
+    .tw-cmdk-row.selected { background: rgba(30,107,74,0.08); }
+    .tw-cmdk-row svg { color: #1E6B4A; flex-shrink: 0; }
+    .tw-cmdk-row-main { flex: 1; min-width: 0; }
+    .tw-cmdk-row-title { font-weight: 600; color: #0F1410; }
+    .tw-cmdk-row-sub { font-size: 12px; color: #888; margin-top: 1px; }
+    .tw-cmdk-empty { padding: 28px 16px; text-align: center; color: #888; font-size: 13px; }
+
+    @media (max-width: 600px) {
+      .tw-cmdk { top: 8px; width: calc(100vw - 16px); }
+    }
+
+    /* Sidebar search button */
+    .tw-search-btn {
+      display: flex; align-items: center; gap: 10px;
+      margin: 4px 10px 8px; padding: 8px 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(245,240,232,0.10);
+      border-radius: 8px;
+      color: rgba(245,240,232,0.55);
+      font-size: 13px; font-family: inherit;
+      cursor: pointer; transition: background 0.12s, color 0.12s, border-color 0.12s;
+    }
+    .tw-search-btn:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(245,240,232,0.18);
+      color: #F5F0E8;
+    }
+    .tw-search-btn span { flex: 1; }
+    .tw-search-btn .tw-cmdk-hint {
+      color: rgba(245,240,232,0.45);
+      border-color: rgba(245,240,232,0.18);
+      font-size: 10px;
+    }
+  `;
+  document.head.appendChild(cmdkStyle);
+
+  // Inject search button into sidebar (above nav items)
+  const searchBtn = document.createElement('button');
+  searchBtn.type = 'button';
+  searchBtn.className = 'tw-search-btn';
+  const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+  searchBtn.innerHTML = `
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>Search…</span>
+    <span class="tw-cmdk-hint">${isMac ? '⌘' : 'Ctrl'} K</span>
+  `;
+  const navEl = sidebar.querySelector('.tw-nav');
+  navEl.insertBefore(searchBtn, navEl.firstChild);
+
+  // Build palette markup
+  const cmdkBackdrop = document.createElement('div');
+  cmdkBackdrop.className = 'tw-cmdk-backdrop';
+  document.body.appendChild(cmdkBackdrop);
+
+  const cmdk = document.createElement('div');
+  cmdk.className = 'tw-cmdk';
+  cmdk.setAttribute('role', 'dialog');
+  cmdk.setAttribute('aria-label', 'Search and jump to');
+  cmdk.innerHTML = `
+    <div class="tw-cmdk-input-wrap">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="tw-cmdk-input" id="twCmdkInput" placeholder="Search clients, dogs, or jump to a page…" autocomplete="off" />
+      <span class="tw-cmdk-hint">esc</span>
+    </div>
+    <div class="tw-cmdk-results" id="twCmdkResults">
+      <div class="tw-cmdk-empty">Start typing to search…</div>
+    </div>
+  `;
+  document.body.appendChild(cmdk);
+
+  const cmdkInput   = cmdk.querySelector('#twCmdkInput');
+  const cmdkResults = cmdk.querySelector('#twCmdkResults');
+  let cmdkSelectedIndex = 0;
+  let cmdkRows = [];   // [{kind, title, sub, href, icon}]
+  let cmdkDebounce;
+
+  const PAGE_TARGETS = NAV_ITEMS.map(it => ({
+    kind: 'page',
+    title: it.label,
+    sub: 'Open page',
+    href: it.href,
+    icon: it.icon
+  }));
+
+  function openCmdk() {
+    cmdkBackdrop.classList.add('open');
+    cmdk.classList.add('open');
+    cmdkInput.value = '';
+    cmdkInput.focus();
+    renderCmdkResults('');
+  }
+  function closeCmdk() {
+    cmdkBackdrop.classList.remove('open');
+    cmdk.classList.remove('open');
+  }
+
+  searchBtn.addEventListener('click', openCmdk);
+  cmdkBackdrop.addEventListener('click', closeCmdk);
+
+  // Global keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    const inField = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+
+    // Cmd/Ctrl+K — open palette (works even from inputs)
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      if (cmdk.classList.contains('open')) closeCmdk(); else openCmdk();
+      return;
+    }
+    // "/" — open palette only when not typing in an input
+    if (e.key === '/' && !inField && !cmdk.classList.contains('open')) {
+      e.preventDefault();
+      openCmdk();
+      return;
+    }
+    // Escape — close palette
+    if (e.key === 'Escape' && cmdk.classList.contains('open')) {
+      closeCmdk();
+      return;
+    }
+  });
+
+  cmdkInput.addEventListener('input', () => {
+    clearTimeout(cmdkDebounce);
+    const q = cmdkInput.value.trim();
+    cmdkDebounce = setTimeout(() => renderCmdkResults(q), 150);
+  });
+
+  cmdkInput.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      cmdkSelectedIndex = Math.min(cmdkSelectedIndex + 1, cmdkRows.length - 1);
+      updateCmdkSelection();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      cmdkSelectedIndex = Math.max(cmdkSelectedIndex - 1, 0);
+      updateCmdkSelection();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const row = cmdkRows[cmdkSelectedIndex];
+      if (row) {
+        closeCmdk();
+        window.location.href = row.href;
+      }
+    }
+  });
+
+  function updateCmdkSelection() {
+    cmdkResults.querySelectorAll('.tw-cmdk-row').forEach((el, i) => {
+      el.classList.toggle('selected', i === cmdkSelectedIndex);
+      if (i === cmdkSelectedIndex) el.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  async function renderCmdkResults(q) {
+    cmdkSelectedIndex = 0;
+
+    if (!q) {
+      cmdkRows = PAGE_TARGETS.slice();
+      renderCmdkRows([{ label: 'Pages', items: PAGE_TARGETS }]);
+      return;
+    }
+
+    const ql = q.toLowerCase();
+    const matchingPages = PAGE_TARGETS.filter(p => p.title.toLowerCase().includes(ql));
+
+    // Hit existing /api/clients?q= which already searches owner name, phone, email, AND dog names
+    let clientsHits = [];
+    let dogsHits = [];
+    try {
+      const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+      const headers = session?.access_token ? { Authorization: 'Bearer ' + session.access_token } : {};
+      const res = await fetch('/api/clients?q=' + encodeURIComponent(q), { headers });
+      if (res.ok) {
+        const clients = await res.json();
+        for (const c of clients.slice(0, 8)) {
+          clientsHits.push({
+            kind: 'client',
+            title: `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.phone || 'Unnamed',
+            sub: [c.phone, c.email].filter(Boolean).join(' · ') || 'Pet parent',
+            href: `/client-profile.html?id=${c.id}`,
+            icon: iconPaw()
+          });
+          for (const d of (c.dogs || [])) {
+            if ((d.name || '').toLowerCase().includes(ql)) {
+              dogsHits.push({
+                kind: 'dog',
+                title: d.name,
+                sub: `${[c.first_name, c.last_name].filter(Boolean).join(' ')}${d.breed ? ' · ' + d.breed : ''}`,
+                href: `/client-profile.html?id=${c.id}`,
+                icon: iconPaw()
+              });
+            }
+          }
+        }
+      }
+    } catch {}
+
+    const sections = [];
+    if (clientsHits.length) sections.push({ label: 'Pet Parents', items: clientsHits });
+    if (dogsHits.length)    sections.push({ label: 'Dogs', items: dogsHits.slice(0, 8) });
+    if (matchingPages.length) sections.push({ label: 'Pages', items: matchingPages });
+
+    cmdkRows = sections.flatMap(s => s.items);
+    renderCmdkRows(sections);
+  }
+
+  function renderCmdkRows(sections) {
+    if (!sections.length || !cmdkRows.length) {
+      cmdkResults.innerHTML = '<div class="tw-cmdk-empty">No results.</div>';
+      return;
+    }
+    let html = '';
+    let i = 0;
+    for (const sec of sections) {
+      html += `<div class="tw-cmdk-section-label">${sec.label}</div>`;
+      for (const r of sec.items) {
+        html += `<button type="button" class="tw-cmdk-row${i === 0 ? ' selected' : ''}" data-i="${i}">
+          ${r.icon || ''}
+          <div class="tw-cmdk-row-main">
+            <div class="tw-cmdk-row-title">${escapeHtml(r.title)}</div>
+            <div class="tw-cmdk-row-sub">${escapeHtml(r.sub || '')}</div>
+          </div>
+        </button>`;
+        i++;
+      }
+    }
+    cmdkResults.innerHTML = html;
+    cmdkResults.querySelectorAll('.tw-cmdk-row').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cmdkSelectedIndex = +el.dataset.i;
+        updateCmdkSelection();
+      });
+      el.addEventListener('click', () => {
+        closeCmdk();
+        window.location.href = cmdkRows[+el.dataset.i].href;
+      });
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]);
+  }
 
   // ── Inline SVG icons ──────────────────────────────────────────────────
   function svg(d) {
