@@ -533,7 +533,7 @@ router.get('/me', requireAuth, async (req, res) => {
 
     const { data: daycare } = await supabaseAdmin
       .from('daycares')
-      .select('id, name, phone, street, city, state, zip, google_link, messaging_mode, auto_reply_text')
+      .select('id, name, phone, street, city, state, zip, google_link, messaging_mode, auto_reply_text, last_reminder_run_at, last_reminder_run_summary')
       .eq('id', req.daycareId)
       .single();
 

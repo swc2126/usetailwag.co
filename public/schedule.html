@@ -178,6 +178,9 @@
     .btn-gold { background: var(--gold); color: white; }
     .btn-gold:hover { background: #b8832f; }
     .btn-sm { font-size: 12px; padding: 6px 12px; }
+    .reminders-group { display: inline-flex; flex-direction: column; align-items: stretch; gap: 2px; }
+    .reminders-last  { font-size: 10px; color: #888; line-height: 1.2; text-align: center; max-width: 200px; }
+    .reminders-last strong { color: var(--slate); font-weight: 600; }
 
     /* ── DAY VIEW: APPOINTMENT LIST ── */
     .appt-list { display: flex; flex-direction: column; gap: 8px; }
@@ -550,7 +553,10 @@
       <h2 id="apptListTitle">Today's Dogs</h2>
       <div class="action-bar-right">
         <button class="btn btn-outline btn-sm" onclick="openSummaryModal()">📋 Morning Summary</button>
-        <button class="btn btn-gold btn-sm" id="sendRemindersBtn" onclick="sendReminders()">📨 Send Reminders</button>
+        <div class="reminders-group">
+          <button class="btn btn-gold btn-sm" id="sendRemindersBtn" onclick="sendReminders()">📨 Send Reminders</button>
+          <div class="reminders-last" id="remindersLast"></div>
+        </div>
         <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Dog</button>
       </div>
     </div>
@@ -1418,34 +1424,84 @@
     const btn = document.getElementById('sendRemindersBtn');
     btn.disabled = true; btn.textContent = '📨 Sending…';
 
-    // Two flows: per-visit reminders for the date + weekly summaries for clients due one.
-    const [resPerVisit, resWeekly] = await Promise.all([
-      fetch('/api/appointments/send-reminders', {
-        method: 'POST', headers: authHeaders(), body: JSON.stringify({ date: currentDate })
-      }),
-      fetch('/api/appointments/send-weekly-summaries', {
-        method: 'POST', headers: authHeaders()
-      })
-    ]);
-    const dPV = resPerVisit.ok ? await resPerVisit.json().catch(()=>({})) : {};
-    const dWS = resWeekly.ok   ? await resWeekly.json().catch(()=>({}))   : {};
-
+    // Single combined endpoint — runs per-visit + weekly in one call and
+    // records ONE log entry on the daycare so the caption shows the merged result.
+    const res = await fetch('/api/appointments/run-reminders', {
+      method: 'POST', headers: authHeaders(), body: JSON.stringify({ date: currentDate })
+    });
+    const data = res.ok ? await res.json().catch(()=>({})) : {};
     btn.disabled = false; btn.textContent = '📨 Send Reminders';
 
-    const pv = dPV.sent || 0;
-    const ws = dWS.sent || 0;
+    if (!res.ok) {
+      showToast(data.error || 'Error sending', 'error');
+      return;
+    }
+
+    const pv = data.per_visit?.sent || 0;
+    const ws = data.weekly?.sent || 0;
     const total = pv + ws;
     if (total > 0) {
       const parts = [];
       if (pv > 0) parts.push(`${pv} per-visit`);
       if (ws > 0) parts.push(`${ws} weekly`);
       showToast(`✓ Sent ${total} (${parts.join(' + ')})`, 'success');
-      loadCurrentView();
-    } else if (!resPerVisit.ok && !resWeekly.ok) {
-      showToast(dPV.error || dWS.error || 'Error sending', 'error');
     } else {
       showToast('No reminders due to send', 'success');
     }
+
+    // Refresh the "last run" caption with the merged result we just produced
+    renderRemindersLast({
+      last_reminder_run_at: data.last_reminder_run_at || new Date().toISOString(),
+      last_reminder_run_summary: { trigger: 'manual', per_visit: data.per_visit, weekly: data.weekly }
+    });
+    loadCurrentView();
+  }
+
+  // ── "Last reminders sent" caption near the Send Reminders button ────────
+  function renderRemindersLast(daycare) {
+    const el = document.getElementById('remindersLast');
+    if (!el) return;
+    const at = daycare?.last_reminder_run_at;
+    const s  = daycare?.last_reminder_run_summary;
+    if (!at) { el.textContent = ''; return; }
+
+    const pv = s?.per_visit?.sent || 0;
+    const ws = s?.weekly?.sent    || 0;
+    const total = pv + ws;
+    const ranAt = new Date(at);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const yesterday = new Date(today.getTime() - 86400000);
+    const ranAtDay = new Date(ranAt); ranAtDay.setHours(0,0,0,0);
+
+    let when;
+    if (ranAtDay.getTime() === today.getTime())          when = 'Today';
+    else if (ranAtDay.getTime() === yesterday.getTime()) when = 'Yesterday';
+    else when = ranAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const time = ranAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+    let countText;
+    if (total === 0) countText = '0 sent';
+    else if (pv && ws) countText = `${pv} per-visit + ${ws} weekly`;
+    else if (pv)       countText = `${pv} per-visit`;
+    else               countText = `${ws} weekly`;
+
+    const triggerTag = s?.trigger === 'cron' ? 'auto' : 'manual';
+    el.innerHTML = `Last sent: <strong>${when} ${time}</strong> · ${countText} <span style="color:#aaa;">(${triggerTag})</span>`;
+  }
+
+  async function loadRemindersLast() {
+    try {
+      const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+      if (!session?.access_token) return;
+      const res = await fetch('/api/auth/me', {
+        method: 'POST',
+        headers: { ...authHeaders() },
+        body: JSON.stringify({ access_token: session.access_token })
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      renderRemindersLast(data?.daycare);
+    } catch {}
   }
 
   async function sendMorningSummary() {
@@ -1807,6 +1863,7 @@
     await loadClients();
     loadCurrentView();
     loadRecurring();
+    loadRemindersLast();
 
     // Honor ?action=add (e.g. from FAB on another page)
     if (new URLSearchParams(window.location.search).get('action') === 'add') {

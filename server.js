@@ -188,7 +188,7 @@ cron.schedule('*/10 * * * *', async () => {
 // node-cron's `timezone` option handles DST automatically — fires at 6 PM
 // America/Chicago year-round. Each daycare's send is wrapped in try/catch
 // so one failure doesn't poison the rest of the run.
-const { runDailyReminders, runWeeklySummaries } = require('./routes/appointments');
+const { runDailyReminders, runWeeklySummaries, recordReminderRun } = require('./routes/appointments');
 
 cron.schedule('0 18 * * *', async () => {
   try {
@@ -206,22 +206,26 @@ cron.schedule('0 18 * * *', async () => {
 
     let totalPV = 0, totalWS = 0, errors = 0;
     for (const cfg of configs) {
+      let pvResult = null, wsResult = null;
       try {
-        const r = await runDailyReminders(cfg.daycare_id, tomorrow);
-        totalPV += r.sent || 0;
+        pvResult = await runDailyReminders(cfg.daycare_id, tomorrow);
+        totalPV += pvResult.sent || 0;
       } catch (err) {
         errors++;
         console.error(`[reminder-cron] PV ${cfg.daycare_id}:`, err.message);
       }
       if (isSunday) {
         try {
-          const r = await runWeeklySummaries(cfg.daycare_id);
-          totalWS += r.sent || 0;
+          wsResult = await runWeeklySummaries(cfg.daycare_id);
+          totalWS += wsResult.sent || 0;
         } catch (err) {
           errors++;
           console.error(`[reminder-cron] WS ${cfg.daycare_id}:`, err.message);
         }
       }
+      // Record one combined log entry per daycare so the schedule-page caption
+      // shows the merged result, not a stale partial.
+      await recordReminderRun(cfg.daycare_id, 'cron', pvResult, wsResult);
     }
 
     console.log(`[reminder-cron] sent ${totalPV} per-visit + ${totalWS} weekly summaries across ${configs.length} daycares (errors: ${errors})${isSunday ? '' : ' [non-Sunday — weekly skipped]'}`);

@@ -107,6 +107,34 @@ async function sendWeeklySummarySms(fromNumber, client, upcoming, daycare) {
   }
 }
 
+// ─── REUSABLE: stamp the daycare with the last reminder run ───────────────
+async function recordReminderRun(daycareId, trigger, perVisit, weekly) {
+  const summary = {
+    trigger,
+    per_visit: {
+      sent:    perVisit?.sent    || 0,
+      failed:  perVisit?.failed  || 0,
+      skipped: perVisit?.skipped || 0
+    },
+    weekly: {
+      sent:    weekly?.sent    || 0,
+      failed:  weekly?.failed  || 0,
+      skipped: weekly?.skipped || 0
+    }
+  };
+  try {
+    await supabaseAdmin.from('daycares')
+      .update({
+        last_reminder_run_at: new Date().toISOString(),
+        last_reminder_run_summary: summary
+      })
+      .eq('id', daycareId);
+  } catch (err) {
+    // Don't let logging failure break the reminder send
+    console.error('recordReminderRun error:', err.message);
+  }
+}
+
 // ─── REUSABLE: per-visit reminders for one daycare/date ──────────────────
 // Used by both POST /send-reminders and the daily cron.
 async function runDailyReminders(daycareId, date) {
@@ -378,6 +406,7 @@ router.post('/send-reminders', requireAuth, async (req, res) => {
   const result = await runDailyReminders(req.daycareId, date);
   if (result.reason === 'no_number') return res.status(400).json({ error: 'No phone number assigned.' });
   if (result.error) return res.status(500).json({ error: result.error });
+  await recordReminderRun(req.daycareId, 'manual', result, null);
   return res.json({ success: true, ...result, message: result.sent === 0 ? 'No pending appointments to remind.' : undefined });
 });
 
@@ -389,7 +418,34 @@ router.post('/send-weekly-summaries', requireAuth, async (req, res) => {
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
   const result = await runWeeklySummaries(req.daycareId);
   if (result.reason === 'no_number') return res.status(400).json({ error: 'No phone number assigned.' });
+  await recordReminderRun(req.daycareId, 'manual', null, result);
   return res.json({ success: true, ...result });
+});
+
+// POST /api/appointments/run-reminders — combined entry point that
+// fires per-visit reminders for the given date AND weekly summaries
+// for clients due, then records ONE log entry on the daycare row.
+// The schedule page's "Send Reminders" button uses this so the caption
+// shows the merged count instead of a stale partial one.
+router.post('/run-reminders', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+  const { date } = req.body;
+  if (!date) return res.status(400).json({ error: 'date required (YYYY-MM-DD)' });
+
+  const [perVisit, weekly] = await Promise.all([
+    runDailyReminders(req.daycareId, date),
+    runWeeklySummaries(req.daycareId)
+  ]);
+  if (perVisit.reason === 'no_number' && weekly.reason === 'no_number') {
+    return res.status(400).json({ error: 'No phone number assigned.' });
+  }
+  await recordReminderRun(req.daycareId, 'manual', perVisit, weekly);
+  return res.json({
+    success: true,
+    per_visit: perVisit,
+    weekly,
+    last_reminder_run_at: new Date().toISOString()
+  });
 });
 
 // POST /api/appointments/morning-summary — send morning confirmation summary to site manager
@@ -503,3 +559,4 @@ router.delete('/recurring/:id', requireAuth, async (req, res) => {
 module.exports = router;
 module.exports.runDailyReminders = runDailyReminders;
 module.exports.runWeeklySummaries = runWeeklySummaries;
+module.exports.recordReminderRun = recordReminderRun;
