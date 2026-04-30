@@ -516,8 +516,62 @@ router.post('/telnyx/inbound', async (req, res) => {
   const isYesNo = ['YES', 'NO', 'Y', 'N'].includes(reply);
 
   // STOP/HELP keywords are handled by Telnyx itself — never auto-reply to those
-  const STOP_KEYWORDS = ['STOP', 'STOPALL', 'UNSUBSCRIBE', 'CANCEL', 'END', 'QUIT', 'HELP', 'INFO'];
-  const isStopKeyword = STOP_KEYWORDS.includes(reply);
+  const STOP_KEYWORDS_BARE = ['STOP', 'STOPALL', 'UNSUBSCRIBE', 'END', 'QUIT', 'HELP', 'INFO'];
+  const isStopKeyword = STOP_KEYWORDS_BARE.includes(reply) || reply === 'CANCEL';
+
+  // ── Day-specific cancel from weekly summary replies ──────────────────
+  //   "NO MON", "SKIP TUE", "CANCEL FRIDAY", "NO MONDAY" — cancel that
+  //   day's pending appointment within the next 7 days. Runs BEFORE
+  //   the bare YES/NO branch so "CANCEL FRI" doesn't get caught by the
+  //   isStopKeyword check above.
+  const DAY_TOKEN_TO_DOW = {
+    SUN: 0, SU: 0, SUNDAY: 0,
+    MON: 1, MO: 1, MONDAY: 1,
+    TUE: 2, TU: 2, TUES: 2, TUESDAY: 2,
+    WED: 3, WE: 3, WEDS: 3, WEDNESDAY: 3,
+    THU: 4, TH: 4, THUR: 4, THURS: 4, THURSDAY: 4,
+    FRI: 5, FR: 5, FRIDAY: 5,
+    SAT: 6, SA: 6, SATURDAY: 6
+  };
+  const dayCancelMatch = reply.match(/^(NO|SKIP|CANCEL)\s+([A-Z]+)$/);
+  const dayCancelDow = dayCancelMatch ? DAY_TOKEN_TO_DOW[dayCancelMatch[2]] : undefined;
+
+  if (dayCancelDow !== undefined && client) {
+    // Find the next pending appointment for this client on that weekday within 7 days
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let target = null;
+    for (let offset = 0; offset < 7; offset++) {
+      const d = new Date(today.getTime() + offset * 86400_000);
+      if (d.getDay() === dayCancelDow) { target = d; break; }
+    }
+    if (target) {
+      const targetDate = target.toISOString().split('T')[0];
+      const { data: dayAppt } = await supabaseAdmin
+        .from('appointments')
+        .select('id, appointment_date, dogs(name)')
+        .eq('daycare_id', config.daycare_id)
+        .eq('client_id', client.id)
+        .eq('appointment_date', targetDate)
+        .eq('status', 'pending')
+        .limit(1)
+        .single();
+      if (dayAppt) {
+        await supabaseAdmin.from('appointments')
+          .update({ status: 'cancelled', confirmed_at: new Date().toISOString() })
+          .eq('id', dayAppt.id);
+
+        const dogName = dayAppt.dogs?.name || 'your pup';
+        const apptDateObj = new Date(dayAppt.appointment_date + 'T12:00:00');
+        const dayStr = apptDateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+        try {
+          await sendSms({ from: to, to: from, text: `Got it, ${client.first_name}! We've cancelled ${dogName} for ${dayStr}. See you next time!` });
+        } catch {}
+        return res.sendStatus(200);
+      }
+    }
+    // No matching appointment found — fall through (auto-reply will handle it gracefully)
+  }
 
   if (!isYesNo) {
     // Not a YES/NO confirmation — handle based on the daycare's messaging mode.

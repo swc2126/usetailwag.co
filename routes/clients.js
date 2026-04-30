@@ -105,10 +105,23 @@ router.get('/:id', requireAuth, async (req, res) => {
 
 // PUT /api/clients/:id — update client
 router.put('/:id', requireAuth, async (req, res) => {
-  const { first_name, last_name, phone, email, notes } = req.body;
+  const { first_name, last_name, phone, email, notes, reminder_cadence } = req.body;
+  const updates = {};
+  if (first_name !== undefined) updates.first_name = first_name;
+  if (last_name  !== undefined) updates.last_name  = last_name;
+  if (phone      !== undefined) updates.phone      = phone;
+  if (email      !== undefined) updates.email      = email;
+  if (notes      !== undefined) updates.notes      = notes;
+  if (reminder_cadence !== undefined) {
+    if (!['per_visit', 'weekly_summary', 'none'].includes(reminder_cadence)) {
+      return res.status(400).json({ error: 'reminder_cadence must be per_visit, weekly_summary, or none' });
+    }
+    updates.reminder_cadence = reminder_cadence;
+  }
+
   const { data, error } = await supabaseAdmin
     .from('clients')
-    .update({ first_name, last_name, phone, email, notes })
+    .update(updates)
     .eq('id', req.params.id)
     .eq('daycare_id', req.daycareId)
     .select()

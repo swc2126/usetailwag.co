@@ -1417,15 +1417,35 @@
   async function sendReminders() {
     const btn = document.getElementById('sendRemindersBtn');
     btn.disabled = true; btn.textContent = '📨 Sending…';
-    const res = await fetch('/api/appointments/send-reminders', {
-      method: 'POST', headers: authHeaders(), body: JSON.stringify({ date: currentDate })
-    });
-    const data = await res.json();
+
+    // Two flows: per-visit reminders for the date + weekly summaries for clients due one.
+    const [resPerVisit, resWeekly] = await Promise.all([
+      fetch('/api/appointments/send-reminders', {
+        method: 'POST', headers: authHeaders(), body: JSON.stringify({ date: currentDate })
+      }),
+      fetch('/api/appointments/send-weekly-summaries', {
+        method: 'POST', headers: authHeaders()
+      })
+    ]);
+    const dPV = resPerVisit.ok ? await resPerVisit.json().catch(()=>({})) : {};
+    const dWS = resWeekly.ok   ? await resWeekly.json().catch(()=>({}))   : {};
+
     btn.disabled = false; btn.textContent = '📨 Send Reminders';
-    if (res.ok) {
-      showToast(data.sent > 0 ? `✓ Sent ${data.sent} reminder${data.sent!==1?'s':''}` : data.message, 'success');
+
+    const pv = dPV.sent || 0;
+    const ws = dWS.sent || 0;
+    const total = pv + ws;
+    if (total > 0) {
+      const parts = [];
+      if (pv > 0) parts.push(`${pv} per-visit`);
+      if (ws > 0) parts.push(`${ws} weekly`);
+      showToast(`✓ Sent ${total} (${parts.join(' + ')})`, 'success');
       loadCurrentView();
-    } else showToast(data.error || 'Error sending', 'error');
+    } else if (!resPerVisit.ok && !resWeekly.ok) {
+      showToast(dPV.error || dWS.error || 'Error sending', 'error');
+    } else {
+      showToast('No reminders due to send', 'success');
+    }
   }
 
   async function sendMorningSummary() {
