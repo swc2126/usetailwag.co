@@ -238,6 +238,12 @@
     .days-row { display: flex; gap: 4px; margin-top: 4px; }
     .day-chip { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 5px; background: var(--linen); color: #666; }
     .day-chip.active { background: var(--green); color: white; }
+    button.day-chip {
+      border: 1px solid transparent; font-family: inherit;
+      cursor: pointer; transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    button.day-chip:hover { border-color: var(--green); }
+    button.day-chip.active:hover { background: var(--green-dark); }
 
     /* ── MODALS ── */
     .modal-overlay {
@@ -1338,9 +1344,9 @@
       const dogName = s.dogs?.name || '(all dogs)';
       const owner   = s.clients ? `${s.clients.first_name} ${s.clients.last_name}` : '—';
       const dayChips = FULL_DAY_NAMES.map((d,i) =>
-        `<span class="day-chip ${s.days_of_week.includes(i)?'active':''}">${d}</span>`
+        `<button type="button" class="day-chip ${s.days_of_week.includes(i)?'active':''}" data-dow="${i}" onclick="toggleRecurringDay('${s.id}', ${i}, this)" title="Toggle ${d}">${d}</button>`
       ).join('');
-      return `<div class="recurring-card">
+      return `<div class="recurring-card" data-recurring-id="${s.id}">
         <div class="dog-avatar">🐕</div>
         <div class="appt-info">
           <div class="appt-dog">${escHtml(dogName)}</div>
@@ -1350,6 +1356,46 @@
         <button class="icon-btn danger" onclick="deleteRecurring('${s.id}')">✕</button>
       </div>`;
     }).join('');
+  }
+
+  async function toggleRecurringDay(scheduleId, dow, btnEl) {
+    const card = btnEl.closest('.recurring-card');
+    if (!card) return;
+
+    // Compute new days from current button states
+    const allBtns = card.querySelectorAll('.day-chip[data-dow]');
+    const wasActive = btnEl.classList.contains('active');
+    const newDays = [];
+    allBtns.forEach(b => {
+      const isThis = (+b.dataset.dow) === dow;
+      const stillActive = isThis ? !wasActive : b.classList.contains('active');
+      if (stillActive) newDays.push(+b.dataset.dow);
+    });
+
+    if (!newDays.length) {
+      showToast('A recurring schedule needs at least one day', 'error');
+      return;
+    }
+
+    // Optimistic UI
+    btnEl.classList.toggle('active');
+    btnEl.disabled = true;
+
+    const res = await fetch('/api/appointments/recurring/' + scheduleId, {
+      method: 'PATCH', headers: authHeaders(),
+      body: JSON.stringify({ days_of_week: newDays })
+    });
+
+    btnEl.disabled = false;
+
+    if (res.ok) {
+      showToast('Recurring schedule updated', 'success');
+      loadCurrentView();   // refresh week/month chips that pull from the recurring schedule
+    } else {
+      btnEl.classList.toggle('active');  // rollback
+      const d = await res.json().catch(() => ({}));
+      showToast(d.error || 'Error updating', 'error');
+    }
   }
 
   function openRecurringModal() {

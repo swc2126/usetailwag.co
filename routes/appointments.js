@@ -325,6 +325,32 @@ router.post('/recurring', requireAuth, async (req, res) => {
   res.status(201).json(data);
 });
 
+// PATCH /api/appointments/recurring/:id — update days_of_week and/or dog_id
+router.patch('/recurring/:id', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+  const { days_of_week, dog_id } = req.body;
+  const updates = {};
+  if (Array.isArray(days_of_week)) {
+    if (!days_of_week.length) return res.status(400).json({ error: 'days_of_week cannot be empty' });
+    if (days_of_week.some(d => !Number.isInteger(d) || d < 0 || d > 6)) {
+      return res.status(400).json({ error: 'days_of_week must be integers 0–6' });
+    }
+    updates.days_of_week = [...new Set(days_of_week)].sort((a,b) => a - b);
+  }
+  if (dog_id !== undefined) updates.dog_id = dog_id || null;
+  if (!Object.keys(updates).length) return res.status(400).json({ error: 'No fields to update' });
+
+  const { data, error } = await supabaseAdmin
+    .from('recurring_schedules')
+    .update(updates)
+    .eq('id', req.params.id)
+    .eq('daycare_id', req.daycareId)
+    .select()
+    .single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
 // DELETE /api/appointments/recurring/:id
 router.delete('/recurring/:id', requireAuth, async (req, res) => {
   const { error } = await supabaseAdmin
