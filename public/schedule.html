@@ -1953,8 +1953,19 @@
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // showToast is now provided globally by /js/toast.js (see sidebar.js bootstrap).
-  // Backward-compat wrapper there forwards (msg, type) → tw.toast(msg, { type }).
+  // Defensive showToast — uses the universal tw.toast() if it's loaded,
+  // otherwise falls back to console.log so a slow/missing toast.js
+  // can't throw and halt the surrounding flow (e.g. confirmAddAppointment
+  // post-save → loadCurrentView()). Once toast.js loads, all toasts use
+  // its UI; before then, we just don't show one (but nothing breaks).
+  function showToast(msg, type) {
+    try {
+      if (window.tw && window.tw.toast) {
+        return window.tw.toast(msg, { type: type === 'error' ? 'error' : 'success' });
+      }
+    } catch {}
+    console.log('[toast:' + (type || 'info') + ']', msg);
+  }
 
   // Close modals on overlay click
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
