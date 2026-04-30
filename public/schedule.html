@@ -345,6 +345,83 @@
       .week-grid { display: none; }
       #viewWeek { display: none; }
     }
+
+    /* ── APPT POPOVER ───────────────────────────────────────────────── */
+    .appt-card.clickable {
+      cursor: pointer;
+      transition: background 0.12s, transform 0.06s;
+    }
+    .appt-card.clickable:hover { background: rgba(30,107,74,0.04); }
+    .appt-card.clickable:active { transform: translateY(1px); }
+
+    .appt-popover-backdrop {
+      position: fixed; inset: 0; z-index: 200;
+      background: transparent;
+      display: none;
+    }
+    .appt-popover-backdrop.open { display: block; }
+
+    .appt-popover {
+      position: fixed; z-index: 201;
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 14px 36px rgba(15,20,16,0.18);
+      border: 1px solid rgba(0,0,0,0.06);
+      width: 300px; padding: 16px;
+      display: none;
+    }
+    .appt-popover.open { display: block; }
+
+    .ap-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+    .ap-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(30,107,74,0.12); display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .ap-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 16px; color: var(--black); }
+    .ap-sub { font-size: 13px; color: #666; margin-top: 2px; }
+    .ap-breed { font-size: 12px; color: #aaa; margin-top: 1px; }
+
+    .ap-section-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #999; margin-bottom: 7px;
+    }
+    .ap-status-group {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;
+      background: #f4f1ec; border-radius: 8px; padding: 3px;
+      margin-bottom: 14px;
+    }
+    .ap-status-btn {
+      padding: 7px 4px; border-radius: 6px; border: none; background: transparent;
+      font-family: inherit; font-size: 12px; font-weight: 600; color: #666;
+      cursor: pointer; transition: background 0.12s, color 0.12s;
+    }
+    .ap-status-btn:hover { background: rgba(255,255,255,0.6); color: var(--slate); }
+    .ap-status-btn.active { background: #fff; color: var(--green); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .ap-status-btn.active.cancelled { color: #c0392b; }
+    .ap-status-btn.active.pending  { color: #d69e2e; }
+
+    .ap-meta { font-size: 12px; color: #888; margin-bottom: 14px; line-height: 1.5; }
+    .ap-meta strong { color: var(--slate); font-weight: 600; }
+
+    .ap-foot { display: flex; gap: 8px; }
+    .ap-btn {
+      flex: 1; padding: 9px 12px; border-radius: 8px; border: 1px solid #e0dbd2;
+      background: #fff; color: var(--slate);
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.12s;
+    }
+    .ap-btn:hover { border-color: var(--slate); }
+    .ap-btn-danger { color: #c0392b; border-color: rgba(192,57,43,0.25); }
+    .ap-btn-danger:hover { background: rgba(192,57,43,0.06); border-color: #c0392b; }
+
+    @media (max-width: 600px) {
+      .appt-popover {
+        left: 12px !important; right: 12px !important;
+        bottom: 12px !important; top: auto !important;
+        width: auto;
+      }
+      .appt-popover-backdrop { background: rgba(15,20,16,0.32); }
+    }
   </style>
 </head>
 <body>
@@ -573,6 +650,33 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Appointment quick-edit popover -->
+<div class="appt-popover-backdrop" id="apBackdrop" onclick="closeApptPopover()"></div>
+<div class="appt-popover" id="apPopover" role="dialog" aria-label="Edit appointment" onclick="event.stopPropagation()">
+  <div class="ap-head">
+    <div class="ap-avatar">🐕</div>
+    <div>
+      <div class="ap-title" id="apTitle">—</div>
+      <div class="ap-sub" id="apSub">—</div>
+      <div class="ap-breed" id="apBreed"></div>
+    </div>
+  </div>
+
+  <div class="ap-section-label">Status</div>
+  <div class="ap-status-group">
+    <button class="ap-status-btn pending"   data-status="pending"   onclick="apptPopoverSetStatus('pending')">Pending</button>
+    <button class="ap-status-btn"           data-status="confirmed" onclick="apptPopoverSetStatus('confirmed')">Confirmed</button>
+    <button class="ap-status-btn cancelled" data-status="cancelled" onclick="apptPopoverSetStatus('cancelled')">Cancelled</button>
+  </div>
+
+  <div class="ap-meta" id="apMeta"></div>
+
+  <div class="ap-foot">
+    <button class="ap-btn" onclick="closeApptPopover()">Close</button>
+    <button class="ap-btn ap-btn-danger" onclick="apptPopoverDelete()">Delete</button>
+  </div>
+</div>
+
 <script>
   // ── State ──────────────────────────────────────────────────────────────
   let viewMode = 'day';
@@ -769,15 +873,14 @@
         recurring_pending: '<span class="badge badge-recurring">Recurring</span>'
       };
       const reminderBadge = appt.reminder_sent_at ? '<span class="badge badge-reminder">Reminded</span>' : '';
-      const deleteBtn = appt.id
-        ? `<button class="icon-btn danger" title="Remove" onclick="removeAppointment('${appt.id}')">✕</button>`
-        : `<button class="icon-btn" title="Add to this date" onclick="confirmRecurring('${appt.client_id}','${appt.dog_id||''}')">＋</button>`;
-      const confirmBtn = ['pending','recurring_pending'].includes(appt.status) && appt.id
-        ? `<button class="icon-btn" title="Mark confirmed" onclick="markStatus('${appt.id}','confirmed')">✓</button>` : '';
-      const cancelBtn = appt.status === 'confirmed' && appt.id
-        ? `<button class="icon-btn danger" title="Cancel" onclick="markStatus('${appt.id}','cancelled')">✕</button>` : '';
 
-      return `<div class="appt-card">
+      // Recurring placeholders (no id yet) keep the inline "+ add to this date" action.
+      // Persisted appointments become click-to-edit-popover (entire card is the click target).
+      const recurringAdd = !appt.id
+        ? `<div class="appt-actions"><button class="icon-btn" title="Add to this date" onclick="event.stopPropagation();confirmRecurring('${appt.client_id}','${appt.dog_id||''}')">＋</button></div>`
+        : '';
+
+      return `<div class="appt-card${appt.id ? ' clickable' : ''}"${appt.id ? ` onclick="openApptPopover('${appt.id}', this)"` : ''}>
         <div class="status-dot ${appt.status}"></div>
         <div class="dog-avatar">🐕</div>
         <div class="appt-info">
@@ -786,7 +889,7 @@
           ${breed ? `<div class="appt-breed">${escHtml(breed)}</div>` : ''}
         </div>
         <div class="appt-badges">${statusMap[appt.status]||''}${sessionBadge(appt.notes)}${reminderBadge}</div>
-        <div class="appt-actions">${confirmBtn}${cancelBtn}${deleteBtn}</div>
+        ${recurringAdd}
       </div>`;
     }).join('');
   }
@@ -931,8 +1034,11 @@
     const res = await fetch('/api/appointments/' + id + '/status', {
       method: 'PATCH', headers: authHeaders(), body: JSON.stringify({ status })
     });
-    if (res.ok) { showToast(status==='confirmed' ? '✓ Confirmed!' : 'Marked cancelled'); loadCurrentView(); }
-    else showToast('Error updating', 'error');
+    if (res.ok) {
+      const msg = status === 'confirmed' ? '✓ Confirmed!' : status === 'cancelled' ? 'Marked cancelled' : 'Marked pending';
+      showToast(msg);
+      loadCurrentView();
+    } else showToast('Error updating', 'error');
   }
 
   async function confirmRecurring(clientId, dogId) {
@@ -943,6 +1049,81 @@
     if (res.ok) { showToast('Added to schedule'); loadCurrentView(); }
     else showToast('Error adding', 'error');
   }
+
+  // ── Appointment quick-edit popover ─────────────────────────────────────
+  let activePopoverApptId = null;
+
+  function openApptPopover(apptId, anchorEl) {
+    const appt = currentAppointments.find(a => String(a.id) === String(apptId));
+    if (!appt) return;
+    activePopoverApptId = apptId;
+
+    const dogName = appt.dogs?.name || '—';
+    const owner   = appt.clients ? `${appt.clients.first_name} ${appt.clients.last_name}` : '—';
+    const breed   = appt.dogs?.breed || '';
+    const apptDate = new Date(appt.appointment_date + 'T12:00:00');
+    const dayStr = apptDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+    const session = (appt.notes || '').trim();
+
+    document.getElementById('apTitle').textContent = dogName;
+    document.getElementById('apSub').textContent   = owner;
+    document.getElementById('apBreed').textContent = breed;
+
+    let metaParts = [`<strong>Date:</strong> ${dayStr}`];
+    if (session) metaParts.push(`<strong>Session:</strong> ${escHtml(session)}`);
+    if (appt.is_recurring) metaParts.push('<em style="color:#3b5fc0;">↻ recurring</em>');
+    if (appt.reminder_sent_at) metaParts.push('<em style="color:#888;">reminder sent</em>');
+    document.getElementById('apMeta').innerHTML = metaParts.join(' &middot; ');
+
+    document.querySelectorAll('.ap-status-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.status === appt.status);
+    });
+
+    // Position next to the clicked card (mobile CSS overrides to bottom sheet)
+    const pop = document.getElementById('apPopover');
+    pop.style.top = pop.style.left = pop.style.bottom = pop.style.right = '';
+    if (anchorEl && window.innerWidth > 600) {
+      const rect = anchorEl.getBoundingClientRect();
+      const popHeight = 280;
+      const popWidth  = 300;
+      let top = rect.top;
+      if (top + popHeight > window.innerHeight - 12) top = window.innerHeight - popHeight - 12;
+      let left = rect.right + 12;
+      if (left + popWidth > window.innerWidth - 12) left = rect.left - popWidth - 12;
+      if (left < 12) left = 12;
+      pop.style.top  = Math.max(12, top) + 'px';
+      pop.style.left = left + 'px';
+    }
+
+    document.getElementById('apBackdrop').classList.add('open');
+    pop.classList.add('open');
+  }
+
+  function closeApptPopover() {
+    activePopoverApptId = null;
+    document.getElementById('apBackdrop').classList.remove('open');
+    document.getElementById('apPopover').classList.remove('open');
+  }
+
+  async function apptPopoverSetStatus(status) {
+    if (!activePopoverApptId) return;
+    const id = activePopoverApptId;
+    closeApptPopover();
+    await markStatus(id, status);
+  }
+
+  async function apptPopoverDelete() {
+    if (!activePopoverApptId) return;
+    const id = activePopoverApptId;
+    if (!confirm('Remove this appointment from the schedule?')) return;
+    closeApptPopover();
+    await removeAppointment(id);
+  }
+
+  // Esc closes popover
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeApptPopover();
+  });
 
   async function sendReminders() {
     const btn = document.getElementById('sendRemindersBtn');
