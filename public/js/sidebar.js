@@ -33,17 +33,39 @@
     document.head.appendChild(ts);
   }
 
-  const NAV_ITEMS = [
-    { href: '/dashboard.html',  label: 'Dashboard', icon: iconHome() },
-    { href: '/clients.html',    label: 'Directory', icon: iconPaw(),     match: ['/clients', '/client-profile'] },
-    { href: '/messaging.html',  label: 'Messaging', icon: iconMessage() },
-    { href: '/schedule.html',   label: 'Schedule',  icon: iconCalendar() },
-    { href: '/reviews.html',    label: 'Reviews',   icon: iconStar() },
-    { href: '/insights.html',   label: 'Insights',  icon: iconChart() },
-    { href: '/team.html',       label: 'Team',      icon: iconUsers() },
-    { href: '/resources.html',  label: 'Resources', icon: iconBook() },
-    { href: '/settings.html',   label: 'Settings',  icon: iconGear() }
+  // Grouped sidebar — DAILY (the 5 daily-use surfaces) / ADMIN (less
+  // frequently visited but still primary nav) / a demoted bottom slot
+  // for Resources (help docs, lighter visual weight).
+  const NAV_GROUPS = [
+    {
+      label: 'Daily',
+      items: [
+        { href: '/dashboard.html', label: 'Dashboard', icon: iconHome() },
+        { href: '/schedule.html',  label: 'Schedule',  icon: iconCalendar() },
+        { href: '/messaging.html', label: 'Messaging', icon: iconMessage() },
+        { href: '/clients.html',   label: 'Directory', icon: iconPaw(), match: ['/clients', '/client-profile'] },
+        { href: '/reviews.html',   label: 'Reviews',   icon: iconStar() }
+      ]
+    },
+    {
+      label: 'Admin',
+      items: [
+        { href: '/insights.html',  label: 'Insights',  icon: iconChart() },
+        { href: '/team.html',      label: 'Team',      icon: iconUsers() },
+        { href: '/settings.html',  label: 'Settings',  icon: iconGear() }
+      ]
+    },
+    {
+      label: null,
+      bottom: true,
+      items: [
+        { href: '/resources.html', label: 'Resources', icon: iconBook() }
+      ]
+    }
   ];
+
+  // Flattened — used by command palette + FAB to know about all pages
+  const NAV_ITEMS = NAV_GROUPS.flatMap(g => g.items);
 
   const path = window.location.pathname.replace(/\/$/, '') || '/';
   const activeItem = NAV_ITEMS.find(it => {
@@ -124,6 +146,29 @@
       padding: 6px 10px 14px;
       display: flex; flex-direction: column; gap: 2px;
     }
+    .tw-nav-group {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .tw-nav-group + .tw-nav-group { margin-top: 14px; }
+    .tw-nav-group-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: rgba(245,240,232,0.40);
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      padding: 4px 14px 6px;
+    }
+    .tw-nav-bottom {
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid rgba(245,240,232,0.06);
+    }
+    .tw-nav-bottom .tw-link {
+      opacity: 0.72;
+      font-size: 13px;
+    }
+    .tw-nav-bottom .tw-link:hover { opacity: 1; }
+
     .tw-link {
       display: flex; align-items: center; gap: 12px;
       padding: 10px 12px; border-radius: 8px;
@@ -174,10 +219,15 @@
     </a>
     <div class="tw-daycare" id="twDaycareName"></div>
     <nav class="tw-nav">
-      ${NAV_ITEMS.map(it => `
-        <a href="${it.href}" class="tw-link${activeItem === it ? ' active' : ''}">
-          ${it.icon}<span>${it.label}</span>
-        </a>
+      ${NAV_GROUPS.map(g => `
+        <div class="tw-nav-group${g.bottom ? ' tw-nav-bottom' : ''}">
+          ${g.label ? `<div class="tw-nav-group-label">${g.label}</div>` : ''}
+          ${g.items.map(it => `
+            <a href="${it.href}" class="tw-link${activeItem === it ? ' active' : ''}">
+              ${it.icon}<span>${it.label}</span>
+            </a>
+          `).join('')}
+        </div>
       `).join('')}
     </nav>
     <div class="tw-foot">
@@ -205,12 +255,20 @@
   } catch {}
 
   // ── FAB (Floating Action Button) — global quick-create ───────────────
-  const FAB_ACTIONS = [
+  const FAB_ACTIONS_ALL = [
     { label: 'New Pet Parent',  href: '/clients.html?action=add',  fn: 'openAddRecord', icon: iconPaw() },
     { label: 'New Appointment', href: '/schedule.html?action=add', fn: 'openAddModal',  icon: iconCalendar() },
     { label: 'Send Message',    href: '/messaging.html',           fn: null,            icon: iconMessage() },
     { label: 'Request Review',  href: '/reviews.html',             fn: null,            icon: iconStar() }
   ];
+
+  // Hide the action that matches the current page — that page already
+  // has its own primary "+" button up top, so duplicating it in the FAB
+  // sheet just adds noise. Other pages still see all 4 quick-creates.
+  const FAB_ACTIONS = FAB_ACTIONS_ALL.filter(a => {
+    const targetPath = a.href.split('?')[0];
+    return targetPath !== window.location.pathname;
+  });
 
   const fabStyle = document.createElement('style');
   fabStyle.textContent = `
@@ -261,6 +319,13 @@
   `;
   document.head.appendChild(fabStyle);
 
+  // Skip the FAB entirely if every action is filtered (would happen
+  // if every quick-create page got its own primary "+" — keeps the
+  // floating button from appearing as an empty trigger).
+  if (FAB_ACTIONS.length === 0) {
+    // Nothing to do — fab/fabSheet/handlers below are bypassed.
+  } else {
+
   const fab = document.createElement('button');
   fab.className = 'tw-fab';
   fab.setAttribute('aria-label', 'Quick create');
@@ -301,6 +366,8 @@
       window.location.href = action.href;
     }
   });
+
+  } // end if (FAB_ACTIONS.length > 0)
 
   // ── Cmd+K / Ctrl+K / "/" command palette ─────────────────────────────
   const cmdkStyle = document.createElement('style');
