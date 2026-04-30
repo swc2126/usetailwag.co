@@ -656,7 +656,7 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- Appointment quick-edit popover -->
+<!-- Appointment quick-edit popover (real, persisted appointment) -->
 <div class="appt-popover-backdrop" id="apBackdrop" onclick="closeApptPopover()"></div>
 <div class="appt-popover" id="apPopover" role="dialog" aria-label="Edit appointment" onclick="event.stopPropagation()">
   <div class="ap-head">
@@ -680,6 +680,28 @@
   <div class="ap-foot">
     <button class="ap-btn" onclick="closeApptPopover()">Close</button>
     <button class="ap-btn ap-btn-danger" onclick="apptPopoverDelete()">Delete</button>
+  </div>
+</div>
+
+<!-- Recurring placeholder popover (not yet a real appointment) -->
+<div class="appt-popover" id="apRecurPopover" role="dialog" aria-label="Recurring schedule entry" onclick="event.stopPropagation()">
+  <div class="ap-head">
+    <div class="ap-avatar">🐕</div>
+    <div>
+      <div class="ap-title" id="apRecurTitle">—</div>
+      <div class="ap-sub" id="apRecurSub">—</div>
+      <div class="ap-breed" style="color:#3b5fc0;">↻ Recurring schedule</div>
+    </div>
+  </div>
+
+  <div class="ap-meta" id="apRecurMeta">This pup is auto-scheduled for today based on a weekly pattern. They aren't saved as a real appointment yet.</div>
+
+  <div class="ap-foot" style="flex-direction:column;gap:8px;">
+    <button class="ap-btn" id="apRecurAddBtn" style="flex:none;background:var(--green);color:white;border-color:var(--green);" onclick="apptRecurPopoverAdd()">Add to today's schedule</button>
+    <div style="display:flex;gap:8px;width:100%;">
+      <button class="ap-btn" style="flex:1;" onclick="closeApptPopover()">Close</button>
+      <button class="ap-btn" style="flex:1;" onclick="apptRecurPopoverScrollToEdit()">Edit pattern</button>
+    </div>
   </div>
 </div>
 
@@ -880,13 +902,13 @@
       };
       const reminderBadge = appt.reminder_sent_at ? '<span class="badge badge-reminder">Reminded</span>' : '';
 
-      // Recurring placeholders (no id yet) keep the inline "+ add to this date" action.
-      // Persisted appointments become click-to-edit-popover (entire card is the click target).
-      const recurringAdd = !appt.id
-        ? `<div class="appt-actions"><button class="icon-btn" title="Add to this date" onclick="event.stopPropagation();confirmRecurring('${appt.client_id}','${appt.dog_id||''}')">＋</button></div>`
-        : '';
+      // Whole card is click-to-popover for both real appointments and recurring placeholders.
+      // Real appts open the edit popover; recurring placeholders open the "Add to today's schedule" popover.
+      const onclickAttr = appt.id
+        ? `openApptPopover('${appt.id}', this)`
+        : `openRecurringPlaceholderPopover('${appt.client_id}','${appt.dog_id||''}', this)`;
 
-      return `<div class="appt-card${appt.id ? ' clickable' : ''}"${appt.id ? ` onclick="openApptPopover('${appt.id}', this)"` : ''}>
+      return `<div class="appt-card clickable" onclick="${onclickAttr}">
         <div class="status-dot ${appt.status}"></div>
         <div class="dog-avatar">🐕</div>
         <div class="appt-info">
@@ -895,7 +917,6 @@
           ${breed ? `<div class="appt-breed">${escHtml(breed)}</div>` : ''}
         </div>
         <div class="appt-badges">${statusMap[appt.status]||''}${sessionBadge(appt.notes)}${reminderBadge}</div>
-        ${recurringAdd}
       </div>`;
     }).join('');
   }
@@ -1058,11 +1079,14 @@
 
   // ── Appointment quick-edit popover ─────────────────────────────────────
   let activePopoverApptId = null;
+  let activeRecurPopoverIds = null;  // { clientId, dogId } for recurring placeholders
 
   function openApptPopover(apptId, anchorEl) {
     const appt = currentAppointments.find(a => String(a.id) === String(apptId));
     if (!appt) return;
+    document.getElementById('apRecurPopover').classList.remove('open');
     activePopoverApptId = apptId;
+    activeRecurPopoverIds = null;
 
     const dogName = appt.dogs?.name || '—';
     const owner   = appt.clients ? `${appt.clients.first_name} ${appt.clients.last_name}` : '—';
@@ -1107,8 +1131,66 @@
 
   function closeApptPopover() {
     activePopoverApptId = null;
+    activeRecurPopoverIds = null;
     document.getElementById('apBackdrop').classList.remove('open');
     document.getElementById('apPopover').classList.remove('open');
+    document.getElementById('apRecurPopover').classList.remove('open');
+  }
+
+  function openRecurringPlaceholderPopover(clientId, dogId, anchorEl) {
+    const placeholder = currentAppointments.find(a =>
+      !a.id && a.is_recurring && a.client_id === clientId && (a.dog_id || '') === (dogId || ''));
+    if (!placeholder) return;
+    document.getElementById('apPopover').classList.remove('open');
+    activeRecurPopoverIds = { clientId, dogId };
+    activePopoverApptId = null;
+
+    const dogName = placeholder.dogs?.name || '—';
+    const owner   = placeholder.clients ? `${placeholder.clients.first_name} ${placeholder.clients.last_name}` : '—';
+    document.getElementById('apRecurTitle').textContent = dogName;
+    document.getElementById('apRecurSub').textContent   = owner;
+    document.getElementById('apRecurAddBtn').disabled = false;
+    document.getElementById('apRecurAddBtn').textContent = 'Add to today\'s schedule';
+
+    // Position next to the clicked card (mobile CSS overrides to bottom sheet)
+    const pop = document.getElementById('apRecurPopover');
+    pop.style.top = pop.style.left = pop.style.bottom = pop.style.right = '';
+    if (anchorEl && window.innerWidth > 600) {
+      const rect = anchorEl.getBoundingClientRect();
+      const popHeight = 280;
+      const popWidth  = 300;
+      let top = rect.top;
+      if (top + popHeight > window.innerHeight - 12) top = window.innerHeight - popHeight - 12;
+      let left = rect.right + 12;
+      if (left + popWidth > window.innerWidth - 12) left = rect.left - popWidth - 12;
+      if (left < 12) left = 12;
+      pop.style.top  = Math.max(12, top) + 'px';
+      pop.style.left = left + 'px';
+    }
+
+    document.getElementById('apBackdrop').classList.add('open');
+    pop.classList.add('open');
+  }
+
+  async function apptRecurPopoverAdd() {
+    if (!activeRecurPopoverIds) return;
+    const { clientId, dogId } = activeRecurPopoverIds;
+    const btn = document.getElementById('apRecurAddBtn');
+    btn.disabled = true;
+    btn.textContent = 'Adding…';
+    closeApptPopover();
+    await confirmRecurring(clientId, dogId);
+  }
+
+  function apptRecurPopoverScrollToEdit() {
+    closeApptPopover();
+    const recurList = document.getElementById('recurringList');
+    if (recurList) {
+      recurList.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      recurList.style.transition = 'background 0.4s';
+      recurList.style.background = 'rgba(196,147,63,0.10)';
+      setTimeout(() => { recurList.style.background = ''; }, 1200);
+    }
   }
 
   async function apptPopoverSetStatus(status) {
