@@ -934,9 +934,6 @@
   function renderAll(data) {
     const { personal, location, financial, all_locations, daycare, role } = data;
 
-    // Nav daycare name
-    document.getElementById('navDaycareName').textContent = daycare?.name || '';
-
     // View As toggle — only show for owner+
     if (ROLE_ORDER.indexOf(role) >= ROLE_ORDER.indexOf('owner')) {
       document.getElementById('viewAsWrap').style.display = 'block';
