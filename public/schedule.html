@@ -937,7 +937,27 @@
   }
 
   // DAY VIEW
+  function renderApptListSkeleton(count) {
+    const el = document.getElementById('apptList');
+    if (!el) return;
+    const widths = [70, 55, 80, 60, 65, 75];
+    let html = '';
+    for (let i = 0; i < count; i++) {
+      html += `<div class="tw-sk-card">
+        <span class="tw-sk tw-sk-avatar"></span>
+        <div class="tw-sk-info">
+          <span class="tw-sk tw-sk-line lg" style="width:${widths[i % widths.length]}%;">.</span>
+          <span class="tw-sk tw-sk-line sm" style="width:${Math.max(30, widths[i % widths.length] - 25)}%;">.</span>
+        </div>
+        <span class="tw-sk tw-sk-pill"></span>
+      </div>`;
+    }
+    el.innerHTML = html;
+  }
+
   async function loadDayView() {
+    // Show skeleton cards immediately so the grid doesn't appear empty during fetch
+    if (!currentAppointments.length) renderApptListSkeleton(4);
     try {
       const res = await fetch('/api/appointments?date=' + currentDate, { headers: authHeaders() });
       if (res.status === 401) { localStorage.removeItem('tailwag_session'); window.location.href = '/login.html'; return; }
@@ -1460,6 +1480,13 @@
   async function apptPopoverSetStatus(status) {
     if (!activePopoverApptId) return;
     const id = activePopoverApptId;
+
+    // Optimistic UI: flip the local status + re-render so the new badge
+    // appears instantly. markStatus() will server-confirm and re-render
+    // again with authoritative data.
+    const cur = currentAppointments.find(a => String(a.id) === String(id));
+    if (cur) { cur.status = status; renderAppointments(currentAppointments); updateStats(currentAppointments); }
+
     closeApptPopover();
     await markStatus(id, status);
   }

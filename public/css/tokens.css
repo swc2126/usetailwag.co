@@ -152,3 +152,45 @@
 
 .tw-btn-sm { font-size: 12px; padding: 6px var(--tw-space-3); }
 .tw-btn-lg { font-size: 15px; padding: 12px var(--tw-space-6); }
+
+/* ────────────────────────────────────────────────────────────────────
+ * SKELETONS — content-shaped placeholders for loading states.
+ * Use .tw-sk for plain inline shapes; -line for text-row, -avatar for
+ * circle, -card to compose a card-shaped skeleton. The shimmer keeps
+ * users oriented during fetches without the abrupt "spinner →
+ * content" swap.
+ * ──────────────────────────────────────────────────────────────── */
+.tw-sk {
+  display: inline-block;
+  background: linear-gradient(90deg,
+    rgba(15,20,16,0.05) 0%,
+    rgba(15,20,16,0.10) 50%,
+    rgba(15,20,16,0.05) 100%);
+  background-size: 200% 100%;
+  border-radius: var(--tw-radius-sm);
+  animation: tw-sk-shimmer 1.4s ease-in-out infinite;
+  color: transparent !important;
+  user-select: none;
+  vertical-align: middle;
+}
+@keyframes tw-sk-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.tw-sk-line   { display: block; height: 12px; margin: 6px 0; }
+.tw-sk-line.lg { height: 16px; }
+.tw-sk-line.sm { height: 10px; }
+.tw-sk-avatar { display: inline-block; width: 40px; height: 40px; border-radius: var(--tw-radius-full); }
+.tw-sk-pill   { display: inline-block; height: 18px; width: 60px; border-radius: var(--tw-radius-full); }
+.tw-sk-card {
+  background: var(--tw-color-card);
+  border-radius: var(--tw-radius-lg);
+  padding: 14px 18px;
+  box-shadow: var(--tw-shadow-1);
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 8px;
+}
+.tw-sk-card .tw-sk-info { flex: 1; min-width: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .tw-sk { animation: none; }
+}

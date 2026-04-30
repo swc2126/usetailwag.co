@@ -706,6 +706,23 @@
     return `<tr><td colspan="${colspan}"><div class="empty-state">No pet parents yet. Add your first pet parent above.</div></td></tr>`;
   }
 
+  function renderClientsSkeleton(count) {
+    const tbody = document.getElementById('clientsTableBody');
+    if (!tbody) return;
+    const widths = [75, 60, 80, 65, 70, 55];
+    let rows = '';
+    for (let i = 0; i < count; i++) {
+      rows += `<tr>
+        <td><span class="tw-sk tw-sk-line lg" style="width:${widths[i % widths.length]}%;">.</span></td>
+        <td><span class="tw-sk tw-sk-line" style="width:60%;">.</span></td>
+        <td><span class="tw-sk tw-sk-line" style="width:70%;">.</span></td>
+        <td><span class="tw-sk tw-sk-pill" style="width:50px;"></span></td>
+        <td><span class="tw-sk tw-sk-pill" style="width:80px;"></span></td>
+      </tr>`;
+    }
+    tbody.innerHTML = rows;
+  }
+
   async function loadClients() {
     try {
       const params = new URLSearchParams();
@@ -713,6 +730,9 @@
       if (q) params.set('q', q);
       if (activeFilter) params.set('filter', activeFilter);
       const url = '/api/clients' + (params.toString() ? '?' + params.toString() : '');
+
+      // Show skeleton rows during the fetch so the table never appears empty
+      renderClientsSkeleton(5);
 
       const clientRes = await fetch(url, { headers: authHeaders });
       if (clientRes.status === 401) { localStorage.removeItem('tailwag_session'); window.location.href = '/login.html'; return; }
