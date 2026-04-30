@@ -750,8 +750,9 @@
     apptDogSel.innerHTML = dogs.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('');
     if (!dogs.length) apptDogSel.innerHTML = '<option value="">No dogs on file</option>';
 
-    // Set today as default date
-    document.getElementById('apptDate').value = new Date().toISOString().split('T')[0];
+    // Set today as default date (local-date — toISOString returns UTC and rolls forward in the evening)
+    const _t = new Date();
+    document.getElementById('apptDate').value = `${_t.getFullYear()}-${String(_t.getMonth()+1).padStart(2,'0')}-${String(_t.getDate()).padStart(2,'0')}`;
   }
 
   async function saveReminderCadence(e) {
@@ -1056,10 +1057,13 @@
   }
 
   // ── SCHEDULE TAB ─────────────────────────────────────────────────
+  function _localDateStr(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
   async function loadSchedule() {
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const past  = new Date(Date.now() - 90 * 86400000).toISOString().split('T')[0];
+      const today = _localDateStr(new Date());
+      const past  = _localDateStr(new Date(Date.now() - 90 * 86400000));
       const future= new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
 
       const res = await fetch(`/api/appointments/by-client/${clientId}`, { headers: authHeaders });

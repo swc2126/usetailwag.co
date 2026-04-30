@@ -810,7 +810,10 @@
 
   // ── Date utilities ─────────────────────────────────────────────────────
   function todayStr() {
-    return new Date().toISOString().split('T')[0];
+    // Local-date YYYY-MM-DD, NOT toISOString() (which returns UTC and
+    // silently rolls forward a day after ~7 PM Central).
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
   function fmtDate(dateStr, opts) {
