@@ -151,6 +151,16 @@
     .voice-option-desc { font-size: 12px; color: #999; margin-top: 3px; line-height: 1.4; }
     .voice-option:has(input:checked) .voice-option-title { color: var(--green); }
 
+    .mode-option {
+      cursor: pointer; border: 1.5px solid #e2e8f0; border-radius: 10px;
+      transition: border-color 0.15s, background 0.15s; display: block;
+    }
+    .mode-option:has(input:checked) { border-color: var(--green); background: rgba(30,107,74,0.04); }
+    .mode-option-inner { padding: 13px 15px; }
+    .mode-option-title { font-size: 14px; font-weight: 700; color: #0F1410; }
+    .mode-option-desc { font-size: 13px; color: #666; margin-top: 4px; line-height: 1.5; }
+    .mode-option:has(input:checked) .mode-option-title { color: var(--green); }
+
     .emoji-option {
       cursor: pointer; border: 1.5px solid #e2e8f0; border-radius: 20px;
       padding: 6px 18px; font-size: 13px; font-weight: 600; color: #666;
@@ -280,6 +290,40 @@
 
       <button class="btn-primary" onclick="saveDaycareInfo()" id="saveDaycareBtn" style="margin-top:20px;">Save Daycare Info</button>
       <div id="daycareInfoMsg" class="msg" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- Messaging Mode Card -->
+    <div class="settings-card" id="messagingModeCard" style="display:none;">
+      <h2>Messaging Mode</h2>
+      <p style="font-size:13px;color:#888;margin-bottom:20px;line-height:1.6;">Choose how TailWag handles parent replies to your messages. Appointment confirmations (YES/NO replies) are always handled automatically regardless of mode.</p>
+
+      <div style="display:grid;gap:10px;">
+        <label class="mode-option" data-val="one_way">
+          <input type="radio" name="messagingMode" value="one_way" style="display:none;">
+          <div class="mode-option-inner">
+            <div class="mode-option-title">One-way <span style="font-weight:500;color:#999;font-size:12px;">· recommended</span></div>
+            <div class="mode-option-desc">Outbound only. When parents reply, TailWag sends them a polite auto-reply pointing them to your preferred channel.</div>
+          </div>
+        </label>
+        <label class="mode-option" data-val="two_way">
+          <input type="radio" name="messagingMode" value="two_way" style="display:none;">
+          <div class="mode-option-inner">
+            <div class="mode-option-title">Two-way</div>
+            <div class="mode-option-desc">Parent replies are saved for review. <em style="color:#999;">Inbox view coming soon — until then, replies are visible on each client's profile.</em></div>
+          </div>
+        </label>
+      </div>
+
+      <div id="autoReplyTextWrap" style="margin-top:18px;display:none;">
+        <label style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px;">Auto-reply text (one-way mode only)</label>
+        <textarea id="autoReplyText" rows="3" placeholder="Leave blank to use the default — TailWag will tell parents to call your business phone."
+          style="width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;resize:vertical;"
+          onfocus="this.style.borderColor='#1E6B4A'" onblur="this.style.borderColor='#ddd'"></textarea>
+        <p style="font-size:12px;color:#aaa;margin-top:5px;">Sent at most once per hour to the same parent. Default: a short message pointing them to your business phone.</p>
+      </div>
+
+      <button class="btn-primary" onclick="saveMessagingMode()" id="saveMessagingModeBtn" style="margin-top:20px;">Save Messaging Mode</button>
+      <div id="messagingModeMsg" class="msg" style="margin-top:10px;"></div>
     </div>
 
     <!-- Brand Voice Card -->
@@ -523,6 +567,10 @@
         if (['owner', 'manager', 'super_admin'].includes(meData.role)) {
           document.getElementById('brandVoiceCard').style.display = 'block';
           loadBrandVoice(dc.messaging_style || {});
+
+          // Messaging Mode — owner/manager only
+          document.getElementById('messagingModeCard').style.display = 'block';
+          loadMessagingMode(dc);
         }
       }
 
@@ -652,6 +700,51 @@
 
     if (res.ok) {
       msg.textContent = '✅ Brand voice saved.';
+      msg.className = 'msg msg-success';
+    } else {
+      msg.textContent = '❌ ' + (data.error || 'Failed to save.');
+      msg.className = 'msg msg-error';
+    }
+    setTimeout(() => { msg.style.display = 'none'; }, 4000);
+  }
+
+  function loadMessagingMode(dc) {
+    const mode = dc.messaging_mode || 'one_way';
+    const input = document.querySelector(`input[name="messagingMode"][value="${mode}"]`);
+    if (input) input.checked = true;
+
+    const ta = document.getElementById('autoReplyText');
+    if (ta) ta.value = dc.auto_reply_text || '';
+
+    document.getElementById('autoReplyTextWrap').style.display = (mode === 'one_way') ? 'block' : 'none';
+
+    document.querySelectorAll('input[name="messagingMode"]').forEach(el => {
+      el.addEventListener('change', () => {
+        document.getElementById('autoReplyTextWrap').style.display = (el.value === 'one_way') ? 'block' : 'none';
+      });
+    });
+  }
+
+  async function saveMessagingMode() {
+    const btn = document.getElementById('saveMessagingModeBtn');
+    const msg = document.getElementById('messagingModeMsg');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    msg.style.display = 'none';
+
+    const messaging_mode  = document.querySelector('input[name="messagingMode"]:checked')?.value || 'one_way';
+    const auto_reply_text = document.getElementById('autoReplyText').value;
+
+    const res = await fetch('/api/dashboard/daycare', {
+      method: 'PUT', headers: authHeaders,
+      body: JSON.stringify({ messaging_mode, auto_reply_text })
+    });
+    const data = await res.json();
+
+    btn.disabled = false; btn.textContent = 'Save Messaging Mode';
+    msg.style.display = 'block';
+
+    if (res.ok) {
+      msg.textContent = '✅ Messaging mode saved.';
       msg.className = 'msg msg-success';
     } else {
       msg.textContent = '❌ ' + (data.error || 'Failed to save.');

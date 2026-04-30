@@ -511,9 +511,64 @@ router.post('/telnyx/inbound', async (req, res) => {
     received_at: new Date().toISOString()
   });
 
-  // Process YES/NO for appointment confirmation
+  // Process YES/NO for appointment confirmation (always-on, regardless of messaging_mode)
   const reply = body.trim().toUpperCase();
-  if (!['YES', 'NO', 'Y', 'N'].includes(reply)) return res.sendStatus(200);
+  const isYesNo = ['YES', 'NO', 'Y', 'N'].includes(reply);
+
+  // STOP/HELP keywords are handled by Telnyx itself — never auto-reply to those
+  const STOP_KEYWORDS = ['STOP', 'STOPALL', 'UNSUBSCRIBE', 'CANCEL', 'END', 'QUIT', 'HELP', 'INFO'];
+  const isStopKeyword = STOP_KEYWORDS.includes(reply);
+
+  if (!isYesNo) {
+    // Not a YES/NO confirmation — handle based on the daycare's messaging mode.
+    if (isStopKeyword) return res.sendStatus(200);
+
+    const { data: dc } = await supabaseAdmin
+      .from('daycares')
+      .select('messaging_mode, auto_reply_text, phone')
+      .eq('id', config.daycare_id)
+      .single();
+
+    if (dc?.messaging_mode !== 'one_way') return res.sendStatus(200);
+
+    // Rate limit: skip if we already auto-replied to this number in the last hour
+    const oneHourAgo = new Date(Date.now() - 3600_000).toISOString();
+    const { data: recent } = await supabaseAdmin
+      .from('messages')
+      .select('id')
+      .eq('daycare_id', config.daycare_id)
+      .eq('recipient_phone', from)
+      .eq('message_type', 'auto_reply')
+      .gte('created_at', oneHourAgo)
+      .limit(1);
+    if (recent && recent.length > 0) return res.sendStatus(200);
+
+    const defaultReply = `Thanks for your message! We don't actively monitor texts at this number${dc.phone ? ' — please call us at ' + dc.phone : ''}. 🐾`;
+    const autoText = (dc.auto_reply_text || '').trim() || defaultReply;
+
+    let providerId = null, sendStatus = 'failed';
+    try {
+      const sendRes = await sendSms({ from: to, to: from, text: autoText });
+      providerId = sendRes?.id || null;
+      sendStatus = 'sent';
+    } catch (err) {
+      console.error('Auto-reply SMS error:', err.message);
+    }
+
+    await supabaseAdmin.from('messages').insert({
+      daycare_id: config.daycare_id,
+      client_id: client?.id || null,
+      sender_id: null,
+      recipient_phone: from,
+      body: autoText,
+      provider_message_id: providerId,
+      status: sendStatus,
+      message_type: 'auto_reply'
+    });
+
+    return res.sendStatus(200);
+  }
+
   if (!client) return res.sendStatus(200);
 
   const isConfirm = reply === 'YES' || reply === 'Y';

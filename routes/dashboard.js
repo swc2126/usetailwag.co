@@ -30,11 +30,16 @@ router.put('/daycare', requireAuth, async (req, res) => {
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
   if (!['owner', 'manager', 'super_admin', 'admin'].includes(req.userRole)) return res.status(403).json({ error: 'Insufficient permissions' });
 
-  const { name, phone, street, city, state, zip, google_link, messaging_style } = req.body;
+  const { name, phone, street, city, state, zip, google_link, messaging_style, messaging_mode, auto_reply_text } = req.body;
 
   // Validate URL if provided
   if (google_link) {
     try { new URL(google_link); } catch { return res.status(400).json({ error: 'Invalid URL' }); }
+  }
+
+  // Validate messaging_mode if provided
+  if (messaging_mode !== undefined && !['one_way', 'two_way'].includes(messaging_mode)) {
+    return res.status(400).json({ error: 'messaging_mode must be one_way or two_way' });
   }
 
   // Handle messaging_style separately — JSONB column added post-deploy;
@@ -48,13 +53,15 @@ router.put('/daycare', requireAuth, async (req, res) => {
   }
 
   const updates = {};
-  if (name        !== undefined) updates.name        = name.trim();
-  if (phone       !== undefined) updates.phone       = phone.trim();
-  if (street      !== undefined) updates.street      = street.trim();
-  if (city        !== undefined) updates.city        = city.trim();
-  if (state       !== undefined) updates.state       = state.trim();
-  if (zip         !== undefined) updates.zip         = zip.trim();
-  if (google_link !== undefined) updates.google_link = google_link.trim() || null;
+  if (name             !== undefined) updates.name             = name.trim();
+  if (phone            !== undefined) updates.phone            = phone.trim();
+  if (street           !== undefined) updates.street           = street.trim();
+  if (city             !== undefined) updates.city             = city.trim();
+  if (state            !== undefined) updates.state            = state.trim();
+  if (zip              !== undefined) updates.zip              = zip.trim();
+  if (google_link      !== undefined) updates.google_link      = google_link.trim() || null;
+  if (messaging_mode   !== undefined) updates.messaging_mode   = messaging_mode;
+  if (auto_reply_text  !== undefined) updates.auto_reply_text  = (auto_reply_text || '').trim() || null;
 
   // If only messaging_style was sent, return success now
   if (Object.keys(updates).length === 0) {
@@ -65,7 +72,7 @@ router.put('/daycare', requireAuth, async (req, res) => {
     .from('daycares')
     .update(updates)
     .eq('id', req.daycareId)
-    .select('name, phone, street, city, state, zip, google_link');
+    .select('name, phone, street, city, state, zip, google_link, messaging_mode, auto_reply_text');
 
   if (error) return res.status(500).json({ error: error.message });
   if (!data || data.length === 0) return res.status(404).json({ error: 'Daycare not found or no rows updated' });
