@@ -547,25 +547,34 @@ router.post('/telnyx/inbound', async (req, res) => {
     }
     if (target) {
       const targetDate = target.toISOString().split('T')[0];
-      const { data: dayAppt } = await supabaseAdmin
+      // Cancel ALL of this client's pending appointments on the target date —
+      // important when the parent has multiple dogs scheduled the same day.
+      const { data: dayAppts } = await supabaseAdmin
         .from('appointments')
         .select('id, appointment_date, dogs(name)')
         .eq('daycare_id', config.daycare_id)
         .eq('client_id', client.id)
         .eq('appointment_date', targetDate)
-        .eq('status', 'pending')
-        .limit(1)
-        .single();
-      if (dayAppt) {
+        .eq('status', 'pending');
+
+      if (dayAppts && dayAppts.length > 0) {
+        const ids = dayAppts.map(a => a.id);
         await supabaseAdmin.from('appointments')
           .update({ status: 'cancelled', confirmed_at: new Date().toISOString() })
-          .eq('id', dayAppt.id);
+          .in('id', ids);
 
-        const dogName = dayAppt.dogs?.name || 'your pup';
-        const apptDateObj = new Date(dayAppt.appointment_date + 'T12:00:00');
+        // Build a single ack covering all dogs cancelled.
+        const dogNames = [...new Set(dayAppts.map(a => a.dogs?.name).filter(Boolean))];
+        let dogPhrase;
+        if (dogNames.length === 0)      dogPhrase = 'your appointment';
+        else if (dogNames.length === 1) dogPhrase = dogNames[0];
+        else if (dogNames.length === 2) dogPhrase = `${dogNames[0]} & ${dogNames[1]}`;
+        else dogPhrase = dogNames.slice(0, -1).join(', ') + ', and ' + dogNames[dogNames.length - 1];
+
+        const apptDateObj = new Date(targetDate + 'T12:00:00');
         const dayStr = apptDateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
         try {
-          await sendSms({ from: to, to: from, text: `Got it, ${client.first_name}! We've cancelled ${dogName} for ${dayStr}. See you next time!` });
+          await sendSms({ from: to, to: from, text: `Got it, ${client.first_name}! We've cancelled ${dogPhrase} for ${dayStr}. See you next time!` });
         } catch {}
         return res.sendStatus(200);
       }

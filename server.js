@@ -179,6 +179,58 @@ cron.schedule('*/10 * * * *', async () => {
 });
 
 
+// ─── CRON: Daily appointment reminders at 6 PM CT ────────────────────────────
+//
+// For every daycare with an active phone number:
+//   - Per-visit reminders for tomorrow's pending appointments
+//   - Weekly summaries (Sundays only) for clients on weekly_summary cadence
+//
+// node-cron's `timezone` option handles DST automatically — fires at 6 PM
+// America/Chicago year-round. Each daycare's send is wrapped in try/catch
+// so one failure doesn't poison the rest of the run.
+const { runDailyReminders, runWeeklySummaries } = require('./routes/appointments');
+
+cron.schedule('0 18 * * *', async () => {
+  try {
+    const { data: configs } = await supabaseAdmin
+      .from('messaging_config')
+      .select('daycare_id')
+      .eq('status', 'active');
+    if (!configs?.length) {
+      console.log('[reminder-cron] No active daycares — skipping');
+      return;
+    }
+
+    const tomorrow = new Date(Date.now() + 86400_000).toISOString().split('T')[0];
+    const isSunday = new Date().toLocaleDateString('en-US', { weekday: 'short', timeZone: 'America/Chicago' }) === 'Sun';
+
+    let totalPV = 0, totalWS = 0, errors = 0;
+    for (const cfg of configs) {
+      try {
+        const r = await runDailyReminders(cfg.daycare_id, tomorrow);
+        totalPV += r.sent || 0;
+      } catch (err) {
+        errors++;
+        console.error(`[reminder-cron] PV ${cfg.daycare_id}:`, err.message);
+      }
+      if (isSunday) {
+        try {
+          const r = await runWeeklySummaries(cfg.daycare_id);
+          totalWS += r.sent || 0;
+        } catch (err) {
+          errors++;
+          console.error(`[reminder-cron] WS ${cfg.daycare_id}:`, err.message);
+        }
+      }
+    }
+
+    console.log(`[reminder-cron] sent ${totalPV} per-visit + ${totalWS} weekly summaries across ${configs.length} daycares (errors: ${errors})${isSunday ? '' : ' [non-Sunday — weekly skipped]'}`);
+  } catch (err) {
+    console.error('Reminder cron error:', err.message);
+  }
+}, { timezone: 'America/Chicago' });
+
+
 // ─── CRON: Daily phone inventory check at 8am CT (13:00 UTC) ─────────────────
 const { getNumberInventory, INVENTORY_THRESHOLD } = require('./routes/ceo');
 const { sendEmail } = require('./utils/email');
