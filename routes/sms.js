@@ -573,7 +573,9 @@ router.post('/telnyx/inbound', async (req, res) => {
 
   const isConfirm = reply === 'YES' || reply === 'Y';
 
-  // Find the most recent pending appointment with a reminder sent
+  // Find the pending appointment whose reminder was sent most recently —
+  // that's the one this YES/NO is most likely responding to. Limit to
+  // appointments dated today-or-later so we never flip a past day.
   const { data: appt } = await supabaseAdmin
     .from('appointments')
     .select('id, appointment_date, dogs(name)')
@@ -582,7 +584,7 @@ router.post('/telnyx/inbound', async (req, res) => {
     .eq('status', 'pending')
     .not('reminder_sent_at', 'is', null)
     .gte('appointment_date', new Date().toISOString().split('T')[0])
-    .order('appointment_date', { ascending: true })
+    .order('reminder_sent_at', { ascending: false })
     .limit(1)
     .single();
 
