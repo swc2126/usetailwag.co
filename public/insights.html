@@ -1239,6 +1239,9 @@
     document.getElementById('lInactive').textContent   = fmt(location.inactive_clients_30d);
     document.getElementById('lTotalClients').textContent = fmt(location.clients);
 
+    // 30-day rolling type counts (used by Location tab's stacked bar + legend)
+    const tc = location.msg_type_counts || {};
+
     // Stacked bar
     const total = location.msgs_30d || 0;
     document.getElementById('stackedTotal').textContent = fmt(total);
