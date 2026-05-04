@@ -24,141 +24,175 @@
     }
     body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
 
-    .dashboard-nav {
-      background: var(--black); padding: 0 32px;
-      display: flex; justify-content: space-between; align-items: center; height: 60px;
-    }
-    .nav-left { display: flex; align-items: center; gap: 32px; }
-    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
-    .nav-links { display: flex; gap: 4px; }
-    .nav-link {
-      color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; font-weight: 500;
-      padding: 6px 14px; border-radius: 6px; transition: color 0.2s, background 0.2s;
-    }
-    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
-    .nav-link.active { color: var(--linen); background: rgba(255,255,255,0.1); }
-    .nav-right { display: flex; align-items: center; gap: 16px; }
-    .user-name { font-size: 14px; color: var(--sage); }
-    .logout-btn {
-      background: transparent; border: 1px solid rgba(245,240,232,0.3); color: var(--linen);
-      padding: 7px 18px; border-radius: 8px; font-family: 'Inter', sans-serif;
-      font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color 0.2s;
-    }
-    .logout-btn:hover { border-color: var(--linen); }
+    .page-container { max-width: 1100px; margin: 0 auto; padding: var(--tw-space-8) var(--tw-space-6); }
 
-    .page-container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
-    .page-header { margin-bottom: 28px; }
-    .page-header h1 {
-      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
-      font-size: 30px; color: var(--black); letter-spacing: -0.5px;
+    /* ── 2-column layout: table + invite right panel ── */
+    .team-layout {
+      display: flex;
+      gap: var(--tw-space-6);
+      align-items: flex-start;
     }
-    .page-header p { font-size: 15px; color: #888; margin-top: 4px; }
+    .team-main { flex: 1; min-width: 0; }
 
-    .btn-primary {
-      background: var(--green); color: var(--linen); border: none; padding: 10px 22px;
-      border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
-      cursor: pointer; transition: background 0.2s;
+    /* Table card */
+    .table-card {
+      background: var(--tw-color-card);
+      border: 1px solid var(--tw-color-border);
+      border-radius: var(--tw-radius-lg);
+      box-shadow: var(--tw-shadow-1);
+      overflow: hidden;
+      margin-bottom: var(--tw-space-6);
     }
-    .btn-primary:hover { background: var(--green-dark); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 28px; }
-    table { width: 100%; border-collapse: collapse; }
-    thead { background: var(--black); }
-    thead th { padding: 14px 20px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--sage); }
-    tbody tr { border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.15s; }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: rgba(30,107,74,0.03); }
-    tbody td { padding: 14px 20px; font-size: 14px; color: var(--slate); }
-
-    .role-badge {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    .role-owner { background: rgba(196,147,63,0.15); color: var(--gold); }
-    .role-admin { background: rgba(30,107,74,0.12); color: var(--green); }
-    .role-staff { background: rgba(0,0,0,0.06); color: #666; }
-
-    .status-badge {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    .status-active { background: rgba(30,107,74,0.1); color: var(--green); }
-    .status-invited { background: rgba(196,147,63,0.12); color: var(--gold); }
-    .status-disabled { background: rgba(0,0,0,0.06); color: #999; }
-
+    /* Action buttons in table */
     .action-btn {
-      background: none; border: none; font-size: 13px; font-weight: 600;
-      cursor: pointer; padding: 5px 10px; border-radius: 6px; transition: background 0.15s;
+      background: none; border: none;
+      font-size: 13px; font-weight: var(--tw-fw-semi);
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: var(--tw-radius-sm);
+      transition: background 0.15s;
     }
-    .remove-btn { color: #e53e3e; }
-    .remove-btn:hover { background: rgba(229,62,62,0.1); }
+    .remove-btn { color: var(--tw-color-error); }
+    .remove-btn:hover { background: var(--tw-color-error-soft); }
     .remove-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
     .role-select {
-      border: 1px solid #ddd; border-radius: 6px; padding: 4px 8px;
-      font-family: 'Inter', sans-serif; font-size: 13px; color: var(--slate);
-      cursor: pointer; background: #fff;
+      border: 1px solid var(--tw-color-border-2);
+      border-radius: var(--tw-radius-sm);
+      padding: 4px 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--slate);
+      cursor: pointer;
+      background: var(--tw-color-card);
     }
     .role-select:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .empty-state { text-align: center; padding: 60px 20px; color: #999; }
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--tw-color-muted);
+    }
     .loading-spinner {
-      width: 28px; height: 28px; border: 3px solid rgba(30,107,74,0.2);
-      border-top-color: var(--green); border-radius: 50%;
-      animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+      width: 28px; height: 28px;
+      border: 3px solid rgba(30,107,74,0.2);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto var(--tw-space-3);
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .error-msg {
-      background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7;
-      border-radius: 8px; padding: 12px 16px; font-size: 13px; margin-bottom: 16px; display: none;
+      background: var(--tw-color-error-soft);
+      color: var(--tw-color-error);
+      border: 1px solid #fed7d7;
+      border-radius: var(--tw-radius-md);
+      padding: 12px 16px;
+      font-size: 13px;
+      margin-bottom: var(--tw-space-4);
+      display: none;
     }
     .success-msg {
-      background: #f0fff4; color: var(--green); border: 1px solid #c6f6d5;
-      border-radius: 8px; padding: 12px 16px; font-size: 13px; margin-bottom: 16px; display: none;
+      background: rgba(30,107,74,0.08);
+      color: var(--green);
+      border: 1px solid #c6f6d5;
+      border-radius: var(--tw-radius-md);
+      padding: 12px 16px;
+      font-size: 13px;
+      margin-bottom: var(--tw-space-4);
+      display: none;
     }
 
-    /* Add Team Member card */
-    .add-member-card {
-      background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      padding: 28px 32px;
+    /* Invite form (in right panel) */
+    .tw-right-panel-card h2 {
+      font-family: var(--tw-font-display);
+      font-weight: var(--tw-fw-bold);
+      font-size: 16px;
+      color: var(--tw-color-ink);
+      margin-bottom: 4px;
     }
-    .add-member-card h2 {
-      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
-      font-size: 18px; color: var(--black); margin-bottom: 6px;
+    .invite-card-desc {
+      font-size: 13px;
+      color: var(--tw-color-muted);
+      margin-bottom: var(--tw-space-5);
+      line-height: 1.5;
     }
-    .add-member-card .card-desc {
-      font-size: 13px; color: #888; margin-bottom: 24px; line-height: 1.5;
+    .invite-form { display: flex; flex-direction: column; gap: var(--tw-space-3); }
+    .invite-form .form-group label {
+      display: block;
+      font-size: 11px; font-weight: var(--tw-fw-bold);
+      color: var(--tw-color-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
     }
-    .invite-form { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
-    .invite-form .form-group { flex: 1; min-width: 200px; margin-bottom: 0; }
-    .invite-form .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--slate); margin-bottom: 6px; }
     .invite-form .form-group input,
     .invite-form .form-group select {
-      width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px;
-      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--slate);
-      transition: border-color 0.2s; outline: none; background: #fff;
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--tw-color-border-2);
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--slate);
+      transition: border-color 0.2s;
+      outline: none;
+      background: var(--tw-color-card);
     }
     .invite-form .form-group input:focus,
     .invite-form .form-group select:focus { border-color: var(--green); }
+    .invite-submit-btn {
+      background: var(--green);
+      color: var(--linen);
+      border: none;
+      padding: 10px 22px;
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: var(--tw-fw-semi);
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: var(--tw-space-2);
+    }
+    .invite-submit-btn:hover:not(:disabled) { background: var(--green-dark); }
+    .invite-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { /* kept for retry button */
+      background: var(--green); color: var(--linen);
+      border: none; padding: 10px 22px;
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: var(--tw-fw-semi);
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--green-dark); }
     .invite-form-error {
-      width: 100%; background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7;
-      border-radius: 8px; padding: 10px 14px; font-size: 13px; display: none; margin-top: 4px;
+      width: 100%;
+      background: var(--tw-color-error-soft);
+      color: var(--tw-color-error);
+      border: 1px solid #fed7d7;
+      border-radius: var(--tw-radius-md);
+      padding: 10px 14px;
+      font-size: 13px;
+      display: none;
+      margin-top: 4px;
     }
     .admin-notice {
-      background: rgba(196,147,63,0.08); border: 1px solid rgba(196,147,63,0.25);
-      border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #7a5a1e;
-      margin-top: 16px; display: none; line-height: 1.5;
+      background: var(--tw-color-gold-soft);
+      border: 1px solid rgba(196,147,63,0.25);
+      border-radius: var(--tw-radius-md);
+      padding: 12px 14px;
+      font-size: 12px;
+      color: #7a5a1e;
+      margin-top: var(--tw-space-4);
+      display: none;
+      line-height: 1.5;
     }
 
+    @media (max-width: 900px) {
+      .team-layout { flex-direction: column; }
+    }
     @media (max-width: 640px) {
-      .dashboard-nav { padding: 0 16px; }
-      .nav-links { display: none; }
-      .page-container { padding: 24px 16px; }
-      .add-member-card { padding: 20px; }
-      .invite-form { flex-direction: column; }
+      .page-container { padding: var(--tw-space-5) var(--tw-space-4); }
     }
   </style>
 </head>
@@ -182,61 +216,70 @@
 
   <!-- Page content -->
   <div id="pageContent" style="display:none;">
-    <div class="page-header">
-      <h1>Team</h1>
-      <p>Manage who has access to your TailWag account.</p>
-    </div>
+
+    <header class="tw-page-header">
+      <div class="tw-page-header-left">
+        <h1>Team</h1>
+        <p class="tw-page-header-sub">Manage who has access to your TailWag account.</p>
+      </div>
+    </header>
 
     <div class="error-msg" id="pageError"></div>
     <div class="success-msg" id="pageSuccess"></div>
 
-    <!-- Team table -->
-    <div class="table-card">
-      <table>
-        <thead>
-          <tr>
-            <th>Name / Email</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="teamTableBody">
-          <tr><td colspan="4"><div class="empty-state">No team members yet.</div></td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="team-layout">
 
-    <!-- Add Team Member card — visible to admin/owner only -->
-    <div class="add-member-card" id="addMemberCard" style="display:none;">
-      <h2>Add Team Member</h2>
-      <p class="card-desc" id="addMemberDesc">Send an invite email to add a new staff member to your account.</p>
-
-      <div class="invite-form">
-        <div class="form-group" style="flex:2;">
-          <label>Email Address *</label>
-          <input type="email" id="inviteEmail" placeholder="colleague@example.com" autocomplete="off">
-        </div>
-        <!-- Role selector — only shown to owner -->
-        <div class="form-group" id="roleFieldWrap" style="display:none;">
-          <label>Role</label>
-          <select id="inviteRole">
-            <option value="staff">Team Member</option>
-            <option value="admin">Site Manager</option>
-          </select>
-        </div>
-        <div>
-          <button class="btn-primary" id="inviteSubmitBtn" onclick="submitInvite()" style="white-space:nowrap;">Send Invite</button>
+      <!-- LEFT: team table -->
+      <div class="team-main">
+        <div class="table-card">
+          <table class="tw-table">
+            <thead>
+              <tr>
+                <th>Name / Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="teamTableBody">
+              <tr><td colspan="4"><div class="empty-state">No team members yet.</div></td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div class="invite-form-error" id="inviteError"></div>
+      <!-- RIGHT: invite form (admin/owner only) -->
+      <aside class="tw-right-panel" id="addMemberCard" style="display:none;">
+        <div class="tw-right-panel-card">
+          <h2>Add Team Member</h2>
+          <p class="invite-card-desc" id="addMemberDesc">Send an invite email to add a new staff member to your account.</p>
 
-      <!-- Notice shown to admin (not owner) -->
-      <div class="admin-notice" id="adminNotice">
-        <strong>Need to add a Site Manager?</strong> Contact TailWag support and we'll provision the additional admin access for you.
-      </div>
-    </div>
+          <div class="invite-form">
+            <div class="form-group">
+              <label>Email Address *</label>
+              <input type="email" id="inviteEmail" placeholder="colleague@example.com" autocomplete="off">
+            </div>
+            <!-- Role selector — only shown to owner -->
+            <div class="form-group" id="roleFieldWrap" style="display:none;">
+              <label>Role</label>
+              <select id="inviteRole">
+                <option value="staff">Team Member</option>
+                <option value="admin">Site Manager</option>
+              </select>
+            </div>
+            <button class="invite-submit-btn" id="inviteSubmitBtn" onclick="submitInvite()">Send Invite</button>
+          </div>
+
+          <div class="invite-form-error" id="inviteError"></div>
+
+          <!-- Notice shown to admin (not owner) -->
+          <div class="admin-notice" id="adminNotice">
+            <strong>Need to add a Site Manager?</strong> Contact TailWag support and we'll provision the additional admin access for you.
+          </div>
+        </div>
+      </aside>
+
+    </div><!-- /team-layout -->
 
   </div>
 </div>
@@ -345,21 +388,29 @@
                       </select>`;
         }
       } else {
-        roleCell = `<span class="role-badge role-${m.role}">${m.role === 'admin' ? 'Site Manager' : m.role === 'owner' ? 'Owner' : 'Team Member'}</span>`;
+        const roleClass = m.role === 'owner' ? 'tw-pill-warning'
+                        : m.role === 'admin' ? 'tw-pill-success'
+                        : 'tw-pill-neutral';
+        const roleLabel = m.role === 'admin' ? 'Site Manager' : m.role === 'owner' ? 'Owner' : 'Team Member';
+        roleCell = `<span class="tw-pill ${roleClass}">${roleLabel}</span>`;
       }
+
+      const statusClass = m.status === 'active'   ? 'tw-pill-success'
+                        : m.status === 'invited'  ? 'tw-pill-warning'
+                        : 'tw-pill-neutral';
 
       return `
         <tr>
           <td>
             <div style="font-weight:600">${escHtml(displayName)}</div>
-            <div style="font-size:12px;color:#999;margin-top:2px">${escHtml(displayEmail)}</div>
+            <div style="font-size:12px;color:var(--tw-color-muted);margin-top:2px">${escHtml(displayEmail)}</div>
           </td>
           <td>${roleCell}</td>
-          <td><span class="status-badge status-${m.status}">${m.status}</span></td>
+          <td><span class="tw-pill ${statusClass}">${m.status}</span></td>
           <td>
             ${canManage && !isRowOwner && !isSelf
               ? `<button class="action-btn remove-btn" onclick="removeMember('${m.id}', '${escHtml(displayName)}')">Remove</button>`
-              : '<span style="color:#ccc;font-size:13px;">—</span>'
+              : '<span style="color:var(--tw-color-faint);font-size:13px;">—</span>'
             }
           </td>
         </tr>
