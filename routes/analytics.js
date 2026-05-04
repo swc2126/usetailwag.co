@@ -57,19 +57,28 @@ router.get('/overview', requireAuth, async (req, res) => {
     const now = new Date();
     const todayStart = new Date(now);
     todayStart.setHours(0, 0, 0, 0);
+    const yesterdayStart = new Date(todayStart.getTime() - 86400000);
     const weekAgo = new Date(now - 7 * 86400000);
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const thirtyDaysAgo = new Date(now - 30 * 86400000);
     const sixtyDaysAgo = new Date(now - 60 * 86400000);
 
     // Step 4: Personal stats (in parallel)
-    const [todayRes, weekRes, monthRes, streakRes] = await Promise.all([
+    const [todayRes, yesterdayRes, weekRes, monthRes, lastMonthPersonalRes, streakRes] = await Promise.all([
       supabaseAdmin
         .from('messages')
         .select('id', { count: 'exact', head: true })
         .eq('sender_id', req.user.id)
         .eq('daycare_id', daycareId)
         .gte('created_at', todayStart.toISOString()),
+      supabaseAdmin
+        .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('sender_id', req.user.id)
+        .eq('daycare_id', daycareId)
+        .gte('created_at', yesterdayStart.toISOString())
+        .lt('created_at', todayStart.toISOString()),
       supabaseAdmin
         .from('messages')
         .select('id', { count: 'exact', head: true })
@@ -84,6 +93,13 @@ router.get('/overview', requireAuth, async (req, res) => {
         .gte('created_at', monthStart.toISOString()),
       supabaseAdmin
         .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('sender_id', req.user.id)
+        .eq('daycare_id', daycareId)
+        .gte('created_at', lastMonthStart.toISOString())
+        .lt('created_at', monthStart.toISOString()),
+      supabaseAdmin
+        .from('messages')
         .select('created_at')
         .eq('sender_id', req.user.id)
         .eq('daycare_id', daycareId)
@@ -92,8 +108,10 @@ router.get('/overview', requireAuth, async (req, res) => {
     ]);
 
     const todayCount = todayRes.count || 0;
+    const yesterdayCount = yesterdayRes.count || 0;
     const weekCount = weekRes.count || 0;
     const monthCount = monthRes.count || 0;
+    const lastMonthCount = lastMonthPersonalRes.count || 0;
 
     // Streak calculation
     const streakRows = streakRes.data || [];
@@ -113,19 +131,25 @@ router.get('/overview', requireAuth, async (req, res) => {
       }
     }
 
-    // Step 5: Fetch all messages for this daycare last 30 days
-    const { data: msgs30 } = await supabaseAdmin
+    // Step 5: Fetch all messages for this daycare from last-month-start → now.
+    // Wider window than the previous 30-day rolling so we can derive both
+    // calendar-month breakdowns (this month vs last month) for the wireframe's
+    // "Location volume this month · +N vs. last" sub-cards.
+    const { data: msgsRange } = await supabaseAdmin
       .from('messages')
       .select('id, sender_id, client_id, message_type, created_at, is_bulk')
       .eq('daycare_id', daycareId)
-      .gte('created_at', thirtyDaysAgo.toISOString());
-    const msgs30arr = msgs30 || [];
+      .gte('created_at', lastMonthStart.toISOString());
+    const msgsRangeArr = msgsRange || [];
+
+    // 30-day rolling subset (preserves prior shape — used by team breakdown etc.)
+    const msgs30arr = msgsRangeArr.filter(m => new Date(m.created_at) >= thirtyDaysAgo);
 
     // Derived location message stats
-    const msgsTodayLocation = msgs30arr.filter(m => new Date(m.created_at) >= todayStart).length;
-    const msgsWeekLocation = msgs30arr.filter(m => new Date(m.created_at) >= weekAgo).length;
+    const msgsTodayLocation = msgsRangeArr.filter(m => new Date(m.created_at) >= todayStart).length;
+    const msgsWeekLocation  = msgsRangeArr.filter(m => new Date(m.created_at) >= weekAgo).length;
 
-    // Message type counts
+    // Message type counts (rolling 30-day) — kept for backward compat
     const msg_type_counts = { report_card: 0, bulk: 0, review_request: 0, reminder: 0, custom: 0 };
     for (const msg of msgs30arr) {
       const t = msg.message_type || (msg.is_bulk ? 'bulk' : 'custom');
@@ -134,6 +158,33 @@ router.get('/overview', requireAuth, async (req, res) => {
       } else {
         msg_type_counts.custom++;
       }
+    }
+
+    // Calendar-month buckets (new — for wireframe deltas)
+    const emptyTypes = () => ({ report_card: 0, bulk: 0, review_request: 0, reminder: 0, custom: 0 });
+    const msg_type_counts_this_month = emptyTypes();
+    const msg_type_counts_last_month = emptyTypes();
+    let messages_this_month_location = 0;
+    let messages_last_month_location = 0;
+
+    for (const msg of msgsRangeArr) {
+      const created = new Date(msg.created_at);
+      const t = msg.message_type || (msg.is_bulk ? 'bulk' : 'custom');
+      const key = msg_type_counts_this_month.hasOwnProperty(t) ? t : 'custom';
+      if (created >= monthStart) {
+        messages_this_month_location++;
+        msg_type_counts_this_month[key]++;
+      } else if (created >= lastMonthStart) {
+        messages_last_month_location++;
+        msg_type_counts_last_month[key]++;
+      }
+    }
+
+    // Personal messages-per-day-of-week for the bar chart (last 7 days, Sun..Sat)
+    const messages_per_dow_personal = [0, 0, 0, 0, 0, 0, 0];
+    for (const m of (streakRes.data || [])) {
+      const d = new Date(m.created_at);
+      if (d >= weekAgo) messages_per_dow_personal[d.getDay()]++;
     }
 
     // Personal week pct of team volume
@@ -234,8 +285,11 @@ router.get('/overview', requireAuth, async (req, res) => {
       daycare: daycareRes.data,
       personal: {
         msgs_today: todayCount,
+        msgs_yesterday: yesterdayCount,                 // NEW — for "+N vs. yesterday" delta
         msgs_week: weekCount,
         msgs_month: monthCount,
+        msgs_last_month: lastMonthCount,                // NEW — for "+N% vs. last month" delta
+        msgs_per_dow_week: messages_per_dow_personal,   // NEW — 7-elem [Sun..Sat] for bar chart
         streak,
         team_volume_pct: userTeamPct
       },
@@ -248,7 +302,11 @@ router.get('/overview', requireAuth, async (req, res) => {
         msgs_today: msgsTodayLocation,
         msgs_week: msgsWeekLocation,
         msgs_30d: msgs30arr.length,
-        msg_type_counts,
+        msg_type_counts,                                // existing 30-day rolling (kept for back-compat)
+        msg_type_counts_this_month,                     // NEW — calendar-month buckets
+        msg_type_counts_last_month,                     // NEW
+        msgs_this_month: messages_this_month_location,  // NEW
+        msgs_last_month: messages_last_month_location,  // NEW
         team
       },
       financial,
