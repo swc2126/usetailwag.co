@@ -73,7 +73,28 @@ const escaped = q.replace(/[,()]/g, ' ').replace(/[%_\\]/g, m => '\\' + m);
 
   const { data, error } = await query.order('last_name');
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+
+  // Annotate each client with last_visit_at — most recent appointment_date
+  // (read-only addition; field is null if the client has no appointments).
+  const clientList = data || [];
+  if (clientList.length) {
+    const ids = clientList.map(c => c.id);
+    const { data: appts } = await supabaseAdmin
+      .from('appointments')
+      .select('client_id, appointment_date')
+      .eq('daycare_id', req.daycareId)
+      .in('client_id', ids)
+      .order('appointment_date', { ascending: false });
+    const lastVisitMap = {};
+    for (const a of (appts || [])) {
+      if (!lastVisitMap[a.client_id]) lastVisitMap[a.client_id] = a.appointment_date;
+    }
+    for (const c of clientList) {
+      c.last_visit_at = lastVisitMap[c.id] || null;
+    }
+  }
+
+  res.json(clientList);
 });
 
 // POST /api/clients — create client

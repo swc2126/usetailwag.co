@@ -72,19 +72,72 @@
     }
     .logout-btn:hover { border-color: var(--linen); }
 
-    /* ── SORT TOGGLE ── */
-    .sort-toggle {
-      display: inline-flex; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px;
-      overflow: hidden; background: #fff;
+    /* ── TAB TOGGLE (Pet Parents / Dogs) ── */
+    .tw-tab-toggle {
+      display: inline-flex; gap: 2px; background: rgba(0,0,0,0.05);
+      border-radius: 10px; padding: 3px;
     }
-    .sort-btn {
-      padding: 7px 16px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif;
-      background: none; border: none; cursor: pointer; color: #888;
+    .tw-tab-toggle .sort-btn {
+      padding: 7px 14px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif;
+      background: none; border: none; cursor: pointer; color: #666; border-radius: 8px;
       transition: background 0.15s, color 0.15s; white-space: nowrap;
     }
-    .sort-btn + .sort-btn { border-left: 1px solid rgba(0,0,0,0.1); }
-    .sort-btn.active { background: var(--black); color: var(--linen); }
-    .sort-btn:not(.active):hover { background: rgba(0,0,0,0.04); color: var(--slate); }
+    .tw-tab-toggle .sort-btn .tab-count { opacity: 0.55; margin-left: 4px; font-weight: 700; }
+    .tw-tab-toggle .sort-btn.active {
+      background: #fff; color: var(--black);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+    .tw-tab-toggle .sort-btn.active .tab-count { opacity: 0.8; color: var(--green); }
+    .tw-tab-toggle .sort-btn:not(.active):hover { color: var(--slate); }
+
+    /* ── AVATAR (initials) ── */
+    .tw-avatar {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(30,107,74,0.12); color: var(--green-dark);
+      font-weight: 700; font-size: 12px; letter-spacing: 0.3px;
+      flex-shrink: 0;
+    }
+    .tw-name-cell { display: flex; align-items: center; gap: 12px; }
+    .tw-name-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .tw-name-primary { font-weight: 600; color: var(--black); }
+    .tw-name-secondary { font-size: 12px; color: #888; font-weight: 400; }
+
+    /* ── ROW ACTIONS (View + overflow ⋯) ── */
+    .tw-row-actions { display: inline-flex; align-items: center; gap: 4px; }
+    .tw-btn-link {
+      background: none; border: none; color: var(--green); font-weight: 600;
+      font-size: 13px; cursor: pointer; padding: 5px 10px; border-radius: 6px;
+      font-family: inherit;
+    }
+    .tw-btn-link:hover { background: rgba(30,107,74,0.1); }
+    .tw-btn-icon {
+      background: none; border: none; cursor: pointer;
+      padding: 4px 9px; border-radius: 6px; color: #999;
+      font-size: 18px; line-height: 1; font-family: inherit;
+    }
+    .tw-btn-icon:hover { background: rgba(0,0,0,0.06); color: var(--slate); }
+
+    /* Overflow menu uses position:fixed to escape table-card's overflow:hidden */
+    .tw-overflow-menu {
+      display: none; position: fixed; min-width: 180px;
+      background: #fff; border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      padding: 4px; z-index: 90;
+    }
+    .tw-overflow-menu.open { display: block; }
+    .tw-overflow-item {
+      display: block; width: 100%; text-align: left;
+      background: none; border: none; padding: 8px 12px;
+      font-size: 13px; color: var(--slate); cursor: pointer;
+      border-radius: 6px; font-family: inherit;
+    }
+    .tw-overflow-item:hover { background: rgba(0,0,0,0.04); }
+    .tw-overflow-item-danger { color: #e53e3e; }
+    .tw-overflow-item-danger:hover { background: rgba(229,62,62,0.08); }
+
+    .tw-last-visit { color: #666; font-size: 13px; }
+    .tw-last-visit-empty { color: #ccc; font-size: 12px; }
 
     /* ── SEARCH + FILTER BAR ── */
     .filter-bar {
@@ -343,12 +396,11 @@
     <div class="page-header">
       <div class="page-header-left">
         <h1>Directory</h1>
-        <span class="count-badge" id="clientCount">0 pet parents</span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;">
-        <div class="sort-toggle">
-          <button class="sort-btn active" id="sortByOwnerBtn" onclick="setSort('owner')">By Pet Parent</button>
-          <button class="sort-btn" id="sortByDogBtn" onclick="setSort('dog')">By Dog</button>
+        <div class="tw-tab-toggle">
+          <button class="sort-btn active" id="sortByOwnerBtn" onclick="setSort('owner')">Pet Parents<span class="tab-count" id="parentCount"></span></button>
+          <button class="sort-btn" id="sortByDogBtn" onclick="setSort('dog')">Dogs<span class="tab-count" id="dogCount"></span></button>
         </div>
         <a href="/import.html" class="btn-outline" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;padding:7px 14px;border-radius:8px;border:1.5px solid #e0dbd2;color:#2D3748;background:white;">⬆ Import</a>
         <button class="btn-primary" id="addRecordBtn" onclick="openAddRecord()">+ Add Pet Parent</button>
@@ -377,11 +429,12 @@
             <th>Phone</th>
             <th>Email</th>
             <th>Dogs</th>
+            <th>Last visit</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody id="clientsTableBody">
-          <tr><td colspan="5"><div class="empty-state">No pet parents yet. Add your first pet parent above.</div></td></tr>
+          <tr><td colspan="6"><div class="empty-state">No pet parents yet. Add your first pet parent above.</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -647,6 +700,84 @@
     renderClients();
   }
 
+  // Populate tab counts (called from renderClients)
+  function updateTabCounts() {
+    const parents = clients.length;
+    const dogs = clients.reduce((n, c) => n + ((c.dogs || []).length), 0);
+    const pEl = document.getElementById('parentCount');
+    const dEl = document.getElementById('dogCount');
+    if (pEl) pEl.textContent = ` ${parents}`;
+    if (dEl) dEl.textContent = ` ${dogs}`;
+  }
+
+  // Initials from first/last name (e.g. "Jane Smith" → "JS")
+  function getInitials(c) {
+    const a = (c.first_name || '').trim().charAt(0);
+    const b = (c.last_name || '').trim().charAt(0);
+    const out = (a + b).toUpperCase();
+    return out || '?';
+  }
+
+  // "Client since 2024" — pulls year from clients.created_at; empty if missing
+  function clientSinceLabel(c) {
+    if (!c.created_at) return '';
+    const d = new Date(c.created_at);
+    if (isNaN(d.getTime())) return '';
+    return `Client since ${d.getFullYear()}`;
+  }
+
+  // Format last_visit_at (YYYY-MM-DD) as "Mar 15" / "Today" / "Yesterday" / "—"
+  function formatLastVisit(dateStr) {
+    if (!dateStr) return '<span class="tw-last-visit-empty">—</span>';
+    // Parse as local date by appending T00 (avoid UTC shift)
+    const d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return '<span class="tw-last-visit-empty">—</span>';
+    const today = new Date(); today.setHours(0,0,0,0);
+    const visit = new Date(d); visit.setHours(0,0,0,0);
+    const diffDays = Math.round((today - visit) / 86400000);
+    if (diffDays === 0) return '<span class="tw-last-visit">Today</span>';
+    if (diffDays === 1) return '<span class="tw-last-visit">Yesterday</span>';
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const label = `${months[d.getMonth()]} ${d.getDate()}`;
+    return `<span class="tw-last-visit">${label}</span>`;
+  }
+
+  // ── ROW OVERFLOW MENU (⋯) ──
+  function toggleOverflow(triggerEl, ev) {
+    if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+    const menu = triggerEl.nextElementSibling;
+    if (!menu || !menu.classList.contains('tw-overflow-menu')) return;
+    // Close any other open menus first
+    document.querySelectorAll('.tw-overflow-menu.open').forEach(m => {
+      if (m !== menu) m.classList.remove('open');
+    });
+    const willOpen = !menu.classList.contains('open');
+    if (willOpen) {
+      const rect = triggerEl.getBoundingClientRect();
+      // Pre-position then open so we can measure width
+      menu.style.top = (rect.bottom + 4) + 'px';
+      menu.style.left = '0px';
+      menu.classList.add('open');
+      const w = menu.offsetWidth || 180;
+      const left = Math.max(8, rect.right - w);
+      menu.style.left = left + 'px';
+    } else {
+      menu.classList.remove('open');
+    }
+  }
+  // Close overflow menus when clicking outside, scrolling, or pressing Escape
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.tw-overflow-menu.open').forEach(m => m.classList.remove('open'));
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.tw-overflow-menu.open').forEach(m => m.classList.remove('open'));
+    }
+  });
+  window.addEventListener('scroll', () => {
+    document.querySelectorAll('.tw-overflow-menu.open').forEach(m => m.classList.remove('open'));
+  }, true);
+
   function readFiltersFromURL() {
     const params = new URLSearchParams(window.location.search);
     const q = params.get('q') || '';
@@ -717,6 +848,7 @@
         <td><span class="tw-sk tw-sk-line" style="width:60%;">.</span></td>
         <td><span class="tw-sk tw-sk-line" style="width:70%;">.</span></td>
         <td><span class="tw-sk tw-sk-pill" style="width:50px;"></span></td>
+        <td><span class="tw-sk tw-sk-line" style="width:50%;">.</span></td>
         <td><span class="tw-sk tw-sk-pill" style="width:80px;"></span></td>
       </tr>`;
     }
@@ -750,7 +882,8 @@
   function renderClients() {
     const tbody = document.getElementById('clientsTableBody');
     const thead = document.getElementById('tableHead');
-    const total = clients.length;
+
+    updateTabCounts();
 
     if (currentSort === 'dog') {
       // ── BY DOG view: one row per dog, sorted A–Z by dog name ──
@@ -759,6 +892,7 @@
         <th>Pet Parent</th>
         <th>Phone</th>
         <th>Breed</th>
+        <th>Last visit</th>
         <th>Actions</th>
       </tr>`;
 
@@ -777,38 +911,52 @@
         return nameA.localeCompare(nameB);
       });
 
-      document.getElementById('clientCount').textContent =
-        `${rows.filter(r => r.dog).length} dog${rows.filter(r => r.dog).length !== 1 ? 's' : ''} · ${total} pet parent${total !== 1 ? 's' : ''}`;
-
       if (!rows.length) {
-        tbody.innerHTML = getEmptyStateHTML(5);
+        tbody.innerHTML = getEmptyStateHTML(6);
         return;
       }
 
       tbody.innerHTML = rows.map(({ dog, client: c }) => {
+        const cJson = JSON.stringify(c).replace(/"/g,'&quot;');
+        const lv = formatLastVisit(c.last_visit_at);
         if (!dog) {
-          return `<tr style="opacity:0.6;">
+          return `<tr style="opacity:0.7;">
             <td><em style="color:#bbb;">No dog added</em></td>
-            <td><strong>${escHtml(c.last_name)}, ${escHtml(c.first_name)}</strong></td>
+            <td>${escHtml(c.last_name)}, ${escHtml(c.first_name)}</td>
             <td>${formatPhone(c.phone)}</td>
             <td>—</td>
+            <td>${lv}</td>
             <td>
-              <button class="action-btn add-dog-btn" onclick="openAddDogModal('${c.id}')">+ Add Dog</button>
-              <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit</button>
+              <div class="tw-row-actions">
+                <button class="tw-btn-link" onclick="window.location.href='/client-profile.html?id=${c.id}'">View</button>
+                <button class="tw-btn-icon" aria-label="More actions" onclick="toggleOverflow(this, event)">⋯</button>
+                <div class="tw-overflow-menu">
+                  <button class="tw-overflow-item" onclick="openEditModal(${cJson})">Edit pet parent</button>
+                  <button class="tw-overflow-item" onclick="openAddDogModal('${c.id}')">Add dog</button>
+                </div>
+              </div>
             </td>
           </tr>`;
         }
+        const dJson = JSON.stringify(dog).replace(/"/g,'&quot;');
         return `<tr>
           <td>
-            <span class="dog-chip" onclick="openEditDogModal(${JSON.stringify(dog).replace(/"/g,'&quot;')}, '${c.id}')" title="Edit ${escHtml(dog.name)}">${escHtml(dog.name)}</span>
+            <span class="dog-chip" onclick="openEditDogModal(${dJson}, '${c.id}')" title="Edit ${escHtml(dog.name)}">${escHtml(dog.name)}</span>
           </td>
           <td>${escHtml(c.last_name)}, ${escHtml(c.first_name)}</td>
           <td>${formatPhone(c.phone)}</td>
           <td style="color:#999;">${escHtml(dog.breed || '—')}</td>
+          <td>${lv}</td>
           <td>
-            <button class="action-btn profile-btn" onclick="window.location.href='/client-profile.html?id=${c.id}'">View Profile</button>
-            <button class="action-btn edit-btn" onclick="openEditDogModal(${JSON.stringify(dog).replace(/"/g,'&quot;')}, '${c.id}')">Edit Dog</button>
-            <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit Owner</button>
+            <div class="tw-row-actions">
+              <button class="tw-btn-link" onclick="window.location.href='/client-profile.html?id=${c.id}'">View</button>
+              <button class="tw-btn-icon" aria-label="More actions" onclick="toggleOverflow(this, event)">⋯</button>
+              <div class="tw-overflow-menu">
+                <button class="tw-overflow-item" onclick="openEditDogModal(${dJson}, '${c.id}')">Edit dog</button>
+                <button class="tw-overflow-item" onclick="openEditModal(${cJson})">Edit pet parent</button>
+                <button class="tw-overflow-item" onclick="openAddDogModal('${c.id}')">Add another dog</button>
+              </div>
+            </div>
           </td>
         </tr>`;
       }).join('');
@@ -820,6 +968,7 @@
         <th>Phone</th>
         <th>Email</th>
         <th>Dogs</th>
+        <th>Last visit</th>
         <th>Actions</th>
       </tr>`;
 
@@ -828,30 +977,44 @@
         return lastCmp !== 0 ? lastCmp : (a.first_name || '').localeCompare(b.first_name || '');
       });
 
-      document.getElementById('clientCount').textContent =
-        `${total} pet parent${total !== 1 ? 's' : ''}`;
-
       if (!sorted.length) {
-        tbody.innerHTML = getEmptyStateHTML(5);
+        tbody.innerHTML = getEmptyStateHTML(6);
         return;
       }
 
       tbody.innerHTML = sorted.map(c => {
+        const cJson = JSON.stringify(c).replace(/"/g,'&quot;');
         const dogsHtml = (c.dogs || []).length
           ? (c.dogs || []).map(d =>
               `<span class="dog-chip" onclick="openEditDogModal(${JSON.stringify(d).replace(/"/g,'&quot;')}, '${c.id}')" title="Edit ${escHtml(d.name)}">${escHtml(d.name)}</span>`
             ).join('')
           : '<span style="color:#ccc;font-size:12px;">None yet</span>';
+        const since = clientSinceLabel(c);
+        const fullName = `${escHtml(c.first_name)} ${escHtml(c.last_name)}`;
         return `<tr>
-          <td><strong>${escHtml(c.last_name)}, ${escHtml(c.first_name)}</strong></td>
+          <td>
+            <div class="tw-name-cell">
+              <span class="tw-avatar">${escHtml(getInitials(c))}</span>
+              <div class="tw-name-meta">
+                <span class="tw-name-primary">${escHtml(c.last_name)}, ${escHtml(c.first_name)}</span>
+                ${since ? `<span class="tw-name-secondary">${since}</span>` : ''}
+              </div>
+            </div>
+          </td>
           <td>${formatPhone(c.phone)}</td>
           <td>${escHtml(c.email || '—')}</td>
           <td>${dogsHtml}</td>
+          <td>${formatLastVisit(c.last_visit_at)}</td>
           <td>
-            <button class="action-btn profile-btn" onclick="window.location.href='/client-profile.html?id=${c.id}'">View Profile</button>
-            <button class="action-btn add-dog-btn" onclick="openAddDogModal('${c.id}')">+ Dog</button>
-            <button class="action-btn edit-btn" onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})">Edit</button>
-            <button class="action-btn delete-btn" onclick="deleteClient('${c.id}', '${escHtml(c.first_name)} ${escHtml(c.last_name)}')">Delete</button>
+            <div class="tw-row-actions">
+              <button class="tw-btn-link" onclick="window.location.href='/client-profile.html?id=${c.id}'">View</button>
+              <button class="tw-btn-icon" aria-label="More actions" onclick="toggleOverflow(this, event)">⋯</button>
+              <div class="tw-overflow-menu">
+                <button class="tw-overflow-item" onclick="openEditModal(${cJson})">Edit pet parent</button>
+                <button class="tw-overflow-item" onclick="openAddDogModal('${c.id}')">Add dog</button>
+                <button class="tw-overflow-item tw-overflow-item-danger" onclick="deleteClient('${c.id}', '${fullName}')">Delete</button>
+              </div>
+            </div>
           </td>
         </tr>`;
       }).join('');
