@@ -39,6 +39,192 @@ async function sendReminderSms(fromNumber, toPhone, firstName, dogName, daycareN
   }
 }
 
+// Helper: format YYYY-MM-DD → "Mon May 13"
+function fmtShortDate(dateStr) {
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+// Helper: format an array of names into a natural English list
+//   ['Buddy']                   → 'Buddy'
+//   ['Buddy', 'Daisy']          → 'Buddy & Daisy'
+//   ['Buddy', 'Daisy', 'Max']   → 'Buddy, Daisy, and Max'
+function joinNames(names) {
+  if (!names.length) return '';
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return `${names[0]} & ${names[1]}`;
+  return names.slice(0, -1).join(', ') + ', and ' + names[names.length - 1];
+}
+
+// Helper: send a weekly summary SMS listing all upcoming appointments.
+// Adapts the body to the client's dog/schedule structure:
+//   - 1 dog                       → "Buddy at TailWag this week: Mon, Wed, Fri."
+//   - N dogs sharing the same days → "Buddy & Daisy at TailWag this week: …"
+//   - N dogs with different days   → "At TailWag this week:\n• Buddy: …\n• Daisy: …"
+async function sendWeeklySummarySms(fromNumber, client, upcoming, daycare) {
+  // Group dates by dog name (de-duplicated)
+  const byDog = {};
+  for (const u of upcoming) {
+    const name = u.dogs?.name || '_no_dog';
+    if (!byDog[name]) byDog[name] = new Set();
+    byDog[name].add(u.appointment_date);
+  }
+  const realDogs = Object.entries(byDog)
+    .filter(([name]) => name !== '_no_dog')
+    .map(([name, dates]) => ({ name, dates: [...dates].sort() }));
+
+  let intro;
+  if (realDogs.length === 1) {
+    const dog = realDogs[0];
+    intro = `${dog.name} at ${daycare.name} this week: ${dog.dates.map(fmtShortDate).join(', ')}.`;
+  } else if (realDogs.length === 0) {
+    const allDates = [...new Set(upcoming.map(u => u.appointment_date))].sort().map(fmtShortDate);
+    intro = `Your pup at ${daycare.name} this week: ${allDates.join(', ')}.`;
+  } else {
+    // Multiple dogs — same schedule or different?
+    const firstSig = realDogs[0].dates.join('|');
+    const allSame = realDogs.every(d => d.dates.join('|') === firstSig);
+    if (allSame) {
+      const dates = realDogs[0].dates.map(fmtShortDate).join(', ');
+      intro = `${joinNames(realDogs.map(d => d.name))} at ${daycare.name} this week: ${dates}.`;
+    } else {
+      const lines = realDogs.map(d => `• ${d.name}: ${d.dates.map(fmtShortDate).join(', ')}`).join('\n');
+      intro = `At ${daycare.name} this week:\n${lines}`;
+    }
+  }
+
+  const phoneTail = daycare?.phone ? ` Or call us at ${daycare.phone}.` : '';
+  const text =
+    `Hi ${client.first_name}! ${intro}\n\n` +
+    `Reply YES to confirm all\n` +
+    `Reply NO + day (e.g. NO TUE) to skip just that day.${phoneTail}`;
+
+  try {
+    await sendSms({ from: fromNumber, to: client.phone, text });
+    return true;
+  } catch (err) {
+    console.error('Weekly summary SMS error:', err.message);
+    return false;
+  }
+}
+
+// ─── REUSABLE: stamp the daycare with the last reminder run ───────────────
+async function recordReminderRun(daycareId, trigger, perVisit, weekly) {
+  const summary = {
+    trigger,
+    per_visit: {
+      sent:    perVisit?.sent    || 0,
+      failed:  perVisit?.failed  || 0,
+      skipped: perVisit?.skipped || 0
+    },
+    weekly: {
+      sent:    weekly?.sent    || 0,
+      failed:  weekly?.failed  || 0,
+      skipped: weekly?.skipped || 0
+    }
+  };
+  try {
+    await supabaseAdmin.from('daycares')
+      .update({
+        last_reminder_run_at: new Date().toISOString(),
+        last_reminder_run_summary: summary
+      })
+      .eq('id', daycareId);
+  } catch (err) {
+    // Don't let logging failure break the reminder send
+    console.error('recordReminderRun error:', err.message);
+  }
+}
+
+// ─── REUSABLE: per-visit reminders for one daycare/date ──────────────────
+// Used by both POST /send-reminders and the daily cron.
+async function runDailyReminders(daycareId, date) {
+  const fromNumber = await getDaycareNumber(daycareId);
+  if (!fromNumber) return { sent: 0, failed: 0, skipped: 0, reason: 'no_number' };
+  const daycare = await getDaycareInfo(daycareId);
+
+  const { data: appts, error } = await supabaseAdmin
+    .from('appointments')
+    .select('id, client_id, dog_id, status, clients(first_name, phone, reminder_cadence), dogs(name)')
+    .eq('daycare_id', daycareId)
+    .eq('appointment_date', date)
+    .eq('status', 'pending')
+    .is('reminder_sent_at', null);
+
+  if (error) return { sent: 0, failed: 0, skipped: 0, error: error.message };
+  if (!appts.length) return { sent: 0, failed: 0, skipped: 0 };
+
+  let sent = 0, failed = 0, skipped = 0;
+  for (const appt of appts) {
+    if (!appt.clients?.phone) { failed++; continue; }
+    const cadence = appt.clients?.reminder_cadence || 'per_visit';
+    if (cadence !== 'per_visit') { skipped++; continue; }
+
+    const dogName = appt.dogs?.name || 'your pup';
+    const ok = await sendReminderSms(fromNumber, appt.clients.phone, appt.clients.first_name, dogName, daycare.name, date);
+    if (ok) {
+      await supabaseAdmin.from('appointments').update({ reminder_sent_at: new Date().toISOString() }).eq('id', appt.id);
+      sent++;
+    } else {
+      failed++;
+    }
+  }
+  return { sent, failed, skipped };
+}
+
+// ─── REUSABLE: weekly summaries for one daycare ──────────────────────────
+// 7-day rate-limit window (was 6) so a client never receives two summaries
+// inside a 7-day stretch even if a manual trigger fires off-schedule.
+async function runWeeklySummaries(daycareId) {
+  const fromNumber = await getDaycareNumber(daycareId);
+  if (!fromNumber) return { sent: 0, failed: 0, skipped: 0, reason: 'no_number' };
+  const daycare = await getDaycareInfo(daycareId);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const sevenDays = new Date(Date.now() + 7 * 86400_000).toISOString().split('T')[0];
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400_000).toISOString();
+
+  const { data: clients } = await supabaseAdmin
+    .from('clients')
+    .select('id, first_name, phone, last_summary_sent_at')
+    .eq('daycare_id', daycareId)
+    .eq('active', true)
+    .eq('reminder_cadence', 'weekly_summary');
+
+  if (!clients?.length) return { sent: 0, failed: 0, skipped: 0 };
+
+  let sent = 0, failed = 0, skipped = 0;
+  for (const c of clients) {
+    if (!c.phone) { skipped++; continue; }
+    if (c.last_summary_sent_at && c.last_summary_sent_at > sevenDaysAgo) { skipped++; continue; }
+
+    const { data: upcoming } = await supabaseAdmin
+      .from('appointments')
+      .select('id, appointment_date, dogs(name)')
+      .eq('daycare_id', daycareId)
+      .eq('client_id', c.id)
+      .eq('status', 'pending')
+      .gte('appointment_date', todayStr)
+      .lte('appointment_date', sevenDays)
+      .order('appointment_date', { ascending: true });
+
+    if (!upcoming?.length) { skipped++; continue; }
+
+    const ok = await sendWeeklySummarySms(fromNumber, c, upcoming, daycare);
+    if (ok) {
+      const apptIds = upcoming.map(u => u.id).filter(Boolean);
+      const now = new Date().toISOString();
+      if (apptIds.length) {
+        await supabaseAdmin.from('appointments').update({ reminder_sent_at: now }).in('id', apptIds);
+      }
+      await supabaseAdmin.from('clients').update({ last_summary_sent_at: now }).eq('id', c.id);
+      sent++;
+    } else {
+      failed++;
+    }
+  }
+  return { sent, failed, skipped };
+}
+
 // ─── APPOINTMENTS ────────────────────────────────────────────────────────────
 
 // GET /api/appointments/range?start=YYYY-MM-DD&end=YYYY-MM-DD
@@ -217,43 +403,49 @@ router.post('/send-reminders', requireAuth, async (req, res) => {
   const { date } = req.body;
   if (!date) return res.status(400).json({ error: 'date required (YYYY-MM-DD)' });
 
-  const daycare = await getDaycareInfo(req.daycareId);
-  const fromNumber = await getDaycareNumber(req.daycareId);
-  if (!fromNumber) return res.status(400).json({ error: 'No phone number assigned.' });
+  const result = await runDailyReminders(req.daycareId, date);
+  if (result.reason === 'no_number') return res.status(400).json({ error: 'No phone number assigned.' });
+  if (result.error) return res.status(500).json({ error: result.error });
+  await recordReminderRun(req.daycareId, 'manual', result, null);
+  return res.json({ success: true, ...result, message: result.sent === 0 ? 'No pending appointments to remind.' : undefined });
+});
 
-  // Get all pending appointments for this date
-  const { data: appts, error } = await supabaseAdmin
-    .from('appointments')
-    .select('id, client_id, dog_id, status, clients(first_name, phone), dogs(name)')
-    .eq('daycare_id', req.daycareId)
-    .eq('appointment_date', date)
-    .eq('status', 'pending')
-    .is('reminder_sent_at', null);
+// POST /api/appointments/send-weekly-summaries — send one summary per
+// client whose reminder_cadence is 'weekly_summary' and who has at
+// least one pending appointment in the next 7 days. Skips clients
+// already summarized in the last 7 days.
+router.post('/send-weekly-summaries', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+  const result = await runWeeklySummaries(req.daycareId);
+  if (result.reason === 'no_number') return res.status(400).json({ error: 'No phone number assigned.' });
+  await recordReminderRun(req.daycareId, 'manual', null, result);
+  return res.json({ success: true, ...result });
+});
 
-  if (error) return res.status(500).json({ error: error.message });
-  if (!appts.length) return res.json({ success: true, sent: 0, message: 'No pending appointments to remind.' });
+// POST /api/appointments/run-reminders — combined entry point that
+// fires per-visit reminders for the given date AND weekly summaries
+// for clients due, then records ONE log entry on the daycare row.
+// The schedule page's "Send Reminders" button uses this so the caption
+// shows the merged count instead of a stale partial one.
+router.post('/run-reminders', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+  const { date } = req.body;
+  if (!date) return res.status(400).json({ error: 'date required (YYYY-MM-DD)' });
 
-  let sent = 0, failed = 0;
-  for (const appt of appts) {
-    if (!appt.clients?.phone) { failed++; continue; }
-    const dogName = appt.dogs?.name || 'your pup';
-    const ok = await sendReminderSms(
-      fromNumber,
-      appt.clients.phone,
-      appt.clients.first_name,
-      dogName,
-      daycare.name,
-      date
-    );
-    if (ok) {
-      await supabaseAdmin.from('appointments').update({ reminder_sent_at: new Date().toISOString() }).eq('id', appt.id);
-      sent++;
-    } else {
-      failed++;
-    }
+  const [perVisit, weekly] = await Promise.all([
+    runDailyReminders(req.daycareId, date),
+    runWeeklySummaries(req.daycareId)
+  ]);
+  if (perVisit.reason === 'no_number' && weekly.reason === 'no_number') {
+    return res.status(400).json({ error: 'No phone number assigned.' });
   }
-
-  res.json({ success: true, sent, failed });
+  await recordReminderRun(req.daycareId, 'manual', perVisit, weekly);
+  return res.json({
+    success: true,
+    per_visit: perVisit,
+    weekly,
+    last_reminder_run_at: new Date().toISOString()
+  });
 });
 
 // POST /api/appointments/morning-summary — send morning confirmation summary to site manager
@@ -325,6 +517,32 @@ router.post('/recurring', requireAuth, async (req, res) => {
   res.status(201).json(data);
 });
 
+// PATCH /api/appointments/recurring/:id — update days_of_week and/or dog_id
+router.patch('/recurring/:id', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+  const { days_of_week, dog_id } = req.body;
+  const updates = {};
+  if (Array.isArray(days_of_week)) {
+    if (!days_of_week.length) return res.status(400).json({ error: 'days_of_week cannot be empty' });
+    if (days_of_week.some(d => !Number.isInteger(d) || d < 0 || d > 6)) {
+      return res.status(400).json({ error: 'days_of_week must be integers 0–6' });
+    }
+    updates.days_of_week = [...new Set(days_of_week)].sort((a,b) => a - b);
+  }
+  if (dog_id !== undefined) updates.dog_id = dog_id || null;
+  if (!Object.keys(updates).length) return res.status(400).json({ error: 'No fields to update' });
+
+  const { data, error } = await supabaseAdmin
+    .from('recurring_schedules')
+    .update(updates)
+    .eq('id', req.params.id)
+    .eq('daycare_id', req.daycareId)
+    .select()
+    .single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
 // DELETE /api/appointments/recurring/:id
 router.delete('/recurring/:id', requireAuth, async (req, res) => {
   const { error } = await supabaseAdmin
@@ -336,6 +554,20 @@ router.delete('/recurring/:id', requireAuth, async (req, res) => {
   res.json({ success: true });
 });
 
+// POST /api/appointments/recurring/:id/restore — undo soft-delete
+router.post('/recurring/:id/restore', requireAuth, async (req, res) => {
+  const { error } = await supabaseAdmin
+    .from('recurring_schedules')
+    .update({ active: true })
+    .eq('id', req.params.id)
+    .eq('daycare_id', req.daycareId);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
 // Inbound SMS handling lives in routes/sms.js (POST /api/sms/telnyx/inbound)
 
 module.exports = router;
+module.exports.runDailyReminders = runDailyReminders;
+module.exports.runWeeklySummaries = runWeeklySummaries;
+module.exports.recordReminderRun = recordReminderRun;

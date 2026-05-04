@@ -1,0 +1,506 @@
+/**
+ * tokens.css — TailWag design tokens.
+ *
+ * Loaded globally by sidebar.js on every authenticated page so all
+ * shared components (sidebar, toast, FAB, popovers) inherit a single
+ * spacing/color/radius/shadow scale.
+ *
+ * Page-level CSS is being migrated incrementally; until each page
+ * adopts these tokens, its own :root values keep working.
+ *
+ * Naming: prefixed --tw-* to avoid collisions with existing per-page
+ * variables (--black, --green, --linen, etc.) that each HTML file ships.
+ */
+
+:root {
+  /* ── COLOR ─────────────────────────────────────────────────────── */
+  --tw-color-ink:        #0F1410;   /* darkest — text on light, brand black */
+  --tw-color-green:      #1E6B4A;   /* primary brand green */
+  --tw-color-green-dark: #164D35;   /* hover/active state */
+  --tw-color-green-soft: rgba(30,107,74,0.08);
+  --tw-color-linen:      #F5F0E8;   /* page background, light surface */
+  --tw-color-sage:       #A8C5B0;   /* accent on dark, secondary text on dark */
+  --tw-color-gold:       #C4933F;   /* accent / warning / "Pro" badge */
+  --tw-color-gold-soft:  rgba(196,147,63,0.12);
+  --tw-color-slate:      #2D3748;   /* primary body text on light */
+  --tw-color-slate-2:    #4A5568;   /* secondary body text */
+  --tw-color-muted:      #888;      /* tertiary/dim text */
+  --tw-color-faint:      #bbb;      /* placeholder/disabled */
+
+  --tw-color-error:      #c0392b;
+  --tw-color-error-soft: rgba(192,57,43,0.10);
+  --tw-color-warning:    #d69e2e;
+  --tw-color-info:       #3b5fc0;
+
+  --tw-color-card:       #ffffff;
+  --tw-color-border:     rgba(0,0,0,0.06);
+  --tw-color-border-2:   rgba(0,0,0,0.12);
+  --tw-color-divider:    rgba(0,0,0,0.05);
+
+  /* On-dark surfaces (sidebar, top nav remnants) */
+  --tw-color-on-dark:        #F5F0E8;
+  --tw-color-on-dark-dim:    rgba(245,240,232,0.66);
+  --tw-color-on-dark-faint:  rgba(245,240,232,0.45);
+  --tw-color-on-dark-border: rgba(245,240,232,0.10);
+
+  /* ── SPACING (4px scale) ───────────────────────────────────────── */
+  --tw-space-1:  4px;
+  --tw-space-2:  8px;
+  --tw-space-3:  12px;
+  --tw-space-4:  16px;
+  --tw-space-5:  20px;
+  --tw-space-6:  24px;
+  --tw-space-7:  32px;
+  --tw-space-8:  40px;
+  --tw-space-9:  48px;
+  --tw-space-10: 64px;
+
+  /* ── RADIUS ───────────────────────────────────────────────────── */
+  --tw-radius-xs:   4px;
+  --tw-radius-sm:   6px;
+  --tw-radius-md:   8px;
+  --tw-radius-lg:   12px;
+  --tw-radius-xl:   16px;
+  --tw-radius-full: 9999px;
+
+  /* ── SHADOW ───────────────────────────────────────────────────── */
+  --tw-shadow-1: 0 1px 3px rgba(15,20,16,0.06);                                   /* card resting */
+  --tw-shadow-2: 0 4px 14px rgba(15,20,16,0.10);                                  /* card hover, dropdown */
+  --tw-shadow-3: 0 12px 32px rgba(15,20,16,0.18);                                 /* popover, modal */
+  --tw-shadow-4: 0 20px 60px rgba(15,20,16,0.22);                                 /* command palette / large modal */
+
+  /* ── TYPOGRAPHY ───────────────────────────────────────────────── */
+  --tw-font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --tw-font-body:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --tw-fw-normal: 400;
+  --tw-fw-medium: 500;
+  --tw-fw-semi:   600;
+  --tw-fw-bold:   700;
+  --tw-fw-extra:  800;
+
+  /* ── MOTION ───────────────────────────────────────────────────── */
+  --tw-ease:       0.18s ease;
+  --tw-ease-fast:  0.12s ease;
+  --tw-ease-slow:  0.30s ease;
+
+  /* ── Z-INDEX ──────────────────────────────────────────────────── */
+  --tw-z-fab:        90;
+  --tw-z-modal:      100;
+  --tw-z-drawer-bg:  110;
+  --tw-z-sidebar:    120;
+  --tw-z-burger:     130;
+  --tw-z-popover:    200;
+  --tw-z-cmdk:       300;
+  --tw-z-toast:      400;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+ * BUTTON LIBRARY (.tw-btn-*)
+ * Use as drop-in replacements for ad-hoc buttons. Existing per-page
+ * .btn-primary/.btn-outline rules continue to work unchanged.
+ * ──────────────────────────────────────────────────────────────── */
+.tw-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--tw-space-2);
+  font-family: var(--tw-font-body);
+  font-size: 14px; font-weight: var(--tw-fw-semi);
+  padding: 9px var(--tw-space-5);
+  border-radius: var(--tw-radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--tw-ease-fast), border-color var(--tw-ease-fast), color var(--tw-ease-fast), box-shadow var(--tw-ease-fast);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.tw-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.tw-btn-primary {
+  background: var(--tw-color-green);
+  color: var(--tw-color-on-dark);
+  border-color: var(--tw-color-green);
+}
+.tw-btn-primary:hover:not(:disabled) {
+  background: var(--tw-color-green-dark); border-color: var(--tw-color-green-dark);
+}
+
+.tw-btn-secondary {
+  background: var(--tw-color-card);
+  color: var(--tw-color-slate);
+  border-color: var(--tw-color-border-2);
+}
+.tw-btn-secondary:hover:not(:disabled) {
+  border-color: var(--tw-color-slate);
+}
+
+.tw-btn-ghost {
+  background: transparent;
+  color: var(--tw-color-slate);
+  border-color: transparent;
+}
+.tw-btn-ghost:hover:not(:disabled) {
+  background: rgba(0,0,0,0.04);
+}
+
+.tw-btn-danger {
+  background: var(--tw-color-card);
+  color: var(--tw-color-error);
+  border-color: rgba(192,57,43,0.25);
+}
+.tw-btn-danger:hover:not(:disabled) {
+  background: var(--tw-color-error-soft); border-color: var(--tw-color-error);
+}
+
+.tw-btn-sm { font-size: 12px; padding: 6px var(--tw-space-3); }
+.tw-btn-lg { font-size: 15px; padding: 12px var(--tw-space-6); }
+
+/* ────────────────────────────────────────────────────────────────────
+ * SKELETONS — content-shaped placeholders for loading states.
+ * Use .tw-sk for plain inline shapes; -line for text-row, -avatar for
+ * circle, -card to compose a card-shaped skeleton. The shimmer keeps
+ * users oriented during fetches without the abrupt "spinner →
+ * content" swap.
+ * ──────────────────────────────────────────────────────────────── */
+.tw-sk {
+  display: inline-block;
+  background: linear-gradient(90deg,
+    rgba(15,20,16,0.05) 0%,
+    rgba(15,20,16,0.10) 50%,
+    rgba(15,20,16,0.05) 100%);
+  background-size: 200% 100%;
+  border-radius: var(--tw-radius-sm);
+  animation: tw-sk-shimmer 1.4s ease-in-out infinite;
+  color: transparent !important;
+  user-select: none;
+  vertical-align: middle;
+}
+@keyframes tw-sk-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.tw-sk-line   { display: block; height: 12px; margin: 6px 0; }
+.tw-sk-line.lg { height: 16px; }
+.tw-sk-line.sm { height: 10px; }
+.tw-sk-avatar { display: inline-block; width: 40px; height: 40px; border-radius: var(--tw-radius-full); }
+.tw-sk-pill   { display: inline-block; height: 18px; width: 60px; border-radius: var(--tw-radius-full); }
+.tw-sk-card {
+  background: var(--tw-color-card);
+  border-radius: var(--tw-radius-lg);
+  padding: 14px 18px;
+  box-shadow: var(--tw-shadow-1);
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 8px;
+}
+.tw-sk-card .tw-sk-info { flex: 1; min-width: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .tw-sk { animation: none; }
+}
+
+/* ────────────────────────────────────────────────────────────────────
+ * PAGE HEADER — large serif title + small subtitle + right-aligned
+ * primary actions. Drop in at the top of any post-login page to match
+ * the wireframes' hierarchy.
+ *
+ *   <header class="tw-page-header">
+ *     <div class="tw-page-header-left">
+ *       <h1>Directory</h1>
+ *       <p class="tw-page-header-sub">47 pet parents · 62 dogs</p>
+ *     </div>
+ *     <div class="tw-page-header-actions">
+ *       <button class="tw-btn tw-btn-secondary">↓ Import</button>
+ *       <button class="tw-btn tw-btn-primary">+ Add pet parent</button>
+ *     </div>
+ *   </header>
+ * ──────────────────────────────────────────────────────────────── */
+.tw-page-header {
+  margin-bottom: var(--tw-space-7);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--tw-space-4);
+}
+.tw-page-header-left h1 {
+  font-family: var(--tw-font-display);
+  font-weight: var(--tw-fw-extra);
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--tw-color-ink);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.tw-page-header-sub {
+  font-size: 14px;
+  color: var(--tw-color-muted);
+  margin: 6px 0 0;
+}
+.tw-page-header-actions {
+  display: flex;
+  gap: var(--tw-space-2);
+  flex-shrink: 0;
+}
+@media (max-width: 700px) {
+  .tw-page-header { flex-direction: column; align-items: stretch; }
+  .tw-page-header-left h1 { font-size: 26px; }
+}
+
+/* ────────────────────────────────────────────────────────────────────
+ * STAT CARD — large serif numeral + small caps label + delta subtitle.
+ * Use .tw-stat-card-active for the dark-green inverse highlight.
+ *
+ *   <div class="tw-stat-card-grid">
+ *     <div class="tw-stat-card tw-stat-card-active">
+ *       <div class="tw-stat-card-label">Messages today</div>
+ *       <div class="tw-stat-card-value">12</div>
+ *       <div class="tw-stat-card-sub">+3 vs. yesterday</div>
+ *     </div>
+ *     ...
+ *   </div>
+ * ──────────────────────────────────────────────────────────────── */
+.tw-stat-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--tw-space-3);
+}
+@media (max-width: 900px) { .tw-stat-card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px) { .tw-stat-card-grid { grid-template-columns: 1fr; } }
+
+.tw-stat-card {
+  background: var(--tw-color-card);
+  border-radius: var(--tw-radius-lg);
+  border: 1px solid var(--tw-color-border);
+  padding: var(--tw-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--tw-space-2);
+  box-shadow: var(--tw-shadow-1);
+}
+.tw-stat-card-label {
+  font-size: 11px;
+  font-weight: var(--tw-fw-bold);
+  color: var(--tw-color-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.tw-stat-card-value {
+  font-family: var(--tw-font-display);
+  font-weight: var(--tw-fw-extra);
+  font-size: 40px;
+  line-height: 1;
+  color: var(--tw-color-ink);
+  letter-spacing: -0.02em;
+}
+.tw-stat-card-sub {
+  font-size: 13px;
+  color: var(--tw-color-muted);
+  margin-top: auto;
+}
+.tw-stat-card-sub .delta-up   { color: var(--tw-color-green); font-weight: var(--tw-fw-bold); }
+.tw-stat-card-sub .delta-down { color: var(--tw-color-error); font-weight: var(--tw-fw-bold); }
+
+.tw-stat-card-active {
+  background: var(--tw-color-ink);
+  border-color: var(--tw-color-ink);
+}
+.tw-stat-card-active .tw-stat-card-label { color: var(--tw-color-sage); }
+.tw-stat-card-active .tw-stat-card-value { color: var(--tw-color-on-dark); }
+.tw-stat-card-active .tw-stat-card-sub   { color: var(--tw-color-on-dark-faint); }
+
+/* ────────────────────────────────────────────────────────────────────
+ * TABLE — roomier rows, small-caps gray column headers, hover row tint.
+ *
+ *   <table class="tw-table">
+ *     <thead><tr><th>Pet parent</th><th>...</th></tr></thead>
+ *     <tbody>...</tbody>
+ *   </table>
+ * ──────────────────────────────────────────────────────────────── */
+.tw-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--tw-color-card);
+  border-radius: var(--tw-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--tw-shadow-1);
+}
+.tw-table thead th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: var(--tw-fw-bold);
+  color: var(--tw-color-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 14px var(--tw-space-5);
+  border-bottom: 1px solid var(--tw-color-divider);
+  background: transparent;
+}
+.tw-table tbody td {
+  padding: var(--tw-space-4) var(--tw-space-5);
+  font-size: 14px;
+  color: var(--tw-color-slate);
+  border-bottom: 1px solid var(--tw-color-divider);
+  vertical-align: middle;
+}
+.tw-table tbody tr:hover { background: rgba(30,107,74,0.03); }
+.tw-table tbody tr:last-child td { border-bottom: none; }
+
+/* ────────────────────────────────────────────────────────────────────
+ * PILL — status / breed / category badges. Color variants are soft
+ * tinted backgrounds with the matching accent text color.
+ * ──────────────────────────────────────────────────────────────── */
+.tw-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--tw-font-body);
+  font-size: 11px;
+  font-weight: var(--tw-fw-bold);
+  padding: 3px 9px;
+  border-radius: var(--tw-radius-full);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.tw-pill-success { background: rgba(30,107,74,0.12);  color: var(--tw-color-green); }
+.tw-pill-warning { background: var(--tw-color-gold-soft); color: var(--tw-color-warning); }
+.tw-pill-error   { background: var(--tw-color-error-soft); color: var(--tw-color-error); }
+.tw-pill-info    { background: rgba(59,95,192,0.10);  color: var(--tw-color-info); }
+.tw-pill-neutral { background: rgba(15,20,16,0.06);   color: var(--tw-color-slate); }
+.tw-pill-soft    { background: rgba(168,197,176,0.25); color: var(--tw-color-green-dark); }
+
+.tw-pill-dot::before {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor; flex-shrink: 0;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+ * TIME RANGE SELECTOR — pill-button group used on Insights/Activity.
+ *
+ *   <div class="tw-time-range">
+ *     <button>7d</button>
+ *     <button class="active">30d</button>
+ *     <button>90d</button>
+ *     <button>YTD</button>
+ *   </div>
+ * ──────────────────────────────────────────────────────────────── */
+.tw-time-range {
+  display: inline-flex;
+  background: var(--tw-color-linen);
+  border: 1px solid var(--tw-color-border);
+  border-radius: var(--tw-radius-md);
+  padding: 3px;
+  gap: 2px;
+}
+.tw-time-range button {
+  background: transparent;
+  border: none;
+  padding: 5px var(--tw-space-3);
+  border-radius: var(--tw-radius-sm);
+  font-family: var(--tw-font-body);
+  font-size: 12px;
+  font-weight: var(--tw-fw-semi);
+  color: var(--tw-color-muted);
+  cursor: pointer;
+  transition: background var(--tw-ease-fast), color var(--tw-ease-fast);
+}
+.tw-time-range button:hover:not(.active) { color: var(--tw-color-slate); }
+.tw-time-range button.active {
+  background: var(--tw-color-card);
+  color: var(--tw-color-ink);
+  box-shadow: var(--tw-shadow-1);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+ * SUB-NAV — left-rail nested navigation (used by Settings).
+ *
+ *   <aside class="tw-sub-nav">
+ *     <a class="tw-sub-nav-item active">💳 Your plan</a>
+ *     <a class="tw-sub-nav-item">📞 TailWag number</a>
+ *     <div class="tw-sub-nav-group">Workspace</div>
+ *     ...
+ *   </aside>
+ * ──────────────────────────────────────────────────────────────── */
+.tw-sub-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 240px;
+  flex-shrink: 0;
+}
+.tw-sub-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: var(--tw-fw-medium);
+  color: var(--tw-color-slate);
+  border-radius: var(--tw-radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background var(--tw-ease-fast), color var(--tw-ease-fast), border-color var(--tw-ease-fast);
+}
+.tw-sub-nav-item:hover { background: rgba(30,107,74,0.04); color: var(--tw-color-green); }
+.tw-sub-nav-item.active {
+  background: rgba(30,107,74,0.08);
+  border-color: rgba(30,107,74,0.18);
+  color: var(--tw-color-green);
+  font-weight: var(--tw-fw-semi);
+}
+.tw-sub-nav-group {
+  font-size: 10px;
+  font-weight: var(--tw-fw-bold);
+  color: var(--tw-color-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 16px 14px 6px;
+  margin-top: 8px;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+ * RIGHT CONTEXT PANEL — sticky right-side card stack. Used by Team
+ * (invite form + role reference) and any future page that wants
+ * permanent context alongside the main content.
+ * ──────────────────────────────────────────────────────────────── */
+.tw-right-panel {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tw-space-4);
+}
+.tw-right-panel-card {
+  background: var(--tw-color-card);
+  border: 1px solid var(--tw-color-border);
+  border-radius: var(--tw-radius-lg);
+  padding: var(--tw-space-5);
+  box-shadow: var(--tw-shadow-1);
+}
+.tw-right-panel-card h3 {
+  font-family: var(--tw-font-display);
+  font-weight: var(--tw-fw-bold);
+  font-size: 15px;
+  color: var(--tw-color-ink);
+  margin: 0 0 6px;
+}
+.tw-right-panel-card p {
+  font-size: 13px;
+  color: var(--tw-color-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+@media (max-width: 900px) {
+  .tw-right-panel { width: 100%; }
+}
+
+/* ────────────────────────────────────────────────────────────────────
+ * MINI CHARTS — lightweight inline SVG-friendly classes for stat-card
+ * sparklines and bar charts. Caller provides the SVG; these classes
+ * just give it consistent stroke/fill colors.
+ * ──────────────────────────────────────────────────────────────── */
+.tw-spark { display: block; width: 100%; height: 36px; }
+.tw-spark path.line { stroke: var(--tw-color-green); stroke-width: 2; fill: none; }
+.tw-spark path.fill { fill: rgba(30,107,74,0.10); stroke: none; }
+.tw-stat-card-active .tw-spark path.line { stroke: var(--tw-color-on-dark); }
+.tw-stat-card-active .tw-spark path.fill { fill: rgba(245,240,232,0.15); }
+
+.tw-bar { background: var(--tw-color-sage); border-radius: 4px; }
+.tw-bar.today { background: var(--tw-color-green); }

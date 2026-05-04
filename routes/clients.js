@@ -73,7 +73,28 @@ const escaped = q.replace(/[,()]/g, ' ').replace(/[%_\\]/g, m => '\\' + m);
 
   const { data, error } = await query.order('last_name');
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+
+  // Annotate each client with last_visit_at — most recent appointment_date
+  // (read-only addition; field is null if the client has no appointments).
+  const clientList = data || [];
+  if (clientList.length) {
+    const ids = clientList.map(c => c.id);
+    const { data: appts } = await supabaseAdmin
+      .from('appointments')
+      .select('client_id, appointment_date')
+      .eq('daycare_id', req.daycareId)
+      .in('client_id', ids)
+      .order('appointment_date', { ascending: false });
+    const lastVisitMap = {};
+    for (const a of (appts || [])) {
+      if (!lastVisitMap[a.client_id]) lastVisitMap[a.client_id] = a.appointment_date;
+    }
+    for (const c of clientList) {
+      c.last_visit_at = lastVisitMap[c.id] || null;
+    }
+  }
+
+  res.json(clientList);
 });
 
 // POST /api/clients — create client
@@ -105,10 +126,23 @@ router.get('/:id', requireAuth, async (req, res) => {
 
 // PUT /api/clients/:id — update client
 router.put('/:id', requireAuth, async (req, res) => {
-  const { first_name, last_name, phone, email, notes } = req.body;
+  const { first_name, last_name, phone, email, notes, reminder_cadence } = req.body;
+  const updates = {};
+  if (first_name !== undefined) updates.first_name = first_name;
+  if (last_name  !== undefined) updates.last_name  = last_name;
+  if (phone      !== undefined) updates.phone      = phone;
+  if (email      !== undefined) updates.email      = email;
+  if (notes      !== undefined) updates.notes      = notes;
+  if (reminder_cadence !== undefined) {
+    if (!['per_visit', 'weekly_summary', 'none'].includes(reminder_cadence)) {
+      return res.status(400).json({ error: 'reminder_cadence must be per_visit, weekly_summary, or none' });
+    }
+    updates.reminder_cadence = reminder_cadence;
+  }
+
   const { data, error } = await supabaseAdmin
     .from('clients')
-    .update({ first_name, last_name, phone, email, notes })
+    .update(updates)
     .eq('id', req.params.id)
     .eq('daycare_id', req.daycareId)
     .select()
@@ -122,6 +156,17 @@ router.delete('/:id', requireAuth, async (req, res) => {
   const { error } = await supabaseAdmin
     .from('clients')
     .update({ active: false })
+    .eq('id', req.params.id)
+    .eq('daycare_id', req.daycareId);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// POST /api/clients/:id/restore — undo a soft-delete
+router.post('/:id/restore', requireAuth, async (req, res) => {
+  const { error } = await supabaseAdmin
+    .from('clients')
+    .update({ active: true })
     .eq('id', req.params.id)
     .eq('daycare_id', req.daycareId);
   if (error) return res.status(500).json({ error: error.message });

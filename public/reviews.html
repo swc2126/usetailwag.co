@@ -24,212 +24,261 @@
     }
     body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
 
-    /* NAV */
-    .dashboard-nav {
-      background: var(--black); padding: 0 32px;
-      display: flex; justify-content: space-between; align-items: center; height: 60px;
-    }
-    .nav-left { display: flex; align-items: center; gap: 32px; }
-    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
-    .nav-links { display: flex; gap: 4px; }
-    .nav-link {
-      color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; font-weight: 500;
-      padding: 6px 14px; border-radius: 6px; transition: color 0.2s, background 0.2s;
-    }
-    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
-    .nav-link.active { color: var(--linen); background: rgba(255,255,255,0.1); }
-    .nav-right { display: flex; align-items: center; gap: 16px; }
-    .user-name { font-size: 14px; color: var(--sage); }
-    .logout-btn {
-      background: transparent; border: 1px solid rgba(245,240,232,0.3); color: var(--linen);
-      padding: 7px 18px; border-radius: 8px; font-family: 'Inter', sans-serif;
-      font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color 0.2s;
-    }
-    .logout-btn:hover { border-color: var(--linen); }
+    .page-container { max-width: 1100px; margin: 0 auto; padding: var(--tw-space-8) var(--tw-space-6); }
 
-    /* LAYOUT */
-    .page-container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
-    .page-header { margin-bottom: 32px; }
-    .page-header h1 {
-      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
-      font-size: 30px; color: var(--black); letter-spacing: -0.5px;
-    }
-    .page-header p { font-size: 15px; color: #888; margin-top: 4px; }
-
-    /* STATS ROW */
-    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
-    .stat-card {
-      background: #fff; border-radius: 12px; padding: 22px 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
-    .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 8px; }
-    .stat-value { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 34px; color: var(--black); line-height: 1; }
-    .stat-sub { font-size: 12px; color: #bbb; margin-top: 5px; }
-
-    /* COMPOSE CARD */
+    /* ── COMPOSE CARD ── */
     .compose-card {
-      background: #fff; border-radius: 12px; padding: 28px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 24px;
+      background: var(--tw-color-card);
+      border: 1px solid var(--tw-color-border);
+      border-radius: var(--tw-radius-lg);
+      box-shadow: var(--tw-shadow-1);
+      padding: var(--tw-space-7);
+      margin-bottom: var(--tw-space-6);
     }
     .compose-card h2 {
-      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
-      font-size: 18px; color: var(--black); margin-bottom: 22px;
+      font-family: var(--tw-font-display);
+      font-weight: var(--tw-fw-bold);
+      font-size: 18px; color: var(--tw-color-ink);
+      margin-bottom: var(--tw-space-5);
     }
-
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    .form-group { margin-bottom: 16px; }
+    .form-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--tw-space-4);
+      margin-bottom: var(--tw-space-4);
+    }
+    .form-group { margin-bottom: var(--tw-space-4); }
     .form-group label {
-      display: block; font-size: 12px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.5px; color: #999; margin-bottom: 6px;
+      display: block;
+      font-size: 11px; font-weight: var(--tw-fw-bold);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--tw-color-muted);
+      margin-bottom: 6px;
     }
     .form-control {
-      width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px;
-      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--slate);
-      outline: none; transition: border-color 0.2s; background: #fff;
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--tw-color-border-2);
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--slate);
+      background: var(--tw-color-card);
+      outline: none;
+      transition: border-color 0.15s;
     }
     .form-control:focus { border-color: var(--green); }
     textarea.form-control { resize: vertical; min-height: 120px; line-height: 1.6; }
 
-    .compose-actions { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+    .compose-actions {
+      display: flex; gap: var(--tw-space-3);
+      margin-top: 4px; flex-wrap: wrap;
+    }
     .btn-primary {
-      background: var(--green); color: var(--linen); border: none; padding: 10px 24px;
-      border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      background: var(--green); color: var(--linen);
+      border: none;
+      padding: 10px 22px;
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: var(--tw-fw-semi);
       cursor: pointer; transition: background 0.2s;
     }
-    .btn-primary:hover { background: var(--green-dark); }
+    .btn-primary:hover:not(:disabled) { background: var(--green-dark); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-outline {
-      background: none; border: 1px solid var(--green); color: var(--green);
-      padding: 9px 20px; border-radius: 8px; font-family: 'Inter', sans-serif;
-      font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+      background: none;
+      border: 1px solid var(--green);
+      color: var(--green);
+      padding: 9px 18px;
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: var(--tw-fw-semi);
+      cursor: pointer; transition: background 0.2s;
     }
-    .btn-outline:hover { background: rgba(30,107,74,0.06); }
+    .btn-outline:hover { background: var(--tw-color-green-soft); }
 
-    .send-result { font-size: 13px; margin-top: 10px; display: none; }
+    .send-result {
+      font-size: 13px;
+      margin-top: var(--tw-space-3);
+      display: none;
+    }
     .send-result.success { color: var(--green); }
-    .send-result.error { color: #e53e3e; }
+    .send-result.error { color: var(--tw-color-error); }
 
     .btn-ai {
       background: linear-gradient(135deg, #1E6B4A, #2d8f65);
-      color: #fff; border: none; padding: 5px 13px; border-radius: 20px;
-      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
-      cursor: pointer; letter-spacing: 0.2px; transition: opacity 0.2s;
+      color: #fff; border: none;
+      padding: 5px 13px;
+      border-radius: var(--tw-radius-full);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: var(--tw-fw-semi);
+      cursor: pointer; transition: opacity 0.2s;
       white-space: nowrap;
     }
-    .btn-ai:hover { opacity: 0.88; }
+    .btn-ai:hover:not(:disabled) { opacity: 0.88; }
     .btn-ai:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* HISTORY TABLE */
+    /* ── TABLE CARDS (Review Status, Recent Review Requests) ── */
     .table-card {
-      background: #fff; border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 28px;
+      background: var(--tw-color-card);
+      border: 1px solid var(--tw-color-border);
+      border-radius: var(--tw-radius-lg);
+      box-shadow: var(--tw-shadow-1);
+      overflow: hidden;
+      margin-bottom: var(--tw-space-6);
     }
-    .table-card-header { padding: 20px 20px 0; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .table-card-header {
+      padding: var(--tw-space-5) var(--tw-space-5) 0;
+      display: flex; justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--tw-space-3);
+    }
     .table-card-header h2 {
-      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 18px; color: var(--black);
+      font-family: var(--tw-font-display);
+      font-weight: var(--tw-fw-bold);
+      font-size: 16px;
+      color: var(--tw-color-ink);
     }
-    table { width: 100%; border-collapse: collapse; }
-    thead { background: var(--black); }
-    thead th {
-      padding: 12px 20px; text-align: left; font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 1px; color: var(--sage);
+    .table-card .tw-table {
+      box-shadow: none;
+      border-radius: 0;
+      margin-top: var(--tw-space-4);
     }
-    tbody tr { border-bottom: 1px solid rgba(0,0,0,0.05); }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: rgba(30,107,74,0.02); }
-    tbody td { padding: 13px 20px; font-size: 13px; color: var(--slate); vertical-align: middle; }
 
-    .status-badge {
-      display: inline-block; padding: 3px 9px; border-radius: 20px;
-      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    /* ── TAB TOGGLE FILTER (matches Directory) ── */
+    .tw-tab-toggle {
+      display: inline-flex; gap: 2px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 10px;
+      padding: 3px;
     }
-    .status-delivered { background: rgba(30,107,74,0.1); color: var(--green); }
-    .status-sent { background: rgba(66,153,225,0.12); color: #2b6cb0; }
-    .status-failed { background: rgba(229,62,62,0.1); color: #e53e3e; }
-    .status-queued, .status-none { background: rgba(0,0,0,0.06); color: #999; }
-
-    /* Review status badges */
-    .rev-badge {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
-    }
-    .rev-badge-gray { background: rgba(0,0,0,0.06); color: #888; }
-    .rev-badge-amber { background: rgba(196,147,63,0.15); color: var(--gold); }
-    .rev-badge-green { background: rgba(30,107,74,0.12); color: var(--green); }
-
-    /* Action buttons in status table */
-    .rev-action-btn {
-      background: none; border: 1px solid #ddd; color: var(--slate);
-      padding: 5px 12px; border-radius: 6px; font-family: 'Inter', sans-serif;
-      font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    .tw-tab-toggle .filter-tab {
+      padding: 6px 12px;
+      font-size: 12px; font-weight: var(--tw-fw-semi);
+      font-family: 'Inter', sans-serif;
+      background: none; border: none; cursor: pointer;
+      color: var(--tw-color-muted);
+      border-radius: 8px;
+      transition: background 0.15s, color 0.15s;
       white-space: nowrap;
     }
-    .rev-action-btn:hover { border-color: var(--green); color: var(--green); background: rgba(30,107,74,0.05); }
+    .tw-tab-toggle .filter-tab .filter-count {
+      opacity: 0.55;
+      margin-left: 4px;
+      font-weight: var(--tw-fw-bold);
+    }
+    .tw-tab-toggle .filter-tab.active {
+      background: var(--tw-color-card);
+      color: var(--tw-color-ink);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+    .tw-tab-toggle .filter-tab.active .filter-count {
+      opacity: 0.8;
+      color: var(--green);
+    }
+    .tw-tab-toggle .filter-tab:not(.active):hover { color: var(--slate); }
+
+    /* ── ACTION BUTTONS IN STATUS TABLE ── */
+    .rev-action-btn {
+      background: none;
+      border: 1px solid var(--tw-color-border-2);
+      color: var(--slate);
+      padding: 5px 12px;
+      border-radius: var(--tw-radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: var(--tw-fw-semi);
+      cursor: pointer; white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .rev-action-btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--tw-color-green-soft);
+    }
     .rev-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .rev-action-btn.sending { opacity: 0.6; cursor: not-allowed; }
     .rev-action-btn-confirm {
-      background: rgba(30,107,74,0.08); border-color: rgba(30,107,74,0.3); color: var(--green);
+      background: rgba(30,107,74,0.08);
+      border-color: rgba(30,107,74,0.3);
+      color: var(--green);
     }
-    .rev-action-btn-confirm:hover { background: rgba(30,107,74,0.15); border-color: var(--green); color: var(--green); }
+    .rev-action-btn-confirm:hover {
+      background: rgba(30,107,74,0.15);
+      border-color: var(--green);
+      color: var(--green);
+    }
     .rev-actions-group { display: flex; gap: 6px; flex-wrap: wrap; }
 
-    /* Filter tabs */
-    .filter-tabs { display: flex; gap: 4px; }
-    .filter-tab {
-      background: none; border: 1px solid #e2e8f0; color: #999;
-      padding: 5px 13px; border-radius: 20px; font-family: 'Inter', sans-serif;
-      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap;
-    }
-    .filter-tab:hover { border-color: var(--green); color: var(--green); }
-    .filter-tab.active { background: var(--green); border-color: var(--green); color: #fff; }
-    .filter-count { font-size: 11px; opacity: 0.75; margin-left: 3px; }
-
-    /* PREVIEW MODAL */
+    /* ── PREVIEW MODAL ── */
     .modal-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-      z-index: 100; align-items: center; justify-content: center;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: var(--tw-z-modal);
+      align-items: center; justify-content: center;
     }
     .modal-overlay.open { display: flex; }
     .modal {
-      background: #fff; border-radius: 14px; padding: 32px; width: 100%; max-width: 380px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center;
+      background: #fff;
+      border-radius: var(--tw-radius-xl);
+      padding: var(--tw-space-7);
+      width: 100%; max-width: 380px;
+      box-shadow: var(--tw-shadow-4);
+      text-align: center;
     }
     .modal h3 {
-      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
-      font-size: 18px; color: var(--black); margin-bottom: 20px;
+      font-family: var(--tw-font-display);
+      font-weight: var(--tw-fw-bold);
+      font-size: 18px; color: var(--tw-color-ink);
+      margin-bottom: var(--tw-space-5);
     }
     .phone-mockup {
-      background: #1a1a1a; border-radius: 28px; padding: 20px 16px;
-      margin: 0 auto 20px; max-width: 260px; min-height: 180px;
-      display: flex; flex-direction: column; justify-content: flex-end; gap: 8px;
+      background: #1a1a1a;
+      border-radius: 28px;
+      padding: 20px 16px;
+      margin: 0 auto var(--tw-space-5);
+      max-width: 260px; min-height: 180px;
+      display: flex; flex-direction: column;
+      justify-content: flex-end; gap: 8px;
     }
     .bubble {
-      background: #3a7d5f; color: #fff; border-radius: 16px 16px 4px 16px;
-      padding: 10px 14px; font-size: 13px; line-height: 1.5; text-align: left;
-      max-width: 90%; align-self: flex-end; word-break: break-word;
+      background: #3a7d5f; color: #fff;
+      border-radius: 16px 16px 4px 16px;
+      padding: 10px 14px;
+      font-size: 13px; line-height: 1.5; text-align: left;
+      max-width: 90%; align-self: flex-end;
+      word-break: break-word;
     }
     .btn-secondary {
-      background: none; border: 1px solid #ddd; color: var(--slate); padding: 9px 20px;
-      border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px;
-      font-weight: 600; cursor: pointer; transition: border-color 0.2s;
+      background: none;
+      border: 1px solid var(--tw-color-border-2);
+      color: var(--slate);
+      padding: 9px 20px;
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: var(--tw-fw-semi);
+      cursor: pointer;
+      transition: border-color 0.2s;
     }
-    .btn-secondary:hover { border-color: #999; }
+    .btn-secondary:hover { border-color: var(--tw-color-muted); }
 
-    .empty-state { text-align: center; padding: 40px 20px; color: #bbb; font-size: 13px; }
+    .empty-state {
+      text-align: center; padding: 40px 20px;
+      color: var(--tw-color-faint); font-size: 13px;
+    }
     .loading-spinner {
-      width: 28px; height: 28px; border: 3px solid rgba(30,107,74,0.2);
-      border-top-color: var(--green); border-radius: 50%;
-      animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+      width: 28px; height: 28px;
+      border: 3px solid rgba(30,107,74,0.2);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto var(--tw-space-3);
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 768px) {
-      .nav-links { display: none; }
-      .dashboard-nav { padding: 0 16px; }
-      .page-container { padding: 24px 16px; }
+      .page-container { padding: var(--tw-space-5) var(--tw-space-4); }
       .form-grid { grid-template-columns: 1fr; }
-      .stats-row { grid-template-columns: 1fr 1fr; }
+      .table-card-header { align-items: stretch; }
     }
   </style>
 </head>
@@ -247,27 +296,29 @@
 
   <div id="pageContent" style="display:none;">
 
-    <div class="page-header">
-      <h1>Review Requests</h1>
-      <p>Send Google review requests to clients after their dog's visit.</p>
-    </div>
+    <header class="tw-page-header">
+      <div class="tw-page-header-left">
+        <h1>Review Requests</h1>
+        <p class="tw-page-header-sub">Send Google review requests to clients after their dog's visit.</p>
+      </div>
+    </header>
 
-    <!-- Stats row -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-label">Sent This Month</div>
-        <div class="stat-value" id="statTotal">—</div>
-        <div class="stat-sub">review requests</div>
+    <!-- Stats grid -->
+    <div class="tw-stat-card-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: var(--tw-space-6);">
+      <div class="tw-stat-card">
+        <div class="tw-stat-card-label">Sent This Month</div>
+        <div class="tw-stat-card-value" id="statTotal">—</div>
+        <div class="tw-stat-card-sub">review requests</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Delivered</div>
-        <div class="stat-value" id="statDelivered">—</div>
-        <div class="stat-sub">confirmed deliveries</div>
+      <div class="tw-stat-card">
+        <div class="tw-stat-card-label">Delivered</div>
+        <div class="tw-stat-card-value" id="statDelivered">—</div>
+        <div class="tw-stat-card-sub">confirmed deliveries</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Reviews Received</div>
-        <div class="stat-value" id="statReviewed">—</div>
-        <div class="stat-sub">this month</div>
+      <div class="tw-stat-card">
+        <div class="tw-stat-card-label">Reviews Received</div>
+        <div class="tw-stat-card-value" id="statReviewed">—</div>
+        <div class="tw-stat-card-sub">this month</div>
       </div>
     </div>
 
@@ -299,10 +350,10 @@
           <textarea class="form-control" id="msgBody" rows="5" placeholder="Select a pet parent to generate a personalized message..."></textarea>
           <div id="aiSpinner" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,0.85);border-radius:8px;display:none;align-items:center;justify-content:center;flex-direction:column;gap:8px;">
             <div class="loading-spinner" style="width:22px;height:22px;border-width:2px;margin:0;"></div>
-            <span style="font-size:12px;color:#888;">Crafting your message...</span>
+            <span style="font-size:12px;color:var(--tw-color-muted);">Crafting your message...</span>
           </div>
         </div>
-        <div id="aiCharCount" style="font-size:11px;color:#bbb;margin-top:4px;text-align:right;display:none;"></div>
+        <div id="aiCharCount" style="font-size:11px;color:var(--tw-color-faint);margin-top:4px;text-align:right;display:none;"></div>
       </div>
 
       <div class="compose-actions">
@@ -316,18 +367,18 @@
     <div class="table-card" id="reviewStatusCard">
       <div class="table-card-header">
         <h2>Review Status</h2>
-        <div class="filter-tabs">
-          <button class="filter-tab active" onclick="setFilter('all', this)">All <span class="filter-count" id="fc-all"></span></button>
-          <button class="filter-tab" onclick="setFilter('not_requested', this)">Not Requested <span class="filter-count" id="fc-not_requested"></span></button>
-          <button class="filter-tab" onclick="setFilter('requested', this)">Requested <span class="filter-count" id="fc-requested"></span></button>
-          <button class="filter-tab" onclick="setFilter('reviewed', this)">Reviewed <span class="filter-count" id="fc-reviewed"></span></button>
+        <div class="tw-tab-toggle">
+          <button class="filter-tab active" onclick="setFilter('all', this)">All<span class="filter-count" id="fc-all"></span></button>
+          <button class="filter-tab" onclick="setFilter('not_requested', this)">Not Requested<span class="filter-count" id="fc-not_requested"></span></button>
+          <button class="filter-tab" onclick="setFilter('requested', this)">Requested<span class="filter-count" id="fc-requested"></span></button>
+          <button class="filter-tab" onclick="setFilter('reviewed', this)">Reviewed<span class="filter-count" id="fc-reviewed"></span></button>
         </div>
       </div>
       <div id="reviewStatusLoading" style="text-align:center;padding:30px;">
         <div class="loading-spinner" style="width:22px;height:22px;border-width:2px;"></div>
       </div>
       <div id="reviewStatusContent" style="display:none;">
-        <table>
+        <table class="tw-table">
           <thead>
             <tr>
               <th>Pet Parent &amp; Dog</th>
@@ -351,7 +402,7 @@
         <div class="loading-spinner" style="width:22px;height:22px;border-width:2px;"></div>
       </div>
       <div id="historyContent" style="display:none;">
-        <table>
+        <table class="tw-table">
           <thead>
             <tr>
               <th>Date</th>
@@ -782,11 +833,11 @@
       let badge, dateLabel, actionHtml;
 
       if (status === 'not_requested') {
-        badge = '<span class="rev-badge rev-badge-gray">Not yet requested</span>';
+        badge = '<span class="tw-pill tw-pill-neutral">Not yet requested</span>';
         dateLabel = '—';
         actionHtml = `<button class="rev-action-btn" id="rev-btn-${c.id}" onclick="sendReviewRequestForClient('${c.id}')">Send Review Request</button>`;
       } else if (status === 'requested') {
-        badge = '<span class="rev-badge rev-badge-amber">Requested</span>';
+        badge = '<span class="tw-pill tw-pill-warning">Requested</span>';
         dateLabel = fmtDate(c.review_requested_at);
         actionHtml = `
           <div class="rev-actions-group">
@@ -794,7 +845,7 @@
             <button class="rev-action-btn rev-action-btn-confirm" id="rev-btn-${c.id}" onclick="markReviewed('${c.id}')">Mark as Reviewed ✓</button>
           </div>`;
       } else if (status === 'reviewed') {
-        badge = '<span class="rev-badge rev-badge-green">✓ Reviewed</span>';
+        badge = '<span class="tw-pill tw-pill-success">✓ Reviewed</span>';
         dateLabel = `<span title="Requested: ${fmtDate(c.review_requested_at)}">${fmtDate(c.review_received_at)}</span>`;
         actionHtml = `<button class="rev-action-btn" id="rev-btn-${c.id}" onclick="requestSocialPost('${c.id}')">Request Social Post</button>`;
       }
@@ -803,10 +854,10 @@
         <tr>
           <td>
             <div style="font-weight:600">${escHtml(c.first_name)} ${escHtml(c.last_name)}</div>
-            <div style="font-size:11px;color:#bbb;margin-top:2px;">${dogLabel}</div>
+            <div style="font-size:11px;color:var(--tw-color-faint);margin-top:2px;">${dogLabel}</div>
           </td>
           <td>${badge}</td>
-          <td style="font-size:12px;color:#999;white-space:nowrap;">${dateLabel}</td>
+          <td style="font-size:12px;color:var(--tw-color-muted);white-space:nowrap;">${dateLabel}</td>
           <td>${actionHtml}</td>
         </tr>`;
     }).join('');
@@ -893,6 +944,14 @@
         return;
       }
 
+      const PILL_CLASS = {
+        delivered: 'tw-pill-success',
+        sent:      'tw-pill-info',
+        failed:    'tw-pill-error',
+        queued:    'tw-pill-neutral',
+        none:      'tw-pill-neutral'
+      };
+
       tbody.innerHTML = messages.map(m => {
         const clientName = m.clients
           ? `${m.clients.first_name || ''} ${m.clients.last_name || ''}`.trim()
@@ -902,11 +961,12 @@
         });
         const preview = (m.body || '').length > 70 ? m.body.substring(0, 70) + '\u2026' : (m.body || '');
         const status = m.status || 'queued';
+        const pillClass = PILL_CLASS[status] || 'tw-pill-neutral';
         return `<tr>
-          <td style="white-space:nowrap;color:#999">${date}</td>
+          <td style="white-space:nowrap;color:var(--tw-color-muted)">${date}</td>
           <td style="font-weight:600">${escHtml(clientName)}</td>
-          <td style="color:#666;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(preview)}</td>
-          <td><span class="status-badge status-${status}">${status}</span></td>
+          <td style="color:var(--tw-color-slate-2);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(preview)}</td>
+          <td><span class="tw-pill ${pillClass}">${status}</span></td>
         </tr>`;
       }).join('');
     } catch {

@@ -516,8 +516,71 @@ router.post('/telnyx/inbound', async (req, res) => {
   const isYesNo = ['YES', 'NO', 'Y', 'N'].includes(reply);
 
   // STOP/HELP keywords are handled by Telnyx itself — never auto-reply to those
-  const STOP_KEYWORDS = ['STOP', 'STOPALL', 'UNSUBSCRIBE', 'CANCEL', 'END', 'QUIT', 'HELP', 'INFO'];
-  const isStopKeyword = STOP_KEYWORDS.includes(reply);
+  const STOP_KEYWORDS_BARE = ['STOP', 'STOPALL', 'UNSUBSCRIBE', 'END', 'QUIT', 'HELP', 'INFO'];
+  const isStopKeyword = STOP_KEYWORDS_BARE.includes(reply) || reply === 'CANCEL';
+
+  // ── Day-specific cancel from weekly summary replies ──────────────────
+  //   "NO MON", "SKIP TUE", "CANCEL FRIDAY", "NO MONDAY" — cancel that
+  //   day's pending appointment within the next 7 days. Runs BEFORE
+  //   the bare YES/NO branch so "CANCEL FRI" doesn't get caught by the
+  //   isStopKeyword check above.
+  const DAY_TOKEN_TO_DOW = {
+    SUN: 0, SU: 0, SUNDAY: 0,
+    MON: 1, MO: 1, MONDAY: 1,
+    TUE: 2, TU: 2, TUES: 2, TUESDAY: 2,
+    WED: 3, WE: 3, WEDS: 3, WEDNESDAY: 3,
+    THU: 4, TH: 4, THUR: 4, THURS: 4, THURSDAY: 4,
+    FRI: 5, FR: 5, FRIDAY: 5,
+    SAT: 6, SA: 6, SATURDAY: 6
+  };
+  const dayCancelMatch = reply.match(/^(NO|SKIP|CANCEL)\s+([A-Z]+)$/);
+  const dayCancelDow = dayCancelMatch ? DAY_TOKEN_TO_DOW[dayCancelMatch[2]] : undefined;
+
+  if (dayCancelDow !== undefined && client) {
+    // Find the next pending appointment for this client on that weekday within 7 days
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let target = null;
+    for (let offset = 0; offset < 7; offset++) {
+      const d = new Date(today.getTime() + offset * 86400_000);
+      if (d.getDay() === dayCancelDow) { target = d; break; }
+    }
+    if (target) {
+      const targetDate = target.toISOString().split('T')[0];
+      // Cancel ALL of this client's pending appointments on the target date —
+      // important when the parent has multiple dogs scheduled the same day.
+      const { data: dayAppts } = await supabaseAdmin
+        .from('appointments')
+        .select('id, appointment_date, dogs(name)')
+        .eq('daycare_id', config.daycare_id)
+        .eq('client_id', client.id)
+        .eq('appointment_date', targetDate)
+        .eq('status', 'pending');
+
+      if (dayAppts && dayAppts.length > 0) {
+        const ids = dayAppts.map(a => a.id);
+        await supabaseAdmin.from('appointments')
+          .update({ status: 'cancelled', confirmed_at: new Date().toISOString() })
+          .in('id', ids);
+
+        // Build a single ack covering all dogs cancelled.
+        const dogNames = [...new Set(dayAppts.map(a => a.dogs?.name).filter(Boolean))];
+        let dogPhrase;
+        if (dogNames.length === 0)      dogPhrase = 'your appointment';
+        else if (dogNames.length === 1) dogPhrase = dogNames[0];
+        else if (dogNames.length === 2) dogPhrase = `${dogNames[0]} & ${dogNames[1]}`;
+        else dogPhrase = dogNames.slice(0, -1).join(', ') + ', and ' + dogNames[dogNames.length - 1];
+
+        const apptDateObj = new Date(targetDate + 'T12:00:00');
+        const dayStr = apptDateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+        try {
+          await sendSms({ from: to, to: from, text: `Got it, ${client.first_name}! We've cancelled ${dogPhrase} for ${dayStr}. See you next time!` });
+        } catch {}
+        return res.sendStatus(200);
+      }
+    }
+    // No matching appointment found — fall through (auto-reply will handle it gracefully)
+  }
 
   if (!isYesNo) {
     // Not a YES/NO confirmation — handle based on the daycare's messaging mode.
@@ -573,7 +636,9 @@ router.post('/telnyx/inbound', async (req, res) => {
 
   const isConfirm = reply === 'YES' || reply === 'Y';
 
-  // Find the most recent pending appointment with a reminder sent
+  // Find the pending appointment whose reminder was sent most recently —
+  // that's the one this YES/NO is most likely responding to. Limit to
+  // appointments dated today-or-later so we never flip a past day.
   const { data: appt } = await supabaseAdmin
     .from('appointments')
     .select('id, appointment_date, dogs(name)')
@@ -582,7 +647,7 @@ router.post('/telnyx/inbound', async (req, res) => {
     .eq('status', 'pending')
     .not('reminder_sent_at', 'is', null)
     .gte('appointment_date', new Date().toISOString().split('T')[0])
-    .order('appointment_date', { ascending: true })
+    .order('reminder_sent_at', { ascending: false })
     .limit(1)
     .single();
 

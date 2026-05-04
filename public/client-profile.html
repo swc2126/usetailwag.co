@@ -122,6 +122,25 @@
     }
     .notes-block-label { font-weight: 700; color: #999; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
 
+    /* ── REMINDER CADENCE BLOCK ── */
+    .reminder-cadence-block {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(0,0,0,0.07);
+    }
+    .rc-options { display: grid; gap: 6px; }
+    .rc-opt {
+      cursor: pointer; border: 1.5px solid #e2e8f0; border-radius: 8px;
+      transition: border-color 0.15s, background 0.15s; display: block;
+    }
+    .rc-opt input { display: none; }
+    .rc-opt:has(input:checked) { border-color: var(--green); background: rgba(30,107,74,0.04); }
+    .rc-opt:hover:not(:has(input:checked)) { border-color: rgba(30,107,74,0.3); }
+    .rc-opt-inner { padding: 9px 11px; }
+    .rc-opt-title { font-size: 12px; font-weight: 700; color: #0F1410; }
+    .rc-opt-desc  { font-size: 11px; color: #888; margin-top: 2px; line-height: 1.35; }
+    .rc-opt:has(input:checked) .rc-opt-title { color: var(--green); }
+
     /* ── RIGHT: TABBED PANEL ── */
     .tabs-panel {
       background: #fff; border-radius: 14px;
@@ -388,6 +407,34 @@
           <div class="notes-block" id="notesBlock" style="display:none;">
             <div class="notes-block-label">Notes</div>
             <div id="clientNotes"></div>
+          </div>
+
+          <div class="reminder-cadence-block">
+            <div class="dog-section-title" style="margin-bottom:8px;">Reminder Cadence</div>
+            <div class="rc-options">
+              <label class="rc-opt">
+                <input type="radio" name="reminderCadence" value="per_visit">
+                <div class="rc-opt-inner">
+                  <div class="rc-opt-title">Per visit</div>
+                  <div class="rc-opt-desc">A text the night before each appointment.</div>
+                </div>
+              </label>
+              <label class="rc-opt">
+                <input type="radio" name="reminderCadence" value="weekly_summary">
+                <div class="rc-opt-inner">
+                  <div class="rc-opt-title">Weekly summary</div>
+                  <div class="rc-opt-desc">One text per week listing all upcoming days. Reply <strong>YES</strong> to confirm all, or <strong>NO MON</strong> to skip a single day.</div>
+                </div>
+              </label>
+              <label class="rc-opt">
+                <input type="radio" name="reminderCadence" value="none">
+                <div class="rc-opt-inner">
+                  <div class="rc-opt-title">No reminders</div>
+                  <div class="rc-opt-desc">Skip reminder texts entirely.</div>
+                </div>
+              </label>
+            </div>
+            <div id="rcSavedMsg" style="font-size:11px;color:var(--green);margin-top:6px;height:14px;"></div>
           </div>
         </div>
       </div>
@@ -678,6 +725,14 @@
       document.getElementById('notesBlock').style.display = 'block';
     }
 
+    // Reminder cadence
+    const cadence = client.reminder_cadence || 'per_visit';
+    const rcInput = document.querySelector(`input[name="reminderCadence"][value="${cadence}"]`);
+    if (rcInput) rcInput.checked = true;
+    document.querySelectorAll('input[name="reminderCadence"]').forEach(input => {
+      input.addEventListener('change', saveReminderCadence);
+    });
+
     // Dogs
     const dogList = document.getElementById('dogList');
     if (!dogs.length) {
@@ -695,8 +750,33 @@
     apptDogSel.innerHTML = dogs.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('');
     if (!dogs.length) apptDogSel.innerHTML = '<option value="">No dogs on file</option>';
 
-    // Set today as default date
-    document.getElementById('apptDate').value = new Date().toISOString().split('T')[0];
+    // Set today as default date (local-date — toISOString returns UTC and rolls forward in the evening)
+    const _t = new Date();
+    document.getElementById('apptDate').value = `${_t.getFullYear()}-${String(_t.getMonth()+1).padStart(2,'0')}-${String(_t.getDate()).padStart(2,'0')}`;
+  }
+
+  async function saveReminderCadence(e) {
+    const value = e.target.value;
+    const msg = document.getElementById('rcSavedMsg');
+    msg.textContent = 'Saving…'; msg.style.color = '#999';
+
+    try {
+      const res = await fetch(`/api/clients/${client.id}`, {
+        method: 'PUT', headers: authHeaders,
+        body: JSON.stringify({ reminder_cadence: value })
+      });
+      if (res.ok) {
+        client.reminder_cadence = value;
+        msg.textContent = '✓ Saved'; msg.style.color = 'var(--green)';
+      } else {
+        const d = await res.json().catch(() => ({}));
+        msg.textContent = '✕ ' + (d.error || 'Failed');
+        msg.style.color = '#e53e3e';
+      }
+    } catch {
+      msg.textContent = '✕ Network error'; msg.style.color = '#e53e3e';
+    }
+    setTimeout(() => { msg.textContent = ''; }, 2500);
   }
 
   function selectDog(dogId) {
@@ -977,10 +1057,13 @@
   }
 
   // ── SCHEDULE TAB ─────────────────────────────────────────────────
+  function _localDateStr(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
   async function loadSchedule() {
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const past  = new Date(Date.now() - 90 * 86400000).toISOString().split('T')[0];
+      const today = _localDateStr(new Date());
+      const past  = _localDateStr(new Date(Date.now() - 90 * 86400000));
       const future= new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
 
       const res = await fetch(`/api/appointments/by-client/${clientId}`, { headers: authHeaders });

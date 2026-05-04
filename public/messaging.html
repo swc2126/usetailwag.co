@@ -24,260 +24,397 @@
     }
     body { font-family: 'Inter', sans-serif; background: var(--linen); color: var(--slate); min-height: 100vh; }
 
-    /* NAV */
-    .dashboard-nav {
-      background: var(--black); padding: 0 32px;
-      display: flex; justify-content: space-between; align-items: center; height: 60px;
-    }
-    .nav-left { display: flex; align-items: center; gap: 32px; }
-    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 20px; color: var(--linen); }
-    .nav-links { display: flex; gap: 4px; }
-    .nav-link {
-      color: rgba(245,240,232,0.6); text-decoration: none; font-size: 14px; font-weight: 500;
-      padding: 6px 14px; border-radius: 6px; transition: color 0.2s, background 0.2s;
-    }
-    .nav-link:hover { color: var(--linen); background: rgba(255,255,255,0.07); }
-    .nav-link.active { color: var(--linen); background: rgba(255,255,255,0.1); }
-    .nav-right { display: flex; align-items: center; gap: 16px; }
-    .user-name { font-size: 14px; color: var(--sage); }
-    .logout-btn {
-      background: transparent; border: 1px solid rgba(245,240,232,0.3); color: var(--linen);
-      padding: 7px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .logout-btn:hover { border-color: var(--linen); }
+    .page-container { max-width: 1200px; margin: 0 auto; padding: var(--tw-space-8) var(--tw-space-6); }
 
-    .page-container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
-
-    /* Usage banner */
-    .usage-banner {
-      background: #fff; border-radius: 10px; padding: 16px 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 24px; display: flex;
-      align-items: center; gap: 20px; flex-wrap: wrap;
+    /* ── 2-column layout ── */
+    .messaging-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: var(--tw-space-5);
+      margin-bottom: var(--tw-space-7);
+      align-items: start;
     }
-    .usage-label { font-size: 13px; font-weight: 600; color: #999; white-space: nowrap; }
-    .usage-bar-wrap { flex: 1; min-width: 160px; }
-    .usage-bar-track { height: 8px; background: rgba(0,0,0,0.08); border-radius: 20px; overflow: hidden; }
-    .usage-bar-fill { height: 100%; background: var(--green); border-radius: 20px; transition: width 0.5s; }
-    .usage-bar-fill.warning { background: var(--gold); }
-    .usage-bar-fill.danger { background: #e53e3e; }
-    .usage-count { font-size: 13px; font-weight: 700; color: var(--slate); white-space: nowrap; }
 
-    /* Main two-column layout */
-    .messaging-layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; margin-bottom: 32px; align-items: start; }
-
-    /* ── LEFT PANEL: Client Roster ── */
+    /* ── LEFT: Client Roster ── */
     .client-panel {
-      background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      overflow: hidden; display: flex; flex-direction: column; max-height: 700px;
+      background: var(--tw-color-card);
+      border: 1px solid var(--tw-color-border);
+      border-radius: var(--tw-radius-lg);
+      box-shadow: var(--tw-shadow-1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: 720px;
+      position: sticky;
+      top: var(--tw-space-5);
     }
-    .client-panel-header { padding: 16px 16px 12px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .client-panel-header {
+      padding: var(--tw-space-4);
+      border-bottom: 1px solid var(--tw-color-divider);
+    }
     .client-panel-header h3 {
-      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px;
-      color: var(--black); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+      font-family: var(--tw-font-display);
+      font-weight: var(--tw-fw-bold);
+      font-size: 11px;
+      color: var(--tw-color-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: var(--tw-space-3);
     }
     .search-input {
-      width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px;
-      font-family: 'Inter', sans-serif; font-size: 13px; outline: none; color: var(--slate);
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--tw-color-border-2);
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--slate);
+      outline: none;
+      transition: border-color 0.15s;
     }
     .search-input:focus { border-color: var(--green); }
     .client-list { overflow-y: auto; flex: 1; }
+
     .client-item {
-      padding: 12px 16px; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.04);
-      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: var(--tw-space-3);
+      padding: var(--tw-space-3) var(--tw-space-4);
+      cursor: pointer;
+      border-bottom: 1px solid var(--tw-color-divider);
+      border-left: 3px solid transparent;
+      transition: background 0.15s, border-left-color 0.15s;
     }
     .client-item:last-child { border-bottom: none; }
-    .client-item:hover { background: rgba(30,107,74,0.05); }
-    .client-item.selected { background: rgba(30,107,74,0.1); border-left: 3px solid var(--green); }
-    .client-item:not(.selected) { border-left: 3px solid transparent; }
-    .client-item-dog { font-size: 13px; font-weight: 700; color: var(--slate); }
-    .client-item-owner { font-size: 12px; color: #888; margin-top: 2px; }
-    .client-item-bottom { margin-top: 5px; display: flex; justify-content: space-between; align-items: center; }
-    .breed-chip {
-      display: inline-block; background: rgba(196,147,63,0.12); color: var(--gold);
-      font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+    .client-item:hover { background: var(--tw-color-green-soft); }
+    .client-item.selected {
+      background: var(--tw-color-green-soft);
+      border-left-color: var(--green);
     }
-    .selected-tag {
-      font-size: 10px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.5px;
-      display: none;
+    .client-item-info { flex: 1; min-width: 0; }
+    .client-item-primary {
+      font-size: 13px;
+      font-weight: var(--tw-fw-semi);
+      color: var(--tw-color-ink);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .client-item.selected .selected-tag { display: block; }
+    .client-item-secondary {
+      font-size: 12px;
+      color: var(--tw-color-muted);
+      margin-top: 1px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .client-item.no-dog .client-item-secondary {
+      color: var(--tw-color-faint);
+      font-style: italic;
+    }
 
-    /* No dogs fallback row */
-    .client-item-no-dog { font-size: 13px; font-weight: 600; color: var(--slate); }
-    .client-item-no-dog-sub { font-size: 11px; color: #bbb; margin-top: 2px; }
+    /* Avatar (initials) — same pattern as Directory */
+    .tw-avatar {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: var(--tw-radius-full);
+      background: rgba(30,107,74,0.12); color: var(--green-dark);
+      font-weight: var(--tw-fw-bold); font-size: 12px; letter-spacing: 0.3px;
+      flex-shrink: 0;
+    }
 
-    /* ── RIGHT PANEL: Compose ── */
-    .compose-panel { display: flex; flex-direction: column; gap: 0; }
+    /* ── RIGHT: Compose ── */
+    .compose-panel { display: flex; flex-direction: column; gap: var(--tw-space-5); }
 
-    /* Empty state */
     .compose-empty {
-      background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 80px 40px; text-align: center; min-height: 360px;
+      background: var(--tw-color-card);
+      border: 1px dashed var(--tw-color-border-2);
+      border-radius: var(--tw-radius-lg);
+      padding: 100px 40px;
+      text-align: center;
+      color: var(--tw-color-muted);
     }
-    .compose-empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
-    .compose-empty p { font-size: 15px; color: #aaa; }
+    .compose-empty-icon { font-size: 32px; margin-bottom: var(--tw-space-3); opacity: 0.5; }
+    .compose-empty p { font-size: 14px; }
 
-    /* Compose active */
-    .compose-active { display: flex; flex-direction: column; gap: 16px; }
-
+    /* Active compose — single card with section dividers */
     .compose-card {
-      background: #fff; border-radius: 12px; padding: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      background: var(--tw-color-card);
+      border: 1px solid var(--tw-color-border);
+      border-radius: var(--tw-radius-lg);
+      box-shadow: var(--tw-shadow-1);
+      overflow: hidden;
     }
+    .compose-section {
+      padding: var(--tw-space-5);
+      border-bottom: 1px solid var(--tw-color-divider);
+    }
+    .compose-section:last-child { border-bottom: none; }
     .section-label {
-      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-      color: #999; margin-bottom: 10px; display: block;
+      display: block;
+      font-size: 11px; font-weight: var(--tw-fw-bold);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--tw-color-muted);
+      margin-bottom: var(--tw-space-3);
     }
 
-    /* Staff notes */
-    .notes-textarea {
-      width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px;
-      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--slate);
-      resize: vertical; min-height: 90px; outline: none; line-height: 1.6;
+    .notes-textarea, .msg-textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--tw-color-border-2);
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif; font-size: 14px;
+      color: var(--slate); resize: vertical;
+      outline: none; line-height: 1.6;
+      transition: border-color 0.15s;
     }
-    .notes-textarea:focus { border-color: var(--green); }
+    .notes-textarea:focus, .msg-textarea:focus { border-color: var(--green); }
+    .notes-textarea { min-height: 84px; }
+    .msg-textarea { min-height: 130px; }
 
-    /* Quick note chips */
-    .quick-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .quick-chips {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-top: var(--tw-space-3);
+    }
     .quick-chip {
-      display: inline-block; background: var(--linen); border: 1px solid rgba(0,0,0,0.1);
-      color: var(--slate); font-size: 12px; font-weight: 500; padding: 4px 10px;
-      border-radius: 20px; cursor: pointer; transition: background 0.15s, border-color 0.15s;
-      user-select: none;
+      background: var(--linen);
+      border: 1px solid var(--tw-color-border-2);
+      color: var(--slate);
+      font-size: 12px; font-weight: 500;
+      padding: 4px 10px;
+      border-radius: var(--tw-radius-full);
+      cursor: pointer; user-select: none;
+      transition: background 0.15s, border-color 0.15s;
     }
-    .quick-chip:hover { background: rgba(30,107,74,0.08); border-color: var(--green); color: var(--green-dark); }
+    .quick-chip:hover {
+      background: var(--tw-color-green-soft);
+      border-color: var(--green);
+      color: var(--green-dark);
+    }
 
-    /* Template selector */
+    .ai-generate-row { margin-top: var(--tw-space-3); }
+    .ai-generate-btn {
+      width: 100%;
+      background: var(--green);
+      color: var(--linen);
+      border: none;
+      border-radius: var(--tw-radius-md);
+      padding: 11px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: var(--tw-fw-semi);
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    .ai-generate-btn:hover:not(:disabled) { background: var(--green-dark); }
+    .ai-generate-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .ai-generate-error {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--tw-color-error);
+    }
+
     .template-select {
-      width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px;
-      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--slate);
-      outline: none; background: #fff; cursor: pointer; margin-bottom: 12px;
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--tw-color-border-2);
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif; font-size: 14px;
+      color: var(--slate); background: var(--tw-color-card);
+      cursor: pointer; outline: none;
+      margin-bottom: var(--tw-space-3);
     }
     .template-select:focus { border-color: var(--green); }
 
-    .msg-textarea {
-      width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px;
-      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--slate);
-      resize: vertical; min-height: 130px; outline: none; line-height: 1.6;
+    /* Toggle row */
+    .toggle-row {
+      display: flex; align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--tw-space-4);
     }
-    .msg-textarea:focus { border-color: var(--green); }
-
-    /* Great Day toggle */
-    .toggle-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
     .toggle-label-wrap { flex: 1; }
-    .toggle-subtext { font-size: 12px; color: #999; margin-top: 3px; }
+    .toggle-subtext { font-size: 12px; color: var(--tw-color-muted); margin-top: 4px; }
     .toggle-subtext.on { color: var(--green); }
 
-    /* Pure CSS pill toggle */
-    .toggle-switch { position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; }
+    .toggle-switch {
+      position: relative; display: inline-block;
+      width: 44px; height: 24px; flex-shrink: 0;
+    }
     .toggle-switch input { opacity: 0; width: 0; height: 0; }
     .toggle-slider {
       position: absolute; cursor: pointer; inset: 0;
-      background: #ddd; border-radius: 26px; transition: background 0.2s;
+      background: #ddd; border-radius: 24px; transition: background 0.2s;
     }
     .toggle-slider:before {
       content: ''; position: absolute;
-      height: 20px; width: 20px; left: 3px; bottom: 3px;
+      height: 18px; width: 18px; left: 3px; bottom: 3px;
       background: #fff; border-radius: 50%; transition: transform 0.2s;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
     .toggle-switch input:checked + .toggle-slider { background: var(--green); }
     .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
 
-    /* Char count + send */
-    .send-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .char-count { font-size: 13px; color: #999; }
+    /* Photo attach */
+    .photo-attach {
+      background: var(--tw-color-gold-soft);
+      border: 1px dashed rgba(196,147,63,0.35);
+      border-radius: var(--tw-radius-md);
+      padding: var(--tw-space-4);
+    }
+    .photo-attach-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--tw-space-3);
+    }
+    .photo-attach-label {
+      font-size: 11px; font-weight: var(--tw-fw-bold);
+      color: var(--gold);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .photo-attach-hint { font-size: 11px; color: var(--tw-color-muted); }
+
+    /* Footer (char count + actions) */
+    .compose-footer {
+      background: rgba(0,0,0,0.02);
+      padding: var(--tw-space-4) var(--tw-space-5);
+      display: flex; align-items: center; gap: var(--tw-space-3);
+      flex-wrap: wrap;
+      border-top: 1px solid var(--tw-color-divider);
+    }
+    .char-count { font-size: 13px; color: var(--tw-color-muted); }
     .char-count.warning { color: var(--gold); }
-    .char-count.over { color: #e53e3e; }
-    .compose-actions { display: flex; gap: 10px; margin-left: auto; }
+    .char-count.over { color: var(--tw-color-error); }
+    .compose-actions {
+      display: flex; gap: var(--tw-space-2);
+      margin-left: auto;
+    }
     .btn-outline {
-      background: none; border: 1px solid var(--green); color: var(--green);
-      padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-      transition: background 0.2s; font-family: 'Inter', sans-serif;
+      background: none;
+      border: 1px solid var(--green);
+      color: var(--green);
+      padding: 9px 18px;
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: var(--tw-fw-semi);
+      cursor: pointer; transition: background 0.2s;
     }
-    .btn-outline:hover { background: rgba(30,107,74,0.06); }
+    .btn-outline:hover { background: var(--tw-color-green-soft); }
     .btn-primary {
-      background: var(--green); color: var(--linen); border: none; padding: 10px 24px;
-      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-      transition: background 0.2s; font-family: 'Inter', sans-serif; white-space: nowrap;
+      background: var(--green);
+      color: var(--linen);
+      border: none;
+      padding: 10px 22px;
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: var(--tw-fw-semi);
+      cursor: pointer; transition: background 0.2s;
+      white-space: nowrap;
     }
-    .btn-primary:hover { background: var(--green-dark); }
+    .btn-primary:hover:not(:disabled) { background: var(--green-dark); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-primary.sent { background: var(--green-dark); }
 
-    .send-result { font-size: 13px; margin-top: 8px; display: none; }
+    .send-result {
+      font-size: 13px; margin-top: var(--tw-space-2);
+      width: 100%; display: none;
+    }
     .send-result.success { color: var(--green); }
-    .send-result.error { color: #e53e3e; }
+    .send-result.error { color: var(--tw-color-error); }
 
-    /* History table */
-    .history-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
-    .history-card-header { padding: 20px 20px 0; margin-bottom: 16px; }
-    .history-card-header h3 {
-      font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 16px; color: var(--black);
+    /* History card */
+    .history-card {
+      background: var(--tw-color-card);
+      border: 1px solid var(--tw-color-border);
+      border-radius: var(--tw-radius-lg);
+      box-shadow: var(--tw-shadow-1);
+      overflow: hidden;
     }
-    table { width: 100%; border-collapse: collapse; }
-    thead { background: var(--black); }
-    thead th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--sage); }
-    tbody tr { border-bottom: 1px solid rgba(0,0,0,0.05); }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: rgba(30,107,74,0.02); }
-    tbody td { padding: 12px 16px; font-size: 13px; color: var(--slate); }
-    .msg-preview { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .status-badge {
-      display: inline-block; padding: 3px 9px; border-radius: 20px;
-      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    .history-card-header {
+      padding: var(--tw-space-5) var(--tw-space-5) 0;
     }
-    .status-delivered { background: rgba(30,107,74,0.1); color: var(--green); }
-    .status-sent { background: rgba(66,153,225,0.12); color: #2b6cb0; }
-    .status-failed { background: rgba(229,62,62,0.1); color: #e53e3e; }
-    .status-queued, .status-none { background: rgba(0,0,0,0.06); color: #999; }
+    .history-card-header h2 {
+      font-family: var(--tw-font-display);
+      font-weight: var(--tw-fw-bold);
+      font-size: 16px;
+      color: var(--tw-color-ink);
+    }
+    .history-card .tw-table {
+      box-shadow: none;
+      border-radius: 0;
+      margin-top: var(--tw-space-4);
+    }
+    .msg-preview {
+      max-width: 280px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
 
     /* Preview modal */
     .modal-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-      z-index: 100; align-items: center; justify-content: center;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: var(--tw-z-modal);
+      align-items: center; justify-content: center;
     }
     .modal-overlay.open { display: flex; }
     .modal {
-      background: #fff; border-radius: 14px; padding: 32px; width: 100%; max-width: 380px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center;
+      background: #fff;
+      border-radius: var(--tw-radius-xl);
+      padding: var(--tw-space-7);
+      width: 100%; max-width: 380px;
+      box-shadow: var(--tw-shadow-4);
+      text-align: center;
     }
-    .modal h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 18px; color: var(--black); margin-bottom: 20px; }
+    .modal h3 {
+      font-family: var(--tw-font-display);
+      font-weight: var(--tw-fw-bold);
+      font-size: 18px;
+      color: var(--tw-color-ink);
+      margin-bottom: var(--tw-space-5);
+    }
     .phone-mockup {
-      background: #1a1a1a; border-radius: 28px; padding: 20px 16px;
-      margin: 0 auto 20px; max-width: 260px; min-height: 180px;
-      display: flex; flex-direction: column; justify-content: flex-end; gap: 8px;
+      background: #1a1a1a;
+      border-radius: 28px;
+      padding: 20px 16px;
+      margin: 0 auto var(--tw-space-5);
+      max-width: 260px; min-height: 180px;
+      display: flex; flex-direction: column;
+      justify-content: flex-end; gap: 8px;
     }
     .bubble {
-      background: #3a7d5f; color: #fff; border-radius: 16px 16px 4px 16px;
-      padding: 10px 14px; font-size: 13px; line-height: 1.5; text-align: left;
-      max-width: 90%; align-self: flex-end; word-break: break-word;
+      background: #3a7d5f;
+      color: #fff;
+      border-radius: 16px 16px 4px 16px;
+      padding: 10px 14px;
+      font-size: 13px; line-height: 1.5; text-align: left;
+      max-width: 90%; align-self: flex-end;
+      word-break: break-word;
     }
     .btn-secondary {
-      background: none; border: 1px solid #ddd; color: var(--slate); padding: 9px 20px;
-      border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer;
+      background: none;
+      border: 1px solid var(--tw-color-border-2);
+      color: var(--slate);
+      padding: 9px 20px;
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: var(--tw-fw-semi);
+      cursor: pointer;
     }
+    .btn-secondary:hover { border-color: var(--tw-color-muted); }
 
-    .empty-state { text-align: center; padding: 40px 20px; color: #bbb; font-size: 13px; }
+    .empty-state {
+      text-align: center; padding: 40px 20px;
+      color: var(--tw-color-faint); font-size: 13px;
+    }
     .loading-spinner {
-      width: 28px; height: 28px; border: 3px solid rgba(30,107,74,0.2);
-      border-top-color: var(--green); border-radius: 50%;
-      animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+      width: 28px; height: 28px;
+      border: 3px solid rgba(30,107,74,0.2);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto var(--tw-space-3);
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 900px) {
       .messaging-layout { grid-template-columns: 1fr; }
-      .client-panel { max-height: 320px; }
+      .client-panel { max-height: 320px; position: static; }
     }
     @media (max-width: 640px) {
-      .nav-links { display: none; }
-      .dashboard-nav { padding: 0 16px; }
-      .page-container { padding: 20px 16px; }
-      .send-row { flex-direction: column; align-items: flex-start; }
+      .page-container { padding: var(--tw-space-5) var(--tw-space-4); }
+      .compose-footer { flex-direction: column; align-items: stretch; }
       .compose-actions { margin-left: 0; }
     }
   </style>
@@ -295,6 +432,13 @@
   </div>
 
   <div id="pageContent" style="display:none;">
+
+    <header class="tw-page-header">
+      <div class="tw-page-header-left">
+        <h1>Messaging</h1>
+        <p class="tw-page-header-sub">Send report cards, reminders, and review requests.</p>
+      </div>
+    </header>
 
     <!-- Two-column layout -->
     <div class="messaging-layout">
@@ -317,99 +461,98 @@
         <!-- Empty state -->
         <div class="compose-empty" id="composeEmpty">
           <div class="compose-empty-icon">&#8592;</div>
-          <p>Select a pet parent to get started</p>
+          <p>Select a pet parent to get started.</p>
         </div>
 
-        <!-- Active compose (hidden until client selected) -->
-        <div class="compose-active" id="composeActive" style="display:none;">
-
-          <!-- Section 1: Staff Notes -->
+        <!-- Active compose: single card with section dividers -->
+        <div id="composeActive" style="display:none;">
           <div class="compose-card">
-            <span class="section-label">Staff Notes</span>
-            <textarea class="notes-textarea" id="staffNotes"
-              placeholder="What happened today? Even a few words helps."
-              oninput="onStaffNotesChange()"></textarea>
-            <div class="quick-chips">
-              <span class="quick-chip" onclick="appendNote('Loved fetch 🎾')">Loved fetch 🎾</span>
-              <span class="quick-chip" onclick="appendNote('New friend 🐾')">New friend 🐾</span>
-              <span class="quick-chip" onclick="appendNote('Water obsessed 💦')">Water obsessed 💦</span>
-              <span class="quick-chip" onclick="appendNote('Napped hard 😴')">Napped hard 😴</span>
-              <span class="quick-chip" onclick="appendNote('Zoomies 🌀')">Zoomies 🌀</span>
-              <span class="quick-chip" onclick="appendNote('Star listener ⭐')">Star listener ⭐</span>
-              <span class="quick-chip" onclick="appendNote('High energy 🔥')">High energy 🔥</span>
-              <span class="quick-chip" onclick="appendNote('Shy but sweet 🤍')">Shy but sweet 🤍</span>
-              <span class="quick-chip" onclick="appendNote('Ate everything 🍖')">Ate everything 🍖</span>
-              <span class="quick-chip" onclick="appendNote('Extra playful 🎉')">Extra playful 🎉</span>
-            </div>
-          </div>
 
-          <!-- AI Generate Report Card -->
-          <div id="generateSection" style="display:none;">
-            <button id="generateBtn" onclick="generateReportCard()"
-              style="width:100%;background:#1E6B4A;color:#fff;border:none;border-radius:10px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.2s,opacity 0.2s;">
-              ✨ Generate Report Card
-            </button>
-            <div id="generateError" style="display:none;margin-top:6px;font-size:12px;color:#e53e3e;"></div>
-          </div>
-
-          <!-- Section 2: Message Template -->
-          <div class="compose-card">
-            <span class="section-label">Message Template</span>
-            <select class="template-select" id="templateSelect" onchange="onTemplateChange()">
-              <option value="report_card">Report Card</option>
-              <option value="appt_reminder">Appointment Reminder</option>
-              <option value="review_request">Review Request</option>
-              <option value="custom">Custom Message</option>
-            </select>
-            <textarea class="msg-textarea" id="msgBody"
-              placeholder="Select a pet parent and template to generate a message..."
-              oninput="updateCharCount()"></textarea>
-          </div>
-
-          <!-- Section 3: Great Day toggle -->
-          <div class="compose-card">
-            <div class="toggle-row">
-              <div class="toggle-label-wrap">
-                <span class="section-label" style="margin-bottom:4px;">Great Day?</span>
-                <div class="toggle-subtext" id="toggleSubtext">Toggle on to append a Google review request</div>
+            <!-- Staff Notes -->
+            <div class="compose-section">
+              <span class="section-label">Staff Notes</span>
+              <textarea class="notes-textarea" id="staffNotes"
+                placeholder="What happened today? Even a few words helps."
+                oninput="onStaffNotesChange()"></textarea>
+              <div class="quick-chips">
+                <span class="quick-chip" onclick="appendNote('Loved fetch 🎾')">Loved fetch 🎾</span>
+                <span class="quick-chip" onclick="appendNote('New friend 🐾')">New friend 🐾</span>
+                <span class="quick-chip" onclick="appendNote('Water obsessed 💦')">Water obsessed 💦</span>
+                <span class="quick-chip" onclick="appendNote('Napped hard 😴')">Napped hard 😴</span>
+                <span class="quick-chip" onclick="appendNote('Zoomies 🌀')">Zoomies 🌀</span>
+                <span class="quick-chip" onclick="appendNote('Star listener ⭐')">Star listener ⭐</span>
+                <span class="quick-chip" onclick="appendNote('High energy 🔥')">High energy 🔥</span>
+                <span class="quick-chip" onclick="appendNote('Shy but sweet 🤍')">Shy but sweet 🤍</span>
+                <span class="quick-chip" onclick="appendNote('Ate everything 🍖')">Ate everything 🍖</span>
+                <span class="quick-chip" onclick="appendNote('Extra playful 🎉')">Extra playful 🎉</span>
               </div>
-              <label class="toggle-switch">
-                <input type="checkbox" id="greatDayToggle" onchange="onGreatDayToggle()">
-                <span class="toggle-slider"></span>
-              </label>
+              <div class="ai-generate-row" id="generateSection" style="display:none;">
+                <button class="ai-generate-btn" id="generateBtn" onclick="generateReportCard()">
+                  ✨ Generate Report Card
+                </button>
+                <div class="ai-generate-error" id="generateError" style="display:none;"></div>
+              </div>
             </div>
-          </div>
 
-          <!-- Section 4: Photo attachment (Growth/Pro only) -->
-          <div class="compose-card" id="photoAttachCard" style="border:1.5px dashed rgba(196,147,63,0.35);background:rgba(196,147,63,0.04);">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-              <label style="font-size:12px;font-weight:700;color:#C4933F;text-transform:uppercase;letter-spacing:0.06em;">📷 Add Today's Photo</label>
-              <span style="font-size:11px;color:var(--text-muted);">Sends with the report card</span>
+            <!-- Message Template -->
+            <div class="compose-section">
+              <span class="section-label">Message Template</span>
+              <select class="template-select" id="templateSelect" onchange="onTemplateChange()">
+                <option value="report_card">Report Card</option>
+                <option value="appt_reminder">Appointment Reminder</option>
+                <option value="review_request">Review Request</option>
+                <option value="custom">Custom Message</option>
+              </select>
+              <textarea class="msg-textarea" id="msgBody"
+                placeholder="Select a pet parent and template to generate a message..."
+                oninput="updateCharCount()"></textarea>
             </div>
-            <input type="file" id="photoFileInput" accept="image/*" style="display:none;" onchange="handlePhotoSelected(this)">
-            <div id="photoPreviewArea" style="display:none;margin-bottom:10px;position:relative;">
-              <img id="photoPreview" style="max-height:160px;width:100%;object-fit:cover;border-radius:8px;border:1px solid rgba(196,147,63,0.3);display:block;" alt="Photo preview">
-              <button onclick="clearPhoto()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.65);color:white;border:none;border-radius:50%;width:24px;height:24px;font-size:14px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
-              <div id="photoUploadStatus" style="font-size:12px;color:#C4933F;margin-top:6px;font-weight:600;"></div>
-            </div>
-            <button class="btn-outline" style="width:100%;font-size:13px;border-color:rgba(196,147,63,0.4);color:#C4933F;" onclick="document.getElementById('photoFileInput').click()">
-              📷 Take or Choose Photo
-            </button>
-          </div>
 
-          <!-- Section 5: Char count + Send -->
-          <div class="compose-card">
-            <div class="send-row">
+            <!-- Great Day toggle -->
+            <div class="compose-section">
+              <div class="toggle-row">
+                <div class="toggle-label-wrap">
+                  <span class="section-label" style="margin-bottom:4px;">Great Day?</span>
+                  <div class="toggle-subtext" id="toggleSubtext">Toggle on to append a Google review request</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="greatDayToggle" onchange="onGreatDayToggle()">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Photo attach -->
+            <div class="compose-section">
+              <div class="photo-attach" id="photoAttachCard">
+                <div class="photo-attach-header">
+                  <span class="photo-attach-label">📷 Add Today's Photo</span>
+                  <span class="photo-attach-hint">Sends with the report card</span>
+                </div>
+                <input type="file" id="photoFileInput" accept="image/*" style="display:none;" onchange="handlePhotoSelected(this)">
+                <div id="photoPreviewArea" style="display:none;margin-bottom:10px;position:relative;">
+                  <img id="photoPreview" style="max-height:160px;width:100%;object-fit:cover;border-radius:8px;border:1px solid rgba(196,147,63,0.3);display:block;" alt="Photo preview">
+                  <button onclick="clearPhoto()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.65);color:white;border:none;border-radius:50%;width:24px;height:24px;font-size:14px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
+                  <div id="photoUploadStatus" style="font-size:12px;color:var(--gold);margin-top:6px;font-weight:600;"></div>
+                </div>
+                <button class="btn-outline" style="width:100%;font-size:13px;border-color:rgba(196,147,63,0.4);color:var(--gold);" onclick="document.getElementById('photoFileInput').click()">
+                  📷 Take or Choose Photo
+                </button>
+              </div>
+            </div>
+
+            <!-- Footer: char count + actions -->
+            <div class="compose-footer">
               <span class="char-count" id="charCount">0 / 160</span>
               <div class="compose-actions">
                 <button class="btn-outline" onclick="openPreviewModal()">Preview</button>
                 <button class="btn-primary" id="sendBtn" onclick="sendMessage()">Send Report Card 📱</button>
               </div>
+              <div class="send-result" id="sendResult"></div>
             </div>
-            <div class="send-result" id="sendResult"></div>
-          </div>
 
-        </div><!-- /compose-active -->
+          </div><!-- /compose-card -->
+        </div><!-- /composeActive -->
       </div><!-- /compose-panel -->
 
     </div><!-- /messaging-layout -->
@@ -417,13 +560,13 @@
     <!-- Message History -->
     <div class="history-card">
       <div class="history-card-header">
-        <h3>Message History</h3>
+        <h2>Message History</h2>
       </div>
       <div id="historyLoading" style="text-align:center;padding:30px;">
         <div class="loading-spinner" style="width:22px;height:22px;border-width:2px;"></div>
       </div>
       <div id="historyContent" style="display:none;">
-        <table>
+        <table class="tw-table">
           <thead>
             <tr>
               <th>Time</th>
@@ -538,6 +681,13 @@
     }
   }
 
+  // Initials from first/last name (e.g. "Jane Smith" → "JS")
+  function getInitials(c) {
+    const a = (c.first_name || '').trim().charAt(0);
+    const b = (c.last_name || '').trim().charAt(0);
+    return ((a + b).toUpperCase()) || '?';
+  }
+
   function renderClientList(clients) {
     const listEl = document.getElementById('clientList');
     if (!clients.length) {
@@ -562,24 +712,25 @@
       const isSelectedNoDog = selectedClient && selectedClient.id === c.id && !d && !selectedDog;
       const sel = isSelected || isSelectedNoDog;
       const key = d ? `${c.id}__${d.id}` : `${c.id}__none`;
+      const initials = escHtml(getInitials(c));
       if (d) {
+        const ownerName = `${escHtml(c.first_name)} ${escHtml(c.last_name)}`;
+        const secondary = d.breed ? `${ownerName} · ${escHtml(d.breed)}` : ownerName;
         return `
           <div class="client-item ${sel ? 'selected' : ''}" id="ci-${key}" onclick="selectClientDog('${c.id}','${d.id}')">
-            <div class="client-item-dog">${escHtml(d.name)}</div>
-            <div class="client-item-owner">${escHtml(c.first_name)} ${escHtml(c.last_name)}</div>
-            <div class="client-item-bottom">
-              ${d.breed ? `<span class="breed-chip">${escHtml(d.breed)}</span>` : '<span></span>'}
-              <span class="selected-tag">Selected</span>
+            <span class="tw-avatar">${initials}</span>
+            <div class="client-item-info">
+              <div class="client-item-primary">${escHtml(d.name)}</div>
+              <div class="client-item-secondary">${secondary}</div>
             </div>
           </div>`;
       } else {
         return `
-          <div class="client-item ${sel ? 'selected' : ''}" id="ci-${key}" onclick="selectClientDog('${c.id}', null)">
-            <div class="client-item-no-dog">${escHtml(c.first_name)} ${escHtml(c.last_name)}</div>
-            <div class="client-item-no-dog-sub">No dogs on file</div>
-            <div class="client-item-bottom">
-              <span></span>
-              <span class="selected-tag">Selected</span>
+          <div class="client-item no-dog ${sel ? 'selected' : ''}" id="ci-${key}" onclick="selectClientDog('${c.id}', null)">
+            <span class="tw-avatar">${initials}</span>
+            <div class="client-item-info">
+              <div class="client-item-primary">${escHtml(c.first_name)} ${escHtml(c.last_name)}</div>
+              <div class="client-item-secondary">No dogs on file</div>
             </div>
           </div>`;
       }
@@ -615,7 +766,7 @@
 
     // Show compose panel
     document.getElementById('composeEmpty').style.display = 'none';
-    document.getElementById('composeActive').style.display = 'flex';
+    document.getElementById('composeActive').style.display = 'block';
 
     // Reset
     aiGeneratedBase = null;
@@ -973,25 +1124,34 @@
       tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state">No messages yet.</div></td></tr>';
       return;
     }
+    const PILL_CLASS = {
+      delivered: 'tw-pill-success',
+      sent:      'tw-pill-info',
+      failed:    'tw-pill-error',
+      queued:    'tw-pill-neutral',
+      none:      'tw-pill-neutral'
+    };
+
     tbody.innerHTML = recent.map(m => {
       const clientName = m.clients
         ? `${m.clients.first_name || ''} ${m.clients.last_name || ''}`.trim()
         : (m.recipient_phone || '—');
       const date = new Date(m.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
       const status = m.status || 'queued';
+      const pillClass = PILL_CLASS[status] || 'tw-pill-neutral';
       const preview = (m.body || '').length > 60 ? m.body.substring(0, 60) + '…' : (m.body || '');
       const photoThumb = m.media_url
-        ? `<img src="${m.media_url}" alt="photo" style="height:36px;width:36px;object-fit:cover;border-radius:5px;vertical-align:middle;margin-right:6px;border:1px solid rgba(255,255,255,0.1);">`
+        ? `<img src="${m.media_url}" alt="photo" style="height:36px;width:36px;object-fit:cover;border-radius:5px;vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,0.08);">`
         : '';
       return `
         <tr>
-          <td style="white-space:nowrap;color:#999">${date}</td>
+          <td style="white-space:nowrap;color:var(--tw-color-muted)">${date}</td>
           <td>
             <div style="font-weight:600">${escHtml(clientName)}</div>
-            <div style="font-size:11px;color:#bbb">${escHtml(m.recipient_phone || '')}</div>
+            <div style="font-size:11px;color:var(--tw-color-faint)">${escHtml(m.recipient_phone || '')}</div>
           </td>
           <td><div class="msg-preview">${photoThumb}${escHtml(preview)}</div></td>
-          <td><span class="status-badge status-${status}">${status}</span></td>
+          <td><span class="tw-pill ${pillClass}">${status}</span></td>
         </tr>`;
     }).join('');
   }

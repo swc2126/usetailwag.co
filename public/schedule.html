@@ -81,11 +81,82 @@
 
     /* ── STATS ── */
     .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
-    .stat-card { background: white; border-radius: 12px; padding: 14px 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .stat-card {
+      background: white; border-radius: 12px; padding: 14px 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.06s;
+    }
+    .stat-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-color: rgba(0,0,0,0.06); }
+    .stat-card:active { transform: translateY(1px); }
+    .stat-card.active { border-color: var(--black); box-shadow: 0 2px 12px rgba(0,0,0,0.10); }
+    .stat-card.confirmed.active { border-color: var(--green); }
+    .stat-card.pending.active { border-color: #d69e2e; }
+    .stat-card.cancelled.active { border-color: #e74c3c; }
     .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #999; }
     .stat-val { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 800; color: var(--black); margin-top: 4px; }
     .stat-card.confirmed .stat-val { color: var(--green); }
     .stat-card.cancelled .stat-val { color: #e74c3c; }
+
+    /* Filter dimming for week/month chips */
+    .week-chip.dimmed, .month-chip.dimmed {
+      opacity: 0.18;
+      transition: opacity 0.15s;
+    }
+
+    /* ── BULK-CONFIRM BANNER (day view) ── */
+    .bulk-confirm-banner {
+      display: none;
+      align-items: center; gap: 12px;
+      background: rgba(196,147,63,0.12);
+      border: 1px solid rgba(196,147,63,0.32);
+      border-radius: 10px;
+      padding: 10px 14px; margin-bottom: 12px;
+      font-size: 13px; color: #6b4d1a;
+    }
+    .bulk-confirm-banner.visible { display: flex; }
+    .bulk-confirm-banner-text { flex: 1; }
+    .bulk-confirm-banner-text strong { color: var(--black); font-weight: 700; }
+    .bulk-confirm-btn {
+      background: var(--green); color: white; border: none;
+      padding: 7px 14px; border-radius: 7px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: inherit; white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .bulk-confirm-btn:hover { background: var(--green-dark); }
+
+    /* ── BULK-CONFIRM (week view per-day) ── */
+    .week-bulk-add {
+      display: flex; align-items: center; justify-content: center;
+      gap: 4px;
+      width: 100%; margin-top: 4px;
+      background: rgba(30,107,74,0.08); color: var(--green);
+      border: 1px dashed rgba(30,107,74,0.4);
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 11px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      transition: background 0.12s;
+    }
+    .week-bulk-add:hover { background: rgba(30,107,74,0.18); }
+
+    /* ── FILTER INDICATOR (above appt list) ── */
+    .filter-indicator {
+      display: none; align-items: center; gap: 8px;
+      background: rgba(15,20,16,0.04); border-radius: 8px;
+      padding: 8px 12px; margin-bottom: 10px;
+      font-size: 13px; color: #555;
+    }
+    .filter-indicator.visible { display: flex; }
+    .filter-indicator strong { color: var(--black); font-weight: 700; }
+    .filter-indicator-clear {
+      margin-left: auto; background: none; border: 1px solid #ccc; color: #555;
+      font-size: 12px; padding: 3px 9px; border-radius: 6px; cursor: pointer;
+      font-family: inherit; font-weight: 600;
+    }
+    .filter-indicator-clear:hover { border-color: var(--black); color: var(--black); }
 
     /* ── ACTION BAR ── */
     .action-bar {
@@ -107,6 +178,9 @@
     .btn-gold { background: var(--gold); color: white; }
     .btn-gold:hover { background: #b8832f; }
     .btn-sm { font-size: 12px; padding: 6px 12px; }
+    .reminders-group { display: inline-flex; flex-direction: column; align-items: stretch; gap: 2px; }
+    .reminders-last  { font-size: 10px; color: #888; line-height: 1.2; text-align: center; max-width: 200px; }
+    .reminders-last strong { color: var(--slate); font-weight: 600; }
 
     /* ── DAY VIEW: APPOINTMENT LIST ── */
     .appt-list { display: flex; flex-direction: column; gap: 8px; }
@@ -238,6 +312,12 @@
     .days-row { display: flex; gap: 4px; margin-top: 4px; }
     .day-chip { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 5px; background: var(--linen); color: #666; }
     .day-chip.active { background: var(--green); color: white; }
+    button.day-chip {
+      border: 1px solid transparent; font-family: inherit;
+      cursor: pointer; transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    button.day-chip:hover { border-color: var(--green); }
+    button.day-chip.active:hover { background: var(--green-dark); }
 
     /* ── MODALS ── */
     .modal-overlay {
@@ -345,6 +425,83 @@
       .week-grid { display: none; }
       #viewWeek { display: none; }
     }
+
+    /* ── APPT POPOVER ───────────────────────────────────────────────── */
+    .appt-card.clickable {
+      cursor: pointer;
+      transition: background 0.12s, transform 0.06s;
+    }
+    .appt-card.clickable:hover { background: rgba(30,107,74,0.04); }
+    .appt-card.clickable:active { transform: translateY(1px); }
+
+    .appt-popover-backdrop {
+      position: fixed; inset: 0; z-index: var(--tw-z-popover, 200);
+      background: transparent;
+      display: none;
+    }
+    .appt-popover-backdrop.open { display: block; }
+
+    .appt-popover {
+      position: fixed; z-index: calc(var(--tw-z-popover, 200) + 1);
+      background: var(--tw-color-card, #fff); border-radius: var(--tw-radius-lg, 14px);
+      box-shadow: var(--tw-shadow-3, 0 14px 36px rgba(15,20,16,0.18));
+      border: 1px solid var(--tw-color-border, rgba(0,0,0,0.06));
+      width: 300px; padding: var(--tw-space-4, 16px);
+      display: none;
+    }
+    .appt-popover.open { display: block; }
+
+    .ap-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+    .ap-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(30,107,74,0.12); display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .ap-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 16px; color: var(--black); }
+    .ap-sub { font-size: 13px; color: #666; margin-top: 2px; }
+    .ap-breed { font-size: 12px; color: #aaa; margin-top: 1px; }
+
+    .ap-section-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #999; margin-bottom: 7px;
+    }
+    .ap-status-group {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;
+      background: #f4f1ec; border-radius: 8px; padding: 3px;
+      margin-bottom: 14px;
+    }
+    .ap-status-btn {
+      padding: 7px 4px; border-radius: 6px; border: none; background: transparent;
+      font-family: inherit; font-size: 12px; font-weight: 600; color: #666;
+      cursor: pointer; transition: background 0.12s, color 0.12s;
+    }
+    .ap-status-btn:hover { background: rgba(255,255,255,0.6); color: var(--slate); }
+    .ap-status-btn.active { background: #fff; color: var(--green); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .ap-status-btn.active.cancelled { color: #c0392b; }
+    .ap-status-btn.active.pending  { color: #d69e2e; }
+
+    .ap-meta { font-size: 12px; color: #888; margin-bottom: 14px; line-height: 1.5; }
+    .ap-meta strong { color: var(--slate); font-weight: 600; }
+
+    .ap-foot { display: flex; gap: 8px; }
+    .ap-btn {
+      flex: 1; padding: 9px 12px; border-radius: 8px; border: 1px solid #e0dbd2;
+      background: #fff; color: var(--slate);
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.12s;
+    }
+    .ap-btn:hover { border-color: var(--slate); }
+    .ap-btn-danger { color: #c0392b; border-color: rgba(192,57,43,0.25); }
+    .ap-btn-danger:hover { background: rgba(192,57,43,0.06); border-color: #c0392b; }
+
+    @media (max-width: 600px) {
+      .appt-popover {
+        left: 12px !important; right: 12px !important;
+        bottom: 12px !important; top: auto !important;
+        width: auto;
+      }
+      .appt-popover-backdrop { background: rgba(15,20,16,0.32); }
+    }
   </style>
 </head>
 <body>
@@ -352,6 +509,13 @@
 <div id="tw-sidebar"></div>
 
 <div class="page-container">
+
+  <header class="tw-page-header">
+    <div class="tw-page-header-left">
+      <h1>Schedule</h1>
+      <p class="tw-page-header-sub">Today's lineup, recurring slots, and reminders.</p>
+    </div>
+  </header>
 
   <!-- TOP BAR: date navigation + view toggle -->
   <div class="top-bar">
@@ -372,19 +536,19 @@
 
   <!-- STATS ROW -->
   <div class="stats-row">
-    <div class="stat-card">
+    <div class="stat-card" data-filter="all" onclick="setStatusFilter('all')" title="Show all dogs">
       <div class="stat-label">Scheduled</div>
       <div class="stat-val" id="statTotal">—</div>
     </div>
-    <div class="stat-card confirmed">
+    <div class="stat-card confirmed" data-filter="confirmed" onclick="setStatusFilter('confirmed')" title="Show only confirmed dogs">
       <div class="stat-label">Confirmed ✓</div>
       <div class="stat-val" id="statConfirmed">—</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card pending" data-filter="pending" onclick="setStatusFilter('pending')" title="Show only pending dogs">
       <div class="stat-label">Pending</div>
       <div class="stat-val" id="statPending">—</div>
     </div>
-    <div class="stat-card cancelled">
+    <div class="stat-card cancelled" data-filter="cancelled" onclick="setStatusFilter('cancelled')" title="Show only cancelled dogs">
       <div class="stat-label">Cancelled</div>
       <div class="stat-val" id="statCancelled">—</div>
     </div>
@@ -396,9 +560,22 @@
       <h2 id="apptListTitle">Today's Dogs</h2>
       <div class="action-bar-right">
         <button class="btn btn-outline btn-sm" onclick="openSummaryModal()">📋 Morning Summary</button>
-        <button class="btn btn-gold btn-sm" id="sendRemindersBtn" onclick="sendReminders()">📨 Send Reminders</button>
+        <div class="reminders-group">
+          <button class="btn btn-gold btn-sm" id="sendRemindersBtn" onclick="sendReminders()">📨 Send Reminders</button>
+          <div class="reminders-last" id="remindersLast"></div>
+        </div>
         <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Dog</button>
       </div>
+    </div>
+    <div class="bulk-confirm-banner" id="bulkConfirmBanner">
+      <div class="bulk-confirm-banner-text">
+        <strong id="bulkConfirmCount"></strong> recurring dogs awaiting confirmation today
+      </div>
+      <button type="button" class="bulk-confirm-btn" onclick="confirmAllRecurringForToday()">Confirm all</button>
+    </div>
+    <div class="filter-indicator" id="filterIndicator">
+      Showing only <strong id="filterIndicatorLabel"></strong> · <span id="filterIndicatorCount"></span>
+      <button type="button" class="filter-indicator-clear" onclick="setStatusFilter('all')">Clear ×</button>
     </div>
     <div id="apptList" class="appt-list">
       <div class="empty-state">
@@ -573,6 +750,55 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Appointment quick-edit popover (real, persisted appointment) -->
+<div class="appt-popover-backdrop" id="apBackdrop" onclick="closeApptPopover()"></div>
+<div class="appt-popover" id="apPopover" role="dialog" aria-label="Edit appointment" onclick="event.stopPropagation()">
+  <div class="ap-head">
+    <div class="ap-avatar">🐕</div>
+    <div>
+      <div class="ap-title" id="apTitle">—</div>
+      <div class="ap-sub" id="apSub">—</div>
+      <div class="ap-breed" id="apBreed"></div>
+    </div>
+  </div>
+
+  <div class="ap-section-label">Status</div>
+  <div class="ap-status-group">
+    <button class="ap-status-btn pending"   data-status="pending"   onclick="apptPopoverSetStatus('pending')">Pending</button>
+    <button class="ap-status-btn"           data-status="confirmed" onclick="apptPopoverSetStatus('confirmed')">Confirmed</button>
+    <button class="ap-status-btn cancelled" data-status="cancelled" onclick="apptPopoverSetStatus('cancelled')">Cancelled</button>
+  </div>
+
+  <div class="ap-meta" id="apMeta"></div>
+
+  <div class="ap-foot">
+    <button class="ap-btn" onclick="closeApptPopover()">Close</button>
+    <button class="ap-btn ap-btn-danger" onclick="apptPopoverDelete()">Delete</button>
+  </div>
+</div>
+
+<!-- Recurring placeholder popover (not yet a real appointment) -->
+<div class="appt-popover" id="apRecurPopover" role="dialog" aria-label="Recurring schedule entry" onclick="event.stopPropagation()">
+  <div class="ap-head">
+    <div class="ap-avatar">🐕</div>
+    <div>
+      <div class="ap-title" id="apRecurTitle">—</div>
+      <div class="ap-sub" id="apRecurSub">—</div>
+      <div class="ap-breed" style="color:#3b5fc0;">↻ Recurring schedule</div>
+    </div>
+  </div>
+
+  <div class="ap-meta" id="apRecurMeta">This pup is auto-scheduled for today based on a weekly pattern. They aren't saved as a real appointment yet.</div>
+
+  <div class="ap-foot" style="flex-direction:column;gap:8px;">
+    <button class="ap-btn" id="apRecurAddBtn" style="flex:none;background:var(--green);color:white;border-color:var(--green);" onclick="apptRecurPopoverAdd()">Add to today's schedule</button>
+    <div style="display:flex;gap:8px;width:100%;">
+      <button class="ap-btn" style="flex:1;" onclick="closeApptPopover()">Close</button>
+      <button class="ap-btn" style="flex:1;" onclick="apptRecurPopoverScrollToEdit()">Edit pattern</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // ── State ──────────────────────────────────────────────────────────────
   let viewMode = 'day';
@@ -580,6 +806,7 @@
   let allClients = [];
   let calendarData = {};         // date → appointments[], for week/month views
   let currentAppointments = [];  // day view appointments
+  let activeStatusFilter = 'all'; // 'all' | 'confirmed' | 'pending' | 'cancelled'
   let selectedClientId = null;
   let selectedDogId    = null;
   let recurSelectedClientId = null;
@@ -590,7 +817,10 @@
 
   // ── Date utilities ─────────────────────────────────────────────────────
   function todayStr() {
-    return new Date().toISOString().split('T')[0];
+    // Local-date YYYY-MM-DD, NOT toISOString() (which returns UTC and
+    // silently rolls forward a day after ~7 PM Central).
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
   function fmtDate(dateStr, opts) {
@@ -660,6 +890,7 @@
       document.getElementById(v+'View').style.display = v === mode ? 'block' : 'none';
     });
     updateDateDisplay();
+    applyFilterUI();
     loadCurrentView();
   }
 
@@ -695,7 +926,7 @@
       const weD = new Date(we + 'T12:00:00');
       const sameMonth = wsD.getMonth() === weD.getMonth();
       label = sameMonth
-        ? fmtDate(ws, { month: 'long', day: 'numeric' }) + ' – ' + fmtDate(we, { day: 'numeric', year: 'numeric' })
+        ? fmtDate(ws, { month: 'long', day: 'numeric' }) + ' – ' + weD.getDate() + ', ' + weD.getFullYear()
         : fmtDate(ws, { month: 'short', day: 'numeric' }) + ' – ' + fmtDate(we, { month: 'short', day: 'numeric', year: 'numeric' });
       const titleEl = document.getElementById('weekTitle');
       if (titleEl) titleEl.textContent = label;
@@ -716,7 +947,27 @@
   }
 
   // DAY VIEW
+  function renderApptListSkeleton(count) {
+    const el = document.getElementById('apptList');
+    if (!el) return;
+    const widths = [70, 55, 80, 60, 65, 75];
+    let html = '';
+    for (let i = 0; i < count; i++) {
+      html += `<div class="tw-sk-card">
+        <span class="tw-sk tw-sk-avatar"></span>
+        <div class="tw-sk-info">
+          <span class="tw-sk tw-sk-line lg" style="width:${widths[i % widths.length]}%;">.</span>
+          <span class="tw-sk tw-sk-line sm" style="width:${Math.max(30, widths[i % widths.length] - 25)}%;">.</span>
+        </div>
+        <span class="tw-sk tw-sk-pill"></span>
+      </div>`;
+    }
+    el.innerHTML = html;
+  }
+
   async function loadDayView() {
+    // Show skeleton cards immediately so the grid doesn't appear empty during fetch
+    if (!currentAppointments.length) renderApptListSkeleton(4);
     try {
       const res = await fetch('/api/appointments?date=' + currentDate, { headers: authHeaders() });
       if (res.status === 401) { localStorage.removeItem('tailwag_session'); window.location.href = '/login.html'; return; }
@@ -736,6 +987,90 @@
     document.getElementById('statConfirmed').textContent = appts.filter(a => a.status === 'confirmed').length;
     document.getElementById('statPending').textContent = appts.filter(a => ['pending','recurring_pending'].includes(a.status)).length;
     document.getElementById('statCancelled').textContent = appts.filter(a => a.status === 'cancelled').length;
+    applyFilterUI();
+  }
+
+  // ── Status filter (click stat cards to filter the day list) ────────────
+  const FILTER_LABELS = {
+    confirmed: 'Confirmed',
+    pending:   'Pending',
+    cancelled: 'Cancelled'
+  };
+
+  function filterAppts(appts, filter) {
+    if (!filter || filter === 'all') return appts;
+    if (filter === 'pending') return appts.filter(a => a.status === 'pending' || a.status === 'recurring_pending');
+    return appts.filter(a => a.status === filter);
+  }
+
+  function setStatusFilter(filter) {
+    // Toggle off when clicking the active card; "all" always clears
+    if (filter === activeStatusFilter && filter !== 'all') filter = 'all';
+    activeStatusFilter = filter;
+
+    // Re-render the current view so filter takes effect (chip dimming or list filter)
+    if (viewMode === 'day') renderAppointments(currentAppointments);
+    applyFilterUI();
+  }
+
+  function applyFilterUI() {
+    const filterActive = activeStatusFilter !== 'all';
+
+    // Active stat-card highlight shows in ALL views (filter affects week/month chips too)
+    document.querySelectorAll('.stat-card[data-filter]').forEach(c => {
+      c.classList.toggle('active', filterActive && c.dataset.filter === activeStatusFilter);
+    });
+
+    // Filter indicator (above appt list) is only meaningful in day view
+    const indicator = document.getElementById('filterIndicator');
+    if (indicator) {
+      if (!filterActive || viewMode !== 'day') {
+        indicator.classList.remove('visible');
+      } else {
+        indicator.classList.add('visible');
+        document.getElementById('filterIndicatorLabel').textContent = FILTER_LABELS[activeStatusFilter] || activeStatusFilter;
+        const count = filterAppts(currentAppointments, activeStatusFilter).length;
+        document.getElementById('filterIndicatorCount').textContent = count + (count === 1 ? ' dog' : ' dogs');
+      }
+    }
+
+    // Dim non-matching chips in week and month views
+    document.querySelectorAll('.week-chip[data-status], .month-chip[data-status]').forEach(chip => {
+      if (!filterActive) { chip.classList.remove('dimmed'); return; }
+      const status = chip.dataset.status;
+      const matches = activeStatusFilter === 'pending'
+        ? (status === 'pending' || status === 'recurring_pending')
+        : status === activeStatusFilter;
+      chip.classList.toggle('dimmed', !matches);
+    });
+  }
+
+  // ── Bulk-confirm recurring placeholders for a given date ────────────────
+  async function confirmAllRecurringForDate(dateStr, count) {
+    const dateLabel = fmtDate(dateStr, { weekday: 'long', month: 'short', day: 'numeric' });
+    if (!confirm(`Add all ${count} recurring dog${count===1?'':'s'} to ${dateLabel}?`)) return;
+
+    // Source the placeholders from the right place depending on view
+    let placeholders;
+    if (viewMode === 'day' && dateStr === currentDate) {
+      placeholders = currentAppointments.filter(a => !a.id && a.is_recurring);
+    } else {
+      placeholders = (calendarData[dateStr] || []).filter(a => !a.id && a.is_recurring);
+    }
+    if (!placeholders.length) { showToast('Nothing to add', 'error'); return; }
+
+    let added = 0, failed = 0;
+    for (const p of placeholders) {
+      const res = await fetch('/api/appointments', {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({ client_id: p.client_id, dog_id: p.dog_id || null, appointment_date: dateStr })
+      });
+      if (res.ok) added++; else failed++;
+    }
+
+    if (added > 0) showToast(`Added ${added} dog${added===1?'':'s'} ✓`, 'success');
+    if (failed > 0) showToast(`${failed} couldn't be added`, 'error');
+    loadCurrentView();
   }
 
   function sessionBadge(notes) {
@@ -744,19 +1079,49 @@
     return '';
   }
 
+  function confirmAllRecurringForToday() {
+    const placeholders = currentAppointments.filter(a => !a.id && a.is_recurring);
+    if (!placeholders.length) return;
+    confirmAllRecurringForDate(currentDate, placeholders.length);
+  }
+
   function renderAppointments(appts) {
     const el = document.getElementById('apptList');
-    if (!appts.length) {
-      el.innerHTML = `<div class="empty-state">
-        <div class="empty-icon">🐶</div>
-        <h3>No dogs scheduled</h3>
-        <p>Add dogs from the Directory, or set up recurring schedules below.</p>
-        <button class="btn btn-primary" onclick="openAddModal()">+ Add Dog</button>
-      </div>`;
+    const filtered = filterAppts(appts, activeStatusFilter);
+
+    // Bulk-confirm banner: only when there are recurring placeholders today
+    const banner = document.getElementById('bulkConfirmBanner');
+    if (banner) {
+      const placeholderCount = appts.filter(a => !a.id && a.is_recurring).length;
+      if (placeholderCount > 0 && activeStatusFilter === 'all') {
+        banner.classList.add('visible');
+        document.getElementById('bulkConfirmCount').textContent = placeholderCount;
+      } else {
+        banner.classList.remove('visible');
+      }
+    }
+
+    if (!filtered.length) {
+      if (activeStatusFilter !== 'all') {
+        const label = (FILTER_LABELS[activeStatusFilter] || activeStatusFilter).toLowerCase();
+        el.innerHTML = `<div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <h3>No ${label} dogs</h3>
+          <p>None of today's dogs match this filter.</p>
+          <button class="btn btn-outline" onclick="setStatusFilter('all')">Show all</button>
+        </div>`;
+      } else {
+        el.innerHTML = `<div class="empty-state">
+          <div class="empty-icon">🐶</div>
+          <h3>No dogs scheduled</h3>
+          <p>Add dogs from the Directory, or set up recurring schedules below.</p>
+          <button class="btn btn-primary" onclick="openAddModal()">+ Add Dog</button>
+        </div>`;
+      }
       return;
     }
     const order = { confirmed: 0, pending: 1, recurring_pending: 2, cancelled: 3 };
-    const sorted = [...appts].sort((a,b) => (order[a.status]??9) - (order[b.status]??9));
+    const sorted = [...filtered].sort((a,b) => (order[a.status]??9) - (order[b.status]??9));
 
     el.innerHTML = sorted.map(appt => {
       const dogName  = appt.dogs?.name || '—';
@@ -766,18 +1131,17 @@
         confirmed:         '<span class="badge badge-confirmed">✓ Confirmed</span>',
         pending:           '<span class="badge badge-pending">Pending</span>',
         cancelled:         '<span class="badge badge-cancelled">Cancelled</span>',
-        recurring_pending: '<span class="badge badge-recurring">Recurring</span>'
+        recurring_pending: '<span class="badge badge-pending">Pending</span> <span class="badge badge-recurring">↻ Recurring</span>'
       };
       const reminderBadge = appt.reminder_sent_at ? '<span class="badge badge-reminder">Reminded</span>' : '';
-      const deleteBtn = appt.id
-        ? `<button class="icon-btn danger" title="Remove" onclick="removeAppointment('${appt.id}')">✕</button>`
-        : `<button class="icon-btn" title="Add to this date" onclick="confirmRecurring('${appt.client_id}','${appt.dog_id||''}')">＋</button>`;
-      const confirmBtn = ['pending','recurring_pending'].includes(appt.status) && appt.id
-        ? `<button class="icon-btn" title="Mark confirmed" onclick="markStatus('${appt.id}','confirmed')">✓</button>` : '';
-      const cancelBtn = appt.status === 'confirmed' && appt.id
-        ? `<button class="icon-btn danger" title="Cancel" onclick="markStatus('${appt.id}','cancelled')">✕</button>` : '';
 
-      return `<div class="appt-card">
+      // Whole card is click-to-popover for both real appointments and recurring placeholders.
+      // Real appts open the edit popover; recurring placeholders open the "Add to today's schedule" popover.
+      const onclickAttr = appt.id
+        ? `openApptPopover('${appt.id}', this)`
+        : `openRecurringPlaceholderPopover('${appt.client_id}','${appt.dog_id||''}', this)`;
+
+      return `<div class="appt-card clickable" onclick="${onclickAttr}">
         <div class="status-dot ${appt.status}"></div>
         <div class="dog-avatar">🐕</div>
         <div class="appt-info">
@@ -786,7 +1150,6 @@
           ${breed ? `<div class="appt-breed">${escHtml(breed)}</div>` : ''}
         </div>
         <div class="appt-badges">${statusMap[appt.status]||''}${sessionBadge(appt.notes)}${reminderBadge}</div>
-        <div class="appt-actions">${confirmBtn}${cancelBtn}${deleteBtn}</div>
       </div>`;
     }).join('');
   }
@@ -827,17 +1190,21 @@
         const sc = a.status === 'cancelled' ? 'status-cancelled' :
                    a.status === 'pending'   ? 'status-pending'   :
                    a.is_recurring           ? 'status-recurring' : '';
-        return `<div class="week-chip ${sc}" onclick="drillToDay('${dateStr}')" title="${name} — ${a.clients?.first_name||''} ${a.clients?.last_name||''}">${escHtml(name)}</div>`;
+        return `<div class="week-chip ${sc}" data-status="${a.status||''}" onclick="drillToDay('${dateStr}')" title="${name} — ${a.clients?.first_name||''} ${a.clients?.last_name||''}">${escHtml(name)}</div>`;
       }).join('');
 
-      const addBtn = `<button class="week-add-btn" onclick="openAddModalForDate('${dateStr}')">+ Add</button>`;
+      const recurringPlaceholderCount = appts.filter(a => !a.id && a.is_recurring).length;
+      const bulkBtn = recurringPlaceholderCount > 0
+        ? `<button class="week-bulk-add" onclick="event.stopPropagation();confirmAllRecurringForDate('${dateStr}', ${recurringPlaceholderCount})" title="Add all recurring dogs to ${dateStr}">↻ Add all ${recurringPlaceholderCount}</button>`
+        : '';
+      const addBtn = `<button class="week-add-btn" onclick="event.stopPropagation();openAddModalForDate('${dateStr}')">+ Add</button>`;
 
       html += `<div class="week-col${isToday?' today-col':''}">
         <div class="week-col-header" onclick="drillToDay('${dateStr}')">
           <div class="week-col-dayname">${dayAbbr}</div>
           <div class="week-col-datenum${isToday?' today':''}">${dayNum}</div>
         </div>
-        <div class="week-col-body">${chips}${addBtn}</div>
+        <div class="week-col-body">${chips}${bulkBtn}${addBtn}</div>
       </div>`;
     }
     grid.innerHTML = html;
@@ -895,7 +1262,7 @@
       const chips = appts.slice(0,3).map(a => {
         const name = a.dogs?.name || a.clients?.first_name || '?';
         const sc = a.status==='cancelled' ? 'status-cancelled' : a.status==='pending' ? 'status-pending' : a.is_recurring ? 'status-recurring' : '';
-        return `<span class="month-chip ${sc}">${escHtml(name)}</span>`;
+        return `<span class="month-chip ${sc}" data-status="${a.status||''}">${escHtml(name)}</span>`;
       }).join('');
       const more = appts.length > 3 ? `<span class="month-more">+${appts.length-3}</span>` : '';
 
@@ -922,17 +1289,77 @@
 
   // ── Actions ────────────────────────────────────────────────────────────
   async function removeAppointment(id) {
+    // Capture a snapshot for Undo before the delete
+    const cur = currentAppointments.find(a => String(a.id) === String(id));
+    const snapshot = cur ? {
+      client_id: cur.client_id, dog_id: cur.dog_id,
+      appointment_date: cur.appointment_date, notes: cur.notes,
+      status: cur.status, dogName: cur.dogs?.name || 'Appointment'
+    } : null;
+
     const res = await fetch('/api/appointments/' + id, { method: 'DELETE', headers: authHeaders() });
-    if (res.ok) { showToast('Removed from schedule'); loadCurrentView(); }
-    else showToast('Error removing', 'error');
+    if (!res.ok) { (window.tw ? tw.toast : showToast)('Error removing', { type: 'error' }); return; }
+
+    if (window.tw && snapshot) {
+      tw.toast(`${snapshot.dogName}: removed`, {
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            const cr = await fetch('/api/appointments', {
+              method: 'POST', headers: authHeaders(),
+              body: JSON.stringify({
+                client_id: snapshot.client_id,
+                dog_id: snapshot.dog_id || null,
+                appointment_date: snapshot.appointment_date,
+                notes: snapshot.notes
+              })
+            });
+            if (!cr.ok) { tw.toast("Couldn't restore", { type: 'error' }); return; }
+            const data = await cr.json().catch(() => ({}));
+            if (snapshot.status && snapshot.status !== 'pending' && data?.id) {
+              await fetch('/api/appointments/' + data.id + '/status', {
+                method: 'PATCH', headers: authHeaders(),
+                body: JSON.stringify({ status: snapshot.status })
+              });
+            }
+            tw.toast(`${snapshot.dogName}: restored`);
+            loadCurrentView();
+          }
+        }
+      });
+    } else {
+      showToast('Removed from schedule');
+    }
+    loadCurrentView();
   }
 
-  async function markStatus(id, status) {
+  async function markStatus(id, status, opts) {
+    const cur = currentAppointments.find(a => String(a.id) === String(id));
+    const prev = (opts && opts.prevStatus) || cur?.status;
+    const isUndo = !!(opts && opts.suppressUndo);
+
     const res = await fetch('/api/appointments/' + id + '/status', {
       method: 'PATCH', headers: authHeaders(), body: JSON.stringify({ status })
     });
-    if (res.ok) { showToast(status==='confirmed' ? '✓ Confirmed!' : 'Marked cancelled'); loadCurrentView(); }
-    else showToast('Error updating', 'error');
+    if (!res.ok) { (window.tw ? tw.toast : showToast)('Error updating', { type: 'error' }); return; }
+
+    const dogName = cur?.dogs?.name || 'Dog';
+    const labelMap = { confirmed: '✓ Confirmed', cancelled: 'Cancelled', pending: 'Pending' };
+    const msg = `${dogName}: ${labelMap[status] || status}`;
+
+    if (window.tw && prev && prev !== status && !isUndo) {
+      tw.toast(msg, {
+        action: {
+          label: 'Undo',
+          onClick: () => markStatus(id, prev, { suppressUndo: true })
+        }
+      });
+    } else if (window.tw) {
+      tw.toast(msg);
+    } else {
+      showToast(msg);
+    }
+    loadCurrentView();
   }
 
   async function confirmRecurring(clientId, dogId) {
@@ -944,18 +1371,231 @@
     else showToast('Error adding', 'error');
   }
 
+  // ── Appointment quick-edit popover ─────────────────────────────────────
+  let activePopoverApptId = null;
+  let activeRecurPopoverIds = null;  // { clientId, dogId } for recurring placeholders
+
+  function openApptPopover(apptId, anchorEl) {
+    const appt = currentAppointments.find(a => String(a.id) === String(apptId));
+    if (!appt) return;
+    document.getElementById('apRecurPopover').classList.remove('open');
+    activePopoverApptId = apptId;
+    activeRecurPopoverIds = null;
+
+    const dogName = appt.dogs?.name || '—';
+    const owner   = appt.clients ? `${appt.clients.first_name} ${appt.clients.last_name}` : '—';
+    const breed   = appt.dogs?.breed || '';
+    const apptDate = new Date(appt.appointment_date + 'T12:00:00');
+    const dayStr = apptDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+    const session = (appt.notes || '').trim();
+
+    document.getElementById('apTitle').textContent = dogName;
+    document.getElementById('apSub').textContent   = owner;
+    document.getElementById('apBreed').textContent = breed;
+
+    let metaParts = [`<strong>Date:</strong> ${dayStr}`];
+    if (session) metaParts.push(`<strong>Session:</strong> ${escHtml(session)}`);
+    if (appt.is_recurring) metaParts.push('<em style="color:#3b5fc0;">↻ recurring</em>');
+    if (appt.reminder_sent_at) metaParts.push('<em style="color:#888;">reminder sent</em>');
+    document.getElementById('apMeta').innerHTML = metaParts.join(' &middot; ');
+
+    document.querySelectorAll('.ap-status-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.status === appt.status);
+    });
+
+    // Position next to the clicked card (mobile CSS overrides to bottom sheet)
+    const pop = document.getElementById('apPopover');
+    pop.style.top = pop.style.left = pop.style.bottom = pop.style.right = '';
+    if (anchorEl && window.innerWidth > 600) {
+      const rect = anchorEl.getBoundingClientRect();
+      const popHeight = 280;
+      const popWidth  = 300;
+      let top = rect.top;
+      if (top + popHeight > window.innerHeight - 12) top = window.innerHeight - popHeight - 12;
+      let left = rect.right + 12;
+      if (left + popWidth > window.innerWidth - 12) left = rect.left - popWidth - 12;
+      if (left < 12) left = 12;
+      pop.style.top  = Math.max(12, top) + 'px';
+      pop.style.left = left + 'px';
+    }
+
+    document.getElementById('apBackdrop').classList.add('open');
+    pop.classList.add('open');
+  }
+
+  function closeApptPopover() {
+    activePopoverApptId = null;
+    activeRecurPopoverIds = null;
+    document.getElementById('apBackdrop').classList.remove('open');
+    document.getElementById('apPopover').classList.remove('open');
+    document.getElementById('apRecurPopover').classList.remove('open');
+  }
+
+  function openRecurringPlaceholderPopover(clientId, dogId, anchorEl) {
+    const placeholder = currentAppointments.find(a =>
+      !a.id && a.is_recurring && a.client_id === clientId && (a.dog_id || '') === (dogId || ''));
+    if (!placeholder) return;
+    document.getElementById('apPopover').classList.remove('open');
+    activeRecurPopoverIds = { clientId, dogId };
+    activePopoverApptId = null;
+
+    const dogName = placeholder.dogs?.name || '—';
+    const owner   = placeholder.clients ? `${placeholder.clients.first_name} ${placeholder.clients.last_name}` : '—';
+    document.getElementById('apRecurTitle').textContent = dogName;
+    document.getElementById('apRecurSub').textContent   = owner;
+    document.getElementById('apRecurAddBtn').disabled = false;
+    document.getElementById('apRecurAddBtn').textContent = 'Add to today\'s schedule';
+
+    // Position next to the clicked card (mobile CSS overrides to bottom sheet)
+    const pop = document.getElementById('apRecurPopover');
+    pop.style.top = pop.style.left = pop.style.bottom = pop.style.right = '';
+    if (anchorEl && window.innerWidth > 600) {
+      const rect = anchorEl.getBoundingClientRect();
+      const popHeight = 280;
+      const popWidth  = 300;
+      let top = rect.top;
+      if (top + popHeight > window.innerHeight - 12) top = window.innerHeight - popHeight - 12;
+      let left = rect.right + 12;
+      if (left + popWidth > window.innerWidth - 12) left = rect.left - popWidth - 12;
+      if (left < 12) left = 12;
+      pop.style.top  = Math.max(12, top) + 'px';
+      pop.style.left = left + 'px';
+    }
+
+    document.getElementById('apBackdrop').classList.add('open');
+    pop.classList.add('open');
+  }
+
+  async function apptRecurPopoverAdd() {
+    if (!activeRecurPopoverIds) return;
+    const { clientId, dogId } = activeRecurPopoverIds;
+    const btn = document.getElementById('apRecurAddBtn');
+    btn.disabled = true;
+    btn.textContent = 'Adding…';
+    closeApptPopover();
+    await confirmRecurring(clientId, dogId);
+  }
+
+  function apptRecurPopoverScrollToEdit() {
+    closeApptPopover();
+    const recurList = document.getElementById('recurringList');
+    if (recurList) {
+      recurList.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      recurList.style.transition = 'background 0.4s';
+      recurList.style.background = 'rgba(196,147,63,0.10)';
+      setTimeout(() => { recurList.style.background = ''; }, 1200);
+    }
+  }
+
+  async function apptPopoverSetStatus(status) {
+    if (!activePopoverApptId) return;
+    const id = activePopoverApptId;
+
+    // Optimistic UI: flip the local status + re-render so the new badge
+    // appears instantly. markStatus() will server-confirm and re-render
+    // again with authoritative data.
+    const cur = currentAppointments.find(a => String(a.id) === String(id));
+    if (cur) { cur.status = status; renderAppointments(currentAppointments); updateStats(currentAppointments); }
+
+    closeApptPopover();
+    await markStatus(id, status);
+  }
+
+  async function apptPopoverDelete() {
+    if (!activePopoverApptId) return;
+    const id = activePopoverApptId;
+    if (!confirm('Remove this appointment from the schedule?')) return;
+    closeApptPopover();
+    await removeAppointment(id);
+  }
+
+  // Esc closes popover
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeApptPopover();
+  });
+
   async function sendReminders() {
     const btn = document.getElementById('sendRemindersBtn');
     btn.disabled = true; btn.textContent = '📨 Sending…';
-    const res = await fetch('/api/appointments/send-reminders', {
+
+    // Single combined endpoint — runs per-visit + weekly in one call and
+    // records ONE log entry on the daycare so the caption shows the merged result.
+    const res = await fetch('/api/appointments/run-reminders', {
       method: 'POST', headers: authHeaders(), body: JSON.stringify({ date: currentDate })
     });
-    const data = await res.json();
+    const data = res.ok ? await res.json().catch(()=>({})) : {};
     btn.disabled = false; btn.textContent = '📨 Send Reminders';
-    if (res.ok) {
-      showToast(data.sent > 0 ? `✓ Sent ${data.sent} reminder${data.sent!==1?'s':''}` : data.message, 'success');
-      loadCurrentView();
-    } else showToast(data.error || 'Error sending', 'error');
+
+    if (!res.ok) {
+      showToast(data.error || 'Error sending', 'error');
+      return;
+    }
+
+    const pv = data.per_visit?.sent || 0;
+    const ws = data.weekly?.sent || 0;
+    const total = pv + ws;
+    if (total > 0) {
+      const parts = [];
+      if (pv > 0) parts.push(`${pv} per-visit`);
+      if (ws > 0) parts.push(`${ws} weekly`);
+      showToast(`✓ Sent ${total} (${parts.join(' + ')})`, 'success');
+    } else {
+      showToast('No reminders due to send', 'success');
+    }
+
+    // Refresh the "last run" caption with the merged result we just produced
+    renderRemindersLast({
+      last_reminder_run_at: data.last_reminder_run_at || new Date().toISOString(),
+      last_reminder_run_summary: { trigger: 'manual', per_visit: data.per_visit, weekly: data.weekly }
+    });
+    loadCurrentView();
+  }
+
+  // ── "Last reminders sent" caption near the Send Reminders button ────────
+  function renderRemindersLast(daycare) {
+    const el = document.getElementById('remindersLast');
+    if (!el) return;
+    const at = daycare?.last_reminder_run_at;
+    const s  = daycare?.last_reminder_run_summary;
+    if (!at) { el.textContent = ''; return; }
+
+    const pv = s?.per_visit?.sent || 0;
+    const ws = s?.weekly?.sent    || 0;
+    const total = pv + ws;
+    const ranAt = new Date(at);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const yesterday = new Date(today.getTime() - 86400000);
+    const ranAtDay = new Date(ranAt); ranAtDay.setHours(0,0,0,0);
+
+    let when;
+    if (ranAtDay.getTime() === today.getTime())          when = 'Today';
+    else if (ranAtDay.getTime() === yesterday.getTime()) when = 'Yesterday';
+    else when = ranAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const time = ranAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+    let countText;
+    if (total === 0) countText = '0 sent';
+    else if (pv && ws) countText = `${pv} per-visit + ${ws} weekly`;
+    else if (pv)       countText = `${pv} per-visit`;
+    else               countText = `${ws} weekly`;
+
+    const triggerTag = s?.trigger === 'cron' ? 'auto' : 'manual';
+    el.innerHTML = `Last sent: <strong>${when} ${time}</strong> · ${countText} <span style="color:#aaa;">(${triggerTag})</span>`;
+  }
+
+  async function loadRemindersLast() {
+    try {
+      const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
+      if (!session?.access_token) return;
+      const res = await fetch('/api/auth/me', {
+        method: 'POST',
+        headers: { ...authHeaders() },
+        body: JSON.stringify({ access_token: session.access_token })
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      renderRemindersLast(data?.daycare);
+    } catch {}
   }
 
   async function sendMorningSummary() {
@@ -1157,9 +1797,9 @@
       const dogName = s.dogs?.name || '(all dogs)';
       const owner   = s.clients ? `${s.clients.first_name} ${s.clients.last_name}` : '—';
       const dayChips = FULL_DAY_NAMES.map((d,i) =>
-        `<span class="day-chip ${s.days_of_week.includes(i)?'active':''}">${d}</span>`
+        `<button type="button" class="day-chip ${s.days_of_week.includes(i)?'active':''}" data-dow="${i}" onclick="toggleRecurringDay('${s.id}', ${i}, this)" title="Toggle ${d}">${d}</button>`
       ).join('');
-      return `<div class="recurring-card">
+      return `<div class="recurring-card" data-recurring-id="${s.id}">
         <div class="dog-avatar">🐕</div>
         <div class="appt-info">
           <div class="appt-dog">${escHtml(dogName)}</div>
@@ -1169,6 +1809,46 @@
         <button class="icon-btn danger" onclick="deleteRecurring('${s.id}')">✕</button>
       </div>`;
     }).join('');
+  }
+
+  async function toggleRecurringDay(scheduleId, dow, btnEl) {
+    const card = btnEl.closest('.recurring-card');
+    if (!card) return;
+
+    // Compute new days from current button states
+    const allBtns = card.querySelectorAll('.day-chip[data-dow]');
+    const wasActive = btnEl.classList.contains('active');
+    const newDays = [];
+    allBtns.forEach(b => {
+      const isThis = (+b.dataset.dow) === dow;
+      const stillActive = isThis ? !wasActive : b.classList.contains('active');
+      if (stillActive) newDays.push(+b.dataset.dow);
+    });
+
+    if (!newDays.length) {
+      showToast('A recurring schedule needs at least one day', 'error');
+      return;
+    }
+
+    // Optimistic UI
+    btnEl.classList.toggle('active');
+    btnEl.disabled = true;
+
+    const res = await fetch('/api/appointments/recurring/' + scheduleId, {
+      method: 'PATCH', headers: authHeaders(),
+      body: JSON.stringify({ days_of_week: newDays })
+    });
+
+    btnEl.disabled = false;
+
+    if (res.ok) {
+      showToast('Recurring schedule updated', 'success');
+      loadCurrentView();   // refresh week/month chips that pull from the recurring schedule
+    } else {
+      btnEl.classList.toggle('active');  // rollback
+      const d = await res.json().catch(() => ({}));
+      showToast(d.error || 'Error updating', 'error');
+    }
   }
 
   function openRecurringModal() {
@@ -1231,9 +1911,29 @@
   }
 
   async function deleteRecurring(id) {
+    const card = document.querySelector(`.recurring-card[data-recurring-id="${id}"]`);
+    const dogName = card?.querySelector('.appt-dog')?.textContent?.trim() || 'Recurring schedule';
+
     const res = await fetch('/api/appointments/recurring/' + id, { method: 'DELETE', headers: authHeaders() });
-    if (res.ok) { showToast('Recurring schedule removed'); loadRecurring(); loadCurrentView(); }
-    else showToast('Error deleting', 'error');
+    if (!res.ok) { (window.tw ? tw.toast : showToast)('Error deleting', { type: 'error' }); return; }
+
+    if (window.tw) {
+      tw.toast(`${dogName}: recurring removed`, {
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            const r = await fetch('/api/appointments/recurring/' + id + '/restore', {
+              method: 'POST', headers: authHeaders()
+            });
+            if (r.ok) { tw.toast(`${dogName}: restored`); loadRecurring(); loadCurrentView(); }
+            else tw.toast("Couldn't restore", { type: 'error' });
+          }
+        }
+      });
+    } else {
+      showToast('Recurring schedule removed');
+    }
+    loadRecurring(); loadCurrentView();
   }
 
   // ── Summary modal ──────────────────────────────────────────────────────
@@ -1260,10 +1960,18 @@
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  function showToast(msg, type = '') {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.className = 'toast show ' + type;
-    setTimeout(() => { t.className = 'toast'; }, 3200);
+  // Defensive showToast — uses the universal tw.toast() if it's loaded,
+  // otherwise falls back to console.log so a slow/missing toast.js
+  // can't throw and halt the surrounding flow (e.g. confirmAddAppointment
+  // post-save → loadCurrentView()). Once toast.js loads, all toasts use
+  // its UI; before then, we just don't show one (but nothing breaks).
+  function showToast(msg, type) {
+    try {
+      if (window.tw && window.tw.toast) {
+        return window.tw.toast(msg, { type: type === 'error' ? 'error' : 'success' });
+      }
+    } catch {}
+    console.log('[toast:' + (type || 'info') + ']', msg);
   }
 
   // Close modals on overlay click
@@ -1277,6 +1985,15 @@
     await loadClients();
     loadCurrentView();
     loadRecurring();
+    loadRemindersLast();
+
+    // Honor ?action=add (e.g. from FAB on another page)
+    if (new URLSearchParams(window.location.search).get('action') === 'add') {
+      try { openAddModal(); } catch {}
+      const url = new URL(window.location.href);
+      url.searchParams.delete('action');
+      window.history.replaceState(null, '', url.pathname + (url.search ? url.search : ''));
+    }
   }
 
   init();

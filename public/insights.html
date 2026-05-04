@@ -511,6 +511,166 @@
       display: flex; justify-content: center;
       padding: 40px 0;
     }
+
+    /* ── ACTIVITY TAB (wireframe redesign) ──────────────────────────── */
+    .activity-two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+      gap: var(--tw-space-4, 16px);
+      align-items: start;
+    }
+    @media (max-width: 980px) { .activity-two-col { grid-template-columns: 1fr; } }
+
+    /* Bar chart */
+    .week-bars {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      align-items: end;
+      height: 180px;
+      padding-top: 12px;
+    }
+    .week-bar-col {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      height: 100%;
+    }
+    .week-bar-bar {
+      width: 100%;
+      background: var(--tw-color-sage, #A8C5B0);
+      border-radius: 6px 6px 0 0;
+      min-height: 4px;
+      transition: height 0.4s ease;
+    }
+    .week-bar-bar.today {
+      background: var(--tw-color-green, #1E6B4A);
+    }
+    .week-bar-label {
+      font-size: 11px; color: var(--tw-color-muted, #888);
+      font-weight: 600;
+    }
+    .week-bar-legend {
+      display: flex; gap: 16px; font-size: 11px; color: var(--tw-color-muted, #888);
+      padding: 0 0 12px;
+    }
+    .week-bar-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .week-bar-legend .dot { width: 10px; height: 10px; border-radius: 3px; }
+    .week-bar-legend .dot.past { background: var(--tw-color-sage, #A8C5B0); }
+    .week-bar-legend .dot.today { background: var(--tw-color-green, #1E6B4A); }
+
+    /* Team share */
+    .team-share-summary {
+      font-size: 13px; color: var(--tw-color-slate, #2D3748);
+      margin-bottom: 12px;
+    }
+    .team-share-summary strong { font-weight: 700; color: var(--tw-color-ink, #0F1410); }
+    .team-share-bar {
+      display: flex; height: 12px; border-radius: 6px; overflow: hidden;
+      background: var(--tw-color-linen, #F5F0E8);
+      margin-bottom: 16px;
+    }
+    .team-share-bar .you { background: var(--tw-color-green, #1E6B4A); }
+    .team-share-bar .team { background: var(--tw-color-sage, #A8C5B0); }
+    .team-share-labels {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: var(--tw-color-muted, #888);
+      margin-top: -10px; margin-bottom: 16px;
+    }
+    .team-share-labels strong { color: var(--tw-color-slate, #2D3748); font-weight: 700; }
+
+    .by-teammate-label {
+      font-size: 10px; font-weight: 700; color: var(--tw-color-muted, #888);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .teammate-row {
+      display: grid; grid-template-columns: 1fr auto; gap: 8px;
+      align-items: center; margin-bottom: 8px;
+    }
+    .teammate-row-name {
+      font-size: 13px; font-weight: 500; color: var(--tw-color-slate, #2D3748);
+    }
+    .teammate-row-name.you { font-weight: 700; }
+    .teammate-row-count {
+      font-size: 13px; font-weight: 700; color: var(--tw-color-ink, #0F1410);
+    }
+    .teammate-row-bar {
+      grid-column: 1 / -1;
+      height: 4px; background: var(--tw-color-linen, #F5F0E8);
+      border-radius: 2px; overflow: hidden;
+    }
+    .teammate-row-bar-fill {
+      height: 100%; background: var(--tw-color-sage, #A8C5B0);
+      border-radius: 2px;
+    }
+    .teammate-row.you .teammate-row-bar-fill { background: var(--tw-color-green, #1E6B4A); }
+
+    /* Location volume sub-cards */
+    .loc-vol-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 0 20px 20px;
+    }
+    @media (max-width: 900px) { .loc-vol-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 540px) { .loc-vol-grid { grid-template-columns: 1fr; } }
+    .loc-vol-card {
+      background: var(--tw-color-linen, #F5F0E8);
+      border-radius: var(--tw-radius-md, 10px);
+      padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .loc-vol-row {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .loc-vol-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--tw-color-muted, #888);
+    }
+    .loc-vol-delta {
+      font-size: 11px; font-weight: 700;
+    }
+    .loc-vol-delta.up   { color: var(--tw-color-green, #1E6B4A); }
+    .loc-vol-delta.down { color: var(--tw-color-error, #c0392b); }
+    .loc-vol-delta.flat { color: var(--tw-color-muted, #888); }
+    .loc-vol-value {
+      font-family: var(--tw-font-display, 'Plus Jakarta Sans'), sans-serif;
+      font-weight: 800; font-size: 26px;
+      color: var(--tw-color-ink, #0F1410); line-height: 1;
+    }
+    .loc-vol-bar {
+      height: 4px; background: rgba(0,0,0,0.06);
+      border-radius: 2px; overflow: hidden;
+    }
+    .loc-vol-bar-fill {
+      height: 100%; background: var(--tw-color-green, #1E6B4A);
+      border-radius: 2px; transition: width 0.5s ease;
+    }
+
+    /* Quick links override for the activity tab — light-theme buttons */
+    #panelActivity .quick-links {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    #panelActivity .quick-link-btn {
+      background: var(--tw-color-card, #fff);
+      border: 1px solid var(--tw-color-border-2, rgba(0,0,0,0.12));
+      color: var(--tw-color-slate, #2D3748);
+      padding: 8px 14px;
+      border-radius: var(--tw-radius-md, 8px);
+      font-size: 13px;
+    }
+    #panelActivity .quick-link-btn:hover {
+      background: rgba(30,107,74,0.04);
+      border-color: var(--tw-color-green, #1E6B4A);
+      color: var(--tw-color-green, #1E6B4A);
+    }
+    #panelActivity .tw-page-header { padding-top: var(--tw-space-2); }
+    #panelActivity .dash-card .dash-card-header { padding: 18px 20px 8px; }
+
+    /* Disabled time-range buttons */
+    .tw-time-range button:disabled {
+      opacity: 0.45; cursor: not-allowed;
+    }
+    .tw-btn:disabled { cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -561,69 +721,121 @@
   <!-- TAB: My Activity -->
   <div class="tab-panel active" id="panelActivity">
 
-    <div class="section">
-      <div class="section-title">My Performance</div>
-      <div class="stat-grid">
-        <div class="stat-card accent">
-          <div class="stat-label">Messages Today</div>
-          <div class="stat-value" id="pMsgsToday">—</div>
+    <header class="tw-page-header">
+      <div class="tw-page-header-left">
+        <h1>My activity</h1>
+        <p class="tw-page-header-sub" id="myActivitySub">Loading…</p>
+      </div>
+      <div class="tw-page-header-actions" style="align-items:center;gap:var(--tw-space-3);">
+        <div class="tw-time-range" id="timeRangeSelector">
+          <button data-range="7d" title="Coming soon" disabled>7d</button>
+          <button class="active" data-range="30d">30d</button>
+          <button data-range="90d" title="Coming soon" disabled>90d</button>
+          <button data-range="ytd" title="Coming soon" disabled>YTD</button>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">This Week</div>
-          <div class="stat-value" id="pMsgsWeek">—</div>
+        <button class="tw-btn tw-btn-secondary tw-btn-sm" id="exportReportBtn" disabled title="Coming soon">↓ Export report</button>
+      </div>
+    </header>
+
+    <!-- 4 personal stat cards (Messages Today is the active dark variant) -->
+    <div class="tw-stat-card-grid" style="margin-bottom: var(--tw-space-6);">
+      <div class="tw-stat-card tw-stat-card-active">
+        <div class="tw-stat-card-label">Messages Today</div>
+        <div class="tw-stat-card-value" id="pMsgsToday">—</div>
+        <div class="tw-stat-card-sub" id="pMsgsTodaySub">&nbsp;</div>
+      </div>
+      <div class="tw-stat-card">
+        <div class="tw-stat-card-label">This Week</div>
+        <div class="tw-stat-card-value" id="pMsgsWeek">—</div>
+        <div class="tw-stat-card-sub" id="pMsgsWeekSub">&nbsp;</div>
+      </div>
+      <div class="tw-stat-card">
+        <div class="tw-stat-card-label">This Month</div>
+        <div class="tw-stat-card-value" id="pMsgsMonth">—</div>
+        <div class="tw-stat-card-sub" id="pMsgsMonthSub">&nbsp;</div>
+      </div>
+      <div class="tw-stat-card">
+        <div class="tw-stat-card-label">Day Streak 🔥</div>
+        <div class="tw-stat-card-value" id="pStreak">—</div>
+        <div class="tw-stat-card-sub">consecutive active days</div>
+      </div>
+    </div>
+
+    <!-- Two-column: weekly bar chart + team share -->
+    <div class="activity-two-col" style="margin-bottom: var(--tw-space-6);">
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <h2>Messages sent this week</h2>
+          <span class="dash-card-link" style="cursor:default;color:var(--tw-color-muted);font-weight:500;" id="weekBarSubtitle">&nbsp;</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">This Month</div>
-          <div class="stat-value" id="pMsgsMonth">—</div>
+        <div id="weekBarChart" style="padding: 0 20px 20px;">
+          <!-- Rendered by renderWeekBarChart() -->
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Day Streak 🔥</div>
-          <div class="stat-value" id="pStreak">—</div>
-          <div class="stat-sub">consecutive active days</div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dash-card-header">
+          <h2>Your share of team volume</h2>
+        </div>
+        <div id="teamShareContent" style="padding: 0 20px 20px;">
+          <!-- Rendered by renderTeamShare() -->
         </div>
       </div>
     </div>
 
-    <div class="section">
-      <div class="section-title">My Share of Team Volume</div>
-      <div class="volume-card">
-        <div class="volume-label" id="teamVolLabel">You sent —% of this week's messages</div>
-        <div class="bar-track">
-          <div class="bar-fill" id="teamVolBar" style="width:0%"></div>
+    <!-- Location volume this month -->
+    <div class="dash-card" style="margin-bottom: var(--tw-space-6);">
+      <div class="dash-card-header">
+        <h2>Location volume this month</h2>
+        <a href="javascript:void(0)" onclick="switchTab('location')" class="dash-card-link">Drill down →</a>
+      </div>
+      <p style="padding: 0 20px 12px; font-size:13px; color: var(--tw-color-muted);" id="locVolSubtitle">— messages across the daycare</p>
+      <div class="loc-vol-grid">
+        <div class="loc-vol-card">
+          <div class="loc-vol-row">
+            <div class="loc-vol-label">Report Cards</div>
+            <div class="loc-vol-delta" id="dReport">&nbsp;</div>
+          </div>
+          <div class="loc-vol-value" id="tReport">—</div>
+          <div class="loc-vol-bar"><div class="loc-vol-bar-fill" id="bReport" style="width:0%"></div></div>
         </div>
-        <div class="volume-sub" id="teamVolSub">— messages this week vs — team total</div>
+        <div class="loc-vol-card">
+          <div class="loc-vol-row">
+            <div class="loc-vol-label">Reminders</div>
+            <div class="loc-vol-delta" id="dReminder">&nbsp;</div>
+          </div>
+          <div class="loc-vol-value" id="tReminder">—</div>
+          <div class="loc-vol-bar"><div class="loc-vol-bar-fill" id="bReminder" style="width:0%"></div></div>
+        </div>
+        <div class="loc-vol-card">
+          <div class="loc-vol-row">
+            <div class="loc-vol-label">Review Requests</div>
+            <div class="loc-vol-delta" id="dReview">&nbsp;</div>
+          </div>
+          <div class="loc-vol-value" id="tReview">—</div>
+          <div class="loc-vol-bar"><div class="loc-vol-bar-fill" id="bReview" style="width:0%"></div></div>
+        </div>
+        <div class="loc-vol-card">
+          <div class="loc-vol-row">
+            <div class="loc-vol-label">Other / Bulk</div>
+            <div class="loc-vol-delta" id="dOther">&nbsp;</div>
+          </div>
+          <div class="loc-vol-value" id="tOther">—</div>
+          <div class="loc-vol-bar"><div class="loc-vol-bar-fill" id="bOther" style="width:0%"></div></div>
+        </div>
       </div>
     </div>
 
-    <div class="section">
-      <div class="section-title">Location Volume This Month</div>
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div class="stat-label">Report Cards</div>
-          <div class="stat-value" id="tReport">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Reminders</div>
-          <div class="stat-value" id="tReminder">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Review Requests</div>
-          <div class="stat-value" id="tReview">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Other / Bulk</div>
-          <div class="stat-value" id="tOther">—</div>
-        </div>
+    <!-- Quick Links -->
+    <div class="dash-card" style="padding: var(--tw-space-4) var(--tw-space-5);">
+      <div class="dash-card-header" style="padding: 0 0 12px;">
+        <h2>Quick links</h2>
       </div>
-      <p class="type-note">Message type tracking began recently. Historical messages appear as 'Other'.</p>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Quick Links</div>
       <div class="quick-links">
-        <a href="/dashboard.html" class="quick-link-btn">→ Send Report Card</a>
-        <a href="/dashboard.html" class="quick-link-btn">→ View Clients</a>
-        <a href="#" class="quick-link-btn" id="googleReviewLink" style="display:none">→ Review Google Reviews</a>
+        <a href="/messaging.html" class="quick-link-btn">📝 Send report card</a>
+        <a href="/clients.html" class="quick-link-btn">👥 View clients</a>
+        <a href="#" class="quick-link-btn" id="googleReviewLink" style="display:none">⭐ Review Google reviews</a>
+        <a href="/settings.html" class="quick-link-btn">🛠 Edit brand voice</a>
       </div>
     </div>
 
@@ -950,24 +1162,66 @@
       ).join('');
     }
 
+    // ── Page subtitle
+    const dcName = daycare?.name || '';
+    const dcLoc  = [daycare?.city, daycare?.state].filter(Boolean).join(', ');
+    const subBits = [`Your performance at ${dcName || 'TailWag'}`, dcLoc, 'Last 30 days'].filter(Boolean);
+    const subEl = document.getElementById('myActivitySub');
+    if (subEl) subEl.textContent = subBits.join(' · ');
+
     // ── Personal stats
-    document.getElementById('pMsgsToday').textContent  = fmt(personal.msgs_today);
-    document.getElementById('pMsgsWeek').textContent   = fmt(personal.msgs_week);
-    document.getElementById('pMsgsMonth').textContent  = fmt(personal.msgs_month);
-    document.getElementById('pStreak').textContent     = fmt(personal.streak);
+    document.getElementById('pMsgsToday').textContent = fmt(personal.msgs_today);
+    document.getElementById('pMsgsWeek').textContent  = fmt(personal.msgs_week);
+    document.getElementById('pMsgsMonth').textContent = fmt(personal.msgs_month);
+    document.getElementById('pStreak').textContent    = fmt(personal.streak);
 
-    const pct = personal.team_volume_pct || 0;
-    document.getElementById('teamVolLabel').textContent = `You sent ${pct}% of this week's messages`;
-    document.getElementById('teamVolBar').style.width   = Math.min(pct, 100) + '%';
-    document.getElementById('teamVolSub').textContent   =
-      `${personal.msgs_week} messages this week vs ${location.msgs_week} team total`;
+    // Today subtitle: delta vs. yesterday
+    const yest = personal.msgs_yesterday;
+    const todaySubEl = document.getElementById('pMsgsTodaySub');
+    if (todaySubEl) {
+      if (yest == null) {
+        todaySubEl.innerHTML = '&nbsp;';
+      } else {
+        const dy = (personal.msgs_today || 0) - (yest || 0);
+        if (dy === 0)      todaySubEl.innerHTML = 'same as yesterday';
+        else if (dy > 0)   todaySubEl.innerHTML = `<span class="delta-up">+${dy}</span> vs. yesterday`;
+        else               todaySubEl.innerHTML = `<span class="delta-down">${dy}</span> vs. yesterday`;
+      }
+    }
 
-    // Message type counts
-    const tc = location.msg_type_counts || {};
-    document.getElementById('tReport').textContent  = fmt(tc.report_card || 0);
-    document.getElementById('tReminder').textContent = fmt(tc.reminder || 0);
-    document.getElementById('tReview').textContent  = fmt(tc.review_request || 0);
-    document.getElementById('tOther').textContent   = fmt((tc.bulk || 0) + (tc.custom || 0));
+    // Week subtitle: "on pace for X" projection
+    const dow = new Date().getDay();           // 0..6, Sun..Sat
+    const daysElapsed = (dow === 0 ? 7 : dow); // counting Sun-as-end-of-week-0
+    const weekSubEl = document.getElementById('pMsgsWeekSub');
+    if (weekSubEl) {
+      const projected = daysElapsed > 0 ? Math.round((personal.msgs_week || 0) * 7 / daysElapsed) : 0;
+      weekSubEl.textContent = `on pace for ${projected}`;
+    }
+
+    // Month subtitle: MoM percentage
+    const lm = personal.msgs_last_month;
+    const monthSubEl = document.getElementById('pMsgsMonthSub');
+    if (monthSubEl) {
+      if (lm == null) {
+        monthSubEl.innerHTML = '&nbsp;';
+      } else if (lm === 0) {
+        monthSubEl.textContent = (personal.msgs_month > 0) ? 'first month' : 'no activity';
+      } else {
+        const pct = Math.round(((personal.msgs_month - lm) / lm) * 100);
+        if (pct === 0)     monthSubEl.textContent = 'flat vs. last month';
+        else if (pct >= 0) monthSubEl.innerHTML = `<span class="delta-up">+${pct}%</span> vs. last month`;
+        else               monthSubEl.innerHTML = `<span class="delta-down">${pct}%</span> vs. last month`;
+      }
+    }
+
+    // ── Weekly bar chart
+    renderWeekBarChart(personal.msgs_per_dow_week || [0,0,0,0,0,0,0]);
+
+    // ── Team share + per-teammate breakdown
+    renderTeamShare(personal, location);
+
+    // ── Location volume sub-cards (with deltas)
+    renderLocVolCards(location);
 
     // Google link
     if (daycare?.google_link) {
@@ -984,6 +1238,9 @@
     document.getElementById('lNewClients').textContent = fmt(location.new_clients_30d);
     document.getElementById('lInactive').textContent   = fmt(location.inactive_clients_30d);
     document.getElementById('lTotalClients').textContent = fmt(location.clients);
+
+    // 30-day rolling type counts (used by Location tab's stacked bar + legend)
+    const tc = location.msg_type_counts || {};
 
     // Stacked bar
     const total = location.msgs_30d || 0;
@@ -1128,6 +1385,115 @@
     } catch (err) {
       content.innerHTML = `<p style="color:var(--text-dim);font-size:13px">Failed to load: ${esc(err.message)}</p>`;
     }
+  }
+
+  // ── Activity-tab renderers (Phase 4 wireframe) ────────────────────────────────
+  function renderWeekBarChart(perDow) {
+    const today = new Date().getDay();  // 0..6, Sun..Sat
+    const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const max = Math.max(1, ...perDow);
+    const total = perDow.reduce((a, b) => a + b, 0);
+
+    let html = `<div class="week-bar-legend">
+      <span><span class="dot past"></span> Past days</span>
+      <span><span class="dot today"></span> Today</span>
+    </div>
+    <div class="week-bars">`;
+
+    for (let i = 0; i < 7; i++) {
+      const isToday = i === today;
+      const heightPct = Math.max(4, (perDow[i] / max) * 100);
+      html += `<div class="week-bar-col">
+        <div style="flex:1;display:flex;align-items:flex-end;width:100%;">
+          <div class="week-bar-bar ${isToday ? 'today' : ''}"
+               style="height:${heightPct}%;width:100%;"
+               title="${perDow[i]} message${perDow[i] === 1 ? '' : 's'}"></div>
+        </div>
+        <div class="week-bar-label">${labels[i]}</div>
+      </div>`;
+    }
+    html += '</div>';
+
+    document.getElementById('weekBarChart').innerHTML = html;
+    const subEl = document.getElementById('weekBarSubtitle');
+    if (subEl) subEl.textContent = `${total} this week`;
+  }
+
+  function renderTeamShare(personal, location) {
+    const youCount  = personal.msgs_week || 0;
+    const total     = location.msgs_week || 0;
+    const teamCount = Math.max(0, total - youCount);
+    const youPct    = total > 0 ? Math.round((youCount / total) * 100) : 0;
+    const teamPct   = total > 0 ? Math.max(0, 100 - youPct) : 0;
+
+    const team = (location.team || []).slice().sort((a, b) => b.msgs_week - a.msgs_week);
+    const teamMax = Math.max(1, ...team.map(t => t.msgs_week));
+
+    let html = `<div class="team-share-summary">
+      <strong>${youCount}</strong> of <strong>${total}</strong> messages this week
+    </div>
+    <div class="team-share-bar">
+      <div class="you" style="width:${youPct}%"></div>
+      <div class="team" style="width:${teamPct}%"></div>
+    </div>
+    <div class="team-share-labels">
+      <span>You · <strong>${youPct}%</strong></span>
+      <span>Team · <strong>${teamPct}%</strong></span>
+    </div>`;
+
+    if (team.length > 0) {
+      html += `<div class="by-teammate-label">By teammate</div>`;
+      for (const t of team) {
+        const widthPct = teamMax > 0 ? (t.msgs_week / teamMax) * 100 : 0;
+        html += `<div class="teammate-row">
+          <div class="teammate-row-name">${esc(t.name)}</div>
+          <div class="teammate-row-count">${t.msgs_week}</div>
+          <div class="teammate-row-bar"><div class="teammate-row-bar-fill" style="width:${widthPct}%"></div></div>
+        </div>`;
+      }
+    }
+
+    document.getElementById('teamShareContent').innerHTML = html;
+  }
+
+  function renderLocVolCards(location) {
+    const tc = location.msg_type_counts_this_month || location.msg_type_counts || {};
+    const lc = location.msg_type_counts_last_month || {};
+    const thisMonthTotal = location.msgs_this_month != null
+      ? location.msgs_this_month
+      : Object.values(tc).reduce((a, b) => a + b, 0);
+
+    const subEl = document.getElementById('locVolSubtitle');
+    if (subEl) subEl.textContent = `${fmt(thisMonthTotal)} message${thisMonthTotal === 1 ? '' : 's'} across the daycare`;
+
+    const max = Math.max(1, ...Object.values(tc));
+
+    function setCard(valueId, count, lastCount, deltaId, barId) {
+      document.getElementById(valueId).textContent = fmt(count);
+      document.getElementById(barId).style.width = (max > 0 ? (count / max) * 100 : 0) + '%';
+
+      const deltaEl = document.getElementById(deltaId);
+      const delta = count - lastCount;
+      if (lastCount === 0 && count === 0) {
+        deltaEl.textContent = '';
+        deltaEl.className = 'loc-vol-delta';
+      } else if (delta === 0) {
+        deltaEl.textContent = '— vs. last';
+        deltaEl.className = 'loc-vol-delta flat';
+      } else if (delta > 0) {
+        deltaEl.textContent = `+${delta} vs. last`;
+        deltaEl.className = 'loc-vol-delta up';
+      } else {
+        deltaEl.textContent = `${delta} vs. last`;
+        deltaEl.className = 'loc-vol-delta down';
+      }
+    }
+
+    setCard('tReport',   tc.report_card    || 0, lc.report_card    || 0, 'dReport',   'bReport');
+    setCard('tReminder', tc.reminder       || 0, lc.reminder       || 0, 'dReminder', 'bReminder');
+    setCard('tReview',   tc.review_request || 0, lc.review_request || 0, 'dReview',   'bReview');
+    setCard('tOther',    (tc.bulk || 0) + (tc.custom || 0),
+                          (lc.bulk || 0) + (lc.custom || 0),             'dOther',    'bOther');
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
