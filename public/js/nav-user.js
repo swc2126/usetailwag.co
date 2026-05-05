@@ -147,6 +147,11 @@
       // Make role available globally for permission checks
       window.TailWagUserRole = userData.role;
 
+      // Tag <body> so role-gated CSS (e.g. HQ sidebar group) can show/hide
+      // Strip any prior tw-role-* class first so cached data can't stick
+      [...document.body.classList].forEach(c => { if (c.startsWith('tw-role-')) document.body.classList.remove(c); });
+      if (userData.role) document.body.classList.add('tw-role-' + userData.role);
+
       renderWidget(container, userData);
       bootIntercom(userData, data.user?.id, session.access_token);
     } catch (e) {

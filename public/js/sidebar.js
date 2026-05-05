@@ -56,6 +56,15 @@
       ]
     },
     {
+      label: 'HQ',
+      role: 'super_admin',
+      items: [
+        { href: '/ceo#onboard',          label: 'Onboard Daycare',    icon: iconBuilding(), match: ['/ceo'] },
+        { href: '/ceo#overview',         label: 'Platform Overview',  icon: iconGlobe(),    match: ['/ceo'] },
+        { href: '/admin-report.html',    label: 'Location Report',    icon: iconReport() }
+      ]
+    },
+    {
       label: null,
       bottom: true,
       items: [
@@ -68,11 +77,20 @@
   const NAV_ITEMS = NAV_GROUPS.flatMap(g => g.items);
 
   const path = window.location.pathname.replace(/\/$/, '') || '/';
-  const activeItem = NAV_ITEMS.find(it => {
-    if (path === it.href || path === it.href.replace('.html','')) return true;
+  const hash = window.location.hash || '';
+  function matchItem(it) {
+    const [itPath, itHashOnly] = it.href.split('#');
+    const itHash = itHashOnly ? '#' + itHashOnly : '';
+    // Items with an explicit hash (e.g. /ceo#onboard) must match the active hash too
+    if (itHash) {
+      const pathOK = path === itPath || path === itPath.replace('.html','');
+      return pathOK && hash === itHash;
+    }
+    if (path === itPath || path === itPath.replace('.html','')) return true;
     if (it.match) return it.match.some(m => path.startsWith(m));
     return false;
-  });
+  }
+  const activeItem = NAV_ITEMS.find(matchItem);
 
   // ── Styles ────────────────────────────────────────────────────────────
   const style = document.createElement('style');
@@ -169,6 +187,11 @@
     }
     .tw-nav-bottom .tw-link:hover { opacity: 1; }
 
+    /* Role-gated nav groups — hidden until body.tw-role-<role> is set
+       by nav-user.js after /api/auth/me resolves. */
+    .tw-nav-role-super_admin { display: none; }
+    body.tw-role-super_admin .tw-nav-role-super_admin { display: block; }
+
     .tw-link {
       display: flex; align-items: center; gap: 12px;
       padding: 10px 12px; border-radius: 8px;
@@ -220,7 +243,7 @@
     <div class="tw-daycare" id="twDaycareName"></div>
     <nav class="tw-nav">
       ${NAV_GROUPS.map(g => `
-        <div class="tw-nav-group${g.bottom ? ' tw-nav-bottom' : ''}">
+        <div class="tw-nav-group${g.bottom ? ' tw-nav-bottom' : ''}${g.role ? ' tw-nav-role-' + g.role : ''}">
           ${g.label ? `<div class="tw-nav-group-label">${g.label}</div>` : ''}
           ${g.items.map(it => `
             <a href="${it.href}" class="tw-link${activeItem === it ? ' active' : ''}">
@@ -246,9 +269,14 @@
   });
   window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 
-  // ── Daycare name (read from cached nav-user payload if available) ────
+  // ── Daycare name + cached role (read from cached nav-user payload if available) ────
   try {
     const cached = JSON.parse(localStorage.getItem('tailwag_nav_user') || 'null');
+    if (cached && cached.role) {
+      // Pre-set body role class from cache so role-gated nav doesn't flash
+      // off then on. nav-user.js will refresh this after /api/auth/me.
+      document.body.classList.add('tw-role-' + cached.role);
+    }
     if (cached && cached.daycare) {
       document.getElementById('twDaycareName').textContent = cached.daycare;
     }
@@ -673,5 +701,8 @@
   function iconChart()    { return svg('<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>'); }
   function iconUsers()    { return svg('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'); }
   function iconBook()     { return svg('<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>'); }
+  function iconBuilding() { return svg('<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="22" x2="9" y2="18"/><line x1="15" y1="22" x2="15" y2="18"/><line x1="8" y1="6" x2="10" y2="6"/><line x1="14" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/>'); }
+  function iconGlobe()    { return svg('<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'); }
+  function iconReport()   { return svg('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="14" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/>'); }
   function iconGear()     { return svg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>'); }
 })();
