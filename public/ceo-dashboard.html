@@ -1003,11 +1003,17 @@
       return `<span class="status-dot dot-${s}"></span>`;
     }
 
+    const TABS = ['overview', 'accounts', 'churn', 'inventory', 'onboard'];
     function switchTab(tab) {
+      if (!TABS.includes(tab)) tab = 'overview';
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
       document.getElementById('tab-' + tab).classList.add('active');
       document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+      // Keep URL hash in sync so the tab is bookmarkable / linkable from sidebar.
+      if (location.hash.replace(/^#/, '') !== tab) {
+        history.replaceState(null, '', '#' + tab);
+      }
       if (tab === 'inventory') loadInventory();
       if (tab === 'onboard') {
         loadAvailableNumbers();
@@ -1021,6 +1027,14 @@
         if (goLiveAt && !goLiveAt.value) goLiveAt.value = today;
       }
     }
+
+    // Hash router — apply hash on load + when it changes (e.g. from sidebar links)
+    function applyTabFromHash() {
+      const t = (location.hash || '').replace(/^#/, '');
+      if (t && TABS.includes(t)) switchTab(t);
+    }
+    window.addEventListener('hashchange', applyTabFromHash);
+    applyTabFromHash();
 
     function wireSmsPreviewListeners() {
       if (window._smsPreviewWired) return;
