@@ -85,21 +85,6 @@
     /* PAGE */
     .page-container { max-width: 1280px; margin: 0 auto; padding: var(--tw-space-7) var(--tw-space-6); }
 
-    .page-header { margin-bottom: var(--tw-space-7); }
-    .page-header h1 {
-      font-family: var(--tw-font-display);
-      font-weight: var(--tw-fw-extra);
-      font-size: 32px;
-      line-height: 1.1;
-      color: var(--tw-color-ink);
-      letter-spacing: -0.02em;
-    }
-    .page-header p {
-      font-size: 14px;
-      color: var(--tw-color-muted);
-      margin-top: 6px;
-    }
-
     /* KPI CARDS */
     .kpi-row {
       display: grid;
@@ -773,10 +758,12 @@
   <div id="tab-overview" class="tab-panel active">
     <div class="page-container">
 
-      <div class="page-header">
-        <h1>Platform Overview</h1>
-        <p id="lastUpdated">Loading...</p>
-      </div>
+      <header class="tw-page-header">
+        <div class="tw-page-header-left">
+          <h1>Platform Overview</h1>
+          <p class="tw-page-header-sub" id="lastUpdated">Loading...</p>
+        </div>
+      </header>
 
       <!-- Row 1: Accent KPI cards -->
       <div class="kpi-row kpi-row-4" id="kpiRow1">
@@ -903,10 +890,12 @@
   <div id="tab-churn" class="tab-panel">
     <div class="page-container">
 
-      <div class="page-header">
-        <h1>Churn Risk Monitor</h1>
-        <p>Accounts showing signs of disengagement — act fast to retain them.</p>
-      </div>
+      <header class="tw-page-header">
+        <div class="tw-page-header-left">
+          <h1>Churn Risk Monitor</h1>
+          <p class="tw-page-header-sub">Accounts showing signs of disengagement — act fast to retain them.</p>
+        </div>
+      </header>
 
       <!-- Section 1: Inactive 14+ days -->
       <div class="card" style="margin-bottom:28px;">
@@ -982,13 +971,15 @@
   <div id="tab-inventory" class="tab-panel">
     <div class="page-container">
 
-      <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;">
-        <div>
+      <header class="tw-page-header">
+        <div class="tw-page-header-left">
           <h1>Phone Inventory</h1>
-          <p>Live status of every Telnyx number, grouped by area code.</p>
+          <p class="tw-page-header-sub">Live status of every Telnyx number, grouped by area code.</p>
         </div>
-        <button onclick="loadInventory()" class="logout-btn" style="background:#1E6B4A;color:#F5F0E8;border-color:#1E6B4A;">Refresh</button>
-      </div>
+        <div class="tw-page-header-actions">
+          <button onclick="loadInventory()" class="tw-btn tw-btn-primary">Refresh</button>
+        </div>
+      </header>
 
       <!-- Top KPI row -->
       <div class="kpi-row kpi-row-4" id="invKpis" style="margin-bottom:24px;">
@@ -1076,10 +1067,12 @@
   <div id="tab-onboard" class="tab-panel">
     <div class="page-container">
 
-      <div class="page-header">
-        <h1>Onboard Daycare</h1>
-        <p>Activate a new daycare in one shot — creates the account, assigns a phone number, and sends the welcome email + SMS.</p>
-      </div>
+      <header class="tw-page-header">
+        <div class="tw-page-header-left">
+          <h1>Onboard Daycare</h1>
+          <p class="tw-page-header-sub">Activate a new daycare in one shot — creates the account, assigns a phone number, and sends the welcome email + SMS.</p>
+        </div>
+      </header>
 
       <!-- Onboarding history (collapsible) -->
       <div class="card" style="margin-bottom:24px;">
