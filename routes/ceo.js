@@ -22,15 +22,37 @@ async function getNumberInventory() {
     throw new Error('TELNYX_API_KEY not configured');
   }
 
-  // 1. Fetch all numbers from Telnyx
-  const telnyxRes = await fetch('https://api.telnyx.com/v2/phone_numbers?page[size]=250', {
-    headers: { Authorization: `Bearer ${process.env.TELNYX_API_KEY}` }
-  });
+  const telnyxAuth = { Authorization: `Bearer ${process.env.TELNYX_API_KEY}` };
+
+  // 1. Fetch all numbers + campaign assignments in parallel.
+  //    Note: /v2/phone_numbers returns messaging_campaign_id=null even for
+  //    numbers that ARE on a campaign. Campaign membership lives at
+  //    /v2/10dlc/phoneNumberCampaign and must be queried separately.
+  const [telnyxRes, campaignRes] = await Promise.all([
+    fetch('https://api.telnyx.com/v2/phone_numbers?page[size]=250', { headers: telnyxAuth }),
+    fetch('https://api.telnyx.com/v2/10dlc/phoneNumberCampaign?recordsPerPage=500', { headers: telnyxAuth })
+  ]);
   if (!telnyxRes.ok) {
     throw new Error(`Telnyx API error ${telnyxRes.status}`);
   }
   const telnyxData = await telnyxRes.json();
   const numbers = telnyxData.data || [];
+
+  // Build the set of numbers currently ASSIGNED to a 10DLC campaign.
+  // If campaign lookup fails, log and treat campaign membership as unknown
+  // (everything on a profile falls back to "on_profile" bucket).
+  let campaignSet = new Set();
+  if (campaignRes.ok) {
+    const campaignData = await campaignRes.json();
+    const records = campaignData.records || [];
+    campaignSet = new Set(
+      records
+        .filter(r => r.assignmentStatus === 'ASSIGNED')
+        .map(r => r.phoneNumber)
+    );
+  } else {
+    console.warn(`[CEO inventory] phoneNumberCampaign lookup failed: ${campaignRes.status}`);
+  }
 
   // 2. Find which numbers are currently assigned to a daycare
   const { data: configs } = await supabaseAdmin
@@ -62,7 +84,7 @@ async function getNumberInventory() {
     bucket.total++;
     if (assignedSet.has(phone)) {
       bucket.in_use++;
-    } else if (num.messaging_campaign_id) {
+    } else if (campaignSet.has(phone)) {
       bucket.available++;
     } else if (num.messaging_profile_id) {
       bucket.on_profile++;
@@ -319,12 +341,29 @@ router.get('/available-numbers', requireAuth, requireRole('super_admin'), async 
   try {
     if (!process.env.TELNYX_API_KEY) return res.status(500).json({ error: 'TELNYX_API_KEY not configured' });
 
-    const telnyxRes = await fetch('https://api.telnyx.com/v2/phone_numbers?page[size]=250', {
-      headers: { Authorization: `Bearer ${process.env.TELNYX_API_KEY}` }
-    });
+    const telnyxAuth = { Authorization: `Bearer ${process.env.TELNYX_API_KEY}` };
+
+    // /v2/phone_numbers no longer populates messaging_campaign_id;
+    // pull campaign assignments from /v2/10dlc/phoneNumberCampaign instead.
+    const [telnyxRes, campaignRes] = await Promise.all([
+      fetch('https://api.telnyx.com/v2/phone_numbers?page[size]=250', { headers: telnyxAuth }),
+      fetch('https://api.telnyx.com/v2/10dlc/phoneNumberCampaign?recordsPerPage=500', { headers: telnyxAuth })
+    ]);
     if (!telnyxRes.ok) return res.status(502).json({ error: `Telnyx API error ${telnyxRes.status}` });
     const telnyxData = await telnyxRes.json();
     const numbers = telnyxData.data || [];
+
+    let campaignSet = new Set();
+    if (campaignRes.ok) {
+      const campaignData = await campaignRes.json();
+      campaignSet = new Set(
+        (campaignData.records || [])
+          .filter(r => r.assignmentStatus === 'ASSIGNED')
+          .map(r => r.phoneNumber)
+      );
+    } else {
+      console.warn(`[CEO available-numbers] phoneNumberCampaign lookup failed: ${campaignRes.status}`);
+    }
 
     const { data: configs } = await supabaseAdmin
       .from('messaging_config')
@@ -335,7 +374,7 @@ router.get('/available-numbers', requireAuth, requireRole('super_admin'), async 
     const filterAreaCode = req.query.area_code;
 
     const available = numbers
-      .filter(n => n.phone_number && n.messaging_campaign_id && !assignedSet.has(n.phone_number))
+      .filter(n => n.phone_number && campaignSet.has(n.phone_number) && !assignedSet.has(n.phone_number))
       .map(n => ({
         phone_number: n.phone_number,
         provider_id: n.id,
