@@ -417,7 +417,7 @@
 
             <p id="daycareReadOnlyHint" style="display:none;font-size:13px;color:var(--tw-color-muted);background:var(--tw-color-gold-soft);border:1px solid rgba(196,147,63,0.25);border-radius:var(--tw-radius-md);padding:12px 14px;margin-top:16px;line-height:1.5;">
               <strong style="color:var(--gold);">🔒 Read-only.</strong>
-              Daycare profile changes are managed by TailWag staff. Use <strong>Request Changes</strong> below to ask Summer to update something.
+              Daycare profile changes are managed by the TailWag team. Use <strong>Request Changes</strong> below to ask us to update something.
             </p>
 
             <div style="display:flex;align-items:center;gap:12px;margin-top:16px;">
@@ -668,7 +668,7 @@
       <button class="tw-modal-close" onclick="closeRequestChangeModal()" aria-label="Close">×</button>
     </div>
     <p style="font-size:13px;color:var(--tw-color-muted);margin-bottom:16px;line-height:1.5;">
-      Tell Summer what you'd like changed (name, address, phone, Google review link, etc.).
+      Tell the TailWag team what you'd like changed (name, address, phone, Google review link, etc.).
       We'll email you back when it's been updated.
     </p>
     <textarea id="requestChangeText" class="field-textarea" rows="6" placeholder="e.g. Please update our address to 123 New Street, Suite 200, Dallas, TX 75201 — we just moved."></textarea>
@@ -892,7 +892,7 @@
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Failed to send request');
 
-      msg.textContent = '✅ Request sent — Summer will be in touch.';
+      msg.textContent = '✅ Request sent — the TailWag team will be in touch.';
       msg.className = 'msg msg-success'; msg.style.display = 'block';
       setTimeout(() => closeRequestChangeModal(), 1800);
     } catch (err) {

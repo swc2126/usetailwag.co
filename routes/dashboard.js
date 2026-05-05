@@ -107,7 +107,7 @@ router.put('/daycare', requireAuth, async (req, res) => {
 
   // Profile fields: super_admin only
   if (profileFieldsSent && req.userRole !== 'super_admin') {
-    return res.status(403).json({ error: 'Daycare profile changes are managed by TailWag staff. Use Request Changes to submit a request.' });
+    return res.status(403).json({ error: 'Daycare profile changes are managed by the TailWag team. Use Request Changes to submit a request.' });
   }
 
   // Operational fields: existing role gate
@@ -224,7 +224,7 @@ router.post('/daycare/request-change', requireAuth, async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error('[daycare/request-change] email send failed:', err.message);
-    res.status(500).json({ error: 'Could not send request — please email summer@usetailwag.co directly.' });
+    res.status(500).json({ error: 'Could not send request — please reach out to the TailWag team at summer@usetailwag.co directly.' });
   }
 });
 
