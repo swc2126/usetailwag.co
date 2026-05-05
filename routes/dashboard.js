@@ -85,11 +85,35 @@ router.get('/stats', requireAuth, async (req, res) => {
 });
 
 // PUT /api/dashboard/daycare — update daycare settings
+//
+// Permission model:
+// - Profile fields (name/phone/street/city/state/zip/google_link) are
+//   super_admin-only. Owners/managers see them in Settings as read-only
+//   and use the request-change flow below to ask Summer to update.
+// - messaging_style / messaging_mode / auto_reply_text are operational
+//   self-serve and remain editable for owner/manager (and super_admin/admin).
 router.put('/daycare', requireAuth, async (req, res) => {
   if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
-  if (!['owner', 'manager', 'super_admin', 'admin'].includes(req.userRole)) return res.status(403).json({ error: 'Insufficient permissions' });
 
   const { name, phone, street, city, state, zip, google_link, messaging_style, messaging_mode, auto_reply_text } = req.body;
+
+  const profileFieldsSent =
+    name !== undefined || phone !== undefined || street !== undefined ||
+    city !== undefined || state !== undefined || zip !== undefined ||
+    google_link !== undefined;
+
+  const operationalFieldsSent =
+    messaging_style !== undefined || messaging_mode !== undefined || auto_reply_text !== undefined;
+
+  // Profile fields: super_admin only
+  if (profileFieldsSent && req.userRole !== 'super_admin') {
+    return res.status(403).json({ error: 'Daycare profile changes are managed by TailWag staff. Use Request Changes to submit a request.' });
+  }
+
+  // Operational fields: existing role gate
+  if (operationalFieldsSent && !['owner', 'manager', 'super_admin', 'admin'].includes(req.userRole)) {
+    return res.status(403).json({ error: 'Insufficient permissions' });
+  }
 
   // Validate URL if provided
   if (google_link) {
@@ -136,6 +160,72 @@ router.put('/daycare', requireAuth, async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   if (!data || data.length === 0) return res.status(404).json({ error: 'Daycare not found or no rows updated' });
   res.json(data[0]);
+});
+
+// POST /api/dashboard/daycare/request-change — owner/manager flow for
+// requesting an edit to daycare profile. Sends an email to summer@usetailwag.co
+// with the current values + the requester's free-text request.
+router.post('/daycare/request-change', requireAuth, async (req, res) => {
+  if (!req.daycareId) return res.status(403).json({ error: 'No daycare associated' });
+
+  const message = (req.body?.message || '').trim();
+  if (!message) return res.status(400).json({ error: 'Message is required' });
+  if (message.length > 4000) return res.status(400).json({ error: 'Message too long' });
+
+  // Pull current daycare values + requester profile in parallel so the email
+  // includes the as-of-now state Summer is being asked to change.
+  const [{ data: dc }, { data: profile }] = await Promise.all([
+    supabaseAdmin
+      .from('daycares')
+      .select('name, phone, street, city, state, zip, google_link')
+      .eq('id', req.daycareId)
+      .single(),
+    supabaseAdmin
+      .from('profiles')
+      .select('first_name, last_name, email')
+      .eq('id', req.user.id)
+      .single()
+  ]);
+
+  if (!dc) return res.status(404).json({ error: 'Daycare not found' });
+
+  const requesterName = profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : '';
+  const requesterEmail = profile?.email || req.user.email || '';
+  const escape = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const html = `
+    <p>A daycare owner submitted a profile change request:</p>
+    <p><strong>${escape(requesterName) || 'Unknown user'}</strong> &lt;${escape(requesterEmail)}&gt;<br>
+    Daycare: <strong>${escape(dc.name)}</strong> (${escape([dc.city, dc.state].filter(Boolean).join(', ') || 'no address on file')})<br>
+    Role: ${escape(req.userRole)}</p>
+
+    <h3 style="margin-top:24px;font-size:14px;text-transform:uppercase;color:#666;letter-spacing:0.06em;">Current values</h3>
+    <table style="border-collapse:collapse;font-size:13px;">
+      <tr><td style="padding:4px 12px 4px 0;color:#888;">Name</td><td>${escape(dc.name)}</td></tr>
+      <tr><td style="padding:4px 12px 4px 0;color:#888;">Phone</td><td>${escape(dc.phone) || '—'}</td></tr>
+      <tr><td style="padding:4px 12px 4px 0;color:#888;">Street</td><td>${escape(dc.street) || '—'}</td></tr>
+      <tr><td style="padding:4px 12px 4px 0;color:#888;">City / State / ZIP</td><td>${escape([dc.city, dc.state, dc.zip].filter(Boolean).join(' · ')) || '—'}</td></tr>
+      <tr><td style="padding:4px 12px 4px 0;color:#888;">Google review link</td><td>${escape(dc.google_link) || '—'}</td></tr>
+    </table>
+
+    <h3 style="margin-top:24px;font-size:14px;text-transform:uppercase;color:#666;letter-spacing:0.06em;">Requested change</h3>
+    <pre style="white-space:pre-wrap;font-family:inherit;background:#f5f0e8;padding:14px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);">${escape(message)}</pre>
+
+    <p style="font-size:12px;color:#999;margin-top:24px;">Reply directly to this email to follow up — it will go to ${escape(requesterEmail) || 'the requester'}.</p>
+  `;
+
+  try {
+    const { sendEmail } = require('../utils/email');
+    await sendEmail({
+      to: 'summer@usetailwag.co',
+      subject: `[TailWag] Daycare change request from ${dc.name}`,
+      html
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[daycare/request-change] email send failed:', err.message);
+    res.status(500).json({ error: 'Could not send request — please email summer@usetailwag.co directly.' });
+  }
 });
 
 module.exports = router;

@@ -170,6 +170,66 @@
       transition: border-color 0.15s;
     }
     .field-input:focus, .field-textarea:focus { border-color: var(--green); }
+    .field-input:disabled, .field-textarea:disabled {
+      background: rgba(0,0,0,0.025);
+      color: var(--tw-color-slate-2);
+      cursor: not-allowed;
+      border-color: var(--tw-color-border);
+    }
+
+    /* Secondary button (used in modal) */
+    .btn-secondary {
+      background: var(--tw-color-card);
+      border: 1px solid var(--tw-color-border-2);
+      color: var(--slate);
+      padding: 9px 18px;
+      border-radius: var(--tw-radius-md);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: var(--tw-fw-semi);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .btn-secondary:hover { border-color: var(--slate); background: rgba(0,0,0,0.02); }
+
+    /* Modal — request-change dialog */
+    .tw-modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(15,20,16,0.40);
+      z-index: var(--tw-z-modal);
+      align-items: center; justify-content: center;
+      padding: var(--tw-space-5);
+    }
+    .tw-modal-overlay.open { display: flex; }
+    .tw-modal {
+      background: var(--tw-color-card);
+      border-radius: var(--tw-radius-xl);
+      padding: var(--tw-space-7);
+      width: 100%; max-width: 520px;
+      box-shadow: var(--tw-shadow-4);
+    }
+    .tw-modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: var(--tw-space-3);
+    }
+    .tw-modal-header h3 {
+      font-family: var(--tw-font-display);
+      font-weight: var(--tw-fw-bold);
+      font-size: 18px;
+      color: var(--tw-color-ink);
+      margin: 0;
+    }
+    .tw-modal-close {
+      background: none;
+      border: none;
+      width: 32px; height: 32px;
+      border-radius: var(--tw-radius-full);
+      cursor: pointer;
+      font-size: 22px; line-height: 1;
+      color: var(--tw-color-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .tw-modal-close:hover { background: rgba(0,0,0,0.06); color: var(--tw-color-ink); }
     .field-textarea { resize: vertical; line-height: 1.5; }
     .field-help {
       font-size: 12px; color: var(--tw-color-faint);
@@ -355,7 +415,15 @@
               </div>
             </div>
 
-            <button class="btn-primary" onclick="saveDaycareInfo()" id="saveDaycareBtn">Save Daycare Info</button>
+            <p id="daycareReadOnlyHint" style="display:none;font-size:13px;color:var(--tw-color-muted);background:var(--tw-color-gold-soft);border:1px solid rgba(196,147,63,0.25);border-radius:var(--tw-radius-md);padding:12px 14px;margin-top:16px;line-height:1.5;">
+              <strong style="color:var(--gold);">🔒 Read-only.</strong>
+              Daycare profile changes are managed by TailWag staff. Use <strong>Request Changes</strong> below to ask Summer to update something.
+            </p>
+
+            <div style="display:flex;align-items:center;gap:12px;margin-top:16px;">
+              <button class="btn-primary" onclick="saveDaycareInfo()" id="saveDaycareBtn" style="display:none;margin-top:0;">Save Daycare Info</button>
+              <button class="btn-primary" onclick="openRequestChangeModal()" id="requestDaycareChangeBtn" style="display:none;margin-top:0;">Request Changes</button>
+            </div>
             <div id="daycareInfoMsg" class="msg"></div>
           </div>
         </section>
@@ -592,6 +660,26 @@
   </div>
 </div>
 
+<!-- Request changes modal — opens for non-super_admin roles -->
+<div class="tw-modal-overlay" id="requestChangeModal" onclick="if(event.target===this)closeRequestChangeModal()">
+  <div class="tw-modal">
+    <div class="tw-modal-header">
+      <h3>Request Daycare Profile Change</h3>
+      <button class="tw-modal-close" onclick="closeRequestChangeModal()" aria-label="Close">×</button>
+    </div>
+    <p style="font-size:13px;color:var(--tw-color-muted);margin-bottom:16px;line-height:1.5;">
+      Tell Summer what you'd like changed (name, address, phone, Google review link, etc.).
+      We'll email you back when it's been updated.
+    </p>
+    <textarea id="requestChangeText" class="field-textarea" rows="6" placeholder="e.g. Please update our address to 123 New Street, Suite 200, Dallas, TX 75201 — we just moved."></textarea>
+    <div id="requestChangeMsg" class="msg" style="margin-top:8px;"></div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+      <button class="btn-secondary" onclick="closeRequestChangeModal()">Cancel</button>
+      <button class="btn-primary" id="requestChangeSubmitBtn" onclick="submitChangeRequest()" style="margin-top:0;">Send Request</button>
+    </div>
+  </div>
+</div>
+
 <script>
   const session = JSON.parse(localStorage.getItem('tailwag_session') || 'null');
   if (!session || !session.access_token) window.location.href = '/login.html';
@@ -664,6 +752,18 @@
         setVal('dcState',       dc.state);
         setVal('dcZip',         dc.zip);
         setVal('googleLinkInput', dc.google_link);
+
+        // Daycare profile editability — super_admin only.
+        // Other roles see fields populated but disabled, plus a Request
+        // Changes button that emails Summer.
+        const canEditProfile = meData.role === 'super_admin';
+        ['dcName','dcPhone','dcStreet','dcCity','dcState','dcZip','googleLinkInput'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = !canEditProfile;
+        });
+        document.getElementById('saveDaycareBtn').style.display          = canEditProfile ? 'inline-flex' : 'none';
+        document.getElementById('requestDaycareChangeBtn').style.display = canEditProfile ? 'none' : 'inline-flex';
+        document.getElementById('daycareReadOnlyHint').style.display     = canEditProfile ? 'none' : 'block';
 
         // Brand Voice — show for owner/manager only
         if (['owner', 'manager', 'super_admin'].includes(meData.role)) {
@@ -751,6 +851,62 @@
 
     setTimeout(() => { msg.style.display = 'none'; }, 4000);
   }
+
+  // ── Request profile change (non-super_admin flow) ──
+  function openRequestChangeModal() {
+    const overlay = document.getElementById('requestChangeModal');
+    const ta = document.getElementById('requestChangeText');
+    const msg = document.getElementById('requestChangeMsg');
+    if (ta) ta.value = '';
+    if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+    if (overlay) overlay.classList.add('open');
+    setTimeout(() => ta && ta.focus(), 50);
+  }
+
+  function closeRequestChangeModal() {
+    const overlay = document.getElementById('requestChangeModal');
+    if (overlay) overlay.classList.remove('open');
+  }
+
+  async function submitChangeRequest() {
+    const ta = document.getElementById('requestChangeText');
+    const msg = document.getElementById('requestChangeMsg');
+    const btn = document.getElementById('requestChangeSubmitBtn');
+    const text = (ta?.value || '').trim();
+
+    if (!text) {
+      msg.textContent = '❌ Please describe what you\'d like changed.';
+      msg.className = 'msg msg-error'; msg.style.display = 'block';
+      ta?.focus();
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Sending…';
+    msg.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/dashboard/daycare/request-change', {
+        method: 'POST', headers: authHeaders,
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to send request');
+
+      msg.textContent = '✅ Request sent — Summer will be in touch.';
+      msg.className = 'msg msg-success'; msg.style.display = 'block';
+      setTimeout(() => closeRequestChangeModal(), 1800);
+    } catch (err) {
+      msg.textContent = '❌ ' + err.message;
+      msg.className = 'msg msg-error'; msg.style.display = 'block';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Send Request';
+    }
+  }
+
+  // Close modal on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeRequestChangeModal();
+  });
 
   function loadBrandVoice(style) {
     // Tone
