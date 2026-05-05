@@ -41,9 +41,9 @@
       label: 'Daily',
       items: [
         { href: '/dashboard.html', label: 'Dashboard', icon: iconHome() },
-        { href: '/schedule.html',  label: 'Schedule',  icon: iconCalendar() },
-        { href: '/messaging.html', label: 'Messaging', icon: iconMessage() },
         { href: '/clients.html',   label: 'Directory', icon: iconPaw(), match: ['/clients', '/client-profile'] },
+        { href: '/messaging.html', label: 'Messaging', icon: iconMessage() },
+        { href: '/schedule.html',  label: 'Schedule',  icon: iconCalendar() },
         { href: '/reviews.html',   label: 'Reviews',   icon: iconStar() }
       ]
     },
